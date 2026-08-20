@@ -1,0 +1,118 @@
+@import "tailwindcss";
+@import "./admin/tokens.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+* { box-sizing: border-box; }
+html { background: var(--nx-bg); color: var(--nx-text); }
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--nx-bg);
+  color: var(--nx-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { background: rgb(var(--nx-brand-rgb) / 0.18); }
+
+.nx-focus {
+  outline: none;
+}
+.nx-focus:focus-visible {
+  box-shadow: 0 0 0 3px rgb(var(--nx-brand-rgb) / 0.18);
+}
+
+.nx-scrollbar { scrollbar-width: thin; scrollbar-color: var(--nx-border-strong) transparent; }
+.nx-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
+.nx-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.nx-scrollbar::-webkit-scrollbar-thumb { background: var(--nx-border-strong); border: 3px solid transparent; background-clip: padding-box; border-radius: 999px; }
+
+.nx-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--nx-border) 68%, transparent);
+}
+.nx-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--nx-surface) 68%, transparent), transparent);
+  animation: nx-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes nx-shimmer { to { transform: translateX(100%); } }
+
+.nx-route-progress {
+  position: fixed;
+  inset: 0 auto auto 0;
+  z-index: 1000;
+  height: 2px;
+  width: 35%;
+  background: var(--nx-brand-600);
+  box-shadow: 0 0 12px rgb(var(--nx-brand-rgb) / 0.5);
+  animation: nx-route-progress 1.1s ease-in-out infinite;
+}
+@keyframes nx-route-progress {
+  0% { transform: translateX(-110%); width: 30%; }
+  60% { width: 55%; }
+  100% { transform: translateX(320%); width: 28%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes nx-table-load {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(410%); }
+}
+
+/* All Nexora UI interaction primitives provide immediate tactile feedback. */
+.nx-pressable {
+  transform: translateZ(0);
+  will-change: transform, filter;
+}
+.nx-pressable:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+  filter: brightness(0.96);
+  transition-duration: 45ms;
+}
+.nx-pressable[aria-busy="true"] {
+  cursor: progress;
+}
+
+/* N1.0 RC8 browser/accessibility baseline. */
+.nx-skip-link {
+  position: fixed;
+  inset-block-start: 0.75rem;
+  inset-inline-start: 0.75rem;
+  z-index: 2000;
+  transform: translateY(-160%);
+  border: 1px solid var(--nx-border-strong);
+  border-radius: var(--nx-radius-control);
+  background: var(--nx-surface-elevated);
+  color: var(--nx-text);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: var(--nx-shadow-md);
+}
+.nx-skip-link:focus-visible { transform: translateY(0); outline: none; box-shadow: 0 0 0 3px rgb(var(--nx-brand-rgb) / 0.22), var(--nx-shadow-md); }
+[dir="rtl"] .nx-route-progress { inset: 0 0 auto auto; animation-name: nx-route-progress-rtl; }
+@keyframes nx-route-progress-rtl {
+  0% { transform: translateX(110%); width: 30%; }
+  60% { width: 55%; }
+  100% { transform: translateX(-320%); width: 28%; }
+}
+@media (forced-colors: active) {
+  .nx-focus:focus-visible { outline: 2px solid CanvasText; outline-offset: 2px; box-shadow: none; }
+  .nx-skip-link:focus-visible { outline: 2px solid CanvasText; outline-offset: 2px; box-shadow: none; }
+}

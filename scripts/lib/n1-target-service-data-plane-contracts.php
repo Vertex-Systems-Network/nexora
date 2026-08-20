@@ -1,0 +1,34 @@
+<?php
+
+declare(strict_types=1);
+
+/** @return array{errors:list<string>,warnings:list<string>,metrics:array<string,int>} */
+function nexoraAnalyzeServiceDataPlaneContracts(string $root): array
+{
+    $errors=[];$warnings=[];$read=static fn(string $f):string=>is_file($root.'/'.$f)?(string)file_get_contents($root.'/'.$f):'';
+    $required=['config/nexora-network-runtime.php','app/Nexora/Cloud/Services/RuntimeServiceDataPlaneIdentity.php','app/Nexora/Foundation/Network/NetworkDestinationPolicy.php','app/Nexora/Foundation/Network/ApprovedHttpClient.php','app/Console/Commands/Nexora/RuntimeServiceStatusCommand.php'];
+    foreach($required as $f)if(!is_file($root.'/'.$f)||filesize($root.'/'.$f)===0)$errors[]="service/network data-plane artifact missing [{$f}]";
+    $config=$read('config/nexora-network-runtime.php');foreach(['require_exact_service_data_plane','require_https','block_private_reserved','require_dns_resolution','require_dns_pin','allowed_ports','verify_peer','cache_roundtrip','redis_ping','queue_size','mail_dns','require_service_convergence'] as $m)if(!str_contains($config,$m))$errors[]="service/network policy missing [{$m}]";
+    $identity=$read('app/Nexora/Cloud/Services/RuntimeServiceDataPlaneIdentity.php');foreach(['cache','session','queue','redis','mail','proxy','ca_bundle','cache_roundtrip','redis_','queue_visibility','mail_dns','deep_sha256','sanitizeUrl','fingerprint'] as $m)if(!str_contains($identity,$m))$errors[]="runtime service identity missing [{$m}]";
+    $policy=$read('app/Nexora/Foundation/Network/NetworkDestinationPolicy.php');foreach(['FILTER_FLAG_NO_PRIV_RANGE','FILTER_FLAG_NO_RES_RANGE','dns_get_record','CURLOPT_RESOLVE','require_dns_pin','sameOrigin','embedded credentials','allowed_ports'] as $m)if(!str_contains($policy,$m))$errors[]="network destination policy missing [{$m}]";
+    $client=$read('app/Nexora/Foundation/Network/ApprovedHttpClient.php');foreach(['NetworkDestinationPolicy','withoutRedirecting','CURLOPT_RESOLVE','verify_peer','sameOrigin','external'] as $m)if(!str_contains($client,$m))$errors[]="approved HTTP client missing [{$m}]";
+    foreach(['app/Nexora/Automation/Services/WebhookDeliveryService.php','app/Nexora/Extensions/Services/MarketplaceCatalogService.php','app/Nexora/Extensions/Services/MarketplacePackageStager.php','app/Nexora/Discovery/Crawler/SeoCrawler.php'] as $f){$src=$read($f);if(!str_contains($src,'ApprovedHttpClient'))$errors[]="approved network broker missing in [{$f}]";if(str_contains($src,'Illuminate\\Support\\Facades\\Http')||preg_match('/\bHttp::/',$src)===1)$errors[]="direct Laravel HTTP facade bypass remains in [{$f}]";}
+    $provider=$read('app/Providers/AppServiceProvider.php');foreach(['RuntimeServiceDataPlaneIdentity::class','NetworkDestinationPolicy::class','ApprovedHttpClient::class',"'payload_schema'=>max(13",'runtime_service_fingerprint'] as $m)if(!str_contains($provider,$m))$errors[]="runtime service queue/provider fence missing [{$m}]";
+    $guard=$read('app/Nexora/Cloud/Services/RuntimeVersionGuard.php');foreach(['runtime_service_fingerprint','runtime_service_compatible','different Nexora cache/session/queue/network service data-plane fingerprint','max(13'] as $m)if(!str_contains($guard,$m))$errors[]="runtime service version/queue guard missing [{$m}]";
+    $node=$read('app/Nexora/Cloud/Services/NodeManager.php');foreach(['runtime_service_fingerprint','cache_service_store','queue_service_connection','mail_service_transport'] as $m)if(!str_contains($node,$m))$errors[]="runtime node service metadata missing [{$m}]";
+    $ha=$read('app/Nexora/Cloud/Services/HaReadinessService.php');foreach(['local_service_data_plane','runtime_service_data_plane_consistency'] as $m)if(!str_contains($ha,$m))$errors[]="HA service convergence missing [{$m}]";
+    $upgrade=$read('app/Nexora/Foundation/Upgrade/UpgradeManager.php');foreach(['source_service_data_plane','service_data_plane_attested','runtime_service_fingerprint','last_upgrade_service_fingerprint','service_deep_probe_sha256'] as $m)if(!str_contains($upgrade,$m))$errors[]="upgrade service data-plane binding missing [{$m}]";
+    $installer=$read('app/Nexora/Installation/Installer.php');foreach(['RuntimeServiceDataPlaneIdentity','runtime_service_fingerprint','service_deep_probe_sha256'] as $m)if(!str_contains($installer,$m))$errors[]="installer service lineage missing [{$m}]";
+    $deployment=$read('scripts/lib/deployment-generation.php').$read('app/Nexora/Cloud/Services/RuntimeDeploymentIdentity.php');foreach(['network_policy_sha256','config/nexora-network-runtime.php'] as $m)if(!str_contains($deployment,$m))$errors[]="deployment generation service-policy binding missing [{$m}]";
+
+    $lineage=$read('app/Console/Commands/Nexora/UpgradeLineageExportCommand.php');foreach(['runtime_service_fingerprint','last_upgrade_service_fingerprint','service_deep_probe_sha256'] as $m)if(!str_contains($lineage,$m))$errors[]="upgrade lineage missing service field [{$m}]";
+    $cutover=$read('app/Console/Commands/Nexora/UpgradeCutoverStatusCommand.php');foreach(['service_data_plane_fingerprint','exact_service_required'] as $m)if(!str_contains($cutover,$m))$errors[]="cutover status missing service field [{$m}]";
+    $provenance=$read('scripts/release-provenance.php');if(!str_contains($provenance,'network_policy_sha256'))$errors[]='release provenance must bind network policy SHA';
+    $env=$read('config/nexora-environment.php');foreach(['DB_URL','REDIS_URL','MAIL_URL','HTTP_PROXY','HTTPS_PROXY','AWS_SESSION_TOKEN'] as $m)if(!str_contains($env,$m))$errors[]="environment secret redaction missing [{$m}]";
+
+    $builder=$read('scripts/build-production-release.php');foreach(['networkPolicyHash','network_policy_sha256','service_data_plane_contract','outbound_dns_pin_required','private_reserved_external_blocked','nexora:runtime:service-status --deep --assert-installed'] as $m)if(!str_contains($builder,$m))$errors[]="production release service/network contract missing [{$m}]";
+    $c2=$read('scripts/n1-c2-laravel-runtime-certify.php');if(!str_contains($c2,"'runtime-service-status'"))$errors[]='C2 must include deep runtime service-data-plane status gate';
+    $c4=$read('scripts/n1-c4-evidence-prepare.php');foreach(['runtime_service_data_plane_fingerprint_verified','outbound_private_destination_rejected','outbound_dns_pin_policy_verified','service_cluster_convergence_verified'] as $m)if(!str_contains($c4,$m))$errors[]="C4 service/network rehearsal missing [{$m}]";
+    $c6=$read('scripts/n1-c6-evidence-prepare.php');if(!str_contains($c6,'runtime_service_data_plane_consistency'))$errors[]='C6 HA evidence must require runtime service data-plane consistency';
+    return ['errors'=>$errors,'warnings'=>$warnings,'metrics'=>['service_data_plane_identity'=>1,'deep_probe_domains'=>5,'approved_http_call_sites'=>4,'queue_payload_schema'=>13,'c2_service_gate'=>1,'ha_service_check'=>1,'direct_http_bypasses'=>0]];
+}

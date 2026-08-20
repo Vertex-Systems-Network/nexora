@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php
+
+use Illuminate\Foundation\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+
+define('LARAVEL_START', microtime(true));
+
+// Ensure runtime/cache/view/session directories exist even in a clean ZIP checkout.
+require __DIR__.'/bootstrap/nexora-runtime-bootstrap.php';
+require __DIR__.'/bootstrap/nexora-installer-bootstrap.php';
+
+if (defined('NEXORA_INSTALL_BOOTSTRAP_ERROR')) {
+    fwrite(STDERR, '[Nexora Environment Bootstrap] '.NEXORA_INSTALL_BOOTSTRAP_ERROR.PHP_EOL);
+    exit(1);
+}
+
+// Register the Composer autoloader...
+require __DIR__.'/vendor/autoload.php';
+
+// Bootstrap Laravel and handle the command...
+/** @var Application $app */
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+$status = $app->handleCommand(new ArgvInput);
+
+exit($status);

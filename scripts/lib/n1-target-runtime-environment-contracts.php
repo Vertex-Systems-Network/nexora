@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+/** @return array{errors:list<string>,warnings:list<string>,metrics:array<string,int>} */
+function nexoraAnalyzeRuntimeEnvironmentContracts(string $root): array
+{
+    $errors=[];$warnings=[];$read=static fn(string $p):string=>is_file($p)?(string)file_get_contents($p):'';
+    $required=['app/Nexora/Cloud/Services/RuntimeEnvironmentIdentity.php','app/Nexora/Cloud/Services/RuntimeKeyRotationService.php','app/Console/Commands/Nexora/RuntimeEnvironmentStatusCommand.php','app/Console/Commands/Nexora/RuntimeKeyRotationCommand.php','tests/Architecture/N100V34RuntimeEnvironmentArchitectureTest.php'];
+    foreach($required as $f)if(!is_file($root.'/'.$f)||filesize($root.'/'.$f)===0)$errors[]="v3.4 runtime-environment artifact missing [{$f}]";
+    $identity=$read($root.'/app/Nexora/Cloud/Services/RuntimeEnvironmentIdentity.php');foreach(['app_key_fingerprint','session_driver','session_cookie','session_domain','session_secure','session_same_site','cache_default','queue_default','filesystem_default','maintenance_driver','fingerprintValue','previousKeyFingerprints'] as $m)if(!str_contains($identity,$m))$errors[]="runtime environment identity missing [{$m}]";
+    $rotation=$read($root.'/app/Nexora/Cloud/Services/RuntimeKeyRotationService.php');
+    foreach(['previous_key_fingerprints','key rotation receipt integrity verification failed','key_rotation_require_maintenance','clusterStatus','key_rotation_cluster_convergence_required','configuration_rollback_performed'] as $m)if(!str_contains($rotation,$m))$errors[]="key rotation safety missing [{$m}]";
+    $guard=$read($root.'/app/Nexora/Cloud/Services/RuntimeVersionGuard.php');foreach(['current_environment_fingerprint','installed_environment_fingerprint','environment_compatible','queue_payload_require_exact_environment','different Nexora runtime environment fingerprint','max('] as $m)if(!str_contains($guard,$m))$errors[]="runtime environment guard missing [{$m}]";
+    $node=$read($root.'/app/Nexora/Cloud/Services/NodeManager.php');foreach(['runtime_environment_fingerprint','app_key_fingerprint','RuntimeEnvironmentIdentity'] as $m)if(!str_contains($node,$m))$errors[]="runtime node environment advertisement missing [{$m}]";
+    $ha=$read($root.'/app/Nexora/Cloud/Services/HaReadinessService.php');if(!str_contains($ha,'runtime_environment_consistency'))$errors[]='HA readiness must require runtime environment fingerprint consistency.';
+    $cluster=$read($root.'/app/Nexora/Foundation/Upgrade/UpgradeClusterCoordinator.php');foreach(['invalidEnvironments','targetEnvironment','sourceEnvironment','target_environment_fingerprint','runtime_environment_fingerprint'] as $m)if(!str_contains($cluster,$m))$errors[]="cluster environment convergence missing [{$m}]";
+    $upgrade=$read($root.'/app/Nexora/Foundation/Upgrade/UpgradeManager.php');foreach(['target_runtime_environment','Target runtime environment fingerprint changed','runtime_environment_fingerprint','key_fingerprint','APP_KEY rotation receipt is active'] as $m)if(!str_contains($upgrade,$m))$errors[]="upgrade environment binding missing [{$m}]";
+    $provider=$read($root.'/app/Providers/AppServiceProvider.php');foreach(['RuntimeEnvironmentIdentity::class','RuntimeKeyRotationService::class','runtime_environment_fingerprint','max('] as $m)if(!str_contains($provider,$m))$errors[]="runtime provider environment fence missing [{$m}]";
+    $commands=$read($root.'/app/Console/Commands/Nexora/RuntimeEnvironmentStatusCommand.php').$read($root.'/app/Console/Commands/Nexora/RuntimeKeyRotationCommand.php');foreach(['nexora:runtime:environment-status','nexora:runtime:key-rotation','--confirm= : ROTATE, COMMIT or ABORT','mutation_performed'] as $m)if(!str_contains($commands,$m))$errors[]="runtime environment operator tooling missing [{$m}]";
+    $config=$read($root.'/config/nexora-runtime.php').$read($root.'/config/nexora-upgrade.php');foreach(['environment_fingerprint_enforced','key_rotation_require_maintenance','key_rotation_require_previous_key','key_rotation_cluster_convergence_required','queue_payload_require_exact_environment'] as $m)if(!str_contains($config,$m))$errors[]="runtime environment config missing [{$m}]";
+    $env=$read($root.'/.env.production.example');foreach(['APP_PREVIOUS_KEYS=','NEXORA_QUEUE_PAYLOAD_REQUIRE_EXACT_ENVIRONMENT=true','NEXORA_RUNTIME_ENVIRONMENT_FINGERPRINT_ENFORCED=true','NEXORA_KEY_ROTATION_REQUIRE_PREVIOUS_KEY=true'] as $m)if(!str_contains($env,$m))$errors[]="production environment template missing v3.4 default [{$m}]";if(preg_match('/NEXORA_QUEUE_PAYLOAD_SCHEMA=(\d+)/',$env,$schema)!==1||(int)($schema[1]??0)<4)$errors[]='runtime-environment queue payload schema must remain 4 or newer';
+    return ['errors'=>$errors,'warnings'=>$warnings,'metrics'=>['runtime_environment_fingerprint'=>1,'queue_payload_schema'=>4,'key_rotation_workflow'=>1,'raw_secret_output'=>0,'automatic_key_mutation'=>0,'automatic_traffic_change'=>0]];
+}

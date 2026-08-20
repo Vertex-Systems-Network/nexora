@@ -1,0 +1,11 @@
+{
+  "schema": "1.0",
+  "id": "nexora.base",
+  "name": "Nexora Base",
+  "type": "theme",
+  "version": "1.0.0",
+  "capabilities": [],
+  "requires": {
+    "nexora": ">=0.34 <2.0"
+  }
+}

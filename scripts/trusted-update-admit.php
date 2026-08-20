@@ -1,0 +1,4 @@
+<?php
+
+declare(strict_types=1);
+$root=dirname(__DIR__);require_once $root.'/scripts/lib/trusted-update.php';$args=[];foreach(array_slice($argv,1) as $a){foreach(['production','evidence','seal','signature','public-key'] as $k)if(str_starts_with($a,'--'.$k.'='))$args[str_replace('-','_',$k)]=substr($a,strlen($k)+3);}foreach(['production','evidence','seal','signature','public_key'] as $k)if(!isset($args[$k])){fwrite(STDERR,"Usage: php scripts/trusted-update-admit.php --production=<zip> --evidence=<zip> --seal=<json> --signature=<sig> --public-key=<pem>\n");exit(2);}$r=nexoraAdmitTrustedUpdate($root,$args);if(!$r['ok']){fwrite(STDERR,"[Nexora Trusted Update] FAIL\n - ".implode("\n - ",$r['errors'])."\n");exit(1);}fwrite(STDOUT,"[Nexora Trusted Update] PASS — signed release admitted for {$r['receipt']['source_version']} -> {$r['receipt']['target_version']}.\nReceipt: storage/app/nexora/update-trust/admission.json\n");

@@ -1,0 +1,334 @@
+{
+  "schema": 2,
+  "platform_version": "1.0.0-rc.32",
+  "base_url": "https://replace-target/",
+  "auditor": "operator-name",
+  "completed_at": "2026-08-18T00:00:00+05:00",
+  "environments": [
+    {
+      "browser": "chrome",
+      "version": "",
+      "os": ""
+    },
+    {
+      "browser": "edge",
+      "version": "",
+      "os": ""
+    },
+    {
+      "browser": "firefox",
+      "version": "",
+      "os": ""
+    }
+  ],
+  "matrix": [
+    {
+      "browser": "chrome",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "ltr",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "ltr",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "rtl",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "rtl",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "ltr",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "ltr",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "rtl",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "rtl",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "ltr",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "ltr",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "rtl",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "rtl",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "ltr",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "ltr",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "rtl",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "rtl",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "ltr",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "ltr",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "rtl",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "rtl",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "ltr",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "ltr",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "rtl",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "edge",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "rtl",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "ltr",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "ltr",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "rtl",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "mobile",
+      "width": 360,
+      "direction": "rtl",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "ltr",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "ltr",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "rtl",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "tablet",
+      "width": 768,
+      "direction": "rtl",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "ltr",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "ltr",
+      "theme": "dark",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "rtl",
+      "theme": "light",
+      "status": "fail"
+    },
+    {
+      "browser": "firefox",
+      "viewport": "desktop",
+      "width": 1440,
+      "direction": "rtl",
+      "theme": "dark",
+      "status": "fail"
+    }
+  ],
+  "assistive_technology": {
+    "name": "screen-reader-name",
+    "browser": "",
+    "os": "",
+    "status": "fail"
+  },
+  "checks": {
+    "keyboard_navigation": "fail",
+    "focus_visible": "fail",
+    "skip_link": "fail",
+    "modal_focus_trap": "fail",
+    "command_palette_keyboard": "fail",
+    "screen_reader_labels": "fail",
+    "reduced_motion": "fail",
+    "zoom_200": "fail",
+    "forced_colors": "fail",
+    "no_page_horizontal_overflow": "fail"
+  },
+  "notes": "Fail-closed example. Replace only with observed operator/browser evidence.",
+  "source_tree_sha256": "replace-with-source-attestation-sha256"
+}

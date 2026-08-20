@@ -1,0 +1,3 @@
+<?php
+
+declare(strict_types=1);$root=dirname(__DIR__);require_once $root.'/scripts/lib/production-dependency-stage.php';try{if(in_array('--build',$argv,true)){$d=nexoraBuildProductionDependencyStage($root);fwrite(STDOUT,"[Nexora Production Dependencies] PASS — no-dev vendor staged; packages={$d['package_count']} tree={$d['vendor_tree_sha256']}\n");exit(0);} $e=nexoraValidateProductionDependencyStage($root);if($e!==[]){fwrite(STDERR,"[Nexora Production Dependencies] FAIL\n - ".implode("\n - ",$e)."\n");exit(1);}fwrite(STDOUT,"[Nexora Production Dependencies] PASS\n");}catch(Throwable $e){fwrite(STDERR,"[Nexora Production Dependencies] FAIL — {$e->getMessage()}\n");exit(1);}

@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1);$root=dirname(__DIR__);require_once $root.'/scripts/lib/final-integrity-contracts.php';$result=nexoraAnalyzeFinalIntegrityContracts($root);if($result['errors']){fwrite(STDERR,"[Nexora Final Integrity Contracts] FAIL\n - ".implode("\n - ",$result['errors'])."\n");exit(1);}fwrite(STDOUT,"[Nexora Final Integrity Contracts] PASS — {$result['metrics']['closure_domains']} closure domains; {$result['metrics']['primary_db_families']} DB families; {$result['metrics']['matrix_high_risk_feature_files']} high-risk matrix flows.\n");

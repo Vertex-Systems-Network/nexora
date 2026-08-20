@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+{{ nx_head }}
+{{ nx_theme_assets }}
+{{ nx_schema }}
+</head>
+<body>
+<header class="nx-site-header"><a class="nx-brand" href="/">{{ site_name }}</a><a class="nx-admin-link" href="/admin">Admin</a></header>
+<main class="nx-shell nx-document-shell">
+<article class="nx-document"><header><span class="nx-eyebrow">Published with Nexora</span><h1>{{ page_title }}</h1><p class="nx-excerpt">{{ excerpt }}</p></header><div class="nx-prose">{{ nx_content }}</div></article>
+</main>
+<footer class="nx-footer">Powered by Nexora</footer>
+</body>
+</html>

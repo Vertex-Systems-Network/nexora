@@ -1,0 +1,205 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Nexora\Modules\Core\AdminModule;
+use App\Nexora\Modules\Core\FoundationModule;
+use App\Nexora\Modules\Core\IdentityAccessModule;
+use App\Nexora\Modules\Core\InstallationModule;
+use App\Nexora\Modules\Core\DocumentEngineModule;
+use App\Nexora\Modules\Core\EditorialModule;
+use App\Nexora\Modules\Core\RuntimeModule;
+use App\Nexora\Modules\Core\SentinelModule;
+use App\Nexora\Modules\Core\SeoModule;
+use App\Nexora\Modules\Core\ThemeEngineModule;
+use App\Nexora\Modules\Core\WriterModule;
+use App\Nexora\Modules\Core\StudioModule;
+use App\Nexora\Modules\Core\PublishingModule;
+use App\Nexora\Modules\Core\MediaDistributionModule;
+use App\Nexora\Modules\Core\SearchAnalyticsModule;
+use App\Nexora\Modules\Core\AutomationModule;
+use App\Nexora\Modules\Core\SupplyChainSecurityModule;
+use App\Nexora\Modules\Core\ExtensionsModule;
+use App\Nexora\Modules\Core\CommerceModule;
+use App\Nexora\Modules\Core\CrmModule;
+use App\Nexora\Modules\Core\MembershipModule;
+use App\Nexora\Modules\Core\HelpdeskModule;
+use App\Nexora\Modules\Core\EnterpriseModule;
+use App\Nexora\Modules\Core\CloudRuntimeModule;
+
+return [
+    'version' => '1.0.0-rc.94',
+    'modules' => [
+        /* Explicit class list: no filesystem discovery occurs on web requests. */
+        'classes' => [
+            FoundationModule::class,
+            InstallationModule::class,
+            IdentityAccessModule::class,
+            AdminModule::class,
+            DocumentEngineModule::class,
+            WriterModule::class,
+            EditorialModule::class,
+            SeoModule::class,
+            ThemeEngineModule::class,
+            StudioModule::class,
+            PublishingModule::class,
+            MediaDistributionModule::class,
+            SearchAnalyticsModule::class,
+            AutomationModule::class,
+            SupplyChainSecurityModule::class,
+            ExtensionsModule::class,
+            CommerceModule::class,
+            CrmModule::class,
+            MembershipModule::class,
+            HelpdeskModule::class,
+            EnterpriseModule::class,
+            CloudRuntimeModule::class,
+            RuntimeModule::class,
+            SentinelModule::class,
+        ],
+        'cache_path' => dirname(__DIR__).'/bootstrap/cache/nexora/runtime.php',
+    ],
+
+    'capabilities' => [
+        ['slug' => 'cloud.topology.read', 'name' => 'Read Runtime Topology', 'group' => 'cloud', 'risk' => 'normal', 'description' => 'Inspect node, queue, cache, storage and scheduler topology.'],
+        ['slug' => 'cloud.nodes.manage', 'name' => 'Manage Runtime Nodes', 'group' => 'cloud', 'risk' => 'sensitive', 'description' => 'Heartbeat, drain, maintain and reactivate Nexora runtime nodes.'],
+        ['slug' => 'cloud.leases.manage', 'name' => 'Manage Distributed Leases', 'group' => 'cloud', 'risk' => 'sensitive', 'description' => 'Acquire and renew platform coordination leases such as scheduler leadership.'],
+        ['slug' => 'cloud.storage.read', 'name' => 'Read Object Storage', 'group' => 'cloud', 'risk' => 'sensitive', 'description' => 'Read objects through the configured Nexora object-storage contract.'],
+        ['slug' => 'cloud.storage.write', 'name' => 'Write Object Storage', 'group' => 'cloud', 'risk' => 'critical', 'description' => 'Write and delete objects through the configured Nexora object-storage contract.'],
+        ['slug' => 'cloud.metrics.read', 'name' => 'Read Runtime Metrics', 'group' => 'cloud', 'risk' => 'normal', 'description' => 'Inspect operational metrics recorded by the runtime.'],
+        ['slug' => 'cloud.metrics.write', 'name' => 'Write Runtime Metrics', 'group' => 'cloud', 'risk' => 'sensitive', 'description' => 'Record operational runtime metrics.'],
+        ['slug' => 'cloud.backups.manage', 'name' => 'Manage Runtime Backups', 'group' => 'cloud', 'risk' => 'critical', 'description' => 'Create, verify and download protected runtime backup artifacts.'],
+        ['slug' => 'cloud.restore.plan', 'name' => 'Plan Runtime Restore', 'group' => 'cloud', 'risk' => 'critical', 'description' => 'Generate checksum-verified offline restore plans without unattended destructive restore.'],
+        ['slug' => 'platform.settings.read', 'name' => 'Read Platform Settings', 'group' => 'platform', 'risk' => 'normal', 'description' => 'Read settings exposed through the Nexora settings contract.'],
+        ['slug' => 'platform.settings.write', 'name' => 'Write Platform Settings', 'group' => 'platform', 'risk' => 'sensitive', 'description' => 'Modify settings through the Nexora settings contract.'],
+        ['slug' => 'system.audit.write', 'name' => 'Write Audit Events', 'group' => 'security', 'risk' => 'normal', 'description' => 'Append structured events to the Nexora audit trail.'],
+        ['slug' => 'system.health.read', 'name' => 'Read System Health', 'group' => 'system', 'risk' => 'normal', 'description' => 'Read platform health checks.'],
+        ['slug' => 'system.modules.read', 'name' => 'Read Modules', 'group' => 'system', 'risk' => 'normal', 'description' => 'Inspect registered Nexora module metadata.'],
+        ['slug' => 'system.capabilities.read', 'name' => 'Read Capabilities', 'group' => 'system', 'risk' => 'normal', 'description' => 'Inspect the runtime capability catalog.'],
+        ['slug' => 'system.runtime.sync', 'name' => 'Synchronize Runtime', 'group' => 'system', 'risk' => 'sensitive', 'description' => 'Synchronize configured runtime metadata with the database.'],
+        ['slug' => 'identity.users.read', 'name' => 'Read Users', 'group' => 'identity', 'risk' => 'sensitive', 'description' => 'Read user identity records through approved contracts.'],
+        ['slug' => 'identity.users.write', 'name' => 'Write Users', 'group' => 'identity', 'risk' => 'critical', 'description' => 'Create or modify user identity records through approved contracts.'],
+        ['slug' => 'identity.roles.read', 'name' => 'Read Roles', 'group' => 'identity', 'risk' => 'sensitive', 'description' => 'Read roles and permission assignments.'],
+        ['slug' => 'identity.roles.write', 'name' => 'Write Roles', 'group' => 'identity', 'risk' => 'critical', 'description' => 'Modify roles and permission assignments.'],
+        ['slug' => 'identity.sessions.manage', 'name' => 'Manage Sessions', 'group' => 'identity', 'risk' => 'critical', 'description' => 'Manage authenticated user sessions.'],
+        ['slug' => 'admin.navigation.register', 'name' => 'Register Admin Navigation', 'group' => 'admin', 'risk' => 'normal', 'description' => 'Register items with the Nexora Admin navigation registry.'],
+        ['slug' => 'admin.notifications.read', 'name' => 'Read Admin Notifications', 'group' => 'admin', 'risk' => 'normal', 'description' => 'Read notifications exposed to the admin application.'],
+        ['slug' => 'admin.search.use', 'name' => 'Use Admin Search', 'group' => 'admin', 'risk' => 'normal', 'description' => 'Register or query admin search providers.'],
+        ['slug' => 'security.sentinel.scan', 'name' => 'Run Sentinel Scans', 'group' => 'security', 'risk' => 'sensitive', 'description' => 'Inspect quarantined packages without executing them.'],
+        ['slug' => 'security.findings.read', 'name' => 'Read Security Findings', 'group' => 'security', 'risk' => 'sensitive', 'description' => 'Read detailed package security findings and source excerpts.'],
+        ['slug' => 'security.quarantine.manage', 'name' => 'Manage Quarantine', 'group' => 'security', 'risk' => 'critical', 'description' => 'Delete or manage packages held in the Sentinel quarantine boundary.'],
+        ['slug' => 'security.supply-chain.read', 'name' => 'Read Supply Chain Security', 'group' => 'security', 'risk' => 'sensitive', 'description' => 'Inspect SBOM inventories, artifact trust, publisher identity and provenance results.'],
+        ['slug' => 'security.artifacts.verify', 'name' => 'Verify Package Artifacts', 'group' => 'security', 'risk' => 'sensitive', 'description' => 'Verify package content digests, publisher signatures and provenance attestations.'],
+        ['slug' => 'security.publishers.manage', 'name' => 'Manage Trusted Publishers', 'group' => 'security', 'risk' => 'critical', 'description' => 'Add or revoke trusted publisher public verification keys.'],
+        ['slug' => 'security.sandbox.evaluate', 'name' => 'Evaluate Execution Trust', 'group' => 'security', 'risk' => 'critical', 'description' => 'Assign execution-policy profiles from verified artifact trust; this does not itself execute package code.'],
+        ['slug' => 'commerce.catalog.read', 'name' => 'Read Commerce Catalog', 'group' => 'commerce', 'risk' => 'normal', 'description' => 'Read products and provider-neutral price definitions.'],
+        ['slug' => 'commerce.catalog.write', 'name' => 'Manage Commerce Catalog', 'group' => 'commerce', 'risk' => 'sensitive', 'description' => 'Create and modify products and prices.'],
+        ['slug' => 'commerce.customers.read', 'name' => 'Read Commerce Customers', 'group' => 'commerce', 'risk' => 'sensitive', 'description' => 'Read customer billing identities and addresses through Commerce contracts.'],
+        ['slug' => 'commerce.customers.write', 'name' => 'Manage Commerce Customers', 'group' => 'commerce', 'risk' => 'sensitive', 'description' => 'Create and update customer billing identities.'],
+        ['slug' => 'commerce.orders.read', 'name' => 'Read Commerce Orders', 'group' => 'commerce', 'risk' => 'sensitive', 'description' => 'Read order and line-item records.'],
+        ['slug' => 'commerce.orders.write', 'name' => 'Manage Commerce Orders', 'group' => 'commerce', 'risk' => 'critical', 'description' => 'Create, place and update orders through transaction-safe services.'],
+        ['slug' => 'commerce.billing.read', 'name' => 'Read Billing Records', 'group' => 'commerce', 'risk' => 'sensitive', 'description' => 'Read invoices, payments, refunds and subscriptions.'],
+        ['slug' => 'commerce.billing.write', 'name' => 'Manage Billing Records', 'group' => 'commerce', 'risk' => 'critical', 'description' => 'Create invoices and controlled billing lifecycle records.'],
+        ['slug' => 'commerce.tax.manage', 'name' => 'Manage Tax Rules', 'group' => 'commerce', 'risk' => 'critical', 'description' => 'Manage explicit tax-rate rules; Nexora does not claim automatic tax compliance.'],
+        ['slug' => 'commerce.providers.register', 'name' => 'Register Payment Providers', 'group' => 'commerce', 'risk' => 'critical', 'description' => 'Register verified extension-backed payment-provider adapters.'],
+        ['slug' => 'commerce.payments.manage', 'name' => 'Manage Payment Lifecycle', 'group' => 'commerce', 'risk' => 'critical', 'description' => 'Record provider payment, refund and subscription lifecycle results through Commerce services.'],
+        ['slug' => 'crm.organizations.read', 'name' => 'Read CRM Organizations', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Read CRM organization/company records through approved contracts.'],
+        ['slug' => 'crm.organizations.write', 'name' => 'Manage CRM Organizations', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Create and update organization/company relationship records.'],
+        ['slug' => 'crm.contacts.read', 'name' => 'Read CRM Contacts', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Read CRM contact records and relationship metadata.'],
+        ['slug' => 'crm.contacts.write', 'name' => 'Manage CRM Contacts', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Create and update CRM contacts.'],
+        ['slug' => 'crm.leads.read', 'name' => 'Read CRM Leads', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Read lead qualification records.'],
+        ['slug' => 'crm.leads.write', 'name' => 'Manage CRM Leads', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Create, qualify and convert leads through CRM services.'],
+        ['slug' => 'crm.opportunities.read', 'name' => 'Read CRM Opportunities', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Read opportunity pipelines and stage history.'],
+        ['slug' => 'crm.opportunities.write', 'name' => 'Manage CRM Opportunities', 'group' => 'crm', 'risk' => 'critical', 'description' => 'Create opportunities and move them through controlled pipeline stages.'],
+        ['slug' => 'crm.activities.read', 'name' => 'Read CRM Activities', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Read relationship activities, notes and timeline events.'],
+        ['slug' => 'crm.activities.write', 'name' => 'Manage CRM Activities', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Create calls, meetings, tasks, notes and extension-sourced activities.'],
+        ['slug' => 'crm.custom-fields.manage', 'name' => 'Manage CRM Custom Fields', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Manage typed custom-field definitions and values for CRM records.'],
+        ['slug' => 'crm.commerce.link', 'name' => 'Link CRM and Commerce Identities', 'group' => 'crm', 'risk' => 'sensitive', 'description' => 'Explicitly link CRM relationships to immutable Commerce billing identities without merging records.'],
+        ['slug' => 'crm.providers.register', 'name' => 'Register CRM Activity Providers', 'group' => 'crm', 'risk' => 'critical', 'description' => 'Register verified extension-backed email, calendar or communication activity adapters without hard-coding provider SDKs in Core.'],
+        ['slug' => 'membership.plans.read', 'name' => 'Read Membership Plans', 'group' => 'membership', 'risk' => 'normal', 'description' => 'Read membership plans and entitlements.'],
+        ['slug' => 'membership.plans.write', 'name' => 'Manage Membership Plans', 'group' => 'membership', 'risk' => 'sensitive', 'description' => 'Create and update membership plans and entitlement definitions.'],
+        ['slug' => 'membership.members.read', 'name' => 'Read Memberships', 'group' => 'membership', 'risk' => 'sensitive', 'description' => 'Read user/customer membership state and linked Commerce subscriptions.'],
+        ['slug' => 'membership.members.write', 'name' => 'Manage Memberships', 'group' => 'membership', 'risk' => 'critical', 'description' => 'Grant, pause, cancel or expire membership access.'],
+        ['slug' => 'membership.access.evaluate', 'name' => 'Evaluate Membership Access', 'group' => 'membership', 'risk' => 'normal', 'description' => 'Evaluate protected-resource access from active memberships and entitlements.'],
+        ['slug' => 'membership.access.manage', 'name' => 'Manage Membership Access Policies', 'group' => 'membership', 'risk' => 'critical', 'description' => 'Attach plan/entitlement requirements to protected Nexora resources.'],
+        ['slug' => 'membership.commerce.sync', 'name' => 'Synchronize Commerce Memberships', 'group' => 'membership', 'risk' => 'sensitive', 'description' => 'Synchronize explicitly mapped Commerce subscription state into Membership records.'],
+        ['slug' => 'helpdesk.tickets.read', 'name' => 'Read Helpdesk Tickets', 'group' => 'helpdesk', 'risk' => 'sensitive', 'description' => 'Read support tickets, requester links, SLA state and conversations.'],
+        ['slug' => 'helpdesk.tickets.write', 'name' => 'Manage Helpdesk Tickets', 'group' => 'helpdesk', 'risk' => 'sensitive', 'description' => 'Create, assign and transition support tickets.'],
+        ['slug' => 'helpdesk.messages.write', 'name' => 'Write Helpdesk Conversations', 'group' => 'helpdesk', 'risk' => 'sensitive', 'description' => 'Add support replies and internal notes.'],
+        ['slug' => 'helpdesk.sla.manage', 'name' => 'Manage Helpdesk SLA', 'group' => 'helpdesk', 'risk' => 'sensitive', 'description' => 'Configure first-response and resolution deadline policies.'],
+        ['slug' => 'helpdesk.assignments.manage', 'name' => 'Manage Helpdesk Assignments', 'group' => 'helpdesk', 'risk' => 'sensitive', 'description' => 'Assign support ownership to Nexora users.'],
+
+
+        ['slug' => 'enterprise.organizations.read', 'name' => 'Read Enterprise Organizations', 'group' => 'enterprise', 'risk' => 'sensitive', 'description' => 'Read tenant organizations and membership boundaries.'],
+        ['slug' => 'enterprise.organizations.write', 'name' => 'Manage Enterprise Organizations', 'group' => 'enterprise', 'risk' => 'critical', 'description' => 'Create and modify tenant organizations.'],
+        ['slug' => 'enterprise.members.manage', 'name' => 'Manage Enterprise Members', 'group' => 'enterprise', 'risk' => 'critical', 'description' => 'Invite, add and change organization membership.'],
+        ['slug' => 'enterprise.domains.manage', 'name' => 'Manage Enterprise Domains', 'group' => 'enterprise', 'risk' => 'critical', 'description' => 'Configure and verify tenant domain mappings.'],
+        ['slug' => 'enterprise.identity.manage', 'name' => 'Manage Enterprise Identity', 'group' => 'enterprise', 'risk' => 'critical', 'description' => 'Configure enterprise OIDC/SAML adapter records without hard-coding providers.'],
+        ['slug' => 'enterprise.scim.manage', 'name' => 'Manage SCIM Provisioning', 'group' => 'enterprise', 'risk' => 'critical', 'description' => 'Issue and revoke organization-scoped SCIM bearer tokens.'],
+        ['slug' => 'enterprise.impersonation.manage', 'name' => 'Manage Enterprise Impersonation', 'group' => 'enterprise', 'risk' => 'critical', 'description' => 'Start or stop reason-bound audited impersonation sessions.'],
+        ['slug' => 'enterprise.audit.read', 'name' => 'Read Enterprise Audit', 'group' => 'enterprise', 'risk' => 'sensitive', 'description' => 'Read enterprise governance and identity events.'],
+        ['slug' => 'enterprise.tenant.resolve', 'name' => 'Resolve Enterprise Tenant', 'group' => 'enterprise', 'risk' => 'normal', 'description' => 'Resolve the request tenant by verified domain, session organization and membership.'],
+
+        ['slug' => 'extensions.registry.read', 'name' => 'Read Extension Registry', 'group' => 'extensions', 'risk' => 'normal', 'description' => 'Inspect installed extension packages and version metadata.'],
+        ['slug' => 'extensions.lifecycle.manage', 'name' => 'Manage Extension Lifecycle', 'group' => 'extensions', 'risk' => 'critical', 'description' => 'Install, enable, disable, update, rollback and uninstall verified extension packages.'],
+        ['slug' => 'extensions.capabilities.grant', 'name' => 'Grant Extension Capabilities', 'group' => 'extensions', 'risk' => 'critical', 'description' => 'Approve runtime capabilities requested by a verified extension.'],
+        ['slug' => 'marketplace.catalog.read', 'name' => 'Read Marketplace Catalog', 'group' => 'extensions', 'risk' => 'normal', 'description' => 'Read synchronized Marketplace package metadata.'],
+        ['slug' => 'marketplace.catalog.sync', 'name' => 'Synchronize Marketplace Catalog', 'group' => 'network', 'risk' => 'sensitive', 'description' => 'Fetch signed package catalog metadata from approved HTTPS sources.'],
+        ['slug' => 'automation.workflows.read', 'name' => 'Read Workflows', 'group' => 'automation', 'risk' => 'normal', 'description' => 'Inspect workflow definitions and execution history.'],
+        ['slug' => 'automation.workflows.write', 'name' => 'Write Workflows', 'group' => 'automation', 'risk' => 'sensitive', 'description' => 'Create, update, pause and activate workflow definitions.'],
+        ['slug' => 'automation.events.emit', 'name' => 'Emit Automation Events', 'group' => 'automation', 'risk' => 'sensitive', 'description' => 'Publish approved domain events into the workflow engine.'],
+        ['slug' => 'automation.runs.execute', 'name' => 'Execute Workflow Runs', 'group' => 'automation', 'risk' => 'sensitive', 'description' => 'Execute queued workflow runs through controlled action adapters.'],
+        ['slug' => 'webhooks.destinations.manage', 'name' => 'Manage Webhook Destinations', 'group' => 'network', 'risk' => 'critical', 'description' => 'Manage external signed webhook destinations and signing secrets.'],
+        ['slug' => 'webhooks.inbound.receive', 'name' => 'Receive Inbound Webhooks', 'group' => 'network', 'risk' => 'sensitive', 'description' => 'Verify and accept signed inbound webhook payloads.'],
+        ['slug' => 'webhooks.outbound.send', 'name' => 'Send Outbound Webhooks', 'group' => 'network', 'risk' => 'critical', 'description' => 'Send signed outbound webhook deliveries to approved destinations.'],
+        ['slug' => 'http.outbound', 'name' => 'Outbound HTTP', 'group' => 'network', 'risk' => 'sensitive', 'description' => 'Request outbound HTTP through the approved Nexora network broker.'],
+        ['slug' => 'filesystem.private', 'name' => 'Private Filesystem', 'group' => 'storage', 'risk' => 'sensitive', 'description' => 'Access package-scoped private storage through Nexora storage contracts.'],
+        ['slug' => 'filesystem.public', 'name' => 'Public Filesystem', 'group' => 'storage', 'risk' => 'sensitive', 'description' => 'Publish assets through the Nexora storage/media pipeline.'],
+        ['slug' => 'content.writer.use', 'name' => 'Use Nexora Writer', 'group' => 'content', 'risk' => 'normal', 'description' => 'Use the semantic block-writing interface over approved document contracts.'],
+        ['slug' => 'content.documents.read', 'name' => 'Read Documents', 'group' => 'content', 'risk' => 'normal', 'description' => 'Read structured Nexora documents through the document engine.'],
+        ['slug' => 'content.documents.write', 'name' => 'Write Documents', 'group' => 'content', 'risk' => 'sensitive', 'description' => 'Create and modify structured Nexora documents.'],
+        ['slug' => 'content.revisions.read', 'name' => 'Read Document Revisions', 'group' => 'content', 'risk' => 'normal', 'description' => 'Inspect immutable document revision snapshots.'],
+        ['slug' => 'content.revisions.write', 'name' => 'Write Document Revisions', 'group' => 'content', 'risk' => 'sensitive', 'description' => 'Append document revision snapshots through approved services.'],
+        ['slug' => 'content.editorial.review', 'name' => 'Review Editorial Content', 'group' => 'content', 'risk' => 'normal', 'description' => 'Create and resolve editorial review feedback through approved document services.'],
+        ['slug' => 'seo.metadata.read', 'name' => 'Read SEO Metadata', 'group' => 'seo', 'risk' => 'normal', 'description' => 'Read canonical SEO metadata through Nexora SEO contracts.'],
+        ['slug' => 'seo.metadata.write', 'name' => 'Write SEO Metadata', 'group' => 'seo', 'risk' => 'sensitive', 'description' => 'Modify SEO metadata, robots and canonical policy through approved services.'],
+        ['slug' => 'seo.schema.read', 'name' => 'Read Schema Graph', 'group' => 'seo', 'risk' => 'normal', 'description' => 'Inspect the central JSON-LD Schema Graph.'],
+        ['slug' => 'seo.schema.write', 'name' => 'Extend Schema Graph', 'group' => 'seo', 'risk' => 'sensitive', 'description' => 'Register or modify schema graph nodes without writing theme markup directly.'],
+        ['slug' => 'seo.sitemap.read', 'name' => 'Read Sitemap Sources', 'group' => 'seo', 'risk' => 'normal', 'description' => 'Read canonical indexable URLs exposed to sitemap renderers.'],
+        ['slug' => 'seo.links.analyze', 'name' => 'Analyze Internal Links', 'group' => 'seo', 'risk' => 'normal', 'description' => 'Analyze document text for internal-link opportunities.'],
+        ['slug' => 'search.index.read', 'name' => 'Read Search Index', 'group' => 'search', 'risk' => 'normal', 'description' => 'Read first-party searchable resource projections.'],
+        ['slug' => 'search.index.write', 'name' => 'Write Search Index', 'group' => 'search', 'risk' => 'sensitive', 'description' => 'Rebuild and update searchable resource projections.'],
+        ['slug' => 'search.public.query', 'name' => 'Query Public Search', 'group' => 'search', 'risk' => 'normal', 'description' => 'Query published Nexora content through the public search service.'],
+        ['slug' => 'analytics.events.write', 'name' => 'Write Analytics Events', 'group' => 'analytics', 'risk' => 'sensitive', 'description' => 'Record privacy-aware first-party content events without storing raw visitor IP addresses.'],
+        ['slug' => 'analytics.metrics.read', 'name' => 'Read Analytics Metrics', 'group' => 'analytics', 'risk' => 'sensitive', 'description' => 'Read aggregated first-party content analytics.'],
+        ['slug' => 'analytics.metrics.aggregate', 'name' => 'Aggregate Analytics Metrics', 'group' => 'analytics', 'risk' => 'sensitive', 'description' => 'Aggregate raw first-party analytics events into daily metrics.'],
+        ['slug' => 'seo.crawler.read', 'name' => 'Read SEO Crawl Results', 'group' => 'seo', 'risk' => 'normal', 'description' => 'Inspect same-host SEO crawler runs, pages and evidence-based findings.'],
+        ['slug' => 'seo.crawler.run', 'name' => 'Run SEO Crawler', 'group' => 'seo', 'risk' => 'sensitive', 'description' => 'Fetch same-host public URLs through the controlled crawler and persist technical/content observations.'],
+        ['slug' => 'themes.registry.read', 'name' => 'Read Theme Registry', 'group' => 'themes', 'risk' => 'normal', 'description' => 'Inspect installed themes and immutable theme versions.'],
+        ['slug' => 'themes.registry.write', 'name' => 'Write Theme Registry', 'group' => 'themes', 'risk' => 'sensitive', 'description' => 'Install, configure and activate verified theme packages through the Theme Engine.'],
+        ['slug' => 'themes.preview.create', 'name' => 'Create Theme Preview', 'group' => 'themes', 'risk' => 'normal', 'description' => 'Create short-lived authenticated preview tokens for installed theme versions.'],
+        ['slug' => 'themes.render.public', 'name' => 'Render Public Theme', 'group' => 'themes', 'risk' => 'normal', 'description' => 'Render public pages through the non-executable theme template contract.'],
+        ['slug' => 'studio.canvas.read', 'name' => 'Read Studio Canvases', 'group' => 'studio', 'risk' => 'normal', 'description' => 'Read visual Studio canvas structures through approved contracts.'],
+        ['slug' => 'studio.canvas.write', 'name' => 'Write Studio Canvases', 'group' => 'studio', 'risk' => 'sensitive', 'description' => 'Create, update and publish validated visual Studio canvases.'],
+        ['slug' => 'studio.components.read', 'name' => 'Read Studio Components', 'group' => 'studio', 'risk' => 'normal', 'description' => 'Read reusable Studio component definitions.'],
+        ['slug' => 'studio.components.write', 'name' => 'Write Studio Components', 'group' => 'studio', 'risk' => 'sensitive', 'description' => 'Create reusable components from validated Studio nodes.'],
+        ['slug' => 'studio.bindings.read', 'name' => 'Read Studio Bindings', 'group' => 'studio', 'risk' => 'normal', 'description' => 'Read the allow-listed dynamic data binding catalog.'],
+        ['slug' => 'media.assets.read', 'name' => 'Read Media Assets', 'group' => 'media', 'risk' => 'normal', 'description' => 'Read media-library records and public URLs through approved media contracts.'],
+        ['slug' => 'media.assets.write', 'name' => 'Write Media Assets', 'group' => 'media', 'risk' => 'sensitive', 'description' => 'Upload and edit media metadata through the Nexora media pipeline.'],
+        ['slug' => 'media.assets.delete', 'name' => 'Delete Media Assets', 'group' => 'media', 'risk' => 'sensitive', 'description' => 'Move media to trash, restore it, or permanently remove files through approved controls.'],
+        ['slug' => 'media.usage.read', 'name' => 'Read Media Usage', 'group' => 'media', 'risk' => 'normal', 'description' => 'Inspect where media assets are referenced by Nexora resources.'],
+        ['slug' => 'media.collections.manage', 'name' => 'Manage Media Collections', 'group' => 'media', 'risk' => 'normal', 'description' => 'Create folders and reusable media collections.'],
+        ['slug' => 'distribution.newsletter.read', 'name' => 'Read Newsletter Data', 'group' => 'distribution', 'risk' => 'sensitive', 'description' => 'Read newsletter lists, subscribers, campaigns and delivery summaries.'],
+        ['slug' => 'distribution.newsletter.write', 'name' => 'Manage Newsletter Data', 'group' => 'distribution', 'risk' => 'sensitive', 'description' => 'Manage consented newsletter audiences and campaigns.'],
+        ['slug' => 'distribution.newsletter.send', 'name' => 'Send Newsletter Campaigns', 'group' => 'distribution', 'risk' => 'critical', 'description' => 'Queue newsletter delivery to consented subscribers through the configured mail transport.'],
+        ['slug' => 'distribution.adapters.read', 'name' => 'Read Distribution Adapters', 'group' => 'distribution', 'risk' => 'normal', 'description' => 'Inspect RSS, newsletter and future distribution adapter readiness.'],
+        ['slug' => 'publishing.articles.read', 'name' => 'Read Published Content', 'group' => 'publishing', 'risk' => 'normal', 'description' => 'Read article and blog publishing metadata.'],
+        ['slug' => 'publishing.articles.write', 'name' => 'Manage Published Content', 'group' => 'publishing', 'risk' => 'sensitive', 'description' => 'Manage article publishing metadata and scheduling.'],
+        ['slug' => 'publishing.taxonomy.manage', 'name' => 'Manage Publishing Taxonomies', 'group' => 'publishing', 'risk' => 'sensitive', 'description' => 'Manage categories, topics and tags.'],
+        ['slug' => 'publishing.authors.manage', 'name' => 'Manage Author Profiles', 'group' => 'publishing', 'risk' => 'sensitive', 'description' => 'Manage public author identities and document bylines.'],
+        ['slug' => 'publishing.series.manage', 'name' => 'Manage Content Series', 'group' => 'publishing', 'risk' => 'sensitive', 'description' => 'Manage ordered article and blog series.'],
+        ['slug' => 'content.autosave.write', 'name' => 'Write Document Autosaves', 'group' => 'content', 'risk' => 'normal', 'description' => 'Persist conflict-guarded writer autosave drafts without creating published revisions.'],
+        ['slug' => 'secrets.read', 'name' => 'Read Declared Secrets', 'group' => 'security', 'risk' => 'critical', 'description' => 'Read explicitly granted secrets through Nexora Vault rather than process environment access.'],
+
+    ],
+];

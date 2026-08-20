@@ -1,0 +1,21 @@
+{
+  "schema": 4,
+  "status": "fail",
+  "source_version": "1.0.0-rc.53",
+  "backup_sha256": "replace-with-64-character-sha256",
+  "database_fingerprint_sha256": "replace-with-64-character-sha256",
+  "backup_location": "operator-managed://replace-me",
+  "operator": "operator-name",
+  "verified_at": "2026-08-18T00:00:00Z",
+  "restore_readiness": {
+    "status": "fail",
+    "plan_id": "replace-with-restore-plan-id",
+    "plan_sha256": "replace-with-64-character-sha256",
+    "automatic_destructive_restore": false
+  },
+  "notes": "Set status=pass only after independently verifying the exact source-version backup, current database/schema fingerprints, persistent-storage data-plane fingerprint, backup-storage profile and a guarded non-destructive restore plan. Keep credentials/secrets out of this file.",
+  "database_data_plane_sha256": "replace-with-64-character-sha256",
+  "database_schema_sha256": "replace-with-64-character-sha256",
+  "storage_data_plane_sha256": "replace-with-64-character-sha256",
+  "backup_storage_profile_sha256": "replace-with-64-character-sha256"
+}

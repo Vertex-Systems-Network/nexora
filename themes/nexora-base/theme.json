@@ -1,0 +1,20 @@
+{
+  "id": "nexora.base",
+  "name": "Nexora Base",
+  "version": "1.0.0",
+  "description": "The safe fallback Nexora public theme. Non-executable, semantic and SEO-independent.",
+  "engine": "nexora-safe-html",
+  "templates": {
+    "home": "templates/home.html",
+    "document": "templates/document.html"
+  },
+  "stylesheet": "assets/theme.css",
+  "screenshot": "assets/screenshot.svg",
+  "design_tokens": {
+    "brand.primary": { "label": "Primary color", "type": "color", "default": "#7C3AED" },
+    "surface.background": { "label": "Page background", "type": "color", "default": "#FFFFFF" },
+    "text.primary": { "label": "Primary text", "type": "color", "default": "#111827" },
+    "layout.max_width": { "label": "Content width", "type": "select", "default": "72rem", "options": ["64rem", "72rem", "80rem"] },
+    "radius.card": { "label": "Card radius", "type": "select", "default": "1.25rem", "options": ["0.75rem", "1.25rem", "1.75rem"] }
+  }
+}

@@ -1,0 +1,75 @@
+:root {
+  --nx-brand-50: #f5f3ff;
+  --nx-brand-100: #ede9fe;
+  --nx-brand-600: #7c3aed;
+  --nx-brand-700: #6d28d9;
+  --nx-brand-rgb: 124 58 237;
+  --nx-brand: var(--nx-brand-600);
+  --nx-brand-soft: rgb(var(--nx-brand-rgb) / 0.10);
+
+  --nx-bg: #f8fafc;
+  --nx-surface: #ffffff;
+  --nx-surface-subtle: #f8fafc;
+  --nx-surface-muted: #f1f5f9;
+  --nx-surface-elevated: #ffffff;
+  --nx-border: #e2e8f0;
+  --nx-border-strong: #cbd5e1;
+  --nx-text: #0f172a;
+  --nx-text-secondary: #475569;
+  --nx-text-muted: #64748b;
+  --nx-success: #16a34a;
+  --nx-warning: #d97706;
+  --nx-danger: #dc2626;
+  --nx-info: #2563eb;
+
+  --nx-space-1: 0.25rem;
+  --nx-space-2: 0.5rem;
+  --nx-space-3: 0.75rem;
+  --nx-space-4: 1rem;
+  --nx-space-5: 1.25rem;
+  --nx-space-6: 1.5rem;
+  --nx-space-8: 2rem;
+  --nx-space-10: 2.5rem;
+  --nx-space-12: 3rem;
+  --nx-space-16: 4rem;
+
+  --nx-radius-sm: 0.5rem;
+  --nx-radius-md: 0.75rem;
+  --nx-radius-lg: 1rem;
+  --nx-radius-control: 0.75rem;
+  --nx-radius-card: 1rem;
+  --nx-shadow-xs: 0 1px 2px rgb(15 23 42 / 0.05);
+  --nx-shadow-sm: 0 1px 3px rgb(15 23 42 / 0.08), 0 1px 2px rgb(15 23 42 / 0.04);
+  --nx-shadow-md: 0 12px 28px rgb(15 23 42 / 0.08);
+
+  --nx-page-max-width: 100rem;
+  --nx-sidebar-width: 17rem;
+  --nx-header-height: 4rem;
+  --nx-control-height: 2.75rem;
+  --nx-content-gap: 1.5rem;
+}
+
+:root.dark {
+  --nx-bg: #0b0d12;
+  --nx-surface: #11141b;
+  --nx-surface-subtle: #151922;
+  --nx-surface-muted: #1c2230;
+  --nx-surface-elevated: #191e29;
+  --nx-border: #242a36;
+  --nx-border-strong: #343c4b;
+  --nx-text: #f8fafc;
+  --nx-text-secondary: #cbd5e1;
+  --nx-text-muted: #94a3b8;
+  --nx-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.25);
+  --nx-shadow-sm: 0 4px 16px rgb(0 0 0 / 0.22);
+  --nx-shadow-md: 0 18px 36px rgb(0 0 0 / 0.28);
+}
+
+:root[data-density="compact"] {
+  --nx-control-height: 2.375rem;
+  --nx-content-gap: 1.125rem;
+}
+
+:root[data-radius="small"] { --nx-radius-control: 0.5rem; }
+:root[data-radius="medium"] { --nx-radius-control: 0.75rem; }
+:root[data-radius="large"] { --nx-radius-control: 1rem; }

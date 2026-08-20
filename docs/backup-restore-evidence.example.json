@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "platform_version": "1.0.0-rc.31",
+  "operator": "operator-name",
+  "completed_at": "2026-08-17T13:00:00+05:00",
+  "backup_id": "backup-id",
+  "backup_sha256": "replace-with-64-character-sha256",
+  "restore_target": "disposable-target",
+  "checks": {
+    "backup_created": "fail",
+    "backup_checksum_verified": "fail",
+    "restore_to_disposable_target": "fail",
+    "restore_completed": "fail",
+    "migration_status_clean": "fail",
+    "application_health_pass": "fail",
+    "admin_login_pass": "fail",
+    "data_spot_check_pass": "fail",
+    "source_backup_unchanged": "fail",
+    "production_not_overwritten": "fail"
+  },
+  "notes": "This template is fail-closed. Replace placeholders only after a real disposable-target restore rehearsal.",
+  "source_tree_sha256": "replace-with-source-attestation-sha256"
+}

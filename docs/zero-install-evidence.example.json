@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "platform_version": "1.0.0-rc.31",
+  "source_tree_sha256": "replace-with-source-attestation-sha256",
+  "operator": "operator-name",
+  "completed_at": "2026-08-17T19:30:00+05:00",
+  "target": "fresh-disposable-laragon-or-linux-target",
+  "checks": {
+    "fresh_source_no_env": "fail",
+    "browser_installer_reached": "fail",
+    "dependency_bootstrap_completed": "fail",
+    "database_install_completed": "fail",
+    "admin_login_completed": "fail",
+    "installed_lockout": "fail",
+    "interrupted_install_recovery": "fail",
+    "stale_deployment_recovery": "fail",
+    "no_second_destructive_reset": "fail",
+    "clean_restart": "fail"
+  },
+  "notes": "Fail-closed template. Record only observed fresh-install and interrupted-recovery results."
+}
