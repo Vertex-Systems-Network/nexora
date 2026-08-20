@@ -38,6 +38,7 @@ $checks['composer'] = [
 ];
 $run('node', 'Node.js', ['node', '--version']);
 $run('npm', 'npm', ['npm', '--version']);
+$run('dev4_core_contract', 'DEV-4 core functional source contract', [PHP_BINARY, 'scripts/dev4-core-functional-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
