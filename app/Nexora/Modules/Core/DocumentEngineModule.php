@@ -56,5 +56,6 @@ final readonly class DocumentEngineModule implements ModuleContract
 
     public function boot(): void
     {
+        require base_path('routes/content-collections.php');
     }
 }
