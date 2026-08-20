@@ -49,5 +49,8 @@ jobs:
       - name: Theme product source contract
         run: php scripts/theme-product-contract-verify.php
 
+      - name: Extension product source contract
+        run: php scripts/extension-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
