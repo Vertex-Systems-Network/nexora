@@ -52,5 +52,8 @@ jobs:
       - name: Extension product source contract
         run: php scripts/extension-product-contract-verify.php
 
+      - name: Studio product source contract
+        run: php scripts/studio-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
