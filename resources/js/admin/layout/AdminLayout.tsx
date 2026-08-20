@@ -11,8 +11,8 @@ import { cx } from "@admin/utils/cx";
 
 const SIDEBAR_KEY = "nexora.admin.sidebar.collapsed";
 
-function BrandMark() {
-    return <img src="/brand/nexora-mark.svg" alt="" className="h-9 w-9 rounded-xl shadow-sm" />;
+function BrandMark({ src }: { src: string }) {
+    return <img src={src} alt="" className="h-9 w-9 rounded-xl object-contain shadow-sm" />;
 }
 
 function initials(name?: string | null) {
@@ -49,7 +49,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     const renderNavigation = (compact: boolean, mobile = false) => (
         <div className="flex h-full flex-col">
             <div className={cx("relative flex h-[var(--nx-header-height)] items-center border-b border-[var(--nx-border)]", compact ? "justify-center px-2" : "gap-3 px-5")}>
-                <BrandMark />
+                <BrandMark src={props.app.logoUrl} />
                 {!compact && <div className="min-w-0"><div className="truncate text-sm font-semibold tracking-[-0.01em] text-[var(--nx-text)]">{props.app.name}</div><div className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--nx-text-muted)]">{props.localization.messages.controlCenter}</div></div>}
                 {!mobile && (
                     <div className={cx("absolute top-1/2 -translate-y-1/2", "-end-4")}>
