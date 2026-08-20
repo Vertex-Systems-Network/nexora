@@ -10,7 +10,7 @@
 ## 0. Ledger metadata
 
 - Ledger schema: `1`
-- Ledger revision: `1.3`
+- Ledger revision: `1.4`
 - Project: `Nexora`
 - Product class: advanced extensible web platform / CMS / site builder / application ecosystem
 - Current development source release: `1.0.0-rc.94`
@@ -69,7 +69,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 11. **Real target evidence is required before marking runtime/product behavior complete.**
 12. **Final dependency/release certification remains late, after usability is proven.**
 13. **Ledger/history updates must not mutate deployed source identity.**
-14. **GitHub is now the canonical source-control workflow.** Meaningful source changes go to a development branch/PR; do not push unverified runtime changes directly to `main`.
+14. **GitHub is the canonical source-control workflow.** Meaningful source changes go through a development branch/PR; do not push unverified runtime changes directly to `main`.
 
 ---
 
@@ -118,15 +118,16 @@ Never report a feature as simply “100% complete” when only source/static ver
 - Source release: `1.0.0-rc.94`
 - Protocol: `v5.29`
 - Generation: `n1-v5.29`
-- Source/package intent: **Post-Install Runtime Stabilization Closure**
-- rc.94 finalizes installed runtime fingerprints in a **fresh HTTP runtime-handoff request** after committed `.env`, DB-backed session/cache behavior and installed deployment mode load.
+- Source/package intent: **Post-Install Runtime Stabilization Closure + DEV-4 core usability work**
+- rc.94 finalizes installed runtime fingerprints in a fresh HTTP runtime-handoff request after committed `.env`, DB-backed session/cache behavior and installed deployment mode load.
 
 ### 5.2 GitHub state
 
-- `main` currently starts from commit `f555fe396cda0e82efd4445ba016f709de3398c8` (`init`) containing the full rc.94 tree.
-- `NEXORA_AI_PROJECT_STATE.md` was present on `main` and matched the rc.94 ledger when GitHub canonicalization began.
+- `main` starts from commit `f555fe396cda0e82efd4445ba016f709de3398c8` (`init`) containing the full rc.94 tree.
 - Active source-work branch: `dev/n1-0b-core-functional-qa`.
 - Draft PR: `#1` to `main`.
+- GitHub Actions source-certification run `32424720624` completed successfully on the DEV-4 branch: Certification preflight, Source Guard, DEV-4 core functional source contract and Unified source certification all passed.
+- Latest verified source attestation after the site-settings batch: `1460` files, SHA-256 `3739e7906b1e14c3e4ceb12d68179168d48953f57360e91be75c04554d4d3ad0`.
 - `composer.lock` and `package-lock.json` are not committed; deterministic dependency certification remains pending/deferred.
 
 ### 5.3 Current live Laragon installation
@@ -158,7 +159,7 @@ Interpretation: source/DB/upgrade drift was not observed. Four post-install fing
 
 ### 5.4 Dependency review state
 
-Runtime dependencies match current locks on the live target, but formal reviewed-lock attestation is missing. This is **not the current usability blocker** and remains final N1.0/C1-C6 certification work.
+Runtime dependencies match current locks on the live target, but formal reviewed-lock attestation is missing. This is not the current usability blocker and remains final N1.0/C1-C6 certification work.
 
 ---
 
@@ -208,12 +209,23 @@ Runtime dependencies match current locks on the live target, but formal reviewed
 
 - Root `AGENTS.md` requires agents to read/update this ledger and preserve source-vs-target semantics.
 - Added `scripts/dev4-core-functional-contract-verify.php`.
-- DEV-4 source gate covers auth/admin/core routes, required controller methods/pages, auth safety markers, raw interactive HTML controls and shared UI exports.
+- DEV-4 source gate covers auth/admin/core routes, required controller methods/pages, auth safety markers, raw interactive HTML controls, icon-only action rules, shared UI exports and global settings contracts.
 - DEV-4 gate is wired into `scripts/development-readiness.php` and GitHub Actions.
 - Source-only GitHub workflow no longer requests npm cache from absent `package-lock.json`.
 - Draft PR `#1` opened for this batch.
-- Local branch verification: certification preflight PASS, Source Guard PASS, DEV-4 Core Functional Contract PASS, unified source certification PASS.
-- Current branch source attestation: `1460` files, SHA-256 `532abda62c1bf7aee06be92c8b8e63a3f27e8fec4aae262d48b0f9a1c05ad00c`.
+- Existing auth/admin feature tests and backend permission enforcement provide strong source-level DEV-4 foundation.
+
+### DEV-4 site identity / regional settings source closure
+
+- Global Settings now includes application/site name, logo URL/media path, default display timezone and default language plus existing appearance tokens.
+- Logo is exposed through shared Inertia props and used by both Admin and Auth layouts.
+- Default language is validated against configured supported locales and used as the installed fallback when no user/session/cookie preference exists.
+- Tenant context resolves before locale middleware so tenant-scoped settings can be read correctly after installation.
+- Display/business timezone is stored separately from Nexora's certified infrastructure/runtime timezone; runtime UTC certification is not mutated by this UI setting.
+- Settings flow test now covers valid site identity/regional updates and rejects unsafe logo schemes, invalid timezone identifiers and unsupported locales.
+- DEV-4 contract now guards these settings so future regression fails source verification.
+- Source/static verification after this batch: PHP syntax PASS; Laravel Runtime Contract PASS; Security Contract PASS; Frontend Contract PASS; Inertia Contract PASS; Source Guard PASS; Certification Preflight PASS; Unified Source Certification PASS.
+- GitHub Actions source-certification run `32424720624`: SUCCESS.
 
 ---
 
@@ -238,7 +250,7 @@ Runtime dependencies match current locks on the live target, but formal reviewed
 | DEV-2A Historical TypeScript remediation | 100% | SOURCE DONE |
 | DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for reported Laragon run |
 | DEV-3 Laravel/install runtime | 75% | PARTIAL — live rc.93 needs safe convergence confirmation |
-| DEV-4 Login/admin/core functional QA | 35% source / 30% live | PARTIAL — GitHub source gate now active; live QA next |
+| DEV-4 Login/admin/core functional QA | 45% source / 30% live | PARTIAL — GitHub source gates + settings closure done; live QA and remaining core workflows next |
 | DEV-5 DB/services portability | 60% | PARTIAL |
 | DEV-6 Final C1-C6/release certification | 10% | DEFERRED CERTIFICATION |
 
@@ -281,7 +293,7 @@ http://nexora/admin
 
 5. Continue DEV-4 live functional QA; do not return to final C1-C6 yet.
 
-### DEV-4 first live/source batch
+### DEV-4 next live/source batch
 
 1. Super Admin login/logout/session persistence.
 2. Direct URL navigation/refresh.
@@ -290,16 +302,21 @@ http://nexora/admin
 5. Light/Dark/System persistence.
 6. Users/profile/password reset/self-service auth.
 7. Roles/permissions/capabilities + tenant boundaries.
-8. Settings: site title/logo/colors/timezone/default language; commerce currency remains in commerce where appropriate.
-9. Media upload/select/use.
+8. Verify site identity/regional settings live: name/logo/default language/default display timezone.
+9. Media upload/select/use flow and reusable media-selection UX.
 10. Core CRUD/errors.
 11. Theme upload -> validate -> install -> preview -> activate.
 12. Plugin upload -> validate -> capabilities -> install -> activate/deactivate/uninstall.
 13. Studio entry + first real page/document edit flow.
 
-### Current source gap discovered for next DEV-4 code batch
+### Next source implementation order
 
-Global Settings currently covers app name + appearance theme/primary/density/radius, but platform-level **logo, default timezone and default language** are not yet complete end-to-end across Settings UI, shared Inertia props and request runtime behavior. This is the next source implementation target after the live runtime gate is proven or in parallel on the development branch.
+```text
+Media usability / reusable media selection
+  -> Theme Engine end-to-end product workflow
+  -> Plugin/Extension end-to-end product workflow
+  -> Studio first complete editing/publishing flow
+```
 
 ---
 
@@ -478,10 +495,20 @@ Use `No release` when no rc release was produced.
 - Trigger / observed blocker: GitHub workflow needed an enforceable product-facing DEV-4 source gate rather than chat/package claims alone.
 - Root cause: auth/admin/core surfaces existed, but no single DEV-4 contract ran both locally and in CI; source-only CI referenced absent `package-lock.json` for npm caching.
 - Changes applied: added `scripts/dev4-core-functional-contract-verify.php`; wired it into development readiness and GitHub Actions; removed lockfile-dependent npm cache while lockfiles remain absent; opened draft PR `#1` from `dev/n1-0b-core-functional-qa` to `main`.
-- Verification completed: certification preflight PASS; Source Guard PASS; DEV-4 Core Functional Contract PASS; unified source certification PASS; source attestation `1460` files / SHA-256 `532abda62c1bf7aee06be92c8b8e63a3f27e8fec4aae262d48b0f9a1c05ad00c`. `composer.lock`/`package-lock.json` remain absent, so deterministic dependency certification stays deferred.
+- Verification completed: certification preflight PASS; Source Guard PASS; DEV-4 Core Functional Contract PASS; unified source certification PASS. `composer.lock`/`package-lock.json` remain absent, so deterministic dependency certification stays deferred.
 - Real-target evidence: no new Laragon target execution in this source pass.
-- Remaining blocker: live rc.93 convergence still must pass; next source gap is global settings completeness (logo/timezone/default language) plus live admin workflows.
-- Next exact action: verify/repair rc.93 -> test `/login` + `/admin`; continue settings/media/theme/plugin/Studio fixes on the development branch; keep PR #1 draft until target evidence is available.
+- Remaining blocker: live rc.93 convergence still must pass.
+- Next exact action: verify/repair rc.93 -> test `/login` + `/admin`; continue product-facing source work on the development branch.
+
+### 2026-08-21 — No release — DEV-4 site identity and regional settings source closure
+
+- Trigger / observed blocker: global Settings only exposed application name and appearance tokens; platform-level logo, default display timezone and default language were not wired end-to-end.
+- Root cause: the settings keys, validation, shared Inertia props, auth/admin branding and installed default-locale resolution were incomplete; locale middleware also ran before tenant context resolution.
+- Changes applied: added validated `app.logo_url`, `app.default_timezone`, `app.default_locale`; expanded Settings UI; exposed the values through shared Inertia app props; Admin/Auth layouts use configured logo; installed SetLocale uses configured default language; reordered tenant resolution before locale; expanded `SettingsFlowTest`; expanded DEV-4 regression contract.
+- Verification completed: PHP syntax PASS; Laravel Runtime Contract PASS; Security Contract PASS; Frontend Contract PASS; Inertia Contract PASS; Source Guard PASS; Certification Preflight PASS; Unified Source Certification PASS; source attestation `1460` files / SHA-256 `3739e7906b1e14c3e4ceb12d68179168d48953f57360e91be75c04554d4d3ad0`; GitHub Actions source-certification run `32424720624` SUCCESS.
+- Real-target evidence: no Laragon target run for these new branch changes yet; this batch is SOURCE DONE, not TARGET VERIFIED.
+- Remaining blocker: live rc.93 post-install convergence + `/login`/`/admin` live evidence; after that this settings batch must be pulled to a separate development target and executed.
+- Next exact action: safely close live rc.93 runtime gate; then run development-readiness + targeted auth/settings tests on the GitHub development branch; continue Media -> Theme -> Plugin -> Studio.
 
 ---
 
@@ -514,7 +541,8 @@ LIVE BLOCKER: post-install environment/activation/service/process fingerprints s
 SOURCE/DEPLOYMENT/DB: matching
 DEPENDENCY RUNTIME: matching
 LOCK REVIEW: missing, deferred
+SOURCE DONE NOW: DEV-4 source gate + global site identity/regional settings
 NEXT LIVE: safe rc.93 repair -> compatibility PASS -> post-install PASS -> /login -> /admin -> DEV-4 QA
-NEXT SOURCE: global settings completeness -> media -> theme -> plugin -> Studio flows
+NEXT SOURCE: media usability -> theme workflow -> plugin workflow -> Studio flow
 DO NOT: overwrite installed rc.93 with rc.94 as repair; do not return to C1-C6 before usability closure
 ```
