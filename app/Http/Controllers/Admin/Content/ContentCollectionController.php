@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -102,9 +103,13 @@ final class ContentCollectionController extends Controller
         $data = $this->validatedCollection($request, $collection);
         $schema = $this->schemas->normalize((array) ($data['schema'] ?? []));
         $slug = $this->uniqueSlug((string) ($data['slug'] ?: $data['name']), $collection);
+        $nextType = $data['document_type'] ?: null;
 
-        DB::transaction(function () use ($request, $collection, $data, $schema, $slug): void {
+        DB::transaction(function () use ($request, $collection, $data, $schema, $slug, $nextType): void {
             $entries = $collection->documents()->get();
+            if ($nextType && $entries->contains(static fn (Document $document): bool => $document->type !== $nextType)) {
+                throw ValidationException::withMessages(['document_type' => 'The selected document type is incompatible with one or more existing collection entries. Remove those entries before restricting the collection type.']);
+            }
             foreach ($entries as $document) {
                 $normalized = $this->schemas->normalizeEntry($this->pivotData($document->pivot->data), $schema);
                 $collection->documents()->updateExistingPivot($document->id, ['data' => json_encode($normalized, JSON_THROW_ON_ERROR)]);
@@ -115,7 +120,7 @@ final class ContentCollectionController extends Controller
                 'slug' => $slug,
                 'description' => $data['description'] ?: null,
                 'status' => (string) $data['status'],
-                'document_type' => $data['document_type'] ?: null,
+                'document_type' => $nextType,
                 'schema' => $schema,
                 'updated_by' => $request->user()?->id,
             ])->save();
@@ -140,12 +145,16 @@ final class ContentCollectionController extends Controller
             'data' => ['nullable', 'array'],
         ]);
         $document = Document::query()->findOrFail((int) $validated['document_id']);
+        if ($collection->documents()->whereKey($document->id)->exists()) {
+            throw ValidationException::withMessages(['document_id' => 'This document is already part of the collection.']);
+        }
         $this->assertDocumentType($collection, $document);
         $data = $this->schemas->normalizeEntry((array) ($validated['data'] ?? []), (array) ($collection->schema ?? []));
         $position = ((int) $collection->documents()->max('nx_content_collection_documents.position')) + 10;
 
-        $collection->documents()->syncWithoutDetaching([
-            $document->id => ['position' => $position, 'data' => json_encode($data, JSON_THROW_ON_ERROR)],
+        $collection->documents()->attach($document->id, [
+            'position' => $position,
+            'data' => json_encode($data, JSON_THROW_ON_ERROR),
         ]);
         $this->audit->record('content.collection.document.attached', $collection, ['document_id' => $document->id]);
         return back()->with('success', 'Document added to the collection.');
@@ -195,7 +204,7 @@ final class ContentCollectionController extends Controller
         $query = ContentCollection::query()->where('slug', $slug);
         if ($except) $query->whereKeyNot($except->id);
         if ($query->exists()) {
-            throw \Illuminate\Validation\ValidationException::withMessages(['slug' => 'A content collection with this slug already exists in the current organization.']);
+            throw ValidationException::withMessages(['slug' => 'A content collection with this slug already exists in the current organization.']);
         }
         return $slug;
     }
@@ -203,7 +212,7 @@ final class ContentCollectionController extends Controller
     private function assertDocumentType(ContentCollection $collection, Document $document): void
     {
         if ($collection->document_type && $document->type !== $collection->document_type) {
-            throw \Illuminate\Validation\ValidationException::withMessages(['document_id' => "This collection only accepts {$collection->document_type} documents."]);
+            throw ValidationException::withMessages(['document_id' => "This collection only accepts {$collection->document_type} documents."]);
         }
     }
 
