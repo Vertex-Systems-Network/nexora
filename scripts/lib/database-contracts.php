@@ -16,6 +16,8 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
     $dropped=[];
     $foreignTargets=[];
     $explicitNames=[];
+    $migrationSources=[];
+    $migrationIndexes=[];
     $portableNullableUniqueCount=0;
     $forbidden=[
         'column placement ->after()'=>'/->after\s*\(/',
@@ -31,6 +33,8 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
     foreach($migrationFiles as $fileIndex=>$file){
         $source=(string)file_get_contents($file);
         $basename=basename($file);
+        $migrationSources[$basename]=$source;
+        $migrationIndexes[$basename]=$fileIndex;
         foreach($forbidden as $label=>$pattern){
             if(preg_match($pattern,$source)===1)$errors[]="{$basename}: forbidden non-portable {$label}.";
         }
@@ -67,6 +71,8 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
     }
 
     $enterprise=$root.'/database/migrations/2026_08_16_002000_add_nexora_enterprise_tenancy.php';
+    $enterpriseBasename=basename($enterprise);
+    $enterpriseMigrationIndex=$migrationIndexes[$enterpriseBasename]??null;
     $tenantTables=[];
     if(is_file($enterprise)){
         $source=(string)file_get_contents($enterprise);
@@ -84,7 +90,24 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
         $tenantModels[$m[1]]=basename($modelFile);
     }
     $declared=array_fill_keys($tenantTables,true);
-    foreach($tenantModels as $table=>$model){if(!isset($declared[$table]))$errors[]="{$model}: tenant-aware table {$table} is missing from enterprise migration tenant manifest.";}
+    foreach($tenantModels as $table=>$model){
+        if(isset($declared[$table])) continue;
+
+        // The enterprise manifest is a backfill contract for tables that existed
+        // before enterprise tenancy was introduced. New tenant-aware tables created
+        // after that migration must be tenant-native instead: their own migration
+        // declares tenant_id and its enterprise foreign key. This keeps future
+        // modules from mutating the historical backfill migration.
+        $creator=$created[$table]??null;
+        $creatorIndex=is_string($creator)?($migrationIndexes[$creator]??null):null;
+        $creatorSource=is_string($creator)?($migrationSources[$creator]??''):'';
+        $isPostEnterprise=is_int($enterpriseMigrationIndex)&&is_int($creatorIndex)&&$creatorIndex>$enterpriseMigrationIndex;
+        $hasTenantColumn=preg_match('/->uuid\([\'\"]tenant_id[\'\"]\)/',$creatorSource)===1;
+        $hasTenantForeign=str_contains($creatorSource,"foreign('tenant_id'")&&str_contains($creatorSource,"on('nx_enterprise_organizations')");
+        if(!$isPostEnterprise||!$hasTenantColumn||!$hasTenantForeign){
+            $errors[]="{$model}: tenant-aware table {$table} is neither in the enterprise backfill manifest nor created later as a tenant-native table with tenant_id and enterprise foreign key.";
+        }
+    }
     foreach($tenantTables as $table){if(!isset($tenantModels[$table]))$errors[]="Enterprise tenant manifest table {$table} has no BelongsToTenant model.";}
 
     foreach($tenantModels as $table=>$model){
