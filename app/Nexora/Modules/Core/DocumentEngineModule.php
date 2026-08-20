@@ -20,7 +20,7 @@ final readonly class DocumentEngineModule implements ModuleContract
         return new ModuleManifest(
             identifier: 'nexora.documents',
             name: 'Nexora Document Engine',
-            version: '0.19.0',
+            version: '0.18.1',
             description: 'Universal structured-document foundation with typed blocks, revisions, tenant-aware content collections and reusable publishing contracts.',
             core: true,
             loadOrder: 35,
