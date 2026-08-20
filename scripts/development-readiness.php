@@ -42,6 +42,7 @@ $run('post_install_runtime_contract', 'Post-install runtime convergence contract
 $run('dev4_core_contract', 'DEV-4 core functional source contract', [PHP_BINARY, 'scripts/dev4-core-functional-contract-verify.php']);
 $run('theme_product_contract', 'Theme product source contract', [PHP_BINARY, 'scripts/theme-product-contract-verify.php']);
 $run('extension_product_contract', 'Extension product source contract', [PHP_BINARY, 'scripts/extension-product-contract-verify.php']);
+$run('studio_product_contract', 'Studio product source contract', [PHP_BINARY, 'scripts/studio-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
