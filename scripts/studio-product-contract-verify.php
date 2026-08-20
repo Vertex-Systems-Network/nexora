@@ -90,7 +90,7 @@ foreach([
     'Tablet viewport'=>'tablet responsive preview',
     'Mobile viewport'=>'mobile responsive preview',
     'Dynamic text binding'=>'binding UX',
-    'Save as component'=>'reusable component UX',
+    'Save selected as component'=>'reusable component UX',
     'Unsaved changes'=>'dirty-state UX',
 ] as $needle=>$label){ if($editor!==''&&!str_contains($editor,$needle)) $errors[]="Studio Product editor UI contract missing: {$label}."; }
 
