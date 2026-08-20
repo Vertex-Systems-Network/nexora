@@ -1,5 +1,6 @@
 import { Head, useForm } from "@inertiajs/react";
 import { AdminLayout } from "@admin/layout/AdminLayout";
+import { MediaPicker } from "@admin/components/MediaPicker";
 import { PageHeader } from "@admin/components/PageHeader";
 import { Button, Card, ColorInput, Input, Select } from "@nexora/admin-ui";
 
@@ -31,7 +32,10 @@ export default function SettingsPage({ settings, timezoneOptions, localeOptions 
                         <section className="grid gap-4">
                             <div><h2 className="text-base font-semibold text-[var(--nx-text)]">Identity</h2><p className="mt-1 text-sm text-[var(--nx-text-muted)]">Site/workspace name and logo shown across Nexora administration and authentication.</p></div>
                             <Input label="Application name" name="appName" value={form.data.appName} onChange={(e) => form.setData("appName", e.target.value)} error={form.errors.appName} />
-                            <Input label="Logo URL or media path" name="logoUrl" value={form.data.logoUrl} onChange={(e) => form.setData("logoUrl", e.target.value)} error={form.errors.logoUrl} placeholder="/media/... or https://..." hint="Leave empty to use the Nexora default mark. Media-library selection can provide a public media path." />
+                            <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                                <Input label="Logo URL or media path" name="logoUrl" value={form.data.logoUrl} onChange={(e) => form.setData("logoUrl", e.target.value)} error={form.errors.logoUrl} placeholder="/media/... or https://..." hint="Choose an existing image from Media Library or enter an approved public path/URL. Leave empty for the Nexora default mark." />
+                                <MediaPicker value={form.data.logoUrl} type="image" onChange={(url) => form.setData("logoUrl", url)} buttonLabel="Choose media" />
+                            </div>
                         </section>
 
                         <section className="grid gap-4 border-t border-[var(--nx-border)] pt-6">
