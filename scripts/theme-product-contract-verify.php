@@ -24,6 +24,7 @@ $read = static function (string $relative) use ($root, &$errors): string {
 $routes = $read('routes/web.php');
 $controller = $read('app/Http/Controllers/Admin/Appearance/ThemeController.php');
 $installer = $read('app/Nexora/Themes/Services/ThemePackageInstaller.php');
+$manager = $read('app/Nexora/Themes/Services/ThemeManager.php');
 $page = $read('resources/js/admin/pages/Admin/Appearance/Themes.tsx');
 $filePicker = $read('resources/js/admin/ui/untitled/file-picker.tsx');
 $test = $read('tests/Feature/Themes/ThemeEngineFlowTest.php');
@@ -57,11 +58,20 @@ foreach ([
     "if (\$scan->quarantine_package_id !== \$package->id || \$scan->decision !== 'allow' || \$scan->status !== 'completed')" => 'completed Sentinel ALLOW promotion gate',
     "if (\$manifest->engine !== 'nexora-safe-html')" => 'non-executable safe theme engine boundary',
     "foreach (['{{ nx_head }}', '{{ nx_theme_assets }}', '{{ nx_schema }}', '{{ nx_content }}'] as \$requiredSlot)" => 'required SEO/schema/content platform slots',
-    'assertRuntimeIntegrity' => 'runtime integrity verification linkage',
     'Theme archive changed after Sentinel approval.' => 'post-scan archive digest immutability',
 ] as $needle => $label) {
     if ($installer !== '' && ! str_contains($installer, $needle)) {
         $errors[] = "Theme Product installer contract missing: {$label}.";
+    }
+}
+
+foreach ([
+    'public function assertRuntimeIntegrity(ThemeVersion $version): void' => 'runtime integrity verifier',
+    '$this->assertRuntimeIntegrity($version);' => 'activation/preview runtime integrity enforcement',
+    'previous_theme_version_id' => 'rollback activation snapshot',
+] as $needle => $label) {
+    if ($manager !== '' && ! str_contains($manager, $needle)) {
+        $errors[] = "Theme Product manager contract missing: {$label}.";
     }
 }
 
