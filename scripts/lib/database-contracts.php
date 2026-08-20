@@ -90,8 +90,13 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
         $tenantModels[$m[1]]=basename($modelFile);
     }
     $declared=array_fill_keys($tenantTables,true);
+    $tenantManifestModels=[];
+    $tenantNativeModels=[];
     foreach($tenantModels as $table=>$model){
-        if(isset($declared[$table])) continue;
+        if(isset($declared[$table])) {
+            $tenantManifestModels[$table]=$model;
+            continue;
+        }
 
         // The enterprise manifest is a backfill contract for tables that existed
         // before enterprise tenancy was introduced. New tenant-aware tables created
@@ -106,7 +111,9 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
         $hasTenantForeign=str_contains($creatorSource,"foreign('tenant_id'")&&str_contains($creatorSource,"on('nx_enterprise_organizations')");
         if(!$isPostEnterprise||!$hasTenantColumn||!$hasTenantForeign){
             $errors[]="{$model}: tenant-aware table {$table} is neither in the enterprise backfill manifest nor created later as a tenant-native table with tenant_id and enterprise foreign key.";
+            continue;
         }
+        $tenantNativeModels[$table]=$model;
     }
     foreach($tenantTables as $table){if(!isset($tenantModels[$table]))$errors[]="Enterprise tenant manifest table {$table} has no BelongsToTenant model.";}
 
@@ -149,8 +156,13 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
             'tables'=>count($created),
             'foreign_targets'=>count($foreignTargets),
             'explicit_index_names'=>count($explicitNames),
+            // Historical manifest-alignment metrics intentionally stay scoped to
+            // the 2026-08-16 enterprise backfill roots so old release invariants
+            // remain stable while forward tenant-native modules can grow safely.
             'tenant_tables'=>count($tenantTables),
-            'tenant_models'=>count($tenantModels),
+            'tenant_models'=>count($tenantManifestModels),
+            'tenant_models_total'=>count($tenantModels),
+            'tenant_native_models'=>count($tenantNativeModels),
             'portable_nullable_unique'=>$portableNullableUniqueCount,
             'seeders'=>count(glob($root.'/database/seeders/**/*.php',GLOB_BRACE) ?: []),
         ],
