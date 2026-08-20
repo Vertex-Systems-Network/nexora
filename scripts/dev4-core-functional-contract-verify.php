@@ -124,13 +124,38 @@ if (is_dir($adminSourceRoot)) {
         $source = (string) file_get_contents($file->getPathname());
         $relative = str_replace('\\', '/', substr($file->getPathname(), strlen($root) + 1));
 
+        // User-facing Admin/Auth pages must consume shared Nexora UI components.
+        // Lowercase native interactive controls here are an architecture regression;
+        // the shared UI package itself remains responsible for the underlying DOM.
         if (preg_match('/<(?:button|input|select|textarea)\b/', $source) === 1) {
             $errors[] = "Raw interactive HTML control found outside shared admin UI: {$relative}.";
         }
 
+        // Icon-only actions must use IconButton so a tooltip + accessible label are guaranteed.
         if (preg_match('/<Button\b[^>]*>\s*<Icon\b[^>]*\/>\s*<\/Button>/s', $source) === 1) {
             $errors[] = "Icon-only Button must use IconButton with tooltip/label: {$relative}.";
         }
+    }
+}
+
+$settingsController = $read('app/Http/Controllers/Admin/SettingsController.php');
+$settingsPage = $read('resources/js/admin/pages/Admin/Settings/Index.tsx');
+$sharedPageTypes = $read('resources/js/admin/types/page.ts');
+foreach ([
+    "app.logo_url" => 'site logo setting',
+    "app.default_timezone" => 'default timezone setting',
+    "app.default_locale" => 'default language setting',
+] as $needle => $label) {
+    if ($settingsController !== '' && ! str_contains($settingsController, $needle)) {
+        $errors[] = "DEV-4 settings contract missing: {$label}.";
+    }
+}
+foreach (['logoUrl', 'defaultTimezone', 'defaultLocale'] as $field) {
+    if ($settingsPage !== '' && ! str_contains($settingsPage, $field)) {
+        $errors[] = "DEV-4 settings UI field missing: {$field}.";
+    }
+    if ($sharedPageTypes !== '' && ! str_contains($sharedPageTypes, $field)) {
+        $errors[] = "DEV-4 shared app prop missing: {$field}.";
     }
 }
 
