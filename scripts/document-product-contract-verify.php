@@ -44,7 +44,7 @@ foreach([
 foreach([
     'lockForUpdate()'=>'row-level concurrency locking',
     "This document was updated in another session. Reload before saving to avoid overwriting newer work."=>'stale-write rejection',
-    "'lock_version'] + 1"=>'optimistic lock version advance',
+    "\$normalized['lock_version'] = ((int) \$locked->lock_version) + 1;"=>'optimistic lock version advance',
     '$this->revisions->record('=>'immutable revision snapshot handoff',
     '$this->contentValidator->normalize('=>'canonical content normalization',
 ] as $needle=>$label){ if($repository!==''&&!str_contains($repository,$needle)) $errors[]="Document Product repository contract missing: {$label}."; }
