@@ -46,13 +46,13 @@ foreach ([
 
 foreach ([
     'public function finalizeCommittedRuntimeIdentity()' => 'one-time runtime identity finalizer',
-    "$allowed = ['environment', 'activation', 'service', 'process'];" => 'narrow reconciliable plane allow-list',
+    '$allowed = [\'environment\', \'activation\', \'service\', \'process\'];' => 'narrow reconciliable plane allow-list',
     '$hard = array_values(array_diff($mismatches, $allowed));' => 'immutable mismatch rejection',
-    "if (($services['status'] ?? 'fail') !== 'pass')" => 'service plane health gate',
-    "if (($processes['status'] ?? 'fail') !== 'pass')" => 'process policy health gate',
+    'if (($services[\'status\'] ?? \'fail\') !== \'pass\')' => 'service plane health gate',
+    'if (($processes[\'status\'] ?? \'fail\') !== \'pass\')' => 'process policy health gate',
     "'post_install_identity_finalized' => true" => 'one-time finalized marker',
     '$after = $this->versions->assess();' => 'post-write compatibility reassessment',
-    "if (($after['compatible'] ?? false) !== true)" => 'post-write fail-closed convergence check',
+    'if (($after[\'compatible\'] ?? false) !== true)' => 'post-write fail-closed convergence check',
 ] as $needle => $label) {
     if ($handoff !== '' && ! str_contains($handoff, $needle)) {
         $errors[] = "Post-install convergence fail-closed contract missing: {$label}.";
