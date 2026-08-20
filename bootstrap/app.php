@@ -31,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn (): string => route('login'));
         $middleware->prepend([ConfigureTrustedProxies::class, EnforceRequestLimits::class]);
         $middleware->preventRequestForgery(except: ['hooks/*', 'scim/*', 'sso/*/*/callback']);
-        $middleware->web(append: [AssignRequestId::class, ApplyPerformanceHeaders::class, RedirectIfNotInstalled::class, SetLocale::class, RuntimeNodeHeartbeat::class, ResolveEnterpriseOrganization::class, HandleInertiaRequests::class]);
+        $middleware->web(append: [AssignRequestId::class, ApplyPerformanceHeaders::class, RedirectIfNotInstalled::class, RuntimeNodeHeartbeat::class, ResolveEnterpriseOrganization::class, SetLocale::class, HandleInertiaRequests::class]);
         $middleware->alias([
             'admin' => EnsureAdminAccess::class,
             'permission' => RequirePermission::class,
