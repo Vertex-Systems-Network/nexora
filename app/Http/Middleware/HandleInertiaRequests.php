@@ -43,6 +43,9 @@ final class HandleInertiaRequests extends Middleware
                 ...parent::share($request),
                 'app' => [
                     'name' => config('app.name', 'Nexora'),
+                    'logoUrl' => '/brand/nexora-mark.svg',
+                    'defaultTimezone' => 'UTC',
+                    'defaultLocale' => (string) config('localization.default', 'en'),
                     'environment' => app()->environment(),
                     'deployment' => [
                         'mode' => 'bootstrap',
@@ -71,6 +74,9 @@ final class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'app' => [
                 'name' => $settings->get('app.name', config('app.name', 'Nexora')),
+                'logoUrl' => $settings->get('app.logo_url', '') ?: '/brand/nexora-mark.svg',
+                'defaultTimezone' => $settings->get('app.default_timezone', 'UTC'),
+                'defaultLocale' => $settings->get('app.default_locale', (string) config('localization.default', 'en')),
                 'environment' => app()->environment(),
                 'deployment' => app(RuntimeDeploymentIdentity::class)->current(),
             ],
