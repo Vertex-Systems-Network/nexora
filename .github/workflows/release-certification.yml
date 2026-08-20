@@ -40,6 +40,9 @@ jobs:
       - name: Source Guard
         run: php scripts/source-guard.php --source-only
 
+      - name: Post-install runtime convergence contract
+        run: php scripts/post-install-runtime-convergence-contract-verify.php
+
       - name: DEV-4 core functional source contract
         run: php scripts/dev4-core-functional-contract-verify.php
 
