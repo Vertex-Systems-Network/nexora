@@ -46,5 +46,8 @@ jobs:
       - name: DEV-4 core functional source contract
         run: php scripts/dev4-core-functional-contract-verify.php
 
+      - name: Theme product source contract
+        run: php scripts/theme-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
