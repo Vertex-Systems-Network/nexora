@@ -10,6 +10,7 @@ use App\Models\ContentSeries;
 use App\Models\Document;
 use App\Models\TaxonomyTerm;
 use App\Nexora\Foundation\Contracts\SettingsContract;
+use App\Nexora\Publishing\Services\PublicDocumentVisibility;
 use App\Nexora\Themes\Contracts\ThemeRendererContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -17,7 +18,11 @@ use Illuminate\Http\Response;
 
 final class BlogController extends Controller
 {
-    public function __construct(private ThemeRendererContract $themes, private SettingsContract $settings) {}
+    public function __construct(
+        private ThemeRendererContract $themes,
+        private SettingsContract $settings,
+        private PublicDocumentVisibility $visibility,
+    ) {}
 
     public function index(): Response
     {
@@ -87,7 +92,7 @@ final class BlogController extends Controller
      *  @param list<array<string,mixed>> $extraSchema */
     private function listing(string $title, $query, ?string $intro = null, array $extraSchema = []): Response
     {
-        $items = $query->limit(24)->get(['nx_documents.id', 'type', 'title', 'slug', 'excerpt', 'published_at']);
+        $items = $this->visibility->apply($query)->limit(24)->get(['nx_documents.id', 'type', 'title', 'slug', 'excerpt', 'published_at']);
         $content = '<section class="nx-archive"><header><h1>'.e($title).'</h1>'.($intro ? '<p>'.e($intro).'</p>' : '').'</header><div class="nx-archive-list">';
         foreach ($items as $document) {
             $content .= '<article><h2><a href="'.e($this->documentUrl($document)).'">'.e((string) $document->title).'</a></h2>';
