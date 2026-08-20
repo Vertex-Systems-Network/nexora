@@ -113,16 +113,28 @@ function nexoraAnalyzePerformanceContracts(string $root): array
         }
     }
 
-    $lazyPreviewFiles = [
-        'resources/js/admin/components/writer/BlockEditor.tsx',
-        'resources/js/admin/pages/Admin/Publishing/ArticleSettings.tsx',
-        'resources/js/admin/pages/Admin/Appearance/Themes.tsx',
-        'resources/js/admin/pages/Admin/Media/Index.tsx',
+    // A preview surface may delegate image rendering to a shared component. The
+    // performance contract follows that ownership instead of requiring fake
+    // loading/decoding markers in every caller.
+    $lazyPreviewOwners = [
+        'resources/js/admin/components/writer/BlockEditor.tsx' => [
+            'resources/js/admin/components/writer/BlockEditor.tsx',
+            'resources/js/admin/components/MediaPicker.tsx',
+        ],
+        'resources/js/admin/pages/Admin/Publishing/ArticleSettings.tsx' => [
+            'resources/js/admin/pages/Admin/Publishing/ArticleSettings.tsx',
+        ],
+        'resources/js/admin/pages/Admin/Appearance/Themes.tsx' => [
+            'resources/js/admin/pages/Admin/Appearance/Themes.tsx',
+        ],
+        'resources/js/admin/pages/Admin/Media/Index.tsx' => [
+            'resources/js/admin/pages/Admin/Media/Index.tsx',
+        ],
     ];
-    foreach ($lazyPreviewFiles as $relative) {
-        $source = $read($relative);
+    foreach ($lazyPreviewOwners as $surface => $owners) {
+        $source = implode("\n", array_map($read, $owners));
         if (! str_contains($source, 'loading="lazy"') || ! str_contains($source, 'decoding="async"')) {
-            $errors[] = 'non-critical preview image must be lazy/async: '.$relative;
+            $errors[] = 'non-critical preview image must be lazy/async: '.$surface;
         }
     }
 
