@@ -123,6 +123,7 @@ function nexoraAnalyzePerformanceContracts(string $root): array
         ],
         'resources/js/admin/pages/Admin/Publishing/ArticleSettings.tsx' => [
             'resources/js/admin/pages/Admin/Publishing/ArticleSettings.tsx',
+            'resources/js/admin/components/MediaPicker.tsx',
         ],
         'resources/js/admin/pages/Admin/Appearance/Themes.tsx' => [
             'resources/js/admin/pages/Admin/Appearance/Themes.tsx',
