@@ -38,6 +38,7 @@ $checks['composer'] = [
 ];
 $run('node', 'Node.js', ['node', '--version']);
 $run('npm', 'npm', ['npm', '--version']);
+$run('post_install_runtime_contract', 'Post-install runtime convergence contract', [PHP_BINARY, 'scripts/post-install-runtime-convergence-contract-verify.php']);
 $run('dev4_core_contract', 'DEV-4 core functional source contract', [PHP_BINARY, 'scripts/dev4-core-functional-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
