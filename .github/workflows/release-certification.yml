@@ -33,15 +33,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-        continue-on-error: true
 
       - name: Certification preflight
         run: php scripts/certification-preflight.php --source-only
 
       - name: Source Guard
         run: php scripts/source-guard.php --source-only
+
+      - name: DEV-4 core functional source contract
+        run: php scripts/dev4-core-functional-contract-verify.php
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
