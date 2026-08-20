@@ -23,12 +23,23 @@ type MediaPickerProps = {
     value?: string;
     selection?: MediaPickerSelection | null;
     onChange: (url: string, asset: MediaPickerAsset) => void;
+    onClear?: () => void;
     type?: "image" | "video" | "audio" | "document";
     buttonLabel?: string;
     showSelection?: boolean;
+    allowClear?: boolean;
 };
 
-export function MediaPicker({ value, selection = null, onChange, type = "image", buttonLabel = "Choose from Media Library", showSelection = false }: MediaPickerProps) {
+export function MediaPicker({
+    value,
+    selection = null,
+    onChange,
+    onClear,
+    type = "image",
+    buttonLabel = "Choose from Media Library",
+    showSelection = false,
+    allowClear = false,
+}: MediaPickerProps) {
     const [open, setOpen] = useState(false);
     const [draftSearch, setDraftSearch] = useState("");
     const [search, setSearch] = useState("");
@@ -38,9 +49,12 @@ export function MediaPicker({ value, selection = null, onChange, type = "image",
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!selection) return;
+        if (!selection) {
+            if (!value) setCurrent(null);
+            return;
+        }
         setCurrent((existing) => existing?.id === selection.id ? { ...existing, ...selection } : selection);
-    }, [selection?.id, selection?.url]);
+    }, [selection?.id, selection?.url, value]);
 
     const load = useCallback(async (signal?: AbortSignal) => {
         setLoading(true);
@@ -80,6 +94,11 @@ export function MediaPicker({ value, selection = null, onChange, type = "image",
         setOpen(false);
     };
 
+    const clear = () => {
+        setCurrent(null);
+        onClear?.();
+    };
+
     const activeUrl = current?.url ?? value;
 
     return <div className="grid gap-3">
@@ -87,7 +106,10 @@ export function MediaPicker({ value, selection = null, onChange, type = "image",
             {type === "image" ? <img src={current.url} alt={current.alt_text ?? current.title} className="max-h-80 w-full object-contain" loading="lazy" decoding="async" /> : <div className="px-4 py-3 text-sm text-[var(--nx-text-secondary)]">{current.title}</div>}
             <div className="flex items-center justify-between gap-3 border-t border-[var(--nx-border)] px-3 py-2 text-xs"><span className="min-w-0 truncate font-medium text-[var(--nx-text)]">{current.title}</span>{current.width && current.height ? <span className="shrink-0 text-[var(--nx-text-muted)]">{current.width}×{current.height}</span> : null}</div>
         </div>}
-        <Button type="button" variant="secondary" onClick={() => setOpen(true)}>{buttonLabel}</Button>
+        <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="secondary" onClick={() => setOpen(true)}>{buttonLabel}</Button>
+            {allowClear && activeUrl && onClear ? <Button type="button" variant="ghost" onClick={clear}>Clear selection</Button> : null}
+        </div>
         <Modal open={open} onClose={() => setOpen(false)} title="Choose media" description={`Select an existing ${type} from the tenant Media Library. The canonical asset reference is reused without duplicating the file.`} footer={<Button type="button" variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>}>
             <div className="grid gap-4">
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
