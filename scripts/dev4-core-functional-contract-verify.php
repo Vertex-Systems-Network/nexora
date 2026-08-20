@@ -124,14 +124,10 @@ if (is_dir($adminSourceRoot)) {
         $source = (string) file_get_contents($file->getPathname());
         $relative = str_replace('\\', '/', substr($file->getPathname(), strlen($root) + 1));
 
-        // User-facing Admin/Auth pages must consume shared Nexora UI components.
-        // Lowercase native interactive controls here are an architecture regression;
-        // the shared UI package itself remains responsible for the underlying DOM.
         if (preg_match('/<(?:button|input|select|textarea)\b/', $source) === 1) {
             $errors[] = "Raw interactive HTML control found outside shared admin UI: {$relative}.";
         }
 
-        // Icon-only actions must use IconButton so a tooltip + accessible label are guaranteed.
         if (preg_match('/<Button\b[^>]*>\s*<Icon\b[^>]*\/>\s*<\/Button>/s', $source) === 1) {
             $errors[] = "Icon-only Button must use IconButton with tooltip/label: {$relative}.";
         }
@@ -159,6 +155,29 @@ foreach (['logoUrl', 'defaultTimezone', 'defaultLocale'] as $field) {
     }
 }
 
+$mediaController = $read('app/Http/Controllers/Admin/Media/MediaController.php');
+$mediaPicker = $read('resources/js/admin/components/MediaPicker.tsx');
+foreach ([
+    "request->boolean('picker')" => 'media picker request mode',
+    "response()->json" => 'media picker JSON response',
+] as $needle => $label) {
+    if ($mediaController !== '' && ! str_contains($mediaController, $needle)) {
+        $errors[] = "DEV-4 media reuse contract missing: {$label}.";
+    }
+}
+foreach ([
+    'picker: "1"' => 'MediaPicker JSON query mode',
+    'Choose media' => 'MediaPicker chooser UI',
+    'onChange(asset.url, asset)' => 'MediaPicker reusable selection callback',
+] as $needle => $label) {
+    if ($mediaPicker !== '' && ! str_contains($mediaPicker, $needle)) {
+        $errors[] = "DEV-4 MediaPicker contract missing: {$label}.";
+    }
+}
+if ($settingsPage !== '' && ! str_contains($settingsPage, '<MediaPicker')) {
+    $errors[] = 'DEV-4 settings logo must consume the reusable MediaPicker component.';
+}
+
 $uiIndex = $read('resources/js/admin/ui/index.ts');
 foreach (['Button', 'IconButton', 'Input', 'Select', 'Textarea', 'Checkbox', 'Tooltip'] as $export) {
     if ($uiIndex !== '' && ! str_contains($uiIndex, $export)) {
@@ -171,4 +190,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora DEV-4 Core Functional Contract] PASS — auth/admin routes, controller surfaces, core pages and shared UI interaction boundaries are source-aligned.\n");
+fwrite(STDOUT, "[Nexora DEV-4 Core Functional Contract] PASS — auth/admin routes, controller surfaces, site settings, reusable media selection and shared UI interaction boundaries are source-aligned.\n");
