@@ -10,7 +10,7 @@
 ## 0. Ledger metadata
 
 - Ledger schema: `1`
-- Ledger revision: `1.4`
+- Ledger revision: `1.5`
 - Project: `Nexora`
 - Product class: advanced extensible web platform / CMS / site builder / application ecosystem
 - Current development source release: `1.0.0-rc.94`
@@ -20,7 +20,10 @@
 - GitHub canonical repository: `Vertex-Systems-Network/nexora`
 - GitHub default branch: `main`
 - Active development branch: `dev/n1-0b-core-functional-qa`
-- Active GitHub pull request: `#1` — DEV-4: establish GitHub-first functional QA gates
+- Active GitHub pull request: `#1` — draft, mergeable; keep draft until real-target evidence is available
+- Current branch head before this ledger-only commit: `2035528bae27222446138e65bda50ea32feb9e17`
+- Latest complete green source-certification run: `32427092798`
+- Open GitHub issues at this checkpoint: `#2 Nexora runtime identity mismatch`
 - Current target environment: Windows + Laragon (real-target development test environment)
 - Current target path: `D:\laragon\www\nexora`
 - Final target: portable/self-hostable beyond Laragon; Laragon is a real development target, not an architectural dependency.
@@ -70,6 +73,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 12. **Final dependency/release certification remains late, after usability is proven.**
 13. **Ledger/history updates must not mutate deployed source identity.**
 14. **GitHub is the canonical source-control workflow.** Meaningful source changes go through a development branch/PR; do not push unverified runtime changes directly to `main`.
+15. **GitHub issues are an execution input, not a separate backlog.** At the start and end of every meaningful pass, inspect open repository issues. Fix applicable source defects alongside roadmap work, add regression protection, and do not close runtime/environment issues until the required real-target evidence exists.
 
 ---
 
@@ -82,19 +86,20 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | Module Registry | Discover/register/activate modules | Foundation implemented |
 | Capability Runtime | Controlled extension permissions | Foundation implemented |
 | Admin Platform / Design System | Shared UI/navigation/forms/selects/themes/tooltips | Strong foundation; app-wide live QA pending |
-| Document Engine | Structured page/content documents | Foundation implemented |
+| Document Engine | Structured page/content documents | Foundation implemented; next product closure block |
 | SEO Core | Metadata/canonical/schema/publishing semantics | Foundation implemented |
-| Theme Engine | Package/install/activate/render | Foundation; real workflow QA pending |
-| Plugin / Extension Engine | Lifecycle/capabilities/migrations | Foundation; real workflow QA pending |
-| Studio | Visual page/site builder | Foundation; major product UX/features ahead |
+| Theme Engine | Package/install/activate/render | Product workflow SOURCE DONE; target execution pending |
+| Plugin / Extension Engine | Lifecycle/capabilities/migrations | Product workflow SOURCE DONE; target execution pending |
+| Studio | Visual page/site builder | First create/edit/publish/public-render workflow SOURCE DONE; target execution pending; advanced builder features remain |
+| Media / DAM | Upload/inspect/variants/folders/collections/reuse | Foundation + reusable picker SOURCE DONE; target execution pending |
 | Forge / SDK | Developer extension tooling | Foundation/planned expansion |
-| Sentinel | Theme/plugin trust/security | Foundation; 2.0 later |
+| Sentinel | Theme/plugin trust/security | Foundation implemented; 2.0 later |
 | Marketplace | Themes/apps distribution | Foundation/planned expansion |
 | Commerce | Commerce primitives/services | Foundation; Commerce 2.0 later |
 | CRM / Membership / Helpdesk | Business/customer capabilities | Foundation/roadmap |
 | Multisite / Organizations / SSO | Enterprise tenancy/governance | Major upcoming block |
 | Cloud / HA Runtime | Distributed workers/storage/deployments | Later roadmap |
-| Installer / Deployment / Recovery | Zero-state install/update/recovery/runtime handoff | Stabilization nearly closed |
+| Installer / Deployment / Recovery | Zero-state install/update/recovery/runtime handoff | rc.94 source stabilization closed; live rc.93 recovery evidence pending |
 
 ---
 
@@ -113,28 +118,55 @@ Never report a feature as simply “100% complete” when only source/static ver
 
 ## 5. Current development checkpoint
 
-### 5.1 Current development source
+### 5.1 Development source
 
 - Source release: `1.0.0-rc.94`
 - Protocol: `v5.29`
 - Generation: `n1-v5.29`
-- Source/package intent: **Post-Install Runtime Stabilization Closure + DEV-4 core usability work**
-- rc.94 finalizes installed runtime fingerprints in a fresh HTTP runtime-handoff request after committed `.env`, DB-backed session/cache behavior and installed deployment mode load.
+- Active branch: `dev/n1-0b-core-functional-qa`
+- PR `#1` is draft and mergeable.
+- Latest green CI run `32427092798` passed:
+  - Certification preflight
+  - Source Guard
+  - Post-install runtime convergence contract
+  - DEV-4 core functional source contract
+  - Theme product source contract
+  - Extension product source contract
+  - Studio product source contract
+  - Unified source certification
+- `composer.lock` and `package-lock.json` are not committed; deterministic dependency/release certification remains deferred.
 
-### 5.2 GitHub state
+### 5.2 Open GitHub issue status
 
-- `main` starts from commit `f555fe396cda0e82efd4445ba016f709de3398c8` (`init`) containing the full rc.94 tree.
-- Active source-work branch: `dev/n1-0b-core-functional-qa`.
-- Draft PR: `#1` to `main`.
-- GitHub Actions source-certification run `32424720624` completed successfully on the DEV-4 branch: Certification preflight, Source Guard, DEV-4 core functional source contract and Unified source certification all passed.
-- Latest verified source attestation after the site-settings batch: `1460` files, SHA-256 `3739e7906b1e14c3e4ceb12d68179168d48953f57360e91be75c04554d4d3ad0`.
-- `composer.lock` and `package-lock.json` are not committed; deterministic dependency certification remains pending/deferred.
+#### Issue #2 — Nexora runtime identity mismatch
+
+Live rc.93 reports only:
+
+```text
+environment
+activation
+service
+process
+```
+
+as mismatches. Version, generation, deployment/source, database, storage, host, resources, policy, Laravel framework and runtime dependencies match.
+
+Permanent rc.94 source fix is present and CI-guarded through `scripts/post-install-runtime-convergence-contract-verify.php`. The contract guarantees:
+
+- fresh `/install/runtime-handoff` request
+- exact reconciliation allow-list limited to `environment`, `activation`, `service`, `process`
+- immutable mismatch rejection
+- service/process health gates
+- one-time post-install identity finalization
+- post-write compatibility reassessment
+
+Issue #2 remains **OPEN** because the existing rc.93 Laragon target still needs real recovery verification.
 
 ### 5.3 Current live Laragon installation
 
-The live target was installed from **rc.93** before rc.94 fresh-request runtime stabilization existed.
+The live target was installed from **rc.93** before rc.94 fresh-request stabilization existed.
 
-Latest live compatibility evidence:
+Latest live evidence:
 
 ```text
 Version                     MATCH
@@ -155,11 +187,11 @@ Mismatches:
 - process
 ```
 
-Interpretation: source/DB/upgrade drift was not observed. Four post-install fingerprints were sealed before final installed context stabilized. A fail-closed external rc.93 repair pack exists and must verify immutable planes before touching only those four permitted stale fingerprints.
+Do not overwrite installed rc.93 with rc.94 merely to repair this state.
 
 ### 5.4 Dependency review state
 
-Runtime dependencies match current locks on the live target, but formal reviewed-lock attestation is missing. This is not the current usability blocker and remains final N1.0/C1-C6 certification work.
+Runtime dependencies match the live installed lock state, but formal reviewed-lock attestation is missing. This is not the current usability blocker and remains final N1.0/C1-C6 certification work.
 
 ---
 
@@ -181,51 +213,83 @@ Runtime dependencies match current locks on the live target, but formal reviewed
 - Installer System/Light/Dark appearance.
 - Shared-select/UI direction.
 - SQL primary DB support: MySQL/MariaDB/PostgreSQL/SQLite/SQL Server + SQL-compatible AWS variants.
-- MongoDB/Atlas/DocumentDB, Redis/ElastiCache and DynamoDB modeled as auxiliary services rather than incorrectly forced into the relational primary DB model.
+- MongoDB/Atlas/DocumentDB, Redis/ElastiCache and DynamoDB modeled as auxiliary services.
 - Auxiliary service credentials/test/enable foundation.
 - Pre-install web pipeline isolation from installed runtime/tenant/auth DB assumptions.
 - Installer-specific error diagnostics.
 - Blade component resolution guard.
 - Browser-vs-CLI deployment identity convergence.
 - rc.94 fresh-request post-install runtime handoff.
+- Post-install runtime convergence source regression gate added to development readiness and CI.
 - Historical TypeScript blockers remediated at source level (`76/76`).
 - Real Laragon frontend build previously reported clean.
 
-### Runtime planes already observed matching on live rc.93
+### GitHub-first DEV-4 foundation
 
-- platform version
-- source generation
-- deployment/source tree
-- frontend manifest
-- database data plane
-- storage
-- host
-- resources
-- policy
-- Laravel framework
-- runtime dependency fingerprint
+- Root `AGENTS.md` requires agents to read/update this ledger.
+- `scripts/dev4-core-functional-contract-verify.php` guards auth/admin/core routes, controller/page surfaces, shared UI controls, global settings and reusable media-selection contracts.
+- GitHub Actions + `scripts/development-readiness.php` run the product-facing source gates.
+- PR #1 kept draft until target evidence is available.
 
-### GitHub-first DEV-4 source workflow
+### Site identity / regional settings
 
-- Root `AGENTS.md` requires agents to read/update this ledger and preserve source-vs-target semantics.
-- Added `scripts/dev4-core-functional-contract-verify.php`.
-- DEV-4 source gate covers auth/admin/core routes, required controller methods/pages, auth safety markers, raw interactive HTML controls, icon-only action rules, shared UI exports and global settings contracts.
-- DEV-4 gate is wired into `scripts/development-readiness.php` and GitHub Actions.
-- Source-only GitHub workflow no longer requests npm cache from absent `package-lock.json`.
-- Draft PR `#1` opened for this batch.
-- Existing auth/admin feature tests and backend permission enforcement provide strong source-level DEV-4 foundation.
+- Application/site name, logo, default display timezone and default language implemented with existing theme/primary/density/radius settings.
+- Logo exposed through shared Inertia props and used by Admin/Auth layouts.
+- Installed default locale resolves from Nexora settings when no user/session/cookie override exists.
+- Tenant context resolves before locale middleware.
+- Display/business timezone remains separate from certified infrastructure/runtime timezone.
+- Settings validation tests cover unsafe logo schemes, invalid timezones and unsupported locales.
 
-### DEV-4 site identity / regional settings source closure
+### Media reusable-selection source closure
 
-- Global Settings now includes application/site name, logo URL/media path, default display timezone and default language plus existing appearance tokens.
-- Logo is exposed through shared Inertia props and used by both Admin and Auth layouts.
-- Default language is validated against configured supported locales and used as the installed fallback when no user/session/cookie preference exists.
-- Tenant context resolves before locale middleware so tenant-scoped settings can be read correctly after installation.
-- Display/business timezone is stored separately from Nexora's certified infrastructure/runtime timezone; runtime UTC certification is not mutated by this UI setting.
-- Settings flow test now covers valid site identity/regional updates and rejects unsafe logo schemes, invalid timezone identifiers and unsupported locales.
-- DEV-4 contract now guards these settings so future regression fails source verification.
-- Source/static verification after this batch: PHP syntax PASS; Laravel Runtime Contract PASS; Security Contract PASS; Frontend Contract PASS; Inertia Contract PASS; Source Guard PASS; Certification Preflight PASS; Unified Source Certification PASS.
-- GitHub Actions source-certification run `32424720624`: SUCCESS.
+- Media Library already supports upload, MIME/checksum inspection, image variants, folders, collections, metadata, usage tracking, Trash/restore and guarded permanent delete.
+- Media Library picker JSON mode added for reusable module selection.
+- `MediaPicker.tsx` added as a shared reusable chooser.
+- Settings logo consumes MediaPicker rather than requiring manual URLs only.
+- Media feature test source verifies picker returns active assets and excludes Trash.
+- Shared UI/file flow remains within Nexora components.
+
+### Theme Engine product workflow source closure
+
+- Safe theme ZIP upload enters quarantine/Sentinel before Theme Engine promotion.
+- Installation requires completed Sentinel `ALLOW` and immutable approved archive digest.
+- Only `nexora-safe-html` theme engine is accepted in this phase.
+- Required platform slots preserve head/assets/schema/content semantics.
+- Preview token does not change active theme.
+- Activation, version switch, design tokens and rollback paths are present.
+- Shared FilePicker now exposes accessible validation errors (`aria-invalid`, announced error text).
+- Theme preview failures are visible instead of silently swallowed.
+- End-to-end acceptance test source creates a real ZIP fixture and covers scan -> install -> preview -> activate -> public render -> rollback.
+- `scripts/theme-product-contract-verify.php` guards the workflow in CI/development readiness.
+
+### Plugin / Extension product workflow source closure
+
+- Extension upload UX routes packages through existing Sentinel quarantine; upload never installs or executes code.
+- Only users with both extension-install and Sentinel scan/view permissions see the direct upload workflow.
+- Verified supply-chain artifacts remain the only install input.
+- Capability grants are deny-by-default; unregistered/missing requested capabilities block enablement.
+- Dependencies, trusted-PHP execution policy, schema rollback safety and dependent-extension uninstall guards remain enforced.
+- Destructive uninstall now requires shared `ConfirmDialog` confirmation.
+- End-to-end declarative extension acceptance-test source covers Sentinel -> artifact -> install -> enable -> disable -> uninstall -> lifecycle evidence.
+- `scripts/extension-product-contract-verify.php` guards the workflow in CI/development readiness.
+
+### Studio first product workflow source closure
+
+- Existing Studio visual editor provides typed elements, layers, responsive desktop/tablet/mobile editing, drag/drop, undo/redo, bindings, design tokens and reusable components.
+- Studio Manager uses row locks + lock versions to reject stale writes and creates revision snapshots on save.
+- Studio validator enforces node/depth budgets, stable IDs, allowed props/styles/bindings and safe link/target normalization.
+- Published document-scoped canvases integrate into public `ThemePageController`; document renderer remains safe fallback when Studio canvas is absent/draft.
+- Studio renderer escapes output and emits responsive tablet/mobile rules.
+- Acceptance-test source expanded to prove:
+  - create -> save -> publish
+  - real public document rendering from Studio
+  - dynamic `document.title` binding
+  - responsive CSS output
+  - unpublish -> Document Engine fallback
+  - stale-write rejection without overwrite
+  - unsafe `javascript:` button URL normalization
+- `scripts/studio-product-contract-verify.php` guards the workflow in CI/development readiness.
+- First Studio contract CI attempt exposed a wrong static marker; the gate itself was corrected and final CI run `32427092798` passed.
 
 ---
 
@@ -234,7 +298,7 @@ Runtime dependencies match current locks on the live target, but formal reviewed
 ### Platform implementation
 
 ```text
-█████████████████░░░  ~85%
+██████████████████░░  ~88%
 ```
 
 ### Real functional verification
@@ -243,14 +307,20 @@ Runtime dependencies match current locks on the live target, but formal reviewed
 ██████████░░░░░░░░░░  ~50%
 ```
 
+Real verification intentionally did not rise with source-only Theme/Extension/Studio work.
+
 | Phase | Progress | Status |
 |---|---:|---|
 | DEV-0 Package/bootstrap | 90% | PARTIAL — final dependency certification deferred |
-| DEV-1 Installer | 100% source | SOURCE DONE — clean live rc.94 confirmation still required |
+| DEV-1 Installer | 100% source | SOURCE DONE — clean live rc.94 install confirmation still required |
 | DEV-2A Historical TypeScript remediation | 100% | SOURCE DONE |
-| DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for reported Laragon run |
-| DEV-3 Laravel/install runtime | 75% | PARTIAL — live rc.93 needs safe convergence confirmation |
-| DEV-4 Login/admin/core functional QA | 45% source / 30% live | PARTIAL — GitHub source gates + settings closure done; live QA and remaining core workflows next |
+| DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for the reported Laragon build |
+| DEV-3 Laravel/install runtime | 80% source / 75% live | PARTIAL — source convergence gate green; live rc.93 repair evidence pending |
+| DEV-4 Login/admin/core functional QA | 70% source / 30% live | PARTIAL — settings/media/theme/extensions/Studio source workflows gated; target QA pending |
+| DEV-4A Site settings + media reuse | 100% source / target pending | SOURCE DONE |
+| DEV-4B Theme workflow | 100% source contract / target pending | SOURCE DONE |
+| DEV-4C Extension workflow | 100% source contract / target pending | SOURCE DONE |
+| DEV-4D Studio first publish workflow | 100% source contract / target pending | SOURCE DONE |
 | DEV-5 DB/services portability | 60% | PARTIAL |
 | DEV-6 Final C1-C6/release certification | 10% | DEFERRED CERTIFICATION |
 
@@ -262,7 +332,7 @@ Runtime dependencies match current locks on the live target, but formal reviewed
 
 Do **not** overwrite installed rc.93 with rc.94 merely to repair four fingerprints.
 
-1. Run prepared **rc.93 Post-Install Identity Repair Pack** externally against `D:\laragon\www\nexora`.
+1. Run the prepared rc.93 Post-Install Identity Repair Pack externally against `D:\laragon\www\nexora`.
 2. Verify:
 
 ```bat
@@ -291,36 +361,39 @@ http://nexora/login
 http://nexora/admin
 ```
 
-5. Continue DEV-4 live functional QA; do not return to final C1-C6 yet.
+5. Only after those pass may GitHub issue #2 be closed.
+6. Keep the installed rc.93 recovery target separate from the rc.94 development checkout.
 
-### DEV-4 next live/source batch
+### Development-target verification after live recovery
 
-1. Super Admin login/logout/session persistence.
-2. Direct URL navigation/refresh.
-3. Admin shell without runtime/tenant errors.
-4. Sidebar collapse/tooltips/responsive behavior.
-5. Light/Dark/System persistence.
-6. Users/profile/password reset/self-service auth.
-7. Roles/permissions/capabilities + tenant boundaries.
-8. Verify site identity/regional settings live: name/logo/default language/default display timezone.
-9. Media upload/select/use flow and reusable media-selection UX.
-10. Core CRUD/errors.
-11. Theme upload -> validate -> install -> preview -> activate.
-12. Plugin upload -> validate -> capabilities -> install -> activate/deactivate/uninstall.
-13. Studio entry + first real page/document edit flow.
+Use a separate development checkout of `dev/n1-0b-core-functional-qa`, then run:
+
+```bat
+php scripts\development-readiness.php --full
+php artisan test --filter=SettingsFlowTest
+php artisan test --filter=MediaLibraryFlowTest
+php artisan test --filter=ThemeEngineFlowTest
+php artisan test --filter=ExtensionsAdminFlowTest
+php artisan test --filter=StudioFlowTest
+```
+
+Do not report Theme/Extension/Studio as TARGET VERIFIED until these execute successfully in the real target environment.
 
 ### Next source implementation order
 
 ```text
-Media usability / reusable media selection
-  -> Theme Engine end-to-end product workflow
-  -> Plugin/Extension end-to-end product workflow
-  -> Studio first complete editing/publishing flow
+CMS / Documents / Collections product closure
+  -> Media selection inside content/editor workflows
+  -> SEO / Publishing end-to-end closure
+  -> Admin Design System application-wide UX pass
+  -> Forms / Data / Workflows
 ```
+
+During every block, inspect GitHub open issues first and again before final handoff.
 
 ---
 
-## 9. Product roadmap after runtime closure
+## 9. Product roadmap
 
 ```text
 N1.0A  Installation + Runtime Closure
@@ -362,9 +435,10 @@ N2.0   Stable Production
 
 1. Read this entire file.
 2. Inspect current GitHub branch/source before trusting old claims.
-3. Identify dev source version, installed target version, blocker class, and current PR/branch.
-4. Do not repeat completed work without regression evidence.
-5. Prefer the next roadmap gate over unrelated hardening.
+3. Query open GitHub issues for `Vertex-Systems-Network/nexora`; classify each as source, target/runtime, UX, data or certification.
+4. Identify dev source version, installed target version, blocker class, current PR/branch and latest CI state.
+5. Do not repeat completed work without regression evidence.
+6. Prefer the next roadmap gate while solving applicable open issues in the same pass.
 
 ### During work
 
@@ -374,17 +448,20 @@ N2.0   Stable Production
 4. Distinguish development convenience from release security.
 5. Never mark target PASS from static checks alone.
 6. Use development branch + PR for meaningful source changes.
+7. Do not close runtime/environment GitHub issues from source CI alone.
 
 ### After work
 
-Update this file before final response/merge/package:
-
-- metadata/branch/PR/release if changed
-- current checkpoint and live target state
-- completed work
-- progress dashboard
-- `NEXT ACTION`
-- append one history entry
+1. Re-query open GitHub issues and update issue comments/state with source/target evidence.
+2. Update this file before final response/merge/package:
+   - metadata/branch/PR/release/CI
+   - open issue state
+   - current checkpoint and live target state
+   - completed work
+   - progress dashboard
+   - `NEXT ACTION`
+   - append history entry
+3. Keep PR #1 draft until the real-target gate is satisfied.
 
 Never delete prior history entries. Corrections are appended and explain what changed.
 
@@ -485,30 +562,70 @@ Use `No release` when no rc release was produced.
 - Trigger / observed blocker: source moved to GitHub; future work needs central push/pull instead of ZIP-only handoffs.
 - Root cause: archive-only iteration made branch history/review harder.
 - Changes applied: verified `Vertex-Systems-Network/nexora` `main` as rc.94/v5.29; created `dev/n1-0b-core-functional-qa`; added `AGENTS.md`; established GitHub as canonical source workflow.
-- Verification completed: repository access includes admin/push; `main` commit `f555fe396cda0e82efd4445ba016f709de3398c8`; repository ledger matched local rc.94 ledger; `AGENTS.md` itself does not affect source attestation.
+- Verification completed: repository access includes admin/push; `main` commit `f555fe396cda0e82efd4445ba016f709de3398c8`; repository ledger matched local rc.94 ledger.
 - Real-target evidence: no Laragon mutation in this synchronization pass.
-- Remaining blocker: live rc.93 post-install convergence; DEV-4 cannot be target-verified before it passes.
-- Next exact action: continue DEV-4 source audit on development branch while obtaining live convergence/login evidence.
+- Remaining blocker: live rc.93 post-install convergence.
+- Next exact action: continue DEV-4 source audit while obtaining live convergence/login evidence.
 
 ### 2026-08-21 — No release — DEV-4 GitHub source gate and draft PR opened
 
 - Trigger / observed blocker: GitHub workflow needed an enforceable product-facing DEV-4 source gate rather than chat/package claims alone.
 - Root cause: auth/admin/core surfaces existed, but no single DEV-4 contract ran both locally and in CI; source-only CI referenced absent `package-lock.json` for npm caching.
-- Changes applied: added `scripts/dev4-core-functional-contract-verify.php`; wired it into development readiness and GitHub Actions; removed lockfile-dependent npm cache while lockfiles remain absent; opened draft PR `#1` from `dev/n1-0b-core-functional-qa` to `main`.
-- Verification completed: certification preflight PASS; Source Guard PASS; DEV-4 Core Functional Contract PASS; unified source certification PASS. `composer.lock`/`package-lock.json` remain absent, so deterministic dependency certification stays deferred.
+- Changes applied: added `scripts/dev4-core-functional-contract-verify.php`; wired it into development readiness and GitHub Actions; removed lockfile-dependent npm cache; opened PR #1.
+- Verification completed: certification preflight, Source Guard, DEV-4 contract and unified source certification PASS.
 - Real-target evidence: no new Laragon target execution in this source pass.
-- Remaining blocker: live rc.93 convergence still must pass.
-- Next exact action: verify/repair rc.93 -> test `/login` + `/admin`; continue product-facing source work on the development branch.
+- Remaining blocker: live rc.93 convergence.
+- Next exact action: verify/repair rc.93 -> `/login` + `/admin`; continue product-facing source work.
 
 ### 2026-08-21 — No release — DEV-4 site identity and regional settings source closure
 
-- Trigger / observed blocker: global Settings only exposed application name and appearance tokens; platform-level logo, default display timezone and default language were not wired end-to-end.
-- Root cause: the settings keys, validation, shared Inertia props, auth/admin branding and installed default-locale resolution were incomplete; locale middleware also ran before tenant context resolution.
-- Changes applied: added validated `app.logo_url`, `app.default_timezone`, `app.default_locale`; expanded Settings UI; exposed the values through shared Inertia app props; Admin/Auth layouts use configured logo; installed SetLocale uses configured default language; reordered tenant resolution before locale; expanded `SettingsFlowTest`; expanded DEV-4 regression contract.
-- Verification completed: PHP syntax PASS; Laravel Runtime Contract PASS; Security Contract PASS; Frontend Contract PASS; Inertia Contract PASS; Source Guard PASS; Certification Preflight PASS; Unified Source Certification PASS; source attestation `1460` files / SHA-256 `3739e7906b1e14c3e4ceb12d68179168d48953f57360e91be75c04554d4d3ad0`; GitHub Actions source-certification run `32424720624` SUCCESS.
-- Real-target evidence: no Laragon target run for these new branch changes yet; this batch is SOURCE DONE, not TARGET VERIFIED.
-- Remaining blocker: live rc.93 post-install convergence + `/login`/`/admin` live evidence; after that this settings batch must be pulled to a separate development target and executed.
-- Next exact action: safely close live rc.93 runtime gate; then run development-readiness + targeted auth/settings tests on the GitHub development branch; continue Media -> Theme -> Plugin -> Studio.
+- Trigger / observed blocker: global Settings only exposed application name and appearance tokens; platform-level logo, default display timezone and default language were incomplete.
+- Root cause: settings keys, validation, shared Inertia props, branding and installed default-locale resolution were incomplete; locale middleware also ran before tenant context resolution.
+- Changes applied: added validated `app.logo_url`, `app.default_timezone`, `app.default_locale`; expanded Settings UI; shared props; Admin/Auth logo; installed default locale; tenant-before-locale ordering; tests/contracts.
+- Verification completed: PHP syntax, Laravel Runtime, Security, Frontend, Inertia, Source Guard, preflight and unified source certification PASS; GitHub Actions source run successful.
+- Real-target evidence: no Laragon execution for this branch batch.
+- Remaining blocker: live rc.93 convergence + target settings execution.
+- Next exact action: runtime recovery then target DEV-4 tests.
+
+### 2026-08-21 — No release — Runtime issue #2 source regression gate
+
+- Trigger / observed blocker: GitHub issue #2 records live rc.93 `environment/activation/service/process` identity mismatch.
+- Root cause: rc.93 sealed install-sensitive fingerprints before final installed runtime context stabilized.
+- Changes applied: added `scripts/post-install-runtime-convergence-contract-verify.php`; wired it into development readiness/CI; exact mutable-plane allow-list is guarded and immutable planes remain fail-closed. A first CI parser bug in the contract itself was fixed.
+- Verification completed: GitHub Actions run `32425880362` SUCCESS with post-install convergence contract PASS.
+- Real-target evidence: no new rc.93 repair result; source evidence only.
+- Remaining blocker: issue #2 stays open until live compatibility + post-install readiness PASS.
+- Next exact action: run safe rc.93 repair and the two required Artisan verification commands.
+
+### 2026-08-21 — No release — Reusable Media + Theme product workflow source closure
+
+- Trigger / observed blocker: Media needed central reusable selection and Theme Engine needed a real user workflow/acceptance contract rather than foundation-only claims.
+- Root cause: Media reuse was not a shared chooser; Theme tests did not prove scan/install/preview/activate/public-render/rollback in one acceptance flow; upload/preview errors were weakly surfaced.
+- Changes applied: Media picker JSON mode + shared `MediaPicker`; Settings logo integration; picker feature-test source; accessible shared FilePicker error API; Theme preview error UX; Theme real-ZIP acceptance-test source; Theme Product source contract.
+- Verification completed: GitHub Actions run `32426200738` SUCCESS with runtime, DEV-4, Theme and unified source contracts PASS.
+- Real-target evidence: no Laragon execution for the new Media/Theme branch work.
+- Remaining blocker: target execution pending.
+- Next exact action: continue Extension workflow source closure while live rc.93 recovery remains the target gate.
+
+### 2026-08-21 — No release — Extension product workflow source closure
+
+- Trigger / observed blocker: Extensions workspace lacked direct package-upload UX and destructive uninstall happened without explicit confirmation; existing tests did not prove the complete trust/lifecycle chain.
+- Root cause: upload existed only via Sentinel workspace; Extensions UI started after verified artifact creation; uninstall UX was too easy to trigger.
+- Changes applied: Extensions upload modal sends package to Sentinel quarantine only when operator has extension-install + Sentinel scan/view permissions; invalid summary icon fixed; shared FilePicker errors used; uninstall requires ConfirmDialog; declarative real-ZIP acceptance-test source covers Sentinel -> artifact -> install -> enable -> disable -> uninstall; Extension Product source contract added.
+- Verification completed: GitHub Actions run `32426515463` SUCCESS with Extension Product contract PASS alongside previous gates.
+- Real-target evidence: no Laragon execution for this branch batch.
+- Remaining blocker: target execution pending; issue #2 still open.
+- Next exact action: Studio product workflow closure + live rc.93 recovery evidence.
+
+### 2026-08-21 — No release — Studio first publish/public-render workflow source closure
+
+- Trigger / observed blocker: Studio had substantial visual-builder code, but acceptance evidence only proved create/save/status-publish and did not prove actual public rendering, fallback, concurrency or unsafe-link normalization.
+- Root cause: product acceptance coverage stopped before ThemePage public integration and critical stale-write/safe-output behavior.
+- Changes applied: expanded `StudioFlowTest` source to cover create/save/publish -> public document Studio render, document title binding, responsive CSS, unpublish -> Document Engine fallback, stale lock rejection and `javascript:` URL normalization; added `scripts/studio-product-contract-verify.php`; wired Studio gate into development readiness and CI.
+- Verification completed: first Studio contract run correctly failed on a wrong static UI marker; marker was corrected. GitHub Actions run `32427092798` then passed preflight, Source Guard, runtime convergence, DEV-4, Theme, Extension, Studio and unified source certification.
+- Real-target evidence: no Laragon execution of the expanded Studio test yet; SOURCE DONE only.
+- Remaining blocker: live issue #2 + target execution of current branch workflows.
+- Next exact action: recover/verify rc.93 live target; in parallel move source work to CMS/Documents/Collections product closure.
 
 ---
 
@@ -523,7 +640,7 @@ Use `No release` when no rc release was produced.
 - final performance/accessibility certification
 - Marketplace 2.0 / Sentinel 2.0 / Commerce 2.0
 
-Do not let these pull work away from: **live runtime convergence -> login -> core product functional QA -> theme/plugin/Studio closure**.
+Do not let these pull work away from: **live runtime convergence -> login/admin target QA -> current product workflow target tests -> CMS/SEO product closure**.
 
 ---
 
@@ -535,14 +652,19 @@ GOAL: Advanced extensible WordPress/Webflow/Wix/Shopify-class platform ecosystem
 GITHUB: Vertex-Systems-Network/nexora
 DEV SOURCE: rc.94 / v5.29 / n1-v5.29
 DEV BRANCH: dev/n1-0b-core-functional-qa
-DRAFT PR: #1
+PR: #1 DRAFT + MERGEABLE; DO NOT MERGE BEFORE TARGET EVIDENCE
+BRANCH HEAD BEFORE LEDGER COMMIT: 2035528bae27222446138e65bda50ea32feb9e17
+LATEST GREEN CI: 32427092798
+OPEN ISSUE: #2 runtime identity mismatch
 LIVE TARGET: rc.93 installed on Laragon
 LIVE BLOCKER: post-install environment/activation/service/process fingerprints stale
-SOURCE/DEPLOYMENT/DB: matching
+SOURCE/DEPLOYMENT/DB ON LIVE EVIDENCE: matching
 DEPENDENCY RUNTIME: matching
 LOCK REVIEW: missing, deferred
-SOURCE DONE NOW: DEV-4 source gate + global site identity/regional settings
-NEXT LIVE: safe rc.93 repair -> compatibility PASS -> post-install PASS -> /login -> /admin -> DEV-4 QA
-NEXT SOURCE: media usability -> theme workflow -> plugin workflow -> Studio flow
-DO NOT: overwrite installed rc.93 with rc.94 as repair; do not return to C1-C6 before usability closure
+SOURCE DONE NOW: runtime convergence regression + site settings + MediaPicker + Theme workflow + Extension workflow + first Studio publish/public-render workflow
+NEXT LIVE: safe rc.93 repair -> compatibility PASS -> post-install PASS -> /login -> /admin -> issue #2 close only after evidence
+NEXT TARGET TESTS: development-readiness --full + Settings/Media/Theme/Extensions/Studio feature tests on separate dev checkout
+NEXT SOURCE: CMS/Documents/Collections -> content Media selection -> SEO/Publishing closure
+ISSUE RULE: inspect open GitHub issues every pass and solve applicable defects alongside roadmap work
+DO NOT: overwrite installed rc.93 with rc.94 as repair; do not merge PR #1 or return to C1-C6 before target usability evidence
 ```
