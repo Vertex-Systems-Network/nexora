@@ -1,28 +1,46 @@
 import { useCallback, useEffect, useState } from "react";
 import { Badge, Button, Input, Modal } from "@nexora/admin-ui";
 
-type MediaPickerAsset = {
+export type MediaPickerSelection = {
     id: number;
-    uuid: string;
     title: string;
+    url: string | null;
+    alt_text: string | null;
+    width: number | null;
+    height: number | null;
+};
+
+export type MediaPickerAsset = MediaPickerSelection & {
+    uuid: string;
     original_name: string;
     media_type: string;
     mime_type: string;
-    width: number | null;
-    height: number | null;
-    alt_text: string | null;
-    url: string | null;
 };
 
 type PickerResponse = { assets: MediaPickerAsset[] };
 
-export function MediaPicker({ value, onChange, type = "image", buttonLabel = "Choose from Media Library" }: { value?: string; onChange: (url: string, asset: MediaPickerAsset) => void; type?: "image" | "video" | "audio" | "document"; buttonLabel?: string }) {
+type MediaPickerProps = {
+    value?: string;
+    selection?: MediaPickerSelection | null;
+    onChange: (url: string, asset: MediaPickerAsset) => void;
+    type?: "image" | "video" | "audio" | "document";
+    buttonLabel?: string;
+    showSelection?: boolean;
+};
+
+export function MediaPicker({ value, selection = null, onChange, type = "image", buttonLabel = "Choose from Media Library", showSelection = false }: MediaPickerProps) {
     const [open, setOpen] = useState(false);
     const [draftSearch, setDraftSearch] = useState("");
     const [search, setSearch] = useState("");
     const [assets, setAssets] = useState<MediaPickerAsset[]>([]);
+    const [current, setCurrent] = useState<MediaPickerSelection | null>(selection);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!selection) return;
+        setCurrent((existing) => existing?.id === selection.id ? { ...existing, ...selection } : selection);
+    }, [selection?.id, selection?.url]);
 
     const load = useCallback(async (signal?: AbortSignal) => {
         setLoading(true);
@@ -57,13 +75,20 @@ export function MediaPicker({ value, onChange, type = "image", buttonLabel = "Ch
 
     const choose = (asset: MediaPickerAsset) => {
         if (!asset.url) return;
+        setCurrent(asset);
         onChange(asset.url, asset);
         setOpen(false);
     };
 
-    return <>
+    const activeUrl = current?.url ?? value;
+
+    return <div className="grid gap-3">
+        {showSelection && current?.url && <div className="overflow-hidden rounded-[var(--nx-radius-card)] border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)]">
+            {type === "image" ? <img src={current.url} alt={current.alt_text ?? current.title} className="max-h-80 w-full object-contain" loading="lazy" decoding="async" /> : <div className="px-4 py-3 text-sm text-[var(--nx-text-secondary)]">{current.title}</div>}
+            <div className="flex items-center justify-between gap-3 border-t border-[var(--nx-border)] px-3 py-2 text-xs"><span className="min-w-0 truncate font-medium text-[var(--nx-text)]">{current.title}</span>{current.width && current.height ? <span className="shrink-0 text-[var(--nx-text-muted)]">{current.width}×{current.height}</span> : null}</div>
+        </div>}
         <Button type="button" variant="secondary" onClick={() => setOpen(true)}>{buttonLabel}</Button>
-        <Modal open={open} onClose={() => setOpen(false)} title="Choose media" description={`Select an existing ${type} from the tenant Media Library. The stored public media URL will be reused without duplicating the asset.`} footer={<Button type="button" variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>}>
+        <Modal open={open} onClose={() => setOpen(false)} title="Choose media" description={`Select an existing ${type} from the tenant Media Library. The canonical asset reference is reused without duplicating the file.`} footer={<Button type="button" variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>}>
             <div className="grid gap-4">
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
                     <Input aria-label="Search Media Library" value={draftSearch} onChange={(event) => setDraftSearch(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") setSearch(draftSearch); }} placeholder="Search title, filename or alt text…" />
@@ -74,7 +99,7 @@ export function MediaPicker({ value, onChange, type = "image", buttonLabel = "Ch
                 {!error && !loading && assets.length === 0 && <div className="rounded-xl border border-dashed border-[var(--nx-border)] px-4 py-8 text-center text-sm text-[var(--nx-text-muted)]">No matching media found. Upload the asset in Media Library and retry.</div>}
 
                 <div className="grid max-h-[26rem] grid-cols-2 gap-3 overflow-y-auto pe-1">
-                    {assets.map((asset) => <Button key={asset.id} type="button" variant={value === asset.url ? "primary" : "secondary"} className="h-auto min-h-0 flex-col items-stretch overflow-hidden p-0 text-start" onClick={() => choose(asset)}>
+                    {assets.map((asset) => <Button key={asset.id} type="button" variant={activeUrl === asset.url ? "primary" : "secondary"} className="h-auto min-h-0 flex-col items-stretch overflow-hidden p-0 text-start" onClick={() => choose(asset)}>
                         <span className="block aspect-square w-full overflow-hidden bg-[var(--nx-surface-subtle)]">
                             {asset.media_type === "image" && asset.url ? <img src={asset.url} alt={asset.alt_text ?? asset.title} className="h-full w-full object-cover" loading="lazy" decoding="async" /> : <span className="grid h-full place-items-center px-3 text-center text-xs text-[var(--nx-text-muted)]">{asset.mime_type}</span>}
                         </span>
@@ -86,5 +111,5 @@ export function MediaPicker({ value, onChange, type = "image", buttonLabel = "Ch
                 </div>
             </div>
         </Modal>
-    </>;
+    </div>;
 }
