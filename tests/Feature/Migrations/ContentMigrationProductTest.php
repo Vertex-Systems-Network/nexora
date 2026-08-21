@@ -84,7 +84,7 @@ final class ContentMigrationProductTest extends TestCase
         $organization = $this->defaultOrganization();
         $actor = $this->superAdmin();
         app(TenantContext::class)->set($organization);
-        $run = $this->run($organization, $actor, 'running');
+        $run = $this->migrationRun($organization, $actor, 'running');
 
         $outcome = app(WordPressContentImporter::class)->import($run, [
             'source_key' => 'wordpress:post:oversized',
@@ -117,7 +117,7 @@ final class ContentMigrationProductTest extends TestCase
         $unauthorized = User::factory()->create(['status' => 'active']);
         app(TenantContext::class)->set($organization);
         Storage::disk('local')->put('nexora/migrations/blocked.xml', $this->wxr());
-        $run = $this->run($organization, $unauthorized, 'queued', 'nexora/migrations/blocked.xml');
+        $run = $this->migrationRun($organization, $unauthorized, 'queued', 'nexora/migrations/blocked.xml');
 
         try {
             $this->runJob($run);
@@ -177,7 +177,7 @@ final class ContentMigrationProductTest extends TestCase
         return $user;
     }
 
-    private function run(
+    private function migrationRun(
         EnterpriseOrganization $organization,
         User $actor,
         string $status,
