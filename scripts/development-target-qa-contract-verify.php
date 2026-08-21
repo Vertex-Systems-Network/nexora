@@ -22,6 +22,8 @@ $read = static function (string $relative) use ($root, &$errors): string {
 $readiness = $read('scripts/development-readiness.php');
 $matrix = $read('scripts/database-target-matrix.php');
 $agents = $read('AGENTS.md');
+$package = $read('package.json');
+$docs = $read('docs/DEVELOPMENT_TARGET_QA.md');
 
 foreach ([
     "in_array('--tests', \$argv, true)" => 'explicit full-PHPUnit opt-in',
@@ -64,6 +66,21 @@ foreach ([
     }
 }
 
+if ($package !== '' && ! str_contains($package, '"dev:target-qa": "php scripts/development-readiness.php --full --tests --evidence"')) {
+    $errors[] = 'package.json must expose the canonical dev:target-qa command.';
+}
+
+foreach ([
+    'npm run dev:target-qa' => 'operator one-command target QA instruction',
+    'development-readiness.json' => 'development evidence documentation',
+    'database-target-matrix.json' => 'database evidence documentation',
+    'Never merge a failing or target-unverified PR.' => 'documented merge fail-closed rule',
+] as $needle => $label) {
+    if ($docs !== '' && ! str_contains($docs, $needle)) {
+        $errors[] = "Development target QA documentation missing: {$label}.";
+    }
+}
+
 if ($errors !== []) {
     fwrite(STDERR, "[Nexora Development Target QA Contract] FAILED\n - ".implode("\n - ", array_values(array_unique($errors)))."\n");
     exit(1);
@@ -71,5 +88,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Development Target QA Contract] PASS — development readiness can execute real PHPUnit/build checks, persist source-bound secret-minimal evidence, compose with the disposable DB matrix, and final PR merging remains fail-closed on required target evidence.'.PHP_EOL,
+    '[Nexora Development Target QA Contract] PASS — development readiness can execute real PHPUnit/build checks, persist source-bound detail-minimal evidence, compose with the disposable DB matrix, expose a one-command operator workflow, and final PR merging remains fail-closed on required target evidence.'.PHP_EOL,
 );
