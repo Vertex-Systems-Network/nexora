@@ -13,11 +13,12 @@
 - Source: `1.0.0-rc.94` / installer `v5.29` / generation `n1-v5.29`
 - Branch: `dev/n1-0b-core-functional-qa`
 - PR #1: **DRAFT + MERGEABLE**, synchronized through N1.17
-- Current N1.18 correction head before this progress commit: `afcefe103e4eefb570d0f71fc27149fcf681c06d`
+- Current N1.18 correction head before this progress commit: `12a54edfe56f3e699e2723631ec97c3745dacdd1`
 - Latest fully green source CI: `32509858655` on N1.17 governance head `45e527c43c69f89c5519dde13bad6c771d171915`
+- N1.18 attempted CI: run `32517367269` failed twice at runner/job startup with **zero executed steps** and no available job log blob; this is not counted as a product-contract result
 - Canonical ledger: revision `2.4`
 - Open blocker: issue #2 runtime identity mismatch — **OPEN**
-- Active source block: N1.18 Public APIs / Webhooks / SDK — **96% source candidate / integrated CI pending**
+- Active source block: N1.18 Public APIs / Webhooks / SDK — **97% source candidate / executable CI evidence pending**
 
 ---
 
@@ -27,11 +28,11 @@
 |---|---:|---:|---:|---|
 | Architecture/core design | 10% | 98% | 9.8 | Mature modular/tenant architecture |
 | Source implementation | 35% | 99.0% | 34.65 | Verified through N1.17; N1.18 candidate not counted yet |
-| Source verification/CI | 15% | 100% | 15.0 | Completed required gates green through N1.17 |
+| Source verification/CI | 15% | 100% | 15.0 | Completed required gates green through N1.17; N1.18 runner did not execute steps |
 | Real target functional verification | 20% | 50% | 10.0 | Broad target QA pending |
 | DB/portability target proof | 10% | 45% | 4.5 | Real matrix pending |
 | Release/operations/certification | 10% | 25% | 2.5 | Final proof deferred |
-| **TOTAL PROJECT POWER** | **100%** |  | **76.5%** | Held until N1.18 green or target evidence |
+| **TOTAL PROJECT POWER** | **100%** |  | **76.5%** | Held until N1.18 executable green or real target evidence |
 
 ```text
 PROJECT POWER   76.5%  ███████████████░░░░░
@@ -55,7 +56,7 @@ Verified Source Power moves only after required green source gates. Target Power
 | DEV-4 Core product QA | 98% | 30% | Broad target QA pending |
 | DEV-5 DB/services portability | 95% | 10% | Real DB matrix pending |
 | N1.9–N1.17 product blocks | 100% source | 0% current target | SOURCE DONE / target pending |
-| N1.18 Public APIs/Webhooks/SDK | **96% candidate** | 0% | **ACTIVE; first integrated CI pending** |
+| N1.18 Public APIs/Webhooks/SDK | **97% candidate** | 0% | **ACTIVE; runner must execute required gate** |
 | N1.19 Import/Export/WP migrations | planned | 0% | Planned |
 | N1.20 Observability | foundation/partial | 0% | Planned |
 | N1.21 Forge/DX | foundation | 0% | Planned |
@@ -89,9 +90,13 @@ Implemented boundaries:
 - executable API isolation/lifecycle acceptance source;
 - required Public API / SDK verifier in Development Readiness + Actions;
 - Automation webhook HMAC/replay/idempotency boundaries preserved;
-- API middleware group now inherits `AssignRequestId`, performance headers, `RedirectIfNotInstalled` and `RuntimeNodeHeartbeat` **before token route middleware executes**, preventing pre-install API DB access.
+- API middleware group inherits request-id/performance/install/runtime fences before bearer-token route middleware.
 
-N1.18 remains **NOT SOURCE DONE** until current-head CI passes every prior gate + Public API / SDK Product Contract + Unified Source Certification.
+Latest self-audit correction: the Public API verifier originally forbade the legitimate one-time service return `['token' => $plain]`, incorrectly conflating **return-to-issuer** with **persistence**. That false prohibition was removed. Hash-only persistence remains enforced by the migration having no plaintext token column plus the manager requiring `token_hash = sha256(plain)`. The verifier now explicitly requires the one-time return and separately locks the API install/runtime fence.
+
+### CI evidence state
+
+Run `32517367269` on head `2b849ceaa7a3ac3fbccedb2630d641db109b2111` concluded failure without running any workflow step. The job object returned zero steps, the decoded log endpoint returned no blob, and a direct job re-run produced the same zero-step startup failure. Therefore this run is recorded as **CI infrastructure/startup evidence**, not a red source-contract result. N1.18 remains NOT SOURCE DONE until a runner actually executes all gates.
 
 ---
 
@@ -125,17 +130,18 @@ Update this file after every meaningful apply with head/CI, block state, Power, 
 | 016 | 2026-08-21 | `2e5d4189…` | API routes + public contract/provider + developer bootstrap | 60% -> 72% |
 | 017 | 2026-08-21 | `42ba9ffa…` | Tenant revoke + one-time browser-local token UI | 72% -> 82% |
 | 018 | 2026-08-21 | `ad2eb0b0…` | Acceptance source + docs + Public API/SDK required gates | 82% -> 95% candidate |
-| 019 | 2026-08-21 | `afcefe10…` | Added install/runtime fencing to API middleware group before bearer-token DB lookup | N1.18 **95% -> 96% candidate**; verified Project/Source held; Target 50% |
+| 019 | 2026-08-21 | `afcefe10…` | API install/runtime fencing before bearer-token DB lookup | 95% -> 96% candidate |
+| 020 | 2026-08-21 | run `32517367269` attempt 1 + job re-run: zero steps/no log; correction `12a54edf…` | Classified runner startup failure separately; corrected verifier to permit one-time plaintext return while preserving hash-only persistence; added bootstrap-fence contract marker | N1.18 **96% -> 97% candidate**; verified Project/Source held; Target 50% |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-N1.18 APPLY-06 — VERIFY / CORRECT / CLOSE
-  1. inspect current-head Actions
-  2. require all old gates + Public API / SDK gate + Unified Source Certification
-  3. root-fix any red result and update this file after each correction
+N1.18 APPLY-07 — EXECUTABLE CI
+  1. inspect the new head Actions run triggered by this progress/correction checkpoint
+  2. require an actually-started job with all old gates + Public API / SDK + Unified Source Certification
+  3. root-fix any real source failure and update this file
   4. full green => N1.18 SOURCE DONE + conservative verified Power update
   5. ledger 2.5 + PR #1 N1.18 sync + issue #2 source checkpoint
 
