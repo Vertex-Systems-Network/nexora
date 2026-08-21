@@ -24,12 +24,16 @@ $catalogModel = $read('app/Models/MarketplaceCatalogItem.php');
 $catalog = $read('app/Nexora/Extensions/Services/MarketplaceCatalogService.php');
 $stager = $read('app/Nexora/Extensions/Services/MarketplacePackageStager.php');
 $controller = $read('app/Http/Controllers/Admin/Extensions/ExtensionController.php');
+$themeController = $read('app/Http/Controllers/Admin/Appearance/ThemeController.php');
+$sentinelController = $read('app/Http/Controllers/Admin/Security/SentinelController.php');
+$sentinelPage = $read('resources/js/admin/pages/Admin/Security/Sentinel/Show.tsx');
 $routes = $read('routes/web.php');
 $lifecycleRoutes = $read('routes/marketplace.php');
 $provider = $read('app/Providers/MarketplaceServiceProvider.php');
 $providers = $read('bootstrap/providers.php');
 $page = $read('resources/js/admin/pages/Admin/Extensions/Index.tsx');
 $test = $read('tests/Feature/Marketplace/MarketplaceWorkflowTest.php');
+$themeTest = $read('tests/Feature/Themes/ThemeEngineFlowTest.php');
 
 foreach ([
     "Schema::create('nx_marketplace_sources'" => 'Marketplace source table',
@@ -64,7 +68,7 @@ foreach ([
     "duplicate package identifier" => 'duplicate package rejection',
     "whereNotIn('package_identifier'" => 'stale catalog retirement',
     "preg_match('/^[A-Za-z0-9][A-Za-z0-9._\\/-]{0,179}$/'" => 'package identifier validation',
-    "['extension', 'app', 'integration', 'studio-pack']" => 'controlled Marketplace package types',
+    "['extension', 'app', 'integration', 'studio-pack', 'theme']" => 'controlled Marketplace extension/theme package types',
     "preg_match('/^[a-f0-9]{64}$/'" => 'artifact digest validation',
     'trusted_publishers_only && $publisherKey === null' => 'trusted-source publisher identity requirement',
 ] as $needle => $label) {
@@ -102,6 +106,35 @@ foreach ([
 ] as $needle => $label) {
     if ($controller !== '' && ! str_contains($controller, $needle)) {
         $errors[] = "Marketplace controller missing: {$label}.";
+    }
+}
+
+foreach ([
+    "if (\$request->filled('scan_id'))" => 'Theme Engine pre-scanned promotion input',
+    'private function promoteApprovedScan(' => 'single Theme Engine promotion path',
+    '$this->installer->install(' => 'ThemePackageInstaller handoff',
+] as $needle => $label) {
+    if ($themeController !== '' && ! str_contains($themeController, $needle)) {
+        $errors[] = "Marketplace theme promotion contract missing: {$label}.";
+    }
+}
+foreach ([
+    "'kind' => 'theme'" => 'Sentinel theme promotion action',
+    "'url' => route('admin.themes.install')" => 'Theme Engine promotion URL',
+    "'payload' => ['scan_id' => (string) \$scan->id]" => 'approved theme scan payload',
+    "in_array(\$type, ['extension', 'app', 'integration', 'studio-pack'], true)" => 'extension-family Sentinel promotion action',
+    "route('admin.extensions.install', \$supplyChain)" => 'verified extension artifact handoff',
+] as $needle => $label) {
+    if ($sentinelController !== '' && ! str_contains($sentinelController, $needle)) {
+        $errors[] = "Marketplace Sentinel promotion contract missing: {$label}.";
+    }
+}
+foreach ([
+    'router.post(promotion.url, promotion.payload' => 'explicit promotion request',
+    'Sentinel never activates package code directly.' => 'visible no-direct-activation boundary',
+] as $needle => $label) {
+    if ($sentinelPage !== '' && ! str_contains($sentinelPage, $needle)) {
+        $errors[] = "Marketplace Sentinel UI contract missing: {$label}.";
     }
 }
 
@@ -158,6 +191,15 @@ foreach ([
         $errors[] = "Marketplace acceptance-test contract missing: {$label}.";
     }
 }
+foreach ([
+    'test_pre_scanned_theme_can_be_promoted_after_sentinel_approval' => 'Marketplace-compatible theme promotion acceptance test',
+    '/admin/security/sentinel' => 'generic quarantine/Sentinel ingress',
+    "['scan_id' => \$scan->id]" => 'approved scan Theme Engine promotion',
+] as $needle => $label) {
+    if ($themeTest !== '' && ! str_contains($themeTest, $needle)) {
+        $errors[] = "Marketplace theme acceptance-test contract missing: {$label}.";
+    }
+}
 
 if ($errors !== []) {
     fwrite(STDERR, "[Nexora Marketplace Product Contract] FAILED\n - ".implode("\n - ", array_values(array_unique($errors)))."\n");
@@ -166,5 +208,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Marketplace Product Contract] PASS — Marketplace catalogs are lifecycle-controlled, atomically synchronized and validation-bounded; resumed sources require fresh synchronization; withdrawn entries retire locally; inactive/stale sources cannot stage; trusted publisher and artifact integrity checks remain inside the Sentinel quarantine boundary.'.PHP_EOL,
+    '[Nexora Marketplace Product Contract] PASS — extension/app/integration/Studio-pack/theme catalogs are lifecycle-controlled, atomically synchronized and validation-bounded; resumed sources require fresh synchronization; withdrawn entries retire locally; inactive/stale sources cannot stage; all package bytes enter quarantine/Sentinel and approved packages are explicitly promoted into their owning Theme or Extension Engine.'.PHP_EOL,
 );
