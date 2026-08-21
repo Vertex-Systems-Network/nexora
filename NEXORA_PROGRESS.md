@@ -13,26 +13,26 @@
 - Source: `1.0.0-rc.94` / installer `v5.29` / generation `n1-v5.29`
 - Branch: `dev/n1-0b-core-functional-qa`
 - PR #1: **DRAFT + MERGEABLE**, synchronized through N1.17
-- Current N1.18 head before this progress commit: `42ba9ffab1c436ae64b6c0381bcecfd22485dbed`
+- Current N1.18 gate head before this progress commit: `ad2eb0b062dafd3d3fe7a9314c9265cd341ddd0d`
 - Latest fully green source CI: `32509858655` on N1.17 governance head `45e527c43c69f89c5519dde13bad6c771d171915`
 - Canonical ledger: revision `2.4`
 - Open blocker: issue #2 runtime identity mismatch — **OPEN**
 - Completed source block: N1.17 SSO / Enterprise Governance — **SOURCE DONE / TARGET PENDING**
-- Active source block: N1.18 Public APIs / Webhooks / SDK — **82% source candidate / acceptance + gate pending**
+- Active source block: N1.18 Public APIs / Webhooks / SDK — **95% source candidate / integrated CI pending**
 
 ---
 
-## 2. Weighted Project Power
+## 2. Weighted Project Power Score
 
 | Plane | Weight | Score | Contribution | Evidence state |
 |---|---:|---:|---:|---|
 | Architecture/core design | 10% | 98% | 9.8 | Mature modular/tenant architecture |
-| Source implementation | 35% | 99.0% | 34.65 | Verified through N1.17; N1.18 partial is not counted yet |
-| Source verification/CI | 15% | 100% | 15.0 | All required gates green through N1.17 |
+| Source implementation | 35% | 99.0% | 34.65 | Verified through N1.17; N1.18 candidate is not counted yet |
+| Source verification/CI | 15% | 100% | 15.0 | All completed required gates green through N1.17 |
 | Real target functional verification | 20% | 50% | 10.0 | Broad Laragon/browser/runtime QA pending |
 | DB/portability target proof | 10% | 45% | 4.5 | Source/harness strong; real matrix pending |
 | Release/operations/certification | 10% | 25% | 2.5 | Reviewed locks/C1-C6/final proof deferred |
-| **TOTAL PROJECT POWER** | **100%** |  | **76.5%** | Evidence-based; held during unverified N1.18 work |
+| **TOTAL PROJECT POWER** | **100%** |  | **76.5%** | Held until N1.18 integrated green or real target evidence |
 
 ```text
 PROJECT POWER   76.5%  ███████████████░░░░░
@@ -64,7 +64,7 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 | N1.15 AI Platform | 100% | 0% | SOURCE DONE |
 | N1.16 Multisite/Organizations | 100% | 0% | SOURCE DONE |
 | N1.17 SSO/Enterprise Governance | 100% | 0% | SOURCE DONE |
-| N1.18 Public APIs/Webhooks/SDK | **82% candidate** | 0% | **ACTIVE; acceptance/product gate pending** |
+| N1.18 Public APIs/Webhooks/SDK | **95% candidate** | 0% | **ACTIVE; first integrated CI pending** |
 | N1.19 Import/Export/WP migrations | planned | 0% | Planned |
 | N1.20 Observability | foundation/partial | 0% | Planned |
 | N1.21 Forge/DX | foundation | 0% | Planned |
@@ -83,27 +83,27 @@ N1.17 remains **SOURCE DONE, TARGET PENDING**. Run `32508900897` passed the SSO 
 
 ---
 
-## 5. N1.18 Public APIs / Webhooks / SDK — active
+## 5. N1.18 Public APIs / Webhooks / SDK — source candidate
 
-### Implemented candidate source
+### Implemented
 
-- Hash-only tenant API-token schema/model with actor ownership, explicit abilities, expiry/revocation and no plaintext database field.
-- Token manager requires active tenant/user/membership, 1–365 day expiry and request-time revalidation; issue/revoke actions are audited.
-- Stateless bearer middleware installs/restores tenant/auth context and rate-limits per token; ability middleware returns scope denial.
-- `/api/v1/documents` + `/api/v1/documents/{document}` use `documents.read`; pagination is cursor-based and capped at 100.
-- Resource detail is explicitly re-resolved after token tenant context rather than implicit model binding.
-- Stable `PublicApiContract` exposes version, ability and endpoint descriptors only; internal models are not part of the SDK contract.
-- `ApiServiceProvider` binds the contract, boots developer routes and Admin navigation; API route/middleware registration is wired in bootstrap.
-- Admin token routes use sensitive enterprise identity permission + tenant binding.
-- Revoke resolves token by scalar UUID through current-tenant `ApiAccessToken::query()` after web tenant resolution.
-- Admin `API & Integrations` UI lists only hash-safe metadata, issues tokens via direct JSON, holds newly issued plaintext only in React state, supports copy/dismiss, and revokes without re-exposing credentials.
+- Tenant-owned API-token schema/model with hash-only secret storage, explicit abilities, actor ownership, expiry/revocation/last-use metadata and no plaintext credential column.
+- Token manager issues one-time `nxapi_` credentials, stores SHA-256 only, bounds expiry to 1–365 days, revalidates active tenant/user/membership on every request and audits issue/revoke.
+- Stateless token middleware installs/restores tenant/auth context, adds v1/rate headers and enforces 120 requests/minute per token; ability middleware returns 403 `insufficient_scope`.
+- Versioned `/api/v1/documents` and detail endpoint require `documents.read`, cap cursor pagination at 100 and explicitly re-resolve detail resources after token tenant installation.
+- Stable `PublicApiContract`/`CorePublicApiContract` expose only version, ability and HTTP resource descriptors; internal Eloquent/controller/service classes remain non-SDK implementation details.
+- `ApiServiceProvider` boots the public contract, developer routes and `API & Integrations` Admin navigation; bootstrap registers API routes and middleware aliases.
+- Admin token lifecycle uses current-tenant routes and sensitive identity permission. Revoke resolves scalar UUID after tenant context instead of implicit binding.
+- Admin UI issues via direct JSON, keeps plaintext only in React state for one-time copy/dismiss, and lists only non-secret lifecycle metadata.
+- `docs/PUBLIC_API_V1.md` locks v1 auth, versioning, pagination, SDK/internal boundaries and target-verification semantics.
+- `PublicApiTenantIsolationTest` source covers hash-only storage, current-tenant reads, guessed cross-tenant IDs, expiry/revocation/stale membership, missing scope, pagination cap and cross-tenant revoke denial.
+- `public-api-sdk-product-contract-verify.php` statically guards token/API/SDK boundaries and explicitly preserves existing Automation webhook HMAC, replay, payload and idempotency safeguards.
+- Public API / SDK contract is now required by both Development Readiness and GitHub Actions.
+- Progress heading compatibility with the N1.17 governance verifier is restored (`Weighted Project Power Score`).
 
-### Required before SOURCE DONE
+### Verification required
 
-1. executable acceptance tests for plaintext non-persistence, cross-tenant resource isolation, cross-tenant revoke denial, expiry/revocation/stale-member denial, scope 403 and pagination max 100;
-2. static Public API / SDK product contract, including stable contract descriptor and preservation of Automation webhook signature/replay/idempotency boundaries;
-3. required gate in Development Readiness + GitHub Actions;
-4. full green current-head CI.
+N1.18 is **not SOURCE DONE** until a current-head Actions run passes Certification preflight, every prior product gate, Public API / SDK Product Contract and Unified Source Certification. Any failure must be fixed at root cause without weakening token/tenant/webhook boundaries.
 
 ---
 
@@ -132,13 +132,13 @@ After **every meaningful apply**, update current head/CI, block state, evidence-
 | Apply | Date | Head / evidence | Apply | Power impact |
 |---:|---|---|---|---|
 | 001 | 2026-08-21 | `11fbcd74…`; CI `32502604979` | Created weighted dashboard after N1.15 | Project 76.1% baseline |
-| 002 | 2026-08-21 | `5e255f8d…` | N1.16 root authorization/privacy fixes | Candidate 15% -> 60%; verified held |
-| 003 | 2026-08-21 | `df50de19…` | N1.16 acceptance/gate + progress governance | 60% -> 90%; held |
+| 002 | 2026-08-21 | `5e255f8d…` | N1.16 root authorization/privacy fixes | 15% -> 60% candidate |
+| 003 | 2026-08-21 | `df50de19…` | N1.16 acceptance/gate + progress governance | 60% -> 90% candidate |
 | 004 | 2026-08-21 | `e6c884f7…`; CI `32504705855` GREEN | N1.16 integrated closure | Project 76.3%, Source 98.5% |
 | 005 | 2026-08-21 | `b8b8641f…`; CI `32505428674` GREEN | N1.16 governance sync | unchanged |
-| 006 | 2026-08-21 | `39f991c3…` | N1.17 SSO/SCIM/invitation fixes | 10% -> 55% |
+| 006 | 2026-08-21 | `39f991c3…` | N1.17 SSO/SCIM/invitation fixes | 10% -> 55% candidate |
 | 007 | 2026-08-21 | `61027bbd…` | N1.17 impersonation hardening | 55% -> 65% |
-| 008 | 2026-08-21 | `c316b7c8…` | N1.17 acceptance + product gate | 65% -> 90% candidate |
+| 008 | 2026-08-21 | `c316b7c8…` | N1.17 acceptance + product gate | 65% -> 90% |
 | 009 | 2026-08-21 | `6856de41…`; CI `32508054237` | Semantic SSO/SCIM Source Guard | held |
 | 010 | 2026-08-21 | `255ed88b…`; CI `32508273140` | Number-independent progress contract | held |
 | 011 | 2026-08-21 | `1b86f397…`; CI `32508900897` GREEN | N1.17 integrated closure | Project 76.5%, Source 99%, Target 50% |
@@ -147,26 +147,22 @@ After **every meaningful apply**, update current head/CI, block state, evidence-
 | 014 | 2026-08-21 | through `676a6aff…` | N1.18 token/API substrate | N1.18 -> 55% candidate |
 | 015 | 2026-08-21 | `351f1c51…` | Post-auth tenant document re-resolution | 55% -> 60% |
 | 016 | 2026-08-21 | `2e5d4189…` | API routes + public contract/provider + developer route/bootstrap | 60% -> 72% |
-| 017 | 2026-08-21 | `42ba9ffa…` | Scalar tenant-scoped revoke + one-time browser-local token Admin UI | N1.18 **72% -> 82% candidate**; verified Project/Source held; Target 50% |
+| 017 | 2026-08-21 | `42ba9ffa…` | Scalar tenant revoke + browser-local one-time token UI | 72% -> 82% |
+| 018 | 2026-08-21 | gate head `ad2eb0b0…` | API acceptance source + v1 docs + Public API/SDK verifier + required Development Readiness/Actions wiring; restored progress heading compatibility | N1.18 **82% -> 95% source candidate**; verified Project/Source held; Target 50% |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-N1.18 APPLY-05 — ACCEPTANCE + REQUIRED GATE
-  - API tenant/token lifecycle feature tests
-  - preserve webhook security contract
-  - Public API / SDK product source verifier
-  - Development Readiness + Actions wiring
-  - progress update
-
-N1.18 APPLY-06 — VERIFY/CORRECT/CLOSE
-  - current-head integrated CI
-  - root-fix any red gate without weakening security
-  - full green => N1.18 SOURCE DONE + conservative Power recalculation
-  - ledger 2.5 + PR/issue sync
+N1.18 APPLY-06 — VERIFY / CORRECT / CLOSE
+  1. inspect current-head GitHub Actions
+  2. require all previous gates + Public API / SDK Product Contract + Unified Source Certification
+  3. inspect exact failed step/log if red and patch root cause
+  4. update THIS FILE after every correction
+  5. full green => N1.18 SOURCE DONE + conservative Power update
+  6. ledger revision 2.5 + PR #1 N1.18 sync + issue #2 source checkpoint
 
 MAIN PROTECTION
-  - main remains protected=false; connector still lacks ruleset mutation
+  - main remains protected=false; connector still lacks branch/ruleset mutation
 ```
