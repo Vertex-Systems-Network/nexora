@@ -103,5 +103,8 @@ jobs:
       - name: Automation product source contract
         run: php scripts/automation-product-contract-verify.php
 
+      - name: AI Platform product source contract
+        run: php scripts/ai-platform-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
