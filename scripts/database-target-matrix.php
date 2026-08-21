@@ -252,7 +252,28 @@ if ($writeEvidence) {
     }
     $evidencePath = $evidenceDirectory.'/database-target-matrix.json';
     $payload['evidence_path'] = 'storage/app/nexora/qa/database-target-matrix.json';
-    $encodedEvidence = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
+    $evidencePayload = [
+        'schema' => $payload['schema'],
+        'status' => $payload['status'],
+        'scope' => $payload['scope'],
+        'generated_at' => $payload['generated_at'],
+        'platform_version' => $payload['platform_version'],
+        'source_generation' => $payload['source_generation'],
+        'php_version' => $payload['php_version'],
+        'selected_drivers' => $payload['selected_drivers'],
+        'destructive_scope' => $payload['destructive_scope'],
+        'evidence_path' => $payload['evidence_path'],
+        'results' => array_map(static fn (array $row): array => [
+            'driver' => $row['driver'],
+            'logical_driver' => $row['logical_driver'],
+            'status' => $row['status'],
+            'server_version' => $row['connection']['version'] ?? null,
+            'object_count_before_test' => $row['connection']['object_count'] ?? null,
+            'test_exit_code' => $row['test_exit_code'],
+            'cleanup' => $row['cleanup'],
+        ], $results),
+    ];
+    $encodedEvidence = json_encode($evidencePayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
     if (@file_put_contents($evidencePath, $encodedEvidence, LOCK_EX) === false) {
         $fail('Unable to write the target-matrix evidence file.', 3);
     }
