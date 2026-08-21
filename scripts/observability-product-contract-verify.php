@@ -169,11 +169,16 @@ $require($test, [
     'test_retention_prunes_old_audit_and_incident_rows_but_preserves_recent_rows' => 'retention acceptance',
 ], 'observability acceptance');
 
-if ($progress !== '' && ! str_contains($progress, 'GitHub Actions: **DEFERRED BY USER')) {
-    $errors[] = 'progress governance missing Actions quota deferral state.';
-}
-if ($progress !== '' && ! str_contains($progress, 'TARGET POWER    50.0%')) {
-    $errors[] = 'progress governance missing unchanged Target Power evidence boundary.';
+if ($progress !== '') {
+    if (! str_contains($progress, 'Actions: **DEFERRED BY USER')) {
+        $errors[] = 'progress governance missing historical Actions quota deferral state.';
+    }
+    if (! str_contains($progress, 'current certification has resumed through the user-approved self-hosted runner pool')) {
+        $errors[] = 'progress governance missing resumed self-hosted certification state.';
+    }
+    if (! str_contains($progress, 'TARGET POWER    50.0%')) {
+        $errors[] = 'progress governance missing unchanged Target Power evidence boundary.';
+    }
 }
 
 if ($errors !== []) {
