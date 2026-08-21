@@ -157,6 +157,8 @@ if ($page !== '' && preg_match('/<(button|input|select|textarea)\b/', $page) ===
 
 foreach ([
     'test_credentials_are_rejected_from_plaintext_endpoint_and_encrypted_at_rest' => 'plaintext/encryption acceptance test',
+    'test_dynamodb_is_endpoint_optional_and_static_keys_must_be_rotated_as_a_pair' => 'DynamoDB endpoint/IAM credential-model acceptance test',
+    'test_non_dynamodb_connectors_still_require_an_endpoint' => 'non-Dynamo endpoint-required acceptance test',
     'assertStringNotContainsString' => 'raw secret non-disclosure assertion',
     'test_rotating_connectivity_preserves_blank_secret_and_forces_fresh_health_test' => 'rotation/re-test acceptance test',
     'test_enabled_connection_cannot_be_deleted' => 'enabled-delete guard test',
