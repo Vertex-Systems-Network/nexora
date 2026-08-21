@@ -157,9 +157,11 @@ $require($agents, [
 
 $require($progress, [
     '## 2. Weighted Project Power Score' => 'weighted Power dashboard',
-    '## 9. Apply Log' => 'per-apply progress history',
     'Target Power' => 'source-vs-target scoring boundary',
 ], 'Progress dashboard');
+if ($progress !== '' && preg_match('/^##\s+\d+\.\s+Apply Log\s*$/m', $progress) !== 1) {
+    $errors[] = 'Progress dashboard contract missing: per-apply progress history.';
+}
 
 if ($errors !== []) {
     fwrite(
