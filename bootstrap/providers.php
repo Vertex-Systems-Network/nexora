@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\AiServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\CommerceServiceProvider;
 use App\Providers\CustomerPortalServiceProvider;
@@ -9,6 +10,7 @@ use App\Providers\NexoraServiceProvider;
 
 return [
     AppServiceProvider::class,
+    AiServiceProvider::class,
     CommerceServiceProvider::class,
     CustomerPortalServiceProvider::class,
     FormsServiceProvider::class,
