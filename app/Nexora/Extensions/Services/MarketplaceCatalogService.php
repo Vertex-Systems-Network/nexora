@@ -108,7 +108,7 @@ final readonly class MarketplaceCatalogService
         }
 
         $type = trim((string) $item['type']);
-        if (! in_array($type, ['extension', 'app', 'integration', 'studio-pack'], true)) {
+        if (! in_array($type, ['extension', 'app', 'integration', 'studio-pack', 'theme'], true)) {
             throw new RuntimeException('Marketplace package '.$identifier.' has unsupported type '.$type.'.');
         }
 
