@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Enterprise;
 
-use App\Models\EnterpriseInvitation;
 use App\Models\EnterpriseOrganization;
 use App\Models\EnterpriseOrganizationMember;
 use App\Models\EnterpriseSsoProvider;
 use App\Models\Role;
 use App\Models\User;
 use App\Nexora\Enterprise\Contracts\EnterpriseIdentityProviderContract;
-use App\Nexora\Enterprise\Services\ImpersonationManager;
 use App\Nexora\Enterprise\Services\InvitationManager;
 use App\Nexora\Enterprise\Services\ScimTokenManager;
 use App\Nexora\Enterprise\Services\SsoProviderRegistry;
@@ -84,13 +82,13 @@ final class EnterpriseIdentityGovernanceTest extends TestCase
         $this->get('/sso/'.$organization->slug.'/'.$second->slug.'/callback?state='.urlencode($state))
             ->assertStatus(419);
 
-        // A compatible adapter must also still match the provider protocol at callback time.
-        $registry = app(SsoProviderRegistry::class);
+        // State remains valid for its original provider, but a protocol drift
+        // must fail at the adapter compatibility boundary instead of signing in.
         $provider = EnterpriseSsoProvider::query()->whereKey($first->id)->firstOrFail();
         $provider->forceFill(['protocol' => 'saml'])->saveQuietly();
 
         $this->get('/sso/'.$organization->slug.'/'.$first->slug.'/callback?state='.urlencode($state))
-            ->assertStatus(419);
+            ->assertStatus(503);
     }
 
     public function test_sso_public_configuration_rejects_secret_like_keys(): void
