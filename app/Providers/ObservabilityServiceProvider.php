@@ -27,7 +27,7 @@ final class ObservabilityServiceProvider extends ServiceProvider
         }
     }
 
-    public function boot(Schedule $schedule): void
+    public function boot(): void
     {
         if (! $this->app->runningInConsole()) {
             return;
@@ -38,6 +38,7 @@ final class ObservabilityServiceProvider extends ServiceProvider
             $time = '04:50';
         }
 
+        $schedule = $this->app->make(Schedule::class);
         $schedule->command('nexora:observability:prune')
             ->dailyAt($time)
             ->withoutOverlapping()
