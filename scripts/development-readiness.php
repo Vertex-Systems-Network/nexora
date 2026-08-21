@@ -73,6 +73,7 @@ $run('sentinel2_product_contract', 'Sentinel 2.0 product source contract', [PHP_
 $run('marketplace2_product_contract', 'Marketplace 2.0 product source contract', [PHP_BINARY, 'scripts/marketplace2-product-contract-verify.php']);
 $run('cloud_ha_product_contract', 'Cloud / HA product source contract', [PHP_BINARY, 'scripts/cloud-ha-product-contract-verify.php']);
 $run('backup_dr_upgrade_product_contract', 'Backup / DR / Upgrade product source contract', [PHP_BINARY, 'scripts/backup-dr-upgrade-product-contract-verify.php']);
+$run('performance_accessibility_release_product_contract', 'Performance + Accessibility + Release product source contract', [PHP_BINARY, 'scripts/performance-accessibility-release-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
