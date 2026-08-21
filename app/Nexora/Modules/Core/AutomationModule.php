@@ -17,9 +17,9 @@ final readonly class AutomationModule implements ModuleContract
     {
         return new ModuleManifest(
             identifier:'nexora.automation',
-            name:'Nexora Automation & Webhooks',
-            version:'0.27.0',
-            description:'Event-driven workflow runtime with conditions, retry-safe actions, signed outbound webhooks and verified inbound webhook endpoints.',
+            name:'Nexora Forms, Automation & Webhooks',
+            version:'0.28.0',
+            description:'Tenant-native forms feeding the event-driven workflow runtime with conditions, retry-safe actions and signed webhook integrations.',
             core:true,
             loadOrder:55,
             capabilities:[
@@ -30,13 +30,22 @@ final readonly class AutomationModule implements ModuleContract
                 new ModuleDependency('nexora.admin','^0.5'),
                 new ModuleDependency('nexora.discovery','^0.26'),
             ],
-            metadata:['workflow_runtime'=>'queued','conditions'=>'server evaluated','webhook_signing'=>'hmac-sha256','inbound_replay_window_seconds'=>300,'idempotency'=>true],
+            metadata:[
+                'workflow_runtime'=>'queued',
+                'forms'=>'tenant-native',
+                'conditions'=>'server evaluated',
+                'webhook_signing'=>'hmac-sha256',
+                'inbound_replay_window_seconds'=>300,
+                'idempotency'=>true,
+            ],
         );
     }
 
     public function register(): void
     {
+        $this->navigation->register(['id'=>'forms','label'=>'Forms','href'=>'/admin/forms','icon'=>'file-text','order'=>60,'permission'=>'forms.view']);
         $this->navigation->register(['id'=>'automation','label'=>'Automation','href'=>'/admin/automation','icon'=>'zap','order'=>61,'permission'=>'automation.view']);
     }
+
     public function boot(): void {}
 }
