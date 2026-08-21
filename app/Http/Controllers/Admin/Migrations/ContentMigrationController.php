@@ -66,10 +66,12 @@ final class ContentMigrationController extends Controller
             ->with('success', 'WordPress migration queued. Run '.$run->id.' will process the staged export.');
     }
 
-    public function resume(string $run, ContentMigrationManager $manager): RedirectResponse
+    public function resume(Request $request, string $run, ContentMigrationManager $manager): RedirectResponse
     {
+        $user = $request->user();
+        abort_unless($user !== null, 403);
         $record = ContentMigrationRun::query()->whereKey($run)->firstOrFail();
-        $manager->resume($record);
+        $manager->resume($record, $user);
 
         return back()->with('success', 'Migration queued for a replay-safe resume.');
     }
