@@ -22,9 +22,20 @@ final class SentinelApprovalGuard
             throw new RuntimeException('The package is not in a promotable Sentinel state. Rescan it before installation.');
         }
 
-        $latestScanId = $package->scans()->latest('created_at')->value('id');
-        if (! is_string($latestScanId) || ! hash_equals($latestScanId, (string) $scan->id)) {
-            throw new RuntimeException('A newer Sentinel scan exists. Only the latest completed ALLOW decision may be promoted.');
+        $approvedAt = $scan->created_at;
+        if ($approvedAt === null) {
+            throw new RuntimeException('The Sentinel approval has no trustworthy scan timestamp. Rescan the package.');
+        }
+
+        $newerOrAmbiguousScanExists = $package->scans()
+            ->where('id', '<>', (string) $scan->id)
+            ->where(function ($query) use ($approvedAt): void {
+                $query->where('created_at', '>', $approvedAt)
+                    ->orWhere('created_at', '=', $approvedAt);
+            })
+            ->exists();
+        if ($newerOrAmbiguousScanExists) {
+            throw new RuntimeException('A newer or ambiguously concurrent Sentinel scan exists. Rescan and promote only an unambiguous latest ALLOW decision.');
         }
 
         $path = (string) $package->path;
