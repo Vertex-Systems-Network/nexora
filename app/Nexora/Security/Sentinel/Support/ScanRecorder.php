@@ -9,10 +9,10 @@ use App\Models\SecurityScan;
 use App\Nexora\Security\Sentinel\Contracts\PackageScannerContract;
 use App\Nexora\Security\Sentinel\Data\SecurityFinding;
 use App\Nexora\Security\Sentinel\Enums\FindingSeverity;
+use App\Nexora\Security\SupplyChain\Services\SupplyChainAnalyzer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
-use App\Nexora\Security\SupplyChain\Services\SupplyChainAnalyzer;
 
 final readonly class ScanRecorder
 {
@@ -20,6 +20,7 @@ final readonly class ScanRecorder
         private PackageScannerContract $scanner,
         private QuarantinePathGuard $paths,
         private SupplyChainAnalyzer $supplyChain,
+        private SentinelFailureReference $failures,
     ) {
     }
 
@@ -81,6 +82,7 @@ final readonly class ScanRecorder
                         'metrics' => $report->metrics,
                         'finding_count' => count($allFindings),
                     ],
+                    'error' => null,
                     'completed_at' => now(),
                 ])->save();
 
@@ -102,11 +104,18 @@ final readonly class ScanRecorder
                 $scan->forceFill(['summary'=>$summary])->save();
             }
         } catch (Throwable $exception) {
+            $failure = $this->failures->for($exception, (string) $scan->id);
+            $summary = (array) ($scan->summary ?? []);
+            $summary['failure'] = [
+                'reference' => $failure['reference'],
+                'class_fingerprint' => $failure['class_fingerprint'],
+            ];
             $scan->forceFill([
                 'status' => 'failed',
                 'decision' => 'block',
                 'risk_score' => 100,
-                'error' => $exception->getMessage(),
+                'summary' => $summary,
+                'error' => $failure['message'],
                 'completed_at' => now(),
             ])->save();
             $package->forceFill(['status' => 'quarantined', 'scanned_at' => now()])->save();
