@@ -31,6 +31,14 @@ final readonly class ProviderBillingService
         return $this->concurrency->mutex(
             'commerce.billing.invoice.'.hash('sha256', $invoice->id.'|'.$idempotencyKey),
             function () use ($invoice, $providerKey, $idempotencyKey): CommercePaymentTransaction {
+                $existing = CommercePaymentTransaction::query()->where('idempotency_key', $idempotencyKey)->first();
+                if ($existing !== null) {
+                    if ($existing->invoice_id !== $invoice->id || $existing->provider_key !== trim($providerKey)) {
+                        throw new InvalidArgumentException('Billing idempotency key is already bound to a different payment operation.');
+                    }
+                    return $existing;
+                }
+
                 $lockedInvoice = CommerceInvoice::query()->with('order')->findOrFail($invoice->id);
                 if (in_array($lockedInvoice->status, ['void', 'paid'], true) || (int) $lockedInvoice->amount_due_minor <= 0) {
                     throw new InvalidArgumentException('This invoice has no collectible balance.');
@@ -87,6 +95,14 @@ final readonly class ProviderBillingService
         return $this->concurrency->mutex(
             'commerce.billing.refund.'.hash('sha256', $payment->id.'|'.$idempotencyKey),
             function () use ($payment, $amountMinor, $reason, $actorId, $idempotencyKey): CommerceRefund {
+                $existing = CommerceRefund::query()->where('idempotency_key', $idempotencyKey)->first();
+                if ($existing !== null) {
+                    if ($existing->payment_transaction_id !== $payment->id || (int) $existing->amount_minor !== $amountMinor) {
+                        throw new InvalidArgumentException('Billing idempotency key is already bound to a different refund operation.');
+                    }
+                    return $existing;
+                }
+
                 $lockedPayment = CommercePaymentTransaction::query()->findOrFail($payment->id);
                 if (! in_array($lockedPayment->type, ['payment', 'capture'], true)
                     || ! in_array($lockedPayment->status, ['succeeded', 'paid', 'captured'], true)) {
