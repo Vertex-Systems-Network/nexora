@@ -28,6 +28,22 @@ final readonly class TenantMemberDirectory
             ->get(['id', 'name', 'email']);
     }
 
+    public function contains(int $userId): bool
+    {
+        $tenantId = $this->tenant->id();
+        if ($tenantId === null || $userId < 1) {
+            return false;
+        }
+
+        return User::query()
+            ->whereKey($userId)
+            ->where('status', 'active')
+            ->whereHas('enterpriseMemberships', fn ($membership) => $membership
+                ->where('organization_id', $tenantId)
+                ->where('status', 'active'))
+            ->exists();
+    }
+
     /** @return Collection<int, User> */
     public function search(string $query, int $limit = 20): Collection
     {
