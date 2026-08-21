@@ -15,7 +15,8 @@
 - Self-hosted run `32523602178` executed on runner `LOCAL-WIN-01`; checkout PASS, then failed before source gates because `shivammathur/setup-php` required missing `pwsh`.
 - Workflow correction head: `7310223dd951995245be69124639a51904a8c320` — hosted-style setup actions removed; installed Windows PHP/Node/npm now verified and used directly.
 - Sentinel 2.0 workflow gate wiring: `e412df465ec3215933f84296e0cb566f6acad955`.
-- Current N1.22 hardening source head before this progress commit: `d31e8524a16c4708dde68cffdec84b3fb4bff00d`.
+- N1.22 hardening implementation checkpoint: `d31e8524a16c4708dde68cffdec84b3fb4bff00d`.
+- Sentinel contract literal-safety correction: `06750699e44dad5b25608b8c95f4b4ce69012b36`.
 - Actions runner: **Windows local runner via `runs-on: self-hosted`**.
 - PR certification trigger: restored; temporary dev-branch push trigger remains during runner stabilization.
 - Ledger: `2.4` — governance sync for N1.18–N1.22 pending after consolidated certification result
@@ -96,7 +97,7 @@ Correction:
 - Sentinel/package scanner foundation retained: bounded ZIP inspection, static scanners, capability mismatch detection, digest recheck/TOCTOU block and RiskEngine.
 - Quarantine retains internal UUID names, atomic copy, source-size limits, path guard and restrictive file permissions.
 - `SentinelFailureReference` creates opaque `SNT-*` references and a non-secret exception-class fingerprint without embedding raw exception text in durable Admin-facing state.
-- Private server diagnostics now log the same opaque `SNT-*` reference so operator-visible failure references are actually correlatable with server logs.
+- Private server diagnostics now log the same opaque `SNT-*` reference so operator-visible failure references are correlatable with server logs.
 - `ScanRecorder` persists only generic failure text + opaque reference/fingerprint metadata; raw throwable details remain server-log-only.
 - Forward migration `2026_08_22_000300_sanitize_sentinel_scan_failures.php` irreversibly scrubs legacy persisted raw scan error strings.
 - Sentinel Admin finding severity ordering now uses portable SQL `CASE`, replacing MySQL-only `FIELD(...)`.
@@ -106,6 +107,7 @@ Correction:
 - Sentinel UI promotion discovery uses the same current-approval guard.
 - `tests/Feature/Security/SentinelTrustHardeningTest.php` covers current ALLOW, newer-scan rejection, same-timestamp ambiguity denial, post-approval digest mutation and raw-message privacy.
 - `scripts/sentinel2-product-contract-verify.php` guards failure privacy/correlation, legacy scrub, SQL portability, immutable/current approval and installer replay prevention.
+- Static contract needles that intentionally match PHP `$variable[...]` source are literal-safe and cannot be corrupted by PHP string interpolation.
 - Sentinel 2.0 contract is required by Development Readiness and the self-hosted release workflow.
 
 ---
@@ -129,6 +131,7 @@ Correction:
 | 034 | 2026-08-22 | readiness `74ca8c89…`; workflow `8e612c5a…` | self-hosted runner + PR trigger + Forge gate wiring | verified Power unchanged |
 | 035 | 2026-08-22 | run `32523602178`; workflow correction `7310223d…` | real LOCAL-WIN-01 execution; diagnosed missing `pwsh`; switched certification to installed Windows toolchain | verified Power unchanged pending rerun |
 | 036 | 2026-08-22 | Sentinel files through `d31e8524…`; workflow `e412df46…` | N1.22 privacy-safe correlated failures, legacy scrub, portable ordering, latest/tie-safe immutable approval, Theme/Extension replay prevention, tests + static/CI gate | implementation-complete candidate; verified Power unchanged pending consolidated run |
+| 037 | 2026-08-22 | contract correction `06750699…` | fixed PHP interpolation-sensitive Sentinel contract needles so the new gate verifies literal source semantics instead of mutating its own search strings | verified Power unchanged pending consolidated run |
 
 ---
 
