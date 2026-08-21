@@ -36,7 +36,10 @@ $forbid = static function (string $key, string $needle, string $message) use (&$
 // Failure privacy: package-controlled/parser exception text must not become durable/UI audit metadata.
 $require('failure', "'SNT-'", 'Sentinel failure references must use a stable opaque SNT prefix.');
 $require('failure', 'class_fingerprint', 'Sentinel failure references must retain a non-secret exception-class fingerprint.');
+$require('failure', "Log::error('Sentinel security scan failed.'", 'Sentinel must correlate opaque operator references with private server logs.');
+$require('failure', "'error_reference' => $failure['reference']", 'Sentinel server logging must include the same opaque failure reference.');
 $forbid('failure', 'getMessage()', 'Sentinel public failure-reference service must never include raw exception messages.');
+$require('recorder', '$this->failures->report($exception', 'ScanRecorder must create and privately log the correlated Sentinel failure reference.');
 $require('recorder', "'error' => $failure['message']", 'ScanRecorder must persist only the privacy-safe failure message.');
 $require('recorder', "'class_fingerprint' => $failure['class_fingerprint']", 'ScanRecorder must retain the non-secret failure fingerprint.');
 $forbid('recorder', "'error' => $exception->getMessage()", 'ScanRecorder must not persist raw exception messages.');
@@ -50,8 +53,10 @@ $forbid('migration', '->after(', 'Sentinel privacy migration must not depend on 
 $require('controller', "CASE severity WHEN 'critical' THEN 1", 'Sentinel finding severity ordering must use portable SQL CASE ordering.');
 $forbid('controller', 'FIELD(severity', 'MySQL-only FIELD severity ordering is forbidden.');
 
-// Promotion trust: stale ALLOW scans and digest mutation must fail closed at UI and installer boundaries.
-$require('approval', "latest('created_at')->value('id')", 'Sentinel approval guard must re-resolve the latest package scan.');
+// Promotion trust: stale/tied ALLOW scans and digest mutation must fail closed at UI and installer boundaries.
+$require('approval', "->where('id', '<>', (string) $scan->id)", 'Sentinel approval guard must exclude the candidate scan while checking competing scans.');
+$require('approval', "->where('created_at', '>', $approvedAt)", 'Sentinel approval guard must reject newer package scans.');
+$require('approval', "->orWhere('created_at', '=', $approvedAt)", 'Sentinel approval guard must fail closed when scan ordering is ambiguous at the stored timestamp precision.');
 $require('approval', "'scanned', 'installed'", 'Sentinel approval guard must bound promotable package states.');
 $require('approval', "hash_file('sha256'", 'Sentinel approval guard must re-hash the quarantined package before promotion.');
 $require('approval', 'hash_equals((string) $package->sha256', 'Sentinel approval guard must compare current bytes to the quarantine baseline digest.');
@@ -63,6 +68,7 @@ $require('extension', '$this->approval->assertCurrent($artifact->package, $artif
 foreach ([
     'test_current_allow_scan_can_be_promoted',
     'test_old_allow_scan_is_rejected_after_newer_scan_exists',
+    'test_same_timestamp_competing_scan_fails_closed',
     'test_approved_package_digest_mutation_is_rejected',
     'test_failure_reference_never_contains_raw_exception_message',
 ] as $method) {
@@ -76,7 +82,7 @@ if ($failures !== []) {
 }
 
 fwrite(STDOUT, "Nexora Sentinel 2.0 Product Contract: PASS\n");
-fwrite(STDOUT, " - privacy-safe scan failure persistence + legacy scrub\n");
+fwrite(STDOUT, " - privacy-safe scan failure persistence + correlated private diagnostics + legacy scrub\n");
 fwrite(STDOUT, " - portable cross-database finding ordering\n");
-fwrite(STDOUT, " - latest-ALLOW + immutable digest promotion guard\n");
+fwrite(STDOUT, " - latest/unambiguous ALLOW + immutable digest promotion guard\n");
 fwrite(STDOUT, " - Theme/Extension server-side stale-scan replay prevention\n");
