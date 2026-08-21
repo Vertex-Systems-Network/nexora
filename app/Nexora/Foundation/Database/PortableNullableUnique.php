@@ -46,6 +46,22 @@ final class PortableNullableUnique
         });
     }
 
+    public static function drop(string $table, string $indexName): void
+    {
+        self::assertIdentifiers([$table, $indexName], $indexName);
+
+        if (DB::connection()->getDriverName() === 'sqlsrv') {
+            $quotedTable = self::quoteSqlServer($table);
+            $quotedIndex = self::quoteSqlServer($indexName);
+            DB::statement("DROP INDEX {$quotedIndex} ON {$quotedTable}");
+            return;
+        }
+
+        Schema::table($table, static function (Blueprint $blueprint) use ($indexName): void {
+            $blueprint->dropUnique($indexName);
+        });
+    }
+
     /** @param list<string> $identifiers */
     private static function assertIdentifiers(array $identifiers, string $indexName): void
     {
