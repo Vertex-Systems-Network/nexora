@@ -9,6 +9,7 @@ use App\Nexora\Installation\DatabaseProvisioner;
 $root = dirname(__DIR__);
 $json = in_array('--json', $argv, true);
 $listOnly = in_array('--list', $argv, true);
+$writeEvidence = in_array('--evidence', $argv, true);
 
 $fail = static function (string $message, int $code = 1) use ($json): never {
     if ($json) {
@@ -70,8 +71,9 @@ if ($listOnly) {
                 $row['env_prefix'],
             ));
         }
-        fwrite(STDOUT, "\nUsage: php scripts/database-target-matrix.php --drivers=sqlite,mysql\n");
+        fwrite(STDOUT, "\nUsage: php scripts/database-target-matrix.php --drivers=sqlite,mysql --evidence\n");
         fwrite(STDOUT, "Network profiles require NEXORA_MATRIX_<DRIVER>_DATABASE names beginning with nexora_matrix_.\n");
+        fwrite(STDOUT, "--evidence writes a secret-free JSON result to storage/app/nexora/qa/database-target-matrix.json.\n");
     }
     exit(0);
 }
@@ -229,13 +231,32 @@ foreach ($profiles as $key => $profile) {
     $results[] = $result;
 }
 
+$nexoraConfig = require $root.'/config/nexora.php';
 $payload = [
-    'schema' => 1,
+    'schema' => 2,
     'status' => $overall ? 'passed' : 'failed',
     'scope' => 'target-database-compatibility-matrix',
+    'generated_at' => gmdate(DATE_ATOM),
+    'platform_version' => (string) ($nexoraConfig['version'] ?? 'unknown'),
+    'source_generation' => DatabaseProvisioner::RUNTIME_SOURCE_GENERATION,
+    'php_version' => PHP_VERSION,
+    'selected_drivers' => array_keys($profiles),
     'destructive_scope' => 'Only empty databases/files whose names match nexora_matrix_* are accepted; cleanup removes matrix objects only.',
     'results' => $results,
 ];
+
+if ($writeEvidence) {
+    $evidenceDirectory = $root.'/storage/app/nexora/qa';
+    if (! is_dir($evidenceDirectory) && ! @mkdir($evidenceDirectory, 0775, true) && ! is_dir($evidenceDirectory)) {
+        $fail('Unable to create the target-matrix evidence directory under storage/app/nexora/qa.', 3);
+    }
+    $evidencePath = $evidenceDirectory.'/database-target-matrix.json';
+    $payload['evidence_path'] = 'storage/app/nexora/qa/database-target-matrix.json';
+    $encodedEvidence = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
+    if (@file_put_contents($evidencePath, $encodedEvidence, LOCK_EX) === false) {
+        $fail('Unable to write the target-matrix evidence file.', 3);
+    }
+}
 
 if ($json) {
     fwrite(STDOUT, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL);
@@ -246,6 +267,9 @@ if ($json) {
         if (($row['detail'] ?? '') !== '') {
             fwrite(STDOUT, '  '.str_replace(["\r", "\n"], ' ', (string) $row['detail']).PHP_EOL);
         }
+    }
+    if ($writeEvidence) {
+        fwrite(STDOUT, 'Evidence: storage/app/nexora/qa/database-target-matrix.json'.PHP_EOL);
     }
 }
 
