@@ -12,7 +12,7 @@
 ## 0. Ledger metadata
 
 - Ledger schema: `1`
-- Ledger revision: `2.3`
+- Ledger revision: `2.4`
 - Project: `Nexora`
 - Product class: advanced extensible web platform / CMS / site builder / application ecosystem
 - Current development source release: `1.0.0-rc.94`
@@ -22,11 +22,12 @@
 - GitHub canonical repository: `Vertex-Systems-Network/nexora`
 - GitHub default branch: `main`
 - Active development branch: `dev/n1-0b-core-functional-qa`
-- Active GitHub pull request: `#1` — draft, mergeable; title to synchronize as `DEV-4/DEV-5 + N1.9-N1.16: product QA, Commerce, CRM/Membership, Search, Collaboration, Automation, AI and Multisite source closure`
-- Current branch head before this ledger-only commit: `9f26b27b48e55a1d5f7f7ef2b3d7b210b2adb29f`
-- Latest complete green source-certification run before this ledger-only commit: `32504935527`
-- Current weighted Project Power before this ledger-only commit: `76.3%` (`Source 98.5%`, `Target 50.0%`, `Release 25.0%`)
+- Active GitHub pull request: `#1` — draft, mergeable; title to synchronize as `DEV-4/DEV-5 + N1.9-N1.17: product QA, Commerce, CRM/Membership, Search, Collaboration, Automation, AI, Multisite and Enterprise Governance source closure`
+- Current branch head before this ledger-only commit: `76b8d077eb5f8abd3e3c623ecc652c13ade555e2`
+- Latest complete green source-certification run before this ledger-only commit: `32508900897` on source head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3`
+- Current weighted Project Power before this ledger-only commit: `76.5%` (`Source 99.0%`, `Target 50.0%`, `Release 25.0%`)
 - Open GitHub issues at this checkpoint: `#2 Nexora runtime identity mismatch`
+- GitHub `main` protection state at this checkpoint: `protected=false` (server-side branch/ruleset protection requested but not yet writable through the connected GitHub action surface)
 - Current target environment: Windows + Laragon (real-target development test environment)
 - Current target path: `D:\laragon\www\nexora`
 - Final target: portable/self-hostable beyond Laragon; Laragon is a real development target, not an architectural dependency.
@@ -80,6 +81,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 16. **Disposable DB verification is mandatory for cross-engine claims.** Source contracts prove source alignment only; a database engine becomes TARGET VERIFIED only after the guarded real target matrix passes on that engine.
 17. **Final PRs merge automatically once genuinely final.** When the required source CI, target/runtime/product QA and applicable issue gates all pass, mark the PR Ready for review and merge it without waiting for another user confirmation. Never auto-merge a draft, red, stale-head or target-unverified PR.
 18. **Weighted progress is evidence-based.** Read and update `NEXORA_PROGRESS.md` after every meaningful apply. Never increase Target Power from source/static CI alone and never inflate progress because file/change volume is large.
+19. **`main` must be server-protected.** Desired repository rule is PR-only changes, required Source certification, stale-review dismissal, review/conversation resolution where supported, force-push/delete denial and administrator enforcement. Do not claim this rule active until GitHub reports direct server-side protection/ruleset evidence.
 
 ---
 
@@ -88,7 +90,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | Layer / subsystem | Purpose | Current state |
 |---|---|---|
 | Kernel / Core | Boot, lifecycle, shared primitives | Foundation implemented |
-| Public Contracts | Stable APIs for modules/plugins/themes | Foundation implemented |
+| Public Contracts | Stable APIs for modules/plugins/themes | Foundation implemented; N1.18 next expansion |
 | Module Registry | Discover/register/activate modules | Foundation implemented |
 | Capability Runtime | Controlled extension permissions | Foundation implemented |
 | Admin Platform / Design System | Shared UI/navigation/forms/selects/themes/tooltips | Strong source closure; responsive/mobile/accessibility contract green; app-wide target QA pending |
@@ -101,12 +103,13 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | Forms / Data / Workflows | Tenant forms, public submissions, Automation bridge | SOURCE DONE for current product workflow; target execution pending |
 | Data Connections | Auxiliary Mongo/Redis/AWS data-service handles | Product/security + DEV-5 portability source closure green; live connector target tests pending |
 | Primary SQL Portability | MySQL/MariaDB/PostgreSQL/SQLite/SQL Server + managed aliases | Source/harness closure green; real engine matrix evidence pending |
-| Search / Discovery | Public content search, Admin global search, query analytics | N1.12 Search 2.0 first workflow SOURCE DONE; membership visibility + tenant/permission isolation source-gated; target execution pending |
-| Collaboration | Document assignment/review and Admin notifications | N1.13 first workflow SOURCE DONE; tenant-member collaborators plus tenant-scoped review/notification identity source-gated; target execution pending |
-| Automation | Event-driven workflows, actions, inbound/outbound webhooks | N1.14 first workflow SOURCE DONE; tenant-member notification targets, tenant-native workflow/event identity, tenant-restored queue execution and webhook safety source-gated; target execution pending |
-| AI Platform | Tenant AI connections, provider-neutral text generation, privacy-minimal run metadata | N1.15 first workflow SOURCE DONE; encrypted credentials, bounded generation and provider-neutral adapter boundary source-gated; target execution + real provider-adapter evidence pending |
-| Multisite / Organizations | Tenant root, organization switching, member/domain/identity governance boundaries | N1.16 first workflow SOURCE DONE; organization-root route binding, non-disclosing switching, direct-identity restrictions and member-scoped impersonation source-gated; target execution pending |
-| SSO / Enterprise Governance | Identity adapter lifecycle, enforced login, SCIM, roles/invitations/impersonation governance | Foundation exists; N1.17 NEXT SOURCE BLOCK |
+| Search / Discovery | Public content search, Admin global search, query analytics | N1.12 Search 2.0 first workflow SOURCE DONE; target execution pending |
+| Collaboration | Document assignment/review and Admin notifications | N1.13 first workflow SOURCE DONE; target execution pending |
+| Automation | Event-driven workflows, actions, inbound/outbound webhooks | N1.14 first workflow SOURCE DONE; target execution pending |
+| AI Platform | Tenant AI connections, provider-neutral text generation, privacy-minimal run metadata | N1.15 first workflow SOURCE DONE; target execution + real provider-adapter evidence pending |
+| Multisite / Organizations | Tenant root, organization switching, member/domain/identity governance boundaries | N1.16 first workflow SOURCE DONE; target execution pending |
+| SSO / Enterprise Governance | Identity adapter lifecycle, enforced login, SCIM, roles/invitations/impersonation governance | N1.17 SOURCE DONE; enforced-login, SCIM tenant lifecycle and governed impersonation source-gated; target execution pending |
+| Public APIs / Webhooks / SDK | External API authentication/versioning, webhook/public contracts, SDK capability surface | Foundation/partial; N1.18 NEXT SOURCE BLOCK |
 | Forge / SDK | Developer extension tooling | Foundation/planned expansion |
 | Sentinel | Theme/plugin trust/security | Foundation implemented; 2.0 later |
 | Marketplace | Theme/app/extension catalog, trusted staging and promotion | N1.9 first workflow SOURCE DONE; target execution pending; Marketplace 2.0 later |
@@ -140,7 +143,7 @@ Never report a feature as simply “100% complete” when only source/static ver
 - Generation: `n1-v5.29`
 - Active branch: `dev/n1-0b-core-functional-qa`
 - PR `#1` is draft and mergeable; it must remain draft until the required real-target gates pass.
-- Latest green source CI before this ledger-only commit: `32504935527` on head `9f26b27b48e55a1d5f7f7ef2b3d7b210b2adb29f`.
+- Latest complete green source CI before this ledger-only commit: `32508900897` on source head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3`.
 - That run passed:
   - Certification preflight
   - Source Guard
@@ -167,8 +170,9 @@ Never report a feature as simply “100% complete” when only source/static ver
   - Automation product source contract
   - AI Platform product source contract
   - Multisite / Organizations product source contract
+  - SSO / Enterprise Governance product source contract
   - Unified source certification
-- Source/static gates are green through N1.16 Multisite / Organizations.
+- Source/static gates are green through N1.17 SSO / Enterprise Governance.
 - `composer.lock` and `package-lock.json` are not committed; deterministic dependency/release certification remains deferred.
 
 ### 5.2 Open GitHub issue status
@@ -188,7 +192,7 @@ as mismatches. Version, generation, deployment/source, database, storage, host, 
 
 Permanent rc.94 source fix is present and CI-guarded through `scripts/post-install-runtime-convergence-contract-verify.php`. The contract guarantees fresh `/install/runtime-handoff`, an exact mutable-plane reconciliation allow-list, immutable mismatch rejection, service/process health gates, one-time post-install identity finalization and post-write compatibility reassessment.
 
-Issue #2 remains **OPEN** because the existing rc.93 Laragon target still needs real recovery verification. The latest N1.11-N1.16 source passes do not change that live evidence.
+Issue #2 remains **OPEN** because the existing rc.93 Laragon target still needs real recovery verification. The latest N1.11-N1.17 source passes do not change that live evidence.
 
 ### 5.3 Current live Laragon installation
 
@@ -238,6 +242,17 @@ storage/app/nexora/qa/database-target-matrix.json
 ```
 
 No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED from current source-only CI. SQLite also requires an actual target run for the current branch generation.
+
+### 5.6 GitHub `main` branch protection state
+
+GitHub branch metadata currently reports:
+
+```text
+main protected=false
+required status checks: off
+```
+
+The authenticated repository user has admin permission, but the connected GitHub action surface available in this execution context does not expose branch-protection/ruleset mutation. This is not treated as applied. Desired server policy remains PR-only + required Source certification + stale-review dismissal + review/conversation resolution + no force push/delete + admin enforcement.
 
 ---
 
@@ -432,6 +447,23 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 - Integrated run `32504705855` passed Multisite / Organizations Product Contract, Unified Source Certification and every prior gate on implementation/progress head `e6c884f714e6419794b1c11566e978987a73ecad`; progress-only head `9f26b27b48e55a1d5f7f7ef2b3d7b210b2adb29f` was reconfirmed green by run `32504935527`.
 - Real Laragon/browser/PHPUnit organization switching, invitation, domain, SSO/SCIM and impersonation execution remains TARGET PENDING.
 
+### N1.17 SSO / Enterprise Governance source closure
+
+- `enforce_for_members` is now a real authentication policy. Active ordinary organization members cannot bypass an enabled enforced provider using a local password; Super Admin retains explicit break-glass local access.
+- Login UI surfaces only enabled, registered and protocol-compatible providers, with generic required/unavailable messaging.
+- SSO start/callback state is one-time, expiring and bound to organization + provider; callback rechecks adapter/protocol, validates bounded absolute HTTP(S) redirects and normalized provider identity email, requires active user + active membership, rotates the authenticated session and selects the organization.
+- Adapter exceptions and diagnostics remain behind generic Core failure messages.
+- `EnterpriseSsoProvider` recursively rejects secret-like keys from public unencrypted `configuration`; secret payload remains encrypted/hidden.
+- `ScimTokenManager` requires active organizations, canonical token prefix, enabled/non-revoked/unexpired state and fails closed after organization suspension.
+- SCIM lifecycle is tenant-local: membership carries active/suspended state; existing foreign platform identities cannot be silently attached; same-tenant privileged roles are preserved; owner/admin deactivation through SCIM is denied.
+- Invitation creation supersedes stale pending tokens for the same organization/email; acceptance requires active account/organization, preserves existing owner/admin authority, supersedes stale tokens and selects the accepted organization in session.
+- `ImpersonationManager` rejects nested sessions and unauthorized/inactive actors/targets; stop validates active session/current target/original actor authority before restoration and otherwise fails closed.
+- Source Guard SSO/SCIM security checks were made semantic/whitespace-tolerant rather than formatting dependent; the Multisite progress contract was made section-number independent.
+- `tests/Feature/Enterprise/EnterpriseIdentityGovernanceTest.php` covers enforced password denial + Super Admin break-glass, SSO provider-state/protocol binding, public secret-config denial, suspended-tenant SCIM token rejection, cross-tenant identity attach denial, tenant-local SCIM lifecycle/privilege preservation, invitation replay/role/session behavior and nested impersonation denial.
+- `scripts/enterprise-governance-product-contract-verify.php` is required by development readiness and GitHub Actions.
+- GitHub Actions run `32508900897` SUCCESS on source head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3`, passing every prior gate, Multisite / Organizations Product Contract, SSO / Enterprise Governance Product Contract and Unified Source Certification.
+- Real Laragon/browser/PHPUnit SSO adapter login enforcement, SCIM provisioning/revocation, invitation and impersonation execution remains TARGET PENDING.
+
 ---
 
 ## 7. Current progress dashboard
@@ -439,8 +471,8 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 ### Weighted Project Power
 
 ```text
-PROJECT POWER   76.3%  ███████████████░░░░░
-SOURCE POWER    98.5%  ████████████████████
+PROJECT POWER   76.5%  ███████████████░░░░░
+SOURCE POWER    99.0%  ████████████████████
 TARGET POWER    50.0%  ██████████░░░░░░░░░░
 RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
 ```
@@ -450,7 +482,7 @@ Detailed weights, per-block status and every-apply history are maintained in `NE
 ### Platform implementation
 
 ```text
-████████████████████  ~98.5%
+████████████████████  ~99.0%
 ```
 
 ### Real functional verification
@@ -459,7 +491,7 @@ Detailed weights, per-block status and every-apply history are maintained in `NE
 ██████████░░░░░░░░░░  ~50%
 ```
 
-Source implementation increased through N1.16; real verification intentionally did not rise because N1.11-N1.16 and prior DEV-4/DEV-5 product work have not yet been executed across the required real targets.
+Source implementation increased through N1.17; real verification intentionally did not rise because N1.11-N1.17 and prior DEV-4/DEV-5 product work have not yet been executed across the required real targets.
 
 | Phase | Progress | Status |
 |---|---:|---|
@@ -487,7 +519,8 @@ Source implementation increased through N1.16; real verification intentionally d
 | N1.14 Automation | 100% source contract / target pending | SOURCE DONE |
 | N1.15 AI Platform Capabilities | 100% source contract / target pending | SOURCE DONE |
 | N1.16 Multisite / Organizations | 100% source contract / target pending | SOURCE DONE |
-| N1.17 SSO / Enterprise Governance | Foundation exists; product audit pending | NEXT SOURCE BLOCK |
+| N1.17 SSO / Enterprise Governance | 100% source contract / target pending | SOURCE DONE |
+| N1.18 Public APIs / Webhooks / SDK | Foundation/partial | NEXT SOURCE BLOCK |
 | DEV-6 Final C1-C6/release certification | 10% | DEFERRED CERTIFICATION |
 
 ---
@@ -542,25 +575,41 @@ php scripts\database-target-matrix.php --list
 php scripts\database-target-matrix.php --drivers=sqlite,mysql,mariadb,pgsql,sqlsrv --evidence
 ```
 
-At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing, SEO, Forms, Data Workflows, Data Connections, Marketplace, Commerce, Customer Portal, CRM, Membership, Search, Collaboration, Automation, AI Platform, Multisite / Organizations and responsive Admin navigation on the real target.
+At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing, SEO, Forms, Data Workflows, Data Connections, Marketplace, Commerce, Customer Portal, CRM, Membership, Search, Collaboration, Automation, AI Platform, Multisite / Organizations, SSO / Enterprise Governance and responsive Admin navigation on the real target.
 
-For network engines use only disposable databases whose names start with `nexora_matrix_`. For auxiliary connectors/provider actions, use controlled target services and record separate evidence. Never infer target verification from source fixtures. For AI, a provider becomes TARGET VERIFIED only after a controlled registered adapter is exercised without exposing credentials/raw generation history.
+For network engines use only disposable databases whose names start with `nexora_matrix_`. For auxiliary connectors/provider actions, use controlled target services and record separate evidence. Never infer target verification from source fixtures. For AI, a provider becomes TARGET VERIFIED only after a controlled registered adapter is exercised without exposing credentials/raw generation history. For SSO/SCIM, target evidence requires a controlled registered identity adapter and SCIM token lifecycle exercise.
 
 ### Remaining source/target sequence
 
 ```text
-N1.17 SSO / Enterprise Governance source audit + closure
+N1.18 Public APIs / Webhooks / SDK source audit + closure
   ||
 Live rc.93 runtime recovery evidence
   -> separate dev checkout full PHPUnit/build/product browser QA
   -> real SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix evidence
-  -> optional managed AWS/auxiliary connector/provider/AI-adapter target evidence where services exist
+  -> optional managed AWS/auxiliary connector/provider/AI/SSO target evidence where services exist
   -> close remaining target defects
   -> final DEV-6 reviewed locks + C1-C6/release certification
   -> mark PR Ready + merge automatically when all required gates are genuinely final
 ```
 
 During every block, inspect GitHub open issues first and again before final handoff.
+
+### GitHub main branch protection
+
+Desired GitHub server-side rule remains:
+
+```text
+require pull request before merge
+require Source certification status check
+require stale review dismissal on new commits
+require conversation/review resolution where supported
+block force pushes
+block branch deletion
+enforce for administrators
+```
+
+Current branch API reports `protected=false`. Apply only through an authorized GitHub branch/ruleset settings mutation; do not substitute CI/source files for actual branch protection.
 
 ---
 
@@ -611,6 +660,7 @@ N2.0   Stable Production
 5. Identify dev source version, installed target version, blocker class, current PR/branch and latest CI state.
 6. Do not repeat completed work without regression evidence.
 7. Prefer the next roadmap gate while solving applicable open issues in the same pass.
+8. Inspect `main` branch protection state; do not call repository governance protected unless GitHub reports it protected.
 
 ### During work
 
@@ -946,6 +996,16 @@ Use `No release` when no rc release was produced.
 - Remaining blocker: live issue #2 + broad dev target QA + real DB matrix/provider evidence.
 - Next exact action: synchronize PR/issue, confirm ledger/progress-only CI, then begin N1.17 SSO / Enterprise Governance source audit.
 
+### 2026-08-21 — No release — N1.17 SSO / Enterprise Governance enforcement and tenant-lifecycle closure
+
+- Trigger / observed blocker: `enforce_for_members` was metadata-only for password login; callback trust/state binding was incomplete; public SSO configuration could carry secret-like keys; SCIM active status conflicted with organization membership state and could attach/demote/deactivate identities unsafely; stale invitations and nested impersonation needed stronger governance.
+- Root cause: N0.33 Enterprise foundations provided primitives but several identity flows still trusted platform-wide/global account semantics or presentation-only enforcement instead of current-tenant, replay-safe, service-level governance.
+- Changes applied: real enforced-SSO password policy with Super Admin break-glass; compatible SSO choices in Login; one-time organization/provider-bound state, protocol/redirect/identity validation and generic adapter failures; secret-like public config rejection; active-tenant/prefix/revocation/expiry SCIM token admission; tenant-local SCIM lifecycle, foreign-identity attach denial, privileged-role preservation/deactivation guard; stale invitation supersession and accepted-tenant session selection; nested/unauthorized impersonation denial and stop integrity checks; executable Enterprise governance acceptance tests; required product contract; semantic Source Guard and section-number-independent progress governance corrections.
+- Verification completed: first run `32508054237` exposed old formatting-sensitive Source Guard markers; correction `6856de412a1f483892944b6c91b64e4969506236` made those checks semantic. Run `32508273140` then passed every gate through AI Platform and exposed only a stale `Apply Log` section-number marker in the N1.16 contract; correction `255ed88beb9c2a324408c36eb417c9df244c96f6` made the heading check semantic. Final integrated run `32508900897` passed Certification preflight, Source Guard, every prior product contract, Multisite / Organizations, SSO / Enterprise Governance and Unified Source Certification on source head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3`.
+- Real-target evidence: no current-branch Laragon/browser/PHPUnit controlled identity-adapter/SCIM execution has been supplied; SOURCE DONE only.
+- Remaining blocker: live issue #2 + broad dev target QA + real DB/provider/identity-adapter evidence; GitHub `main` server protection still reports `protected=false` and requires a settings mutation capability.
+- Next exact action: synchronize PR/issue/governance CI, apply `main` server protection when an authorized branch/ruleset mutation is available, then begin N1.18 Public APIs / Webhooks / SDK source audit while target recovery remains separate.
+
 ---
 
 ## 13. Known deferred work / not the current blocker
@@ -959,6 +1019,8 @@ Use `No release` when no rc release was produced.
 - auxiliary Mongo/Redis/AWS connector target verification where adapters/services are available
 - real Commerce payment-provider target verification where a controlled test gateway/extension is available
 - real AI provider-adapter target verification where a controlled adapter/service is available
+- real SSO identity-adapter/SCIM target verification where a controlled adapter/service is available
+- GitHub `main` branch protection/ruleset server mutation (current API evidence: protected=false)
 - HA/distributed runtime
 - final performance/accessibility certification
 - Marketplace 2.0 / Sentinel 2.0
@@ -975,31 +1037,29 @@ GOAL: Advanced extensible WordPress/Webflow/Wix/Shopify-class platform ecosystem
 GITHUB: Vertex-Systems-Network/nexora
 DEV SOURCE: rc.94 / v5.29 / n1-v5.29
 DEV BRANCH: dev/n1-0b-core-functional-qa
-PR: #1 DRAFT + MERGEABLE; FINAL GATES PASS => MARK READY + MERGE AUTOMATICALLY
-BRANCH HEAD BEFORE LEDGER COMMIT: 9f26b27b48e55a1d5f7f7ef2b3d7b210b2adb29f
-LATEST GREEN CI BEFORE LEDGER COMMIT: 32504935527
+PR: #1 DRAFT + MERGEABLE; SYNC THROUGH N1.17; FINAL GATES PASS => MARK READY + MERGE AUTOMATICALLY
+BRANCH HEAD BEFORE LEDGER COMMIT: 76b8d077eb5f8abd3e3c623ecc652c13ade555e2
+LATEST GREEN CI BEFORE LEDGER COMMIT: 32508900897 on 1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3
 PROGRESS DASHBOARD: NEXORA_PROGRESS.md — mandatory every-apply update
-PROJECT POWER: 76.3% | SOURCE 98.5% | TARGET 50.0% | RELEASE 25.0%
+PROJECT POWER: 76.5% | SOURCE 99.0% | TARGET 50.0% | RELEASE 25.0%
 OPEN ISSUE: #2 runtime identity mismatch
+MAIN PROTECTION: GitHub reports protected=false; desired PR + Source certification + stale-review dismissal + resolution + no force/delete + admin enforcement; do not claim applied until server evidence changes
 LIVE TARGET: rc.93 installed on Laragon
 LIVE BLOCKER: post-install environment/activation/service/process fingerprints stale
 SOURCE/DEPLOYMENT/DB ON LIVE EVIDENCE: matching
 DEPENDENCY RUNTIME: matching
 LOCK REVIEW: missing, deferred
-SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + Admin UX + Forms/Data/Workflows + Data Connections + Primary SQL portability + Installer DB UX + guarded real-DB matrix harness + Marketplace N1.9 + Commerce N1.10 + Customer Portal/CRM/Membership N1.11 + Search N1.12 + Collaboration N1.13 + Automation N1.14 + AI Platform N1.15 + Multisite/Organizations N1.16
+SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + Admin UX + Forms/Data/Workflows + Data Connections + Primary SQL portability + Installer DB UX + guarded real-DB matrix harness + Marketplace N1.9 + Commerce N1.10 + Customer Portal/CRM/Membership N1.11 + Search N1.12 + Collaboration N1.13 + Automation N1.14 + AI Platform N1.15 + Multisite/Organizations N1.16 + SSO/Enterprise Governance N1.17
 DEV-5: ~95% SOURCE; real engine TARGET VERIFIED evidence pending
-N1.11: SOURCE DONE; target pending
-N1.12: SOURCE DONE; target pending
-N1.13: SOURCE DONE; target pending
-N1.14: SOURCE DONE; target pending
 N1.15: SOURCE DONE; target/provider-adapter evidence pending
 N1.16: SOURCE DONE; target organization/identity workflow evidence pending
+N1.17: SOURCE DONE; target SSO/SCIM/invitation/impersonation evidence pending
 DB MATRIX: scripts/database-target-matrix.php; use only empty nexora_matrix_* targets; --evidence -> storage/app/nexora/qa/database-target-matrix.json
 NEXT LIVE: safe rc.93 repair -> compatibility PASS -> post-install PASS -> /login -> /admin -> issue #2 close only after evidence
-NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + major product browser QA including AI + Multisite/Organizations + real DB target matrix on separate dev checkout
-NEXT SOURCE: N1.17 SSO / Enterprise Governance source audit and closure
+NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + major product browser QA including AI + Multisite/Organizations + SSO/Enterprise Governance + real DB target matrix on separate dev checkout
+NEXT SOURCE: N1.18 Public APIs / Webhooks / SDK source audit and closure
 ISSUE RULE: inspect open GitHub issues every pass and solve applicable defects alongside roadmap work
 PROGRESS RULE: update NEXORA_PROGRESS.md after every meaningful apply; Target Power only moves on real target evidence
 MERGE RULE: when required source + target + issue gates are final, mark Ready and merge automatically without asking again
-DO NOT: overwrite installed rc.93 with rc.94 as repair; do not mark PR #1 Ready or claim DB/provider TARGET VERIFIED from source CI alone
+DO NOT: overwrite installed rc.93 with rc.94 as repair; do not mark PR #1 Ready or claim DB/provider/SSO TARGET VERIFIED from source CI alone
 ```
