@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Nexora\Enterprise\Services\SsoEnforcementPolicy;
 use App\Nexora\Installation\InstallationState;
 use App\Nexora\Security\Audit\AuditManager;
 use App\Nexora\Security\Session\SessionSecurityManager;
@@ -17,16 +18,22 @@ use Inertia\Response;
 
 final class AuthenticatedSessionController extends Controller
 {
-    public function create(): Response
+    public function create(SsoEnforcementPolicy $ssoPolicy): Response
     {
         return Inertia::render('Auth/Login', [
             'canResetPassword' => true,
             'status' => session('status'),
+            'sso' => $ssoPolicy->loginContext(),
         ]);
     }
 
-    public function store(Request $request, AuditManager $audit, InstallationState $installation, SessionSecurityManager $sessions): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        AuditManager $audit,
+        InstallationState $installation,
+        SessionSecurityManager $sessions,
+        SsoEnforcementPolicy $ssoPolicy,
+    ): RedirectResponse {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
@@ -48,6 +55,16 @@ final class AuthenticatedSessionController extends Controller
             $sessions->invalidateCurrentSession($request);
 
             throw ValidationException::withMessages(['email' => 'This account is not available for sign in.']);
+        }
+
+        if ($user !== null && $ssoPolicy->requiresSso($user)) {
+            $audit->record('auth.login_blocked', $user, ['reason' => 'enterprise-sso-required']);
+            Auth::logout();
+            $sessions->invalidateCurrentSession($request);
+
+            throw ValidationException::withMessages([
+                'email' => 'This organization requires SSO sign-in. Use an organization SSO option below.',
+            ]);
         }
 
         $sessions->rotateAuthenticatedSession($request);
