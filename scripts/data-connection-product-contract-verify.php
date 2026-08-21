@@ -27,6 +27,7 @@ $controller = $read('app/Http/Controllers/Admin/Data/DataConnectionController.ph
 $page = $read('resources/js/admin/pages/Admin/Data/Connections.tsx');
 $routes = $read('routes/web.php');
 $test = $read('tests/Feature/DataConnections/DataConnectionFlowTest.php');
+$portabilityTest = $read('tests/Unit/Data/ConnectionTesterPortabilityTest.php');
 
 if ($enterpriseMigration !== '' && ! str_contains($enterpriseMigration, "'nx_data_connections'")) {
     $errors[] = 'Canonical enterprise tenancy manifest must own nx_data_connections.';
@@ -66,6 +67,12 @@ foreach ([
     "'aws_documentdb' =>" => 'DocumentDB connector',
     "'aws_elasticache_redis' =>" => 'ElastiCache Redis connector',
     "'aws_dynamodb' =>" => 'DynamoDB connector',
+    "'endpoint_required' => false" => 'endpoint-optional connector capability',
+    "'database_supported' => false" => 'database-field capability',
+    "'username_password_supported' => false" => 'username/password capability',
+    "'region_required' => true" => 'region-required connector capability',
+    "'aws_key_pair_supported' => true" => 'AWS static-key capability',
+    "rediss://cache.xxxxxx.cache.amazonaws.com:6379" => 'ElastiCache TLS-first example',
 ] as $needle => $label) {
     if ($catalog !== '' && ! str_contains($catalog, $needle)) {
         $errors[] = "Data connector catalog missing: {$label}.";
@@ -78,7 +85,11 @@ foreach ([
     'hasEmbeddedCredentials' => 'embedded URI credential rejection',
     "'$1[redacted]@'" => 'URI userinfo error redaction',
     "foreach (['password', 'access_key', 'secret_key']" => 'known-secret value redaction',
-    "str_starts_with(strtolower(\$endpoint), 'rediss://')" => 'Redis TLS endpoint handling',
+    "\$connectHost = \$transport === 'tls' ? 'tls://'.\$host : \$host" => 'PhpRedis TLS transport mapping',
+    "'scheme' => \$transport" => 'Predis TLS/TCP transport mapping',
+    "'rediss', 'tls' => 'tls'" => 'Redis TLS scheme normalization',
+    "Redis endpoint scheme must be redis://, rediss://, tcp:// or tls://." => 'Redis scheme allow-list',
+    "AWS access key and secret key must be provided together." => 'DynamoDB partial credential rejection',
 ] as $needle => $label) {
     if ($tester !== '' && ! str_contains($tester, $needle)) {
         $errors[] = "Connection tester contract missing: {$label}.";
@@ -96,6 +107,13 @@ foreach ([
     "'is_enabled' => false" => 'forced disable after connectivity changes',
     "'last_tested_at' => null" => 'fresh health-test requirement',
     "if (\$connection->is_enabled)" => 'enabled delete guard',
+    "\$definition['endpoint_required'] ?? true" => 'driver-aware endpoint validation',
+    "\$definition['database_supported'] ?? true" => 'driver-aware database validation',
+    "\$definition['username_password_supported'] ?? true" => 'driver-aware username/password validation',
+    "\$definition['region_required'] ?? false" => 'driver-aware region validation',
+    "\$definition['aws_key_pair_supported'] ?? false" => 'driver-aware AWS key validation',
+    "validateConnectionPayload(\$request, false, (string) \$connection->driver)" => 'immutable-driver edit validation',
+    "AWS access key and secret key must be entered together" => 'Admin AWS key-pair validation',
 ] as $needle => $label) {
     if ($controller !== '' && ! str_contains($controller, $needle)) {
         $errors[] = "Data connection controller contract missing: {$label}.";
@@ -149,6 +167,17 @@ foreach ([
     }
 }
 
+foreach ([
+    'dynamodb_rejects_partial_static_credentials_before_sdk_resolution' => 'DynamoDB credential-pair unit test',
+    'redis_rediss_endpoint_maps_to_tls_transport_for_both_clients' => 'Redis TLS endpoint unit test',
+    'redis_plain_endpoint_maps_to_tcp_transport' => 'Redis TCP endpoint unit test',
+    'redis_endpoint_rejects_non_redis_url_schemes' => 'Redis scheme rejection unit test',
+] as $needle => $label) {
+    if ($portabilityTest !== '' && ! str_contains($portabilityTest, $needle)) {
+        $errors[] = "Data Connections portability-test contract missing: {$label}.";
+    }
+}
+
 if ($errors !== []) {
     fwrite(STDERR, "[Nexora Data Connections Product Contract] FAILED\n - ".implode("\n - ", array_values(array_unique($errors)))."\n");
     exit(1);
@@ -156,5 +185,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Data Connections Product Contract] PASS — auxiliary connectors are enterprise-tenant-scoped, secrets remain encrypted/non-disclosed, plaintext endpoint credentials are quarantined, rotation invalidates stale health and destructive removal is guarded.'.PHP_EOL,
+    '[Nexora Data Connections Product Contract] PASS — auxiliary connectors are enterprise-tenant-scoped, secrets remain encrypted/non-disclosed, plaintext endpoint credentials are quarantined, rotation invalidates stale health, DynamoDB validation is endpoint/credential-model aware, Redis TLS is normalized across PhpRedis/Predis, and destructive removal is guarded.'.PHP_EOL,
 );
