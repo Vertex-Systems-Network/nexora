@@ -82,5 +82,8 @@ jobs:
       - name: Development target QA source contract
         run: php scripts/development-target-qa-contract-verify.php
 
+      - name: Marketplace product source contract
+        run: php scripts/marketplace-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
