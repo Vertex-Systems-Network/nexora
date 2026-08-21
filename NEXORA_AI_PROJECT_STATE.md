@@ -10,7 +10,7 @@
 ## 0. Ledger metadata
 
 - Ledger schema: `1`
-- Ledger revision: `1.9`
+- Ledger revision: `2.0`
 - Project: `Nexora`
 - Product class: advanced extensible web platform / CMS / site builder / application ecosystem
 - Current development source release: `1.0.0-rc.94`
@@ -20,9 +20,9 @@
 - GitHub canonical repository: `Vertex-Systems-Network/nexora`
 - GitHub default branch: `main`
 - Active development branch: `dev/n1-0b-core-functional-qa`
-- Active GitHub pull request: `#1` — draft, mergeable; title `DEV-4/DEV-5 + N1.9-N1.12: product QA, Commerce, CRM/Membership and Search source closure`
-- Current branch head before this ledger-only commit: `4ddc9f56c0cbfc3d5fe828687724bcc496af3cad`
-- Latest complete green source-certification run before this ledger-only commit: `32481766814`
+- Active GitHub pull request: `#1` — draft, mergeable; title `DEV-4/DEV-5 + N1.9-N1.13: product QA, Commerce, CRM/Membership, Search and Collaboration source closure`
+- Current branch head before this ledger-only commit: `9c254e551fb8346eb553e67403fc7baeb09fe53e`
+- Latest complete green source-certification run before this ledger-only commit: `32489614837`
 - Open GitHub issues at this checkpoint: `#2 Nexora runtime identity mismatch`
 - Current target environment: Windows + Laragon (real-target development test environment)
 - Current target path: `D:\laragon\www\nexora`
@@ -98,6 +98,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | Data Connections | Auxiliary Mongo/Redis/AWS data-service handles | Product/security + DEV-5 portability source closure green; live connector target tests pending |
 | Primary SQL Portability | MySQL/MariaDB/PostgreSQL/SQLite/SQL Server + managed aliases | Source/harness closure green; real engine matrix evidence pending |
 | Search / Discovery | Public content search, Admin global search, query analytics | N1.12 Search 2.0 first workflow SOURCE DONE; membership visibility + tenant/permission isolation source-gated; target execution pending |
+| Collaboration | Document assignment/review and Admin notifications | N1.13 first workflow SOURCE DONE; tenant-member collaborators plus tenant-scoped review/notification identity source-gated; target execution pending |
 | Forge / SDK | Developer extension tooling | Foundation/planned expansion |
 | Sentinel | Theme/plugin trust/security | Foundation implemented; 2.0 later |
 | Marketplace | Theme/app/extension catalog, trusted staging and promotion | N1.9 first workflow SOURCE DONE; target execution pending; Marketplace 2.0 later |
@@ -132,7 +133,7 @@ Never report a feature as simply “100% complete” when only source/static ver
 - Generation: `n1-v5.29`
 - Active branch: `dev/n1-0b-core-functional-qa`
 - PR `#1` is draft and mergeable; it must remain draft until the required real-target gates pass.
-- Latest green source CI before this ledger-only commit: `32481766814` on head `4ddc9f56c0cbfc3d5fe828687724bcc496af3cad`.
+- Latest green source CI before this ledger-only commit: `32489614837` on head `9c254e551fb8346eb553e67403fc7baeb09fe53e`.
 - That run passed:
   - Certification preflight
   - Source Guard
@@ -155,8 +156,9 @@ Never report a feature as simply “100% complete” when only source/static ver
   - Customer Portal product source contract
   - CRM + Membership product source contract
   - Search 2.0 product source contract
+  - Collaboration product source contract
   - Unified source certification
-- Source/static gates are green through N1.12 Search 2.0.
+- Source/static gates are green through N1.13 Collaboration.
 - `composer.lock` and `package-lock.json` are not committed; deterministic dependency/release certification remains deferred.
 
 ### 5.2 Open GitHub issue status
@@ -176,7 +178,7 @@ as mismatches. Version, generation, deployment/source, database, storage, host, 
 
 Permanent rc.94 source fix is present and CI-guarded through `scripts/post-install-runtime-convergence-contract-verify.php`. The contract guarantees fresh `/install/runtime-handoff`, an exact mutable-plane reconciliation allow-list, immutable mismatch rejection, service/process health gates, one-time post-install identity finalization and post-write compatibility reassessment.
 
-Issue #2 remains **OPEN** because the existing rc.93 Laragon target still needs real recovery verification. The N1.11/N1.12 source passes do not change that live evidence.
+Issue #2 remains **OPEN** because the existing rc.93 Laragon target still needs real recovery verification. The latest N1.11-N1.13 source passes do not change that live evidence.
 
 ### 5.3 Current live Laragon installation
 
@@ -360,6 +362,18 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 - GitHub Actions run `32481766814` PASS on source head `4ddc9f56c0cbfc3d5fe828687724bcc496af3cad`, including Search 2.0 Product Contract and Unified Source Certification.
 - Real Search browser/runtime/PHPUnit execution remains TARGET PENDING.
 
+### N1.13 Collaboration first workflow source closure
+
+- Writer assignee/reviewer discovery now uses shared `TenantMemberDirectory::activeUsers()` instead of platform-wide user discovery.
+- `assigned_to` and `reviewer_id` writes use `TenantMemberExists`; platform-wide `exists:users,id` collaboration validation was removed.
+- `DocumentReviewComment` and `AdminNotification` now use `BelongsToTenant`; review comment creation explicitly inherits the parent Document tenant.
+- Forward migration `2026_08_21_000600_scope_collaboration_identity_to_tenant.php` adds tenant identity to review comments and Admin notifications without mutating historical migrations.
+- Historical review comments backfill from their parent Document tenant. Historical notifications backfill only when the user has exactly one active organization membership; zero/multi-organization rows remain `tenant_id = null` and therefore fail closed under tenant scope.
+- `tests/Feature/Collaboration/CollaborationTenantIsolationTest.php` covers collaborator discovery/write isolation, direct review/notification tenant isolation and ambiguous legacy notification non-disclosure.
+- `scripts/collaboration-product-contract-verify.php` is required by development readiness and GitHub Actions.
+- First source run `32489523189` correctly failed because the forward migration used non-portable `->after()` column placement. That cosmetic placement was removed without changing tenant semantics; run `32489614837` then passed Collaboration Product Contract, Unified Source Certification and every prior source gate on head `9c254e551fb8346eb553e67403fc7baeb09fe53e`.
+- Real Collaboration PHPUnit/browser/runtime execution remains TARGET PENDING.
+
 ---
 
 ## 7. Current progress dashboard
@@ -376,7 +390,7 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 ██████████░░░░░░░░░░  ~50%
 ```
 
-Source implementation increased through N1.12; real verification intentionally did not rise because N1.11/N1.12 and prior DEV-4/DEV-5 product work have not yet been executed across the required real targets.
+Source implementation increased through N1.13; real verification intentionally did not rise because N1.11-N1.13 and prior DEV-4/DEV-5 product work have not yet been executed across the required real targets.
 
 | Phase | Progress | Status |
 |---|---:|---|
@@ -400,7 +414,8 @@ Source implementation increased through N1.12; real verification intentionally d
 | N1.10 Commerce 2.0 first workflow | 100% source contract / target pending | SOURCE DONE |
 | N1.11 CRM / Membership / Customer Portal | 100% source contract / target pending | SOURCE DONE |
 | N1.12 Search 2.0 | 100% source contract / target pending | SOURCE DONE |
-| N1.13 Collaboration | Foundation/audit pending | NEXT SOURCE BLOCK |
+| N1.13 Collaboration | 100% source contract / target pending | SOURCE DONE |
+| N1.14 Automation | Foundation/audit pending | NEXT SOURCE BLOCK |
 | DEV-6 Final C1-C6/release certification | 10% | DEFERRED CERTIFICATION |
 
 ---
@@ -455,14 +470,14 @@ php scripts\database-target-matrix.php --list
 php scripts\database-target-matrix.php --drivers=sqlite,mysql,mariadb,pgsql,sqlsrv --evidence
 ```
 
-At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing, SEO, Forms, Data Workflows, Data Connections, Marketplace, Commerce, Customer Portal, CRM, Membership, Search and responsive Admin navigation on the real target.
+At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing, SEO, Forms, Data Workflows, Data Connections, Marketplace, Commerce, Customer Portal, CRM, Membership, Search, Collaboration and responsive Admin navigation on the real target.
 
 For network engines use only disposable databases whose names start with `nexora_matrix_`. For auxiliary connectors/provider actions, use controlled target services and record separate evidence. Never infer target verification from source fixtures.
 
 ### Remaining source/target sequence
 
 ```text
-N1.13 Collaboration source audit + closure
+N1.14 Automation source audit + closure
   ||
 Live rc.93 runtime recovery evidence
   -> separate dev checkout full PHPUnit/build/product browser QA
@@ -740,7 +755,7 @@ Use `No release` when no rc release was produced.
 
 - Trigger / observed blocker: Nexora needed a complete first forms/data workflow rather than isolated form/schema primitives.
 - Root cause: public submission semantics, privacy-minimal storage, Automation bridging, tenant permissions and non-destructive lifecycle needed one enforceable product contract.
-- Changes applied: tenant form/submission schema and models, controlled form definition validator, schema-derived public validation/storage, CSRF/honeypot/throttle/status gates, `form.submitted` Automation bridge, Admin workflow and acceptance contract.
+- Changes applied: tenant form/submission schema and models, controlled form definition validator, schema-derived public validation/storage, CSRF/honeypot/throttle/status guards, `form.submitted` Automation bridge, Admin workflow and acceptance contract.
 - Verification completed: Forms + Data + Workflows product source gate PASS in full source run `32476210643` and subsequent full runs.
 - Real-target evidence: no new Laragon execution for this workflow; SOURCE DONE only.
 - Remaining blocker: target functional execution.
@@ -816,6 +831,16 @@ Use `No release` when no rc release was produced.
 - Remaining blocker: live issue #2 + broad target QA + real DB matrix evidence.
 - Next exact action: synchronize PR/ledger, then begin N1.13 Collaboration source audit while target recovery remains a parallel gate.
 
+### 2026-08-21 — No release — N1.13 Collaboration tenant-isolation closure
+
+- Trigger / observed blocker: Writer collaborator discovery and assignment/reviewer validation were platform-wide; Admin notifications had only user identity and review comments lacked direct tenant ownership, creating cross-organization disclosure risk for multi-organization users/direct model queries.
+- Root cause: collaboration features predated the shared tenant-member boundary and two historical collaboration tables had no explicit tenant identity.
+- Changes applied: Writer now uses `TenantMemberDirectory` + `TenantMemberExists`; review comments and Admin notifications use `BelongsToTenant`; forward collaboration migration adds tenant identity and deterministic/fail-closed historical backfill; review comment writes inherit parent Document tenant; acceptance tests and a dedicated Collaboration product contract were added and wired to readiness/CI.
+- Verification completed: run `32489523189` caught non-portable `->after()` usage in the new migration; the placement-only call was removed. GitHub Actions run `32489614837` then passed every source gate including Collaboration Product Contract and Unified Source Certification on head `9c254e551fb8346eb553e67403fc7baeb09fe53e`.
+- Real-target evidence: no current-branch Laragon Collaboration/PHPUnit/browser execution yet; SOURCE DONE only.
+- Remaining blocker: live issue #2 + broad target QA + real DB matrix evidence.
+- Next exact action: begin N1.14 Automation source audit while live rc.93 recovery remains a parallel target gate.
+
 ---
 
 ## 13. Known deferred work / not the current blocker
@@ -845,22 +870,23 @@ GITHUB: Vertex-Systems-Network/nexora
 DEV SOURCE: rc.94 / v5.29 / n1-v5.29
 DEV BRANCH: dev/n1-0b-core-functional-qa
 PR: #1 DRAFT + MERGEABLE; FINAL GATES PASS => MARK READY + MERGE AUTOMATICALLY
-BRANCH HEAD BEFORE LEDGER COMMIT: 4ddc9f56c0cbfc3d5fe828687724bcc496af3cad
-LATEST GREEN CI BEFORE LEDGER COMMIT: 32481766814
+BRANCH HEAD BEFORE LEDGER COMMIT: 9c254e551fb8346eb553e67403fc7baeb09fe53e
+LATEST GREEN CI BEFORE LEDGER COMMIT: 32489614837
 OPEN ISSUE: #2 runtime identity mismatch
 LIVE TARGET: rc.93 installed on Laragon
 LIVE BLOCKER: post-install environment/activation/service/process fingerprints stale
 SOURCE/DEPLOYMENT/DB ON LIVE EVIDENCE: matching
 DEPENDENCY RUNTIME: matching
 LOCK REVIEW: missing, deferred
-SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + Admin UX + Forms/Data/Workflows + Data Connections + Primary SQL portability + Installer DB UX + guarded real-DB matrix harness + Marketplace N1.9 + Commerce N1.10 + Customer Portal/CRM/Membership N1.11 + Search N1.12
+SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + Admin UX + Forms/Data/Workflows + Data Connections + Primary SQL portability + Installer DB UX + guarded real-DB matrix harness + Marketplace N1.9 + Commerce N1.10 + Customer Portal/CRM/Membership N1.11 + Search N1.12 + Collaboration N1.13
 DEV-5: ~95% SOURCE; real engine TARGET VERIFIED evidence pending
 N1.11: SOURCE DONE; target pending
 N1.12: SOURCE DONE; target pending
+N1.13: SOURCE DONE; target pending
 DB MATRIX: scripts/database-target-matrix.php; use only empty nexora_matrix_* targets; --evidence -> storage/app/nexora/qa/database-target-matrix.json
 NEXT LIVE: safe rc.93 repair -> compatibility PASS -> post-install PASS -> /login -> /admin -> issue #2 close only after evidence
 NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + major product browser QA + real DB target matrix on separate dev checkout
-NEXT SOURCE: N1.13 Collaboration source audit and closure
+NEXT SOURCE: N1.14 Automation source audit and closure
 ISSUE RULE: inspect open GitHub issues every pass and solve applicable defects alongside roadmap work
 MERGE RULE: when required source + target + issue gates are final, mark Ready and merge automatically without asking again
 DO NOT: overwrite installed rc.93 with rc.94 as repair; do not mark PR #1 Ready or claim DB/provider TARGET VERIFIED from source CI alone
