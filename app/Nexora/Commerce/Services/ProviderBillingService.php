@@ -128,6 +128,11 @@ final readonly class ProviderBillingService
                     actorId: $actorId,
                     providerReference: $this->providerReference($result->providerReference),
                     idempotencyKey: $idempotencyKey,
+                    metadata: [
+                        'provider_successful' => $result->successful,
+                        'provider_message' => $result->message,
+                        'provider_metadata' => $result->metadata,
+                    ],
                 );
             },
         );
