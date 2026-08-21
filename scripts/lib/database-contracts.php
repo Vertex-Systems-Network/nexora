@@ -3,6 +3,57 @@
 declare(strict_types=1);
 
 /**
+ * @return list<string>
+ */
+function nexoraMigrationSchemaTableBlocks(string $source, string $targetTable): array
+{
+    $constants=[];
+    if(preg_match_all('/(?:private\s+|protected\s+|public\s+)?const\s+([A-Z0-9_]+)\s*=\s*[\'\"]([^\'\"]+)[\'\"]\s*;/', $source,$constantMatches,PREG_SET_ORDER)!==false){
+        foreach($constantMatches as $match)$constants[$match[1]]=$match[2];
+    }
+
+    $blocks=[];
+    if(preg_match_all('/Schema::table\(\s*(?:[\'\"]([^\'\"]+)[\'\"]|self::([A-Z0-9_]+))\s*,/', $source,$matches,PREG_SET_ORDER|PREG_OFFSET_CAPTURE)===false)return $blocks;
+
+    foreach($matches as $match){
+        $literal=$match[1][0]??'';
+        $constant=$match[2][0]??'';
+        $table=$literal!==''?$literal:($constants[$constant]??'');
+        if($table!==$targetTable)continue;
+
+        $start=(int)$match[0][1]+strlen((string)$match[0][0]);
+        $open=strpos($source,'{',$start);
+        if($open===false)continue;
+        $depth=0;
+        $length=strlen($source);
+        for($i=$open;$i<$length;$i++){
+            if($source[$i]==='{')$depth++;
+            elseif($source[$i]==='}'){
+                $depth--;
+                if($depth===0){
+                    $blocks[]=substr($source,$open,$i-$open+1);
+                    break;
+                }
+            }
+        }
+    }
+
+    return $blocks;
+}
+
+function nexoraMigrationForwardTenantizesTable(string $source, string $targetTable): bool
+{
+    $blocks=nexoraMigrationSchemaTableBlocks($source,$targetTable);
+    if($blocks===[])return false;
+    $combined=implode("\n",$blocks);
+
+    $hasTenantColumn=preg_match('/->uuid\s*\(\s*[\'\"]tenant_id[\'\"]\s*\)/',$combined)===1;
+    $hasTenantForeign=preg_match('/->foreign\s*\(\s*[\'\"]tenant_id[\'\"][^;]*?->references\s*\([^;]*?->on\s*\(\s*[\'\"]nx_enterprise_organizations[\'\"]\s*\)/s',$combined)===1;
+
+    return $hasTenantColumn&&$hasTenantForeign;
+}
+
+/**
  * @return array{errors:list<string>,warnings:list<string>,metrics:array<string,int>}
  */
 function nexoraAnalyzeDatabaseContracts(string $root): array
@@ -93,6 +144,7 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
     $declared=array_fill_keys($tenantTables,true);
     $tenantManifestModels=[];
     $tenantNativeModels=[];
+    $tenantForwardModels=[];
     foreach($tenantModels as $table=>$model){
         if(isset($declared[$table])) {
             $tenantManifestModels[$table]=$model;
@@ -102,19 +154,37 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
         // The enterprise manifest is a backfill contract for tables that existed
         // before enterprise tenancy was introduced. New tenant-aware tables created
         // after that migration must be tenant-native instead: their own migration
-        // declares tenant_id and its enterprise foreign key. This keeps future
-        // modules from mutating the historical backfill migration.
+        // declares tenant_id and its enterprise foreign key. Existing historical
+        // tables may also be tenantized by a later forward migration; never mutate
+        // the frozen enterprise backfill migration just to register that evolution.
         $creator=$created[$table]??null;
         $creatorIndex=is_string($creator)?($migrationIndexes[$creator]??null):null;
         $creatorSource=is_string($creator)?($migrationSources[$creator]??''):'';
         $isPostEnterprise=is_int($enterpriseMigrationIndex)&&is_int($creatorIndex)&&$creatorIndex>$enterpriseMigrationIndex;
         $hasTenantColumn=preg_match('/->uuid\([\'\"]tenant_id[\'\"]\)/',$creatorSource)===1;
         $hasTenantForeign=str_contains($creatorSource,"foreign('tenant_id'")&&str_contains($creatorSource,"on('nx_enterprise_organizations')");
-        if(!$isPostEnterprise||!$hasTenantColumn||!$hasTenantForeign){
-            $errors[]="{$model}: tenant-aware table {$table} is neither in the enterprise backfill manifest nor created later as a tenant-native table with tenant_id and enterprise foreign key.";
+        if($isPostEnterprise&&$hasTenantColumn&&$hasTenantForeign){
+            $tenantNativeModels[$table]=$model;
             continue;
         }
-        $tenantNativeModels[$table]=$model;
+
+        $forwardMigration=null;
+        if(is_int($enterpriseMigrationIndex)){
+            foreach($migrationSources as $migrationBasename=>$migrationSource){
+                $migrationIndex=$migrationIndexes[$migrationBasename]??null;
+                if(!is_int($migrationIndex)||$migrationIndex<=$enterpriseMigrationIndex)continue;
+                if(nexoraMigrationForwardTenantizesTable($migrationSource,$table)){
+                    $forwardMigration=$migrationBasename;
+                    break;
+                }
+            }
+        }
+        if(is_string($forwardMigration)){
+            $tenantForwardModels[$table]=$model;
+            continue;
+        }
+
+        $errors[]="{$model}: tenant-aware table {$table} is neither in the enterprise backfill manifest, created later as tenant-native, nor converted by a later forward tenantization migration with tenant_id and enterprise foreign key.";
     }
     foreach($tenantTables as $table){if(!isset($tenantModels[$table]))$errors[]="Enterprise tenant manifest table {$table} has no BelongsToTenant model.";}
 
@@ -187,6 +257,7 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
             'tenant_models_current'=>count($tenantManifestModels),
             'tenant_models_total'=>count($tenantModels),
             'tenant_native_models'=>count($tenantNativeModels),
+            'tenant_forward_models'=>count($tenantForwardModels),
             'portable_nullable_unique'=>$portableNullableUniqueCount,
             'seeders'=>count(glob($root.'/database/seeders/**/*.php',GLOB_BRACE) ?: []),
         ],
