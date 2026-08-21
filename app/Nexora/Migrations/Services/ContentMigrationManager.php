@@ -53,10 +53,13 @@ final class ContentMigrationManager
             ->where('source_hash', $sourceHash)
             ->first();
         if ($existing) {
-            if ($existing->status === 'failed' && ! Storage::disk('local')->exists($existing->source_path)) {
-                $this->restageExisting($existing, $file);
+            if (in_array($existing->status, ['failed', 'completed_with_errors'], true)) {
+                if (! Storage::disk('local')->exists($existing->source_path)) {
+                    $this->restageExisting($existing, $file);
+                }
+                return $this->resume($existing);
             }
-            if (in_array($existing->status, ['queued', 'failed'], true)) {
+            if ($existing->status === 'queued') {
                 $this->dispatch($existing);
             }
             return $existing->refresh();
@@ -99,14 +102,19 @@ final class ContentMigrationManager
 
     public function resume(ContentMigrationRun $run): ContentMigrationRun
     {
-        if (! in_array($run->status, ['failed', 'queued'], true)) {
-            throw ValidationException::withMessages(['run' => 'Only failed or queued migrations can be resumed.']);
+        if (! in_array($run->status, ['failed', 'queued', 'completed_with_errors'], true)) {
+            throw ValidationException::withMessages(['run' => 'Only failed, partial or queued migrations can be resumed.']);
         }
         if (! Storage::disk('local')->exists($run->source_path)) {
             throw ValidationException::withMessages(['run' => 'The staged source file is no longer available; upload it again.']);
         }
 
-        $run->forceFill(['status' => 'queued', 'error_code' => null, 'failed_at' => null])->save();
+        $run->forceFill([
+            'status' => 'queued',
+            'error_code' => null,
+            'failed_at' => null,
+            'completed_at' => null,
+        ])->save();
         $this->dispatch($run);
         return $run->refresh();
     }
