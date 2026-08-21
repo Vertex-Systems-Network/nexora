@@ -143,6 +143,22 @@ foreach ([
     'passes a fresh test' => 're-test requirement UX',
     '<ConfirmDialog' => 'destructive removal confirmation',
     '!connection.enabled' => 'enabled removal suppression',
+    'endpoint_required: boolean' => 'capability-aware endpoint UI type',
+    'database_supported: boolean' => 'capability-aware database UI type',
+    'username_password_supported: boolean' => 'capability-aware credential UI type',
+    'region_required: boolean' => 'capability-aware region UI type',
+    'aws_key_pair_supported: boolean' => 'capability-aware AWS key UI type',
+    'const selectDriver = (value: string)' => 'driver-switch normalization workflow',
+    'form.clearErrors();' => 'driver-switch validation reset',
+    'password: ""' => 'driver-switch stale password clearing',
+    'No endpoint is required for this connector.' => 'endpoint-optional connector guidance',
+    'runtime IAM credential chain' => 'IAM-chain UX guidance',
+    'selected?.database_supported !== false' => 'conditional database field rendering',
+    'selected?.username_password_supported !== false' => 'conditional user/password rendering',
+    'selected?.region_required' => 'conditional region rendering',
+    'selected?.aws_key_pair_supported' => 'conditional AWS key rendering',
+    'editSelected?.endpoint_required !== false' => 'capability-aware edit endpoint rendering',
+    'editSelected?.aws_key_pair_supported' => 'capability-aware edit AWS key rendering',
 ] as $needle => $label) {
     if ($page !== '' && ! str_contains($page, $needle)) {
         $errors[] = "Data Connections Admin UX contract missing: {$label}.";
@@ -187,5 +203,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Data Connections Product Contract] PASS — auxiliary connectors are enterprise-tenant-scoped, secrets remain encrypted/non-disclosed, plaintext endpoint credentials are quarantined, rotation invalidates stale health, DynamoDB validation is endpoint/credential-model aware, Redis TLS is normalized across PhpRedis/Predis, and destructive removal is guarded.'.PHP_EOL,
+    '[Nexora Data Connections Product Contract] PASS — auxiliary connectors are enterprise-tenant-scoped, secrets remain encrypted/non-disclosed, plaintext endpoint credentials are quarantined, rotation invalidates stale health, DynamoDB validation/UI are endpoint/credential-model aware, Redis TLS is normalized across PhpRedis/Predis, and destructive removal is guarded.'.PHP_EOL,
 );
