@@ -6,6 +6,7 @@ namespace Tests\Feature\Themes;
 
 use App\Models\Document;
 use App\Models\Role;
+use App\Models\SecurityScan;
 use App\Models\Theme;
 use App\Models\ThemeVersion;
 use App\Models\User;
@@ -107,6 +108,38 @@ final class ThemeEngineFlowTest extends TestCase
                 ->assertSessionHasNoErrors();
 
             self::assertSame('nexora.base', app(ThemeManagerContract::class)->active()?->theme?->identifier);
+        } finally {
+            @unlink($zipPath);
+        }
+    }
+
+    public function test_pre_scanned_theme_can_be_promoted_after_sentinel_approval(): void
+    {
+        $admin = User::factory()->create(['email_verified_at' => now()]);
+        $admin->roles()->attach(Role::query()->where('slug', 'administrator')->value('id'));
+        $zipPath = $this->themeZip();
+
+        try {
+            $this->actingAs($admin)->post('/admin/security/sentinel', [
+                'package' => new UploadedFile($zipPath, 'acme-marketplace-theme.zip', 'application/zip', null, true),
+            ])->assertSessionHasNoErrors();
+
+            $scan = SecurityScan::query()->where('source_name', 'acme-marketplace-theme.zip')->latest('created_at')->firstOrFail();
+            self::assertSame('completed', $scan->status);
+            self::assertSame('allow', $scan->decision);
+            self::assertSame('theme', $scan->manifest['type'] ?? null);
+            self::assertFalse(Theme::query()->where('identifier', 'acme.e2e')->exists());
+
+            $this->actingAs($admin)
+                ->post('/admin/appearance/themes/install', ['scan_id' => $scan->id])
+                ->assertRedirect('/admin/appearance/themes')
+                ->assertSessionHasNoErrors();
+
+            $theme = Theme::query()->where('identifier', 'acme.e2e')->firstOrFail();
+            $version = $theme->versions()->where('version', '1.0.0')->firstOrFail();
+            self::assertSame('nexora-safe-html', $version->engine);
+            self::assertSame($scan->id, $version->source_scan_id);
+            self::assertSame('installed', $scan->quarantinePackage()->value('status'));
         } finally {
             @unlink($zipPath);
         }
