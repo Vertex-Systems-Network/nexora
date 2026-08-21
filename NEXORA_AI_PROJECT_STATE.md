@@ -10,7 +10,7 @@
 ## 0. Ledger metadata
 
 - Ledger schema: `1`
-- Ledger revision: `2.1`
+- Ledger revision: `2.2`
 - Project: `Nexora`
 - Product class: advanced extensible web platform / CMS / site builder / application ecosystem
 - Current development source release: `1.0.0-rc.94`
@@ -20,9 +20,9 @@
 - GitHub canonical repository: `Vertex-Systems-Network/nexora`
 - GitHub default branch: `main`
 - Active development branch: `dev/n1-0b-core-functional-qa`
-- Active GitHub pull request: `#1` — draft, mergeable; title to synchronize as `DEV-4/DEV-5 + N1.9-N1.14: product QA, Commerce, CRM/Membership, Search, Collaboration and Automation source closure`
-- Current branch head before this ledger-only commit: `4689abd4b91a4a293bfbf4dc365befb56a2cc04e`
-- Latest complete green source-certification run before this ledger-only commit: `32493091576`
+- Active GitHub pull request: `#1` — draft, mergeable; title to synchronize as `DEV-4/DEV-5 + N1.9-N1.15: product QA, Commerce, CRM/Membership, Search, Collaboration, Automation and AI source closure`
+- Current branch head before this ledger-only commit: `3b9eb2d1012336b43aa06a2d01841f7fc9d19b5e`
+- Latest complete green source-certification run before this ledger-only commit: `32501783846`
 - Open GitHub issues at this checkpoint: `#2 Nexora runtime identity mismatch`
 - Current target environment: Windows + Laragon (real-target development test environment)
 - Current target path: `D:\laragon\www\nexora`
@@ -100,6 +100,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | Search / Discovery | Public content search, Admin global search, query analytics | N1.12 Search 2.0 first workflow SOURCE DONE; membership visibility + tenant/permission isolation source-gated; target execution pending |
 | Collaboration | Document assignment/review and Admin notifications | N1.13 first workflow SOURCE DONE; tenant-member collaborators plus tenant-scoped review/notification identity source-gated; target execution pending |
 | Automation | Event-driven workflows, actions, inbound/outbound webhooks | N1.14 first workflow SOURCE DONE; tenant-member notification targets, tenant-native workflow/event identity, tenant-restored queue execution and webhook safety source-gated; target execution pending |
+| AI Platform | Tenant AI connections, provider-neutral text generation, privacy-minimal run metadata | N1.15 first workflow SOURCE DONE; encrypted credentials, bounded generation and provider-neutral adapter boundary source-gated; target execution + real provider-adapter evidence pending |
 | Forge / SDK | Developer extension tooling | Foundation/planned expansion |
 | Sentinel | Theme/plugin trust/security | Foundation implemented; 2.0 later |
 | Marketplace | Theme/app/extension catalog, trusted staging and promotion | N1.9 first workflow SOURCE DONE; target execution pending; Marketplace 2.0 later |
@@ -134,7 +135,7 @@ Never report a feature as simply “100% complete” when only source/static ver
 - Generation: `n1-v5.29`
 - Active branch: `dev/n1-0b-core-functional-qa`
 - PR `#1` is draft and mergeable; it must remain draft until the required real-target gates pass.
-- Latest green source CI before this ledger-only commit: `32493091576` on head `4689abd4b91a4a293bfbf4dc365befb56a2cc04e`.
+- Latest green source CI before this ledger-only commit: `32501783846` on head `3b9eb2d1012336b43aa06a2d01841f7fc9d19b5e`.
 - That run passed:
   - Certification preflight
   - Source Guard
@@ -159,8 +160,9 @@ Never report a feature as simply “100% complete” when only source/static ver
   - Search 2.0 product source contract
   - Collaboration product source contract
   - Automation product source contract
+  - AI Platform product source contract
   - Unified source certification
-- Source/static gates are green through N1.14 Automation.
+- Source/static gates are green through N1.15 AI Platform Capabilities.
 - `composer.lock` and `package-lock.json` are not committed; deterministic dependency/release certification remains deferred.
 
 ### 5.2 Open GitHub issue status
@@ -180,7 +182,7 @@ as mismatches. Version, generation, deployment/source, database, storage, host, 
 
 Permanent rc.94 source fix is present and CI-guarded through `scripts/post-install-runtime-convergence-contract-verify.php`. The contract guarantees fresh `/install/runtime-handoff`, an exact mutable-plane reconciliation allow-list, immutable mismatch rejection, service/process health gates, one-time post-install identity finalization and post-write compatibility reassessment.
 
-Issue #2 remains **OPEN** because the existing rc.93 Laragon target still needs real recovery verification. The latest N1.11-N1.14 source passes do not change that live evidence.
+Issue #2 remains **OPEN** because the existing rc.93 Laragon target still needs real recovery verification. The latest N1.11-N1.15 source passes do not change that live evidence.
 
 ### 5.3 Current live Laragon installation
 
@@ -392,6 +394,22 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 - GitHub Actions run `32493091576` then passed Certification preflight, Primary SQL Portability, Automation Product Contract, Unified Source Certification and every prior source gate on head `4689abd4b91a4a293bfbf4dc365befb56a2cc04e`.
 - Real Automation PHPUnit/browser/queue/inbound-outbound webhook execution remains TARGET PENDING.
 
+### N1.15 AI Platform first workflow source closure
+
+- Existing Core had no dedicated AI module/provider/runtime surface, so the first workflow was intentionally scoped to tenant AI connections, provider-neutral bounded text generation and privacy-minimal generation metadata rather than claiming a complete vendor AI suite.
+- `AiConnection` and `AiGenerationRun` are tenant-owned through `BelongsToTenant`; connection credentials use Laravel `encrypted:array` casting and are hidden from serialization.
+- Core defines `AiTextProviderContract`, `AiProviderRegistry` and `AiGenerationService`; no OpenAI/Anthropic/vendor AI SDK was added to Core. Verified extensions can register adapters without changing the Core generation contract.
+- Generation re-resolves the selected connection inside the active tenant, requires an enabled/healthy registered provider, enforces per-connection input/output bounds and reserves the daily request quota under a concurrency mutex before calling the provider. Failed provider attempts therefore also consume admission budget instead of enabling retry-based quota bypass.
+- Generation history has no raw `prompt` or `output` columns. It stores SHA-256 digests, lengths, requested/observed token counts, status/timestamps and a strictly validated provider request identifier. Provider failure messages persisted by Core are generic.
+- Raw generated text is returned by a direct JSON response and held only in browser-local React state. It is not placed in Laravel session flash, preventing DB-backed session persistence of generated content.
+- Provider health diagnostics are reduced to generic Core messages so an adapter cannot persist/echo secret or prompt content through health text.
+- Provider settings reject secret-like keys; secrets must use encrypted Credentials JSON. Changing provider requires an explicit new credentials payload (including `{}` for no-secret adapters) so old-provider credentials cannot silently cross provider boundaries.
+- Admin routes are authenticated, verified, admin-only, tenant route-bound and permission/throttle gated. AI capabilities are registered in the runtime graph and `AiServiceProvider` is bootstrapped explicitly.
+- `tests/Feature/Ai/AiPlatformIsolationTest.php` covers cross-tenant connection isolation, encrypted-at-rest credentials, metadata-only generation history, quota admission and cross-tenant execution rejection.
+- `scripts/ai-platform-product-contract-verify.php` is required by development readiness and GitHub Actions and guards provider neutrality, credential privacy, raw-content non-persistence, health/quota/bounds admission and route/UI privacy semantics.
+- GitHub Actions run `32501783846` SUCCESS on source head `3b9eb2d1012336b43aa06a2d01841f7fc9d19b5e`, including AI Platform Product Contract, Unified Source Certification and every prior source gate.
+- Real Laragon PHPUnit/browser AI execution and controlled real provider-adapter verification remain TARGET PENDING.
+
 ---
 
 ## 7. Current progress dashboard
@@ -408,7 +426,7 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 ██████████░░░░░░░░░░  ~50%
 ```
 
-Source implementation increased through N1.14; real verification intentionally did not rise because N1.11-N1.14 and prior DEV-4/DEV-5 product work have not yet been executed across the required real targets.
+Source implementation increased through N1.15; real verification intentionally did not rise because N1.11-N1.15 and prior DEV-4/DEV-5 product work have not yet been executed across the required real targets.
 
 | Phase | Progress | Status |
 |---|---:|---|
@@ -417,7 +435,7 @@ Source implementation increased through N1.14; real verification intentionally d
 | DEV-2A Historical TypeScript remediation | 100% | SOURCE DONE |
 | DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for the previously reported Laragon build |
 | DEV-3 Laravel/install runtime | 80% source / 75% live | PARTIAL — source convergence gate green; live rc.93 repair evidence pending |
-| DEV-4 Login/admin/core functional QA | 96% source / 30% live | PARTIAL — major product workflows source-gated; broad target QA pending |
+| DEV-4 Login/admin/core functional QA | 97% source / 30% live | PARTIAL — major product workflows source-gated; broad target QA pending |
 | DEV-4A Site settings + media reuse | 100% source / target pending | SOURCE DONE |
 | DEV-4B Theme workflow | 100% source contract / target pending | SOURCE DONE |
 | DEV-4C Extension workflow | 100% source contract / target pending | SOURCE DONE |
@@ -434,7 +452,8 @@ Source implementation increased through N1.14; real verification intentionally d
 | N1.12 Search 2.0 | 100% source contract / target pending | SOURCE DONE |
 | N1.13 Collaboration | 100% source contract / target pending | SOURCE DONE |
 | N1.14 Automation | 100% source contract / target pending | SOURCE DONE |
-| N1.15 AI Platform Capabilities | Foundation/audit pending | NEXT SOURCE BLOCK |
+| N1.15 AI Platform Capabilities | 100% source contract / target pending | SOURCE DONE |
+| N1.16 Multisite / Organizations | Foundation exists; product audit pending | NEXT SOURCE BLOCK |
 | DEV-6 Final C1-C6/release certification | 10% | DEFERRED CERTIFICATION |
 
 ---
@@ -489,19 +508,19 @@ php scripts\database-target-matrix.php --list
 php scripts\database-target-matrix.php --drivers=sqlite,mysql,mariadb,pgsql,sqlsrv --evidence
 ```
 
-At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing, SEO, Forms, Data Workflows, Data Connections, Marketplace, Commerce, Customer Portal, CRM, Membership, Search, Collaboration, Automation and responsive Admin navigation on the real target.
+At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing, SEO, Forms, Data Workflows, Data Connections, Marketplace, Commerce, Customer Portal, CRM, Membership, Search, Collaboration, Automation, AI Platform and responsive Admin navigation on the real target.
 
-For network engines use only disposable databases whose names start with `nexora_matrix_`. For auxiliary connectors/provider actions, use controlled target services and record separate evidence. Never infer target verification from source fixtures.
+For network engines use only disposable databases whose names start with `nexora_matrix_`. For auxiliary connectors/provider actions, use controlled target services and record separate evidence. Never infer target verification from source fixtures. For AI, a provider becomes TARGET VERIFIED only after a controlled registered adapter is exercised without exposing credentials/raw generation history.
 
 ### Remaining source/target sequence
 
 ```text
-N1.15 AI Platform Capabilities source audit + closure
+N1.16 Multisite / Organizations source audit + closure
   ||
 Live rc.93 runtime recovery evidence
   -> separate dev checkout full PHPUnit/build/product browser QA
   -> real SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix evidence
-  -> optional managed AWS/auxiliary connector/provider target evidence where services exist
+  -> optional managed AWS/auxiliary connector/provider/AI-adapter target evidence where services exist
   -> close remaining target defects
   -> final DEV-6 reviewed locks + C1-C6/release certification
   -> mark PR Ready + merge automatically when all required gates are genuinely final
@@ -870,6 +889,16 @@ Use `No release` when no rc release was produced.
 - Remaining blocker: live issue #2 + broad dev target QA + real DB matrix evidence.
 - Next exact action: synchronize PR/ledger, then begin N1.15 AI Platform Capabilities source audit while target recovery remains separate.
 
+### 2026-08-21 — No release — N1.15 AI Platform provider-neutral privacy and tenant closure
+
+- Trigger / observed blocker: Nexora had no dedicated AI platform surface, while a safe first workflow required tenant isolation, provider neutrality, encrypted credentials, strict admission controls and a guarantee that raw prompts/generated text would not become durable history.
+- Root cause: no Core AI provider contract/registry, no tenant-native AI connection/run schema and no shared generation boundary existed. During implementation, session-flash raw output, arbitrary provider health text/request IDs, secret-like settings and cross-provider credential reuse were also identified as privacy/trust risks.
+- Changes applied: added `nexora.ai`, AI capabilities and service-provider/routes; tenant-scoped encrypted AI connections and metadata-only generation runs; provider-neutral `AiTextProviderContract`/registry; bounded `AiGenerationService` with tenant re-resolution, health admission, pre-call daily quota reservation, input/output bounds and generic failures; direct JSON/browser-local raw output; secret-like settings rejection; explicit credentials on provider switch; generic health diagnostics; strict provider request-ID validation; acceptance tests and required AI Platform product source contract.
+- Verification completed: GitHub Actions run `32501783846` SUCCESS on head `3b9eb2d1012336b43aa06a2d01841f7fc9d19b5e`; AI Platform Product Contract, Unified Source Certification and every prior source gate passed.
+- Real-target evidence: no current-branch Laragon AI PHPUnit/browser execution or controlled real provider-adapter call has been supplied; SOURCE DONE only.
+- Remaining blocker: live issue #2 + broad dev target QA + real DB matrix + controlled AI provider-adapter target evidence.
+- Next exact action: begin N1.16 Multisite / Organizations source audit while live rc.93 recovery remains a separate target gate.
+
 ---
 
 ## 13. Known deferred work / not the current blocker
@@ -882,6 +911,7 @@ Use `No release` when no rc release was produced.
 - managed AWS SQL target verification where test services are available
 - auxiliary Mongo/Redis/AWS connector target verification where adapters/services are available
 - real Commerce payment-provider target verification where a controlled test gateway/extension is available
+- real AI provider-adapter target verification where a controlled adapter/service is available
 - HA/distributed runtime
 - final performance/accessibility certification
 - Marketplace 2.0 / Sentinel 2.0
@@ -899,24 +929,25 @@ GITHUB: Vertex-Systems-Network/nexora
 DEV SOURCE: rc.94 / v5.29 / n1-v5.29
 DEV BRANCH: dev/n1-0b-core-functional-qa
 PR: #1 DRAFT + MERGEABLE; FINAL GATES PASS => MARK READY + MERGE AUTOMATICALLY
-BRANCH HEAD BEFORE LEDGER COMMIT: 4689abd4b91a4a293bfbf4dc365befb56a2cc04e
-LATEST GREEN CI BEFORE LEDGER COMMIT: 32493091576
+BRANCH HEAD BEFORE LEDGER COMMIT: 3b9eb2d1012336b43aa06a2d01841f7fc9d19b5e
+LATEST GREEN CI BEFORE LEDGER COMMIT: 32501783846
 OPEN ISSUE: #2 runtime identity mismatch
 LIVE TARGET: rc.93 installed on Laragon
 LIVE BLOCKER: post-install environment/activation/service/process fingerprints stale
 SOURCE/DEPLOYMENT/DB ON LIVE EVIDENCE: matching
 DEPENDENCY RUNTIME: matching
 LOCK REVIEW: missing, deferred
-SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + Admin UX + Forms/Data/Workflows + Data Connections + Primary SQL portability + Installer DB UX + guarded real-DB matrix harness + Marketplace N1.9 + Commerce N1.10 + Customer Portal/CRM/Membership N1.11 + Search N1.12 + Collaboration N1.13 + Automation N1.14
+SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + Admin UX + Forms/Data/Workflows + Data Connections + Primary SQL portability + Installer DB UX + guarded real-DB matrix harness + Marketplace N1.9 + Commerce N1.10 + Customer Portal/CRM/Membership N1.11 + Search N1.12 + Collaboration N1.13 + Automation N1.14 + AI Platform N1.15
 DEV-5: ~95% SOURCE; real engine TARGET VERIFIED evidence pending
 N1.11: SOURCE DONE; target pending
 N1.12: SOURCE DONE; target pending
 N1.13: SOURCE DONE; target pending
 N1.14: SOURCE DONE; target pending
+N1.15: SOURCE DONE; target/provider-adapter evidence pending
 DB MATRIX: scripts/database-target-matrix.php; use only empty nexora_matrix_* targets; --evidence -> storage/app/nexora/qa/database-target-matrix.json
 NEXT LIVE: safe rc.93 repair -> compatibility PASS -> post-install PASS -> /login -> /admin -> issue #2 close only after evidence
-NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + major product browser QA + real DB target matrix on separate dev checkout
-NEXT SOURCE: N1.15 AI Platform Capabilities source audit and closure
+NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + major product browser QA including AI Platform + real DB target matrix on separate dev checkout
+NEXT SOURCE: N1.16 Multisite / Organizations source audit and closure
 ISSUE RULE: inspect open GitHub issues every pass and solve applicable defects alongside roadmap work
 MERGE RULE: when required source + target + issue gates are final, mark Ready and merge automatically without asking again
 DO NOT: overwrite installed rc.93 with rc.94 as repair; do not mark PR #1 Ready or claim DB/provider TARGET VERIFIED from source CI alone
