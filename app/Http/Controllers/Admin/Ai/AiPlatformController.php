@@ -101,13 +101,20 @@ final class AiPlatformController extends Controller
     {
         $data = $this->validatedConnection($request, false, (string) $connection->provider_key);
         $this->assertUniqueName((string) $data['name'], $connection->id);
-        $nextCredentials = trim((string) ($data['credentials_json'] ?? '')) === ''
+        $providerKey = (string) ($data['provider_key'] ?? $connection->provider_key);
+        $providerChanged = $providerKey !== $connection->provider_key;
+        $credentialJson = trim((string) ($data['credentials_json'] ?? ''));
+        if ($providerChanged && $credentialJson === '') {
+            throw ValidationException::withMessages([
+                'credentials_json' => 'Changing AI provider requires an explicit Credentials JSON value, including {} when the new provider uses no secret credentials.',
+            ]);
+        }
+        $nextCredentials = $credentialJson === ''
             ? (array) $connection->credentials
-            : $this->decodeObject((string) $data['credentials_json'], 'credentials_json');
+            : $this->decodeObject($credentialJson, 'credentials_json');
         $nextSettings = $this->decodeObject((string) ($data['settings_json'] ?? ''), 'settings_json');
         $this->assertSettingsContainNoSecrets($nextSettings);
-        $providerKey = (string) ($data['provider_key'] ?? $connection->provider_key);
-        $connectivityChanged = $providerKey !== $connection->provider_key
+        $connectivityChanged = $providerChanged
             || trim((string) $data['model']) !== $connection->model
             || $nextCredentials !== (array) $connection->credentials
             || $nextSettings !== (array) $connection->settings;
