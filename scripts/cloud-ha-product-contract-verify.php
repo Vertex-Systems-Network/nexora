@@ -51,7 +51,7 @@ $forbid(
 );
 $require('leases', 'lockForUpdate()->first()', 'Runtime lease ownership must serialize contenders with a database row lock.');
 $require('leases', 'if (! $expired && ! $sameOwner) return false;', 'Runtime lease ownership must reject a live competing owner.');
-$require('leases', "where('owner_node_key', $owner)->update", 'Lease release must be owner-bound.');
+$require('leases', 'where(\'owner_node_key\', $owner)->update', 'Lease release must be owner-bound.');
 
 // Scheduler leadership uses the shared lease boundary and runtime compatibility admission.
 $require('leadership', 'private RuntimeLeaseManager $leases', 'Cluster leadership must use the shared runtime lease manager.');
@@ -61,22 +61,22 @@ $require('leadership', '!$this->nodes->isReady()||!$this->versions->compatible()
 // HA readiness must reject ghost/stale scheduler owners, not just a live timestamp.
 $require('readiness', "Schema::hasTable('nx_runtime_leases')", 'HA readiness must verify runtime lease storage exists.');
 $require('readiness', "Schema::hasTable('nx_runtime_nodes')", 'HA readiness must verify runtime node storage exists.');
-$require('readiness', "where('node_key', $lease->owner_node_key)", 'HA readiness must resolve the scheduler lease owner as an observed runtime node.');
+$require('readiness', 'where(\'node_key\', $lease->owner_node_key)', 'HA readiness must resolve the scheduler lease owner as an observed runtime node.');
 $require('readiness', "where('status', 'active')", 'HA readiness must require the scheduler lease owner to be active.');
-$require('readiness', "where('last_heartbeat_at', '>=', $now->copy()->subSeconds($freshSeconds))", 'HA readiness must require a fresh scheduler lease owner heartbeat.');
+$require('readiness', 'where(\'last_heartbeat_at\', \'>=\', $now->copy()->subSeconds($freshSeconds))', 'HA readiness must require a fresh scheduler lease owner heartbeat.');
 $require('readiness', 'scheduler lease owner is missing, stale, or inactive', 'HA readiness must fail closed for ghost/stale/inactive scheduler owners.');
 
 // All coordinated schedules share one leadership decision. Heartbeats remain per-node and must not be leader-gated.
 $require('console', '$leaderCheck = static fn (): bool => app(ClusterLeadership::class)->isSchedulerLeader();', 'Scheduled work must share the ClusterLeadership gate.');
-$require('console', "Schedule::command('nexora:publishing:run')->everyMinute()->withoutOverlapping()->when($leaderCheck);", 'Publishing scheduler must be leader-gated.');
-$require('console', "Schedule::command('nexora:runtime:metrics')->everyFiveMinutes()->withoutOverlapping()->when($leaderCheck);", 'Runtime metrics aggregation must be leader-gated.');
+$require('console', 'Schedule::command(\'nexora:publishing:run\')->everyMinute()->withoutOverlapping()->when($leaderCheck);', 'Publishing scheduler must be leader-gated.');
+$require('console', 'Schedule::command(\'nexora:runtime:metrics\')->everyFiveMinutes()->withoutOverlapping()->when($leaderCheck);', 'Runtime metrics aggregation must be leader-gated.');
 $require('console', "Schedule::command('nexora:runtime:process-heartbeat scheduler')->everyMinute();", 'Scheduler process heartbeat must run independently on every scheduler process.');
 $require('console', "Schedule::command('nexora:node:heartbeat')->everyMinute();", 'Node heartbeat must run independently on every node.');
-$forbid('console', "Schedule::command('nexora:node:heartbeat')->everyMinute()->when($leaderCheck)", 'Node heartbeat must never be restricted to the elected scheduler leader.');
+$forbid('console', 'Schedule::command(\'nexora:node:heartbeat\')->everyMinute()->when($leaderCheck)', 'Node heartbeat must never be restricted to the elected scheduler leader.');
 
 // Public readiness does not disclose exception strings.
-$require('health', "return ['name' => $name, 'status' => 'unhealthy', 'duration_ms' =>", 'Health probes must return bounded generic unhealthy state.');
-$forbid('health', "'error' => $e->getMessage()", 'Public health probes must not disclose raw exception messages.');
+$require('health', 'return [\'name\' => $name, \'status\' => \'unhealthy\', \'duration_ms\' =>', 'Health probes must return bounded generic unhealthy state.');
+$forbid('health', '\'error\' => $e->getMessage()', 'Public health probes must not disclose raw exception messages.');
 
 foreach ([
     'test_lease_and_barrier_acquisition_fail_closed_when_coordination_table_is_unavailable',
