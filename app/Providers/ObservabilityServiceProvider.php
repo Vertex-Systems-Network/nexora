@@ -9,6 +9,7 @@ use App\Nexora\Cloud\Services\ClusterLeadership;
 use App\Nexora\Observability\Services\ObservabilityRecorder;
 use App\Nexora\Observability\Services\ObservabilityRetentionService;
 use App\Nexora\Observability\Services\TelemetrySanitizer;
+use App\Nexora\Security\Audit\AuditManager;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,7 +18,8 @@ final class ObservabilityServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(TelemetrySanitizer::class);
-        $this->app->singleton(ObservabilityRecorder::class);
+        $this->app->scoped(AuditManager::class);
+        $this->app->scoped(ObservabilityRecorder::class);
         $this->app->singleton(ObservabilityRetentionService::class);
 
         if ($this->app->runningInConsole()) {
