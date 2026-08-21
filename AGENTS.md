@@ -10,5 +10,7 @@ Before planning, editing, auditing, packaging, or releasing Nexora:
 6. After every meaningful implementation, audit, packaging, target-verification, or release pass, update `NEXORA_AI_PROJECT_STATE.md` and append a history entry. Never delete prior history.
 7. Do not mark source/static work as target-verified without real target evidence.
 8. Keep final C1-C6/release certification late; product usability and runtime closure come first.
+9. Inspect open GitHub issues at the start and end of every meaningful pass, and solve applicable defects alongside roadmap work.
+10. A pull request may leave draft state only when its required source CI and real-target gates are satisfied. Once a PR is genuinely final/merge-ready, mark it Ready for review and merge it without waiting for a separate merge confirmation. Never merge a target-unverified or failing PR.
 
 When using GitHub, prefer a development branch + pull request for meaningful source changes. Do not push unverified runtime code directly to `main`.
