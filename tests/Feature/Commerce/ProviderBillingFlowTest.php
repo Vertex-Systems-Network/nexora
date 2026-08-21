@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Commerce;
 
+use App\Models\CommerceCustomer;
 use App\Models\CommerceInvoice;
 use App\Models\CommerceOrder;
 use App\Models\CommercePaymentProviderConfig;
@@ -11,6 +12,7 @@ use App\Models\CommercePaymentTransaction;
 use App\Models\CommercePrice;
 use App\Models\CommerceProduct;
 use App\Models\CommerceRefund;
+use App\Models\CommerceSubscription;
 use App\Models\Role;
 use App\Models\User;
 use App\Nexora\Commerce\Contracts\PaymentProviderContract;
@@ -21,7 +23,6 @@ use App\Nexora\Commerce\Data\SubscriptionRequest;
 use App\Nexora\Commerce\Services\PaymentProviderRegistry;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use LogicException;
 use Tests\TestCase;
 
 final class ProviderBillingFlowTest extends TestCase
@@ -36,18 +37,7 @@ final class ProviderBillingFlowTest extends TestCase
 
     public function test_enabled_provider_collects_and_refunds_with_retry_safe_idempotency(): void
     {
-        $provider = new FakeCommercePaymentProvider();
-        app(PaymentProviderRegistry::class)->register($provider);
-        CommercePaymentProviderConfig::query()->create([
-            'provider_key' => $provider->key(),
-            'display_name' => $provider->label(),
-            'enabled' => true,
-            'mode' => 'test',
-            'configuration' => [],
-            'secret_refs' => [],
-            'last_health_status' => 'healthy',
-        ]);
-
+        $provider = $this->enabledProvider();
         $admin = $this->administrator();
         $price = $this->activePrice();
 
@@ -93,6 +83,74 @@ final class ProviderBillingFlowTest extends TestCase
         self::assertSame(1, CommerceRefund::query()->count());
     }
 
+    public function test_provider_subscription_create_and_cancel_are_retry_safe(): void
+    {
+        $provider = $this->enabledProvider();
+        $admin = $this->administrator();
+        $customer = CommerceCustomer::query()->create([
+            'name' => 'Subscription Customer',
+            'email' => 'subscription@example.test',
+        ]);
+        $price = $this->activePrice(recurring: true);
+
+        $createPayload = [
+            'customer_id' => $customer->id,
+            'price_id' => $price->id,
+            'provider_key' => $provider->key(),
+            'idempotency_key' => 'provider-subscription-create-1',
+        ];
+        $this->actingAs($admin)->post('/admin/commerce/billing/subscriptions', $createPayload)->assertSessionHas('success');
+        $this->actingAs($admin)->post('/admin/commerce/billing/subscriptions', $createPayload)->assertSessionHas('success');
+
+        self::assertSame(1, $provider->subscriptionCalls);
+        self::assertSame(1, CommerceSubscription::query()->count());
+        $subscription = CommerceSubscription::query()->firstOrFail();
+        self::assertSame('active', $subscription->status);
+        self::assertSame('provider-subscription-create-1', data_get($subscription->metadata, 'provider_idempotency_key'));
+
+        $cancelPayload = ['idempotency_key' => 'provider-subscription-cancel-1'];
+        $this->actingAs($admin)->post('/admin/commerce/billing/subscriptions/'.$subscription->id.'/cancel', $cancelPayload)->assertSessionHas('success');
+        $this->actingAs($admin)->post('/admin/commerce/billing/subscriptions/'.$subscription->id.'/cancel', $cancelPayload)->assertSessionHas('success');
+
+        self::assertSame(1, $provider->cancelCalls);
+        $subscription->refresh();
+        self::assertSame('cancelled', $subscription->status);
+        self::assertSame('provider-subscription-cancel-1', data_get($subscription->metadata, 'last_cancel_idempotency_key'));
+        self::assertNotNull($subscription->cancelled_at);
+    }
+
+    public function test_failed_subscription_cancel_is_recorded_without_state_corruption_or_duplicate_provider_call(): void
+    {
+        $provider = $this->enabledProvider();
+        $admin = $this->administrator();
+        $customer = CommerceCustomer::query()->create([
+            'name' => 'Cancellation Failure Customer',
+            'email' => 'cancel-failure@example.test',
+        ]);
+        $price = $this->activePrice(recurring: true);
+
+        $this->actingAs($admin)->post('/admin/commerce/billing/subscriptions', [
+            'customer_id' => $customer->id,
+            'price_id' => $price->id,
+            'provider_key' => $provider->key(),
+            'idempotency_key' => 'provider-subscription-create-failure-case',
+        ])->assertSessionHas('success');
+
+        $subscription = CommerceSubscription::query()->firstOrFail();
+        $provider->cancelSuccessful = false;
+        $cancelPayload = ['idempotency_key' => 'provider-subscription-cancel-failed-1'];
+
+        $this->actingAs($admin)->post('/admin/commerce/billing/subscriptions/'.$subscription->id.'/cancel', $cancelPayload)->assertSessionHas('error');
+        $this->actingAs($admin)->post('/admin/commerce/billing/subscriptions/'.$subscription->id.'/cancel', $cancelPayload)->assertSessionHas('error');
+
+        self::assertSame(1, $provider->cancelCalls);
+        $subscription->refresh();
+        self::assertSame('active', $subscription->status);
+        self::assertNull($subscription->cancelled_at);
+        self::assertSame('provider-subscription-cancel-failed-1', data_get($subscription->metadata, 'last_cancel_idempotency_key'));
+        self::assertFalse((bool) data_get($subscription->metadata, 'last_cancel_provider_result.provider_successful', true));
+    }
+
     public function test_disabled_provider_fails_before_external_payment_call(): void
     {
         $provider = new FakeCommercePaymentProvider();
@@ -128,12 +186,29 @@ final class ProviderBillingFlowTest extends TestCase
         self::assertSame(0, CommercePaymentTransaction::query()->count());
     }
 
-    private function activePrice(): CommercePrice
+    private function enabledProvider(): FakeCommercePaymentProvider
     {
+        $provider = new FakeCommercePaymentProvider();
+        app(PaymentProviderRegistry::class)->register($provider);
+        CommercePaymentProviderConfig::query()->create([
+            'provider_key' => $provider->key(),
+            'display_name' => $provider->label(),
+            'enabled' => true,
+            'mode' => 'test',
+            'configuration' => [],
+            'secret_refs' => [],
+            'last_health_status' => 'healthy',
+        ]);
+        return $provider;
+    }
+
+    private function activePrice(bool $recurring = false): CommercePrice
+    {
+        $suffix = strtoupper(substr(md5(microtime(true).random_int(1, PHP_INT_MAX)), 0, 8));
         $product = CommerceProduct::query()->create([
-            'name' => 'Provider Billing Product',
-            'sku' => 'PROVIDER-BILLING-'.strtoupper(substr(md5(microtime(true)), 0, 8)),
-            'slug' => 'provider-billing-'.strtolower(substr(md5(microtime(true)), 0, 8)),
+            'name' => $recurring ? 'Provider Subscription Product' : 'Provider Billing Product',
+            'sku' => 'PROVIDER-'.$suffix,
+            'slug' => 'provider-'.strtolower($suffix),
             'type' => 'product',
             'status' => 'active',
             'published_at' => now(),
@@ -143,6 +218,8 @@ final class ProviderBillingFlowTest extends TestCase
             'product_id' => $product->id,
             'currency' => 'USD',
             'amount_minor' => 1250,
+            'billing_interval' => $recurring ? 'month' : null,
+            'interval_count' => $recurring ? 1 : 1,
             'active' => true,
         ]);
     }
@@ -159,10 +236,13 @@ final class FakeCommercePaymentProvider implements PaymentProviderContract
 {
     public int $paymentCalls = 0;
     public int $refundCalls = 0;
+    public int $subscriptionCalls = 0;
+    public int $cancelCalls = 0;
+    public bool $cancelSuccessful = true;
 
     public function key(): string { return 'test-provider'; }
     public function label(): string { return 'Test Provider'; }
-    public function capabilities(): array { return [self::CAPABILITY_PAYMENTS, self::CAPABILITY_REFUNDS]; }
+    public function capabilities(): array { return [self::CAPABILITY_PAYMENTS, self::CAPABILITY_REFUNDS, self::CAPABILITY_SUBSCRIPTIONS]; }
     public function health(array $configuration = []): array { return ['ok' => true, 'message' => 'Test provider healthy.']; }
 
     public function createPayment(PaymentRequest $request): ProviderTransactionResult
@@ -179,11 +259,16 @@ final class FakeCommercePaymentProvider implements PaymentProviderContract
 
     public function createSubscription(SubscriptionRequest $request): ProviderTransactionResult
     {
-        throw new LogicException('Subscriptions are outside this acceptance flow.');
+        $this->subscriptionCalls++;
+        return new ProviderTransactionResult(true, 'active', 'sub-'.$request->idempotencyKey, 'Subscription active.');
     }
 
     public function cancelSubscription(string $providerReference, array $context = []): ProviderTransactionResult
     {
-        throw new LogicException('Subscriptions are outside this acceptance flow.');
+        $this->cancelCalls++;
+        if (! $this->cancelSuccessful) {
+            return new ProviderTransactionResult(false, 'failed', $providerReference, 'Subscription cancellation failed.');
+        }
+        return new ProviderTransactionResult(true, 'cancelled', $providerReference, 'Subscription cancelled.');
     }
 }
