@@ -9,9 +9,12 @@ use App\Models\CommerceInvoice;
 use App\Models\CommerceOrder;
 use App\Models\CommercePrice;
 use App\Models\CommerceProduct;
+use App\Models\EnterpriseOrganization;
 use App\Models\Role;
 use App\Models\User;
+use App\Nexora\Enterprise\Services\TenantContext;
 use Database\Seeders\Core\NexoraCoreSeeder;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -120,6 +123,49 @@ final class CommerceAdminFlowTest extends TestCase
             ->assertSessionHasErrors(['amount']);
 
         $this->assertDatabaseMissing('nx_commerce_products', ['sku' => 'OVERFLOW-1']);
+    }
+
+    public function test_product_sku_and_slug_are_unique_per_tenant_not_globally(): void
+    {
+        $default = EnterpriseOrganization::query()->where('is_default', true)->firstOrFail();
+        $second = EnterpriseOrganization::query()->create([
+            'name' => 'Second Commerce Tenant',
+            'slug' => 'second-commerce-tenant',
+            'status' => 'active',
+            'is_default' => false,
+            'timezone' => 'UTC',
+            'locale' => 'en',
+        ]);
+        $tenants = app(TenantContext::class);
+
+        $firstProduct = $tenants->runWith($default, fn () => CommerceProduct::query()->create([
+            'name' => 'Shared Identity A',
+            'sku' => 'SHARED-SKU',
+            'slug' => 'shared-product',
+            'type' => 'product',
+            'status' => 'active',
+            'published_at' => now(),
+        ]));
+        $secondProduct = $tenants->runWith($second, fn () => CommerceProduct::query()->create([
+            'name' => 'Shared Identity B',
+            'sku' => 'SHARED-SKU',
+            'slug' => 'shared-product',
+            'type' => 'product',
+            'status' => 'active',
+            'published_at' => now(),
+        ]));
+
+        self::assertNotSame($firstProduct->tenant_id, $secondProduct->tenant_id);
+        self::assertSame('SHARED-SKU', $secondProduct->sku);
+
+        $this->expectException(QueryException::class);
+        $tenants->runWith($default, fn () => CommerceProduct::query()->create([
+            'name' => 'Duplicate In Same Tenant',
+            'sku' => 'SHARED-SKU',
+            'slug' => 'different-slug-same-sku',
+            'type' => 'product',
+            'status' => 'draft',
+        ]));
     }
 
     /** @return array{0:CommerceProduct,1:CommercePrice} */
