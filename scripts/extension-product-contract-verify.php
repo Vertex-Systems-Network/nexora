@@ -58,11 +58,12 @@ foreach([
 
 foreach([
     'Upload extension'=>'extension upload UX',
-    "upload.post('/admin/security/sentinel'"=>'upload-to-Sentinel handoff',
+    'upload.post('=>'upload form submission handoff',
+    '/admin/security/sentinel'=>'upload-to-Sentinel route target',
     'error={upload.errors.package}'=>'upload validation UX',
     'Verified packages ready to install'=>'verified artifact install queue',
     'Send to Sentinel'=>'Marketplace quarantine handoff',
-    'i:"success"'=>'valid enabled-summary icon',
+    'i: "success"'=>'valid enabled-summary icon',
 ] as $needle=>$label){ if($index!==''&&!str_contains($index,$needle)) $errors[]="Extension Product index UI contract missing: {$label}."; }
 
 foreach([
