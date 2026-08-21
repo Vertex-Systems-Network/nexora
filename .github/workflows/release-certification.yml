@@ -136,5 +136,8 @@ jobs:
       - name: Sentinel 2.0 product source contract
         run: php scripts/sentinel2-product-contract-verify.php
 
+      - name: Marketplace 2.0 product source contract
+        run: php scripts/marketplace2-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
