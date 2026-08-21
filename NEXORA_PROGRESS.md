@@ -16,12 +16,13 @@
 - Generation: `n1-v5.29`
 - Branch: `dev/n1-0b-core-functional-qa`
 - PR: `#1` — **DRAFT + MERGEABLE**
-- Current source head before this progress update: `df50de19f91d03fd6f0aa45c928edb11be39ea28`
-- Latest fully green source CI: `32502604979` on the N1.15 checkpoint; first N1.16 integrated CI is now pending
-- Canonical ledger revision: `2.2`
+- Verified source head before this progress update: `e6c884f714e6419794b1c11566e978987a73ecad`
+- Latest fully green source CI: `32504705855`
+- Canonical ledger revision: `2.2` — synchronization to `2.3` is the next governance apply
 - Open blocking issue: `#2 Nexora runtime identity mismatch`
 - Current source block: `N1.16 Multisite / Organizations`
-- N1.16 state: **SOURCE GATE IMPLEMENTED — FIRST INTEGRATED CI PENDING**
+- N1.16 state: **SOURCE DONE — TARGET PENDING**
+- Next source block: `N1.17 SSO / Enterprise Governance`
 
 ---
 
@@ -32,18 +33,18 @@ The **Power Score** is a weighted readiness indicator, not a claim that the prod
 | Power plane | Weight | Current score | Weighted contribution | Meaning |
 |---|---:|---:|---:|---|
 | Architecture & core platform design | 10% | 98% | 9.8 | Core/module/capability/tenant architecture is mature |
-| Source implementation | 35% | 98% | 34.3 | Major product workflows implemented through N1.15; N1.16 awaits integrated CI |
-| Source verification / CI contracts | 15% | 100% | 15.0 | Last completed certified checkpoint green through N1.15; new N1.16 required gate pending |
+| Source implementation | 35% | 98.5% | 34.475 | Major product workflows source-gated through N1.16 |
+| Source verification / CI contracts | 15% | 100% | 15.0 | All current required source gates green through N1.16 |
 | Real target functional verification | 20% | 50% | 10.0 | Broad current-branch Laragon/browser/runtime QA still pending |
 | Database / portability target proof | 10% | 45% | 4.5 | Source/harness strong; real multi-engine matrix evidence pending |
 | Release / operations / certification | 10% | 25% | 2.5 | Final reviewed locks, C1-C6 and release proof deferred |
-| **TOTAL PROJECT POWER** | **100%** |  | **76.1%** | **Held until N1.16 integrated verification finishes** |
+| **TOTAL PROJECT POWER** | **100%** |  | **76.3%** | **Evidence-based weighted readiness** |
 
 ### Power bar
 
 ```text
-PROJECT POWER   76.1%  ███████████████░░░░░
-SOURCE POWER    98.0%  ████████████████████
+PROJECT POWER   76.3%  ███████████████░░░░░
+SOURCE POWER    98.5%  ████████████████████
 TARGET POWER    50.0%  ██████████░░░░░░░░░░
 RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
 ```
@@ -56,8 +57,8 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 
 | Dimension | Progress | State |
 |---|---:|---|
-| Platform source implementation | ~98% | Strong source closure through N1.15; N1.16 implementation + source gate now present |
-| Source certification | 100% for last completed checkpoint | GREEN through N1.15; N1.16 integrated run pending |
+| Platform source implementation | ~98.5% | Strong source closure through N1.16 |
+| Source certification | 100% for current required gates | GREEN through N1.16 |
 | Real functional verification | ~50% | PARTIAL |
 | DEV-5 SQL/services portability source | ~95% | SOURCE STRONG / TARGET PENDING |
 | Real DB matrix | ~0% current-branch certified engines | TARGET PENDING |
@@ -83,8 +84,8 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 | N1.13 Collaboration | 100% | 0% | SOURCE DONE; target pending |
 | N1.14 Automation | 100% | 0% | SOURCE DONE; queue/webhook target pending |
 | N1.15 AI Platform | 100% | 0% | SOURCE DONE; real adapter/provider target evidence pending |
-| N1.16 Multisite / Organizations | 90% source / CI pending | 0% | **ACTIVE** — implementation + acceptance + required contract wired; full green needed |
-| N1.17 SSO / Enterprise Governance | foundation | 0% | Planned after N1.16 |
+| N1.16 Multisite / Organizations | 100% source | 0% | **SOURCE DONE** — real organization/browser/runtime execution pending |
+| N1.17 SSO / Enterprise Governance | foundation | 0% | **NEXT SOURCE BLOCK** |
 | N1.18 Public APIs / Webhooks / SDK | foundation/partial | 0% | Planned |
 | N1.19 Import / Export / WP migrations | planned | 0% | Planned |
 | N1.20 Observability | foundation/partial | 0% | Planned |
@@ -98,47 +99,45 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 
 ---
 
-## 5. Current N1.16 Multisite / Organizations audit
+## 5. N1.16 Multisite / Organizations closure
 
-### Confirmed strengths
+### Root cause closed
 
-- Enterprise organization model/membership/domain/roles/SSO/SCIM foundations already exist.
-- Tenant context and session organization switching foundation exists.
-- `RequirePermission` composes global platform RBAC with `TenantAuthorizationService`, so organization roles already restrict current-tenant permissions.
-- Organization manager has an explicit `canAccess()` concept.
-- Organization detail views scope many data collections by `organization_id`.
+The critical boundary was a **current-tenant vs route-organization confused-deputy gap**: permission middleware resolved permissions for organization **A**, but `EnterpriseOrganization` is the tenant root and has no `tenant_id`, so a route parameter for organization **B** was not rejected by the generic route-binding guard.
 
-### Root cause confirmed
+### SOURCE DONE implementation
 
-The critical boundary was a **current-tenant vs route-organization confused-deputy gap**: permission middleware resolves permissions for current organization **A**, while `EnterpriseOrganization` itself has no `tenant_id`, so generic tenant route binding did not stop an `{organization}` parameter for organization **B**. Several mutation endpoints could therefore receive a different organization root after authorization had already succeeded for A.
+1. `EnsureTenantRouteBinding` treats `EnterpriseOrganization` as the tenant root and requires its primary key to equal the active `TenantContext` ID; mismatched organization routes fail with 404.
+2. Organization list **Manage** switches tenant first and then visits the selected organization management route.
+3. Organization switching validates UUID shape, resolves only active organizations, checks access, and returns 404 for inaccessible/nonexistent targets without a global `exists` disclosure validator.
+4. Enterprise UI action capability props compose platform RBAC with `TenantAuthorizationService`, matching route authorization semantics.
+5. Ordinary organization admins no longer receive a platform-wide user directory. Existing platform identities can be directly attached only by a Super Admin; tenant admins retain invitation-by-email.
+6. Direct member attachment accepts active users only and remains server-enforced Super Admin-only.
+7. Impersonation target validation is scoped to active members of the selected organization; UI options are derived from organization members, not the platform user directory.
+8. SSO adapter health diagnostics are generic/fail-closed; arbitrary adapter-provided text is not surfaced to Admin.
+9. `AGENTS.md` now mandates reading/updating this progress dashboard after every meaningful apply and prohibits raising Target Power from source CI alone.
 
-### APPLY-01 fixes completed
+### Regression/source verification
 
-1. `EnsureTenantRouteBinding` now treats `EnterpriseOrganization` as the tenant root and requires its primary key to equal the active `TenantContext` ID; mismatched organization routes fail with 404.
-2. Organization list **Manage** now switches tenant first and only then visits the organization management route.
-3. Organization switching no longer uses a platform-wide `exists` validator; it validates UUID shape, resolves active organization, checks membership/access, and returns 404 for inaccessible/nonexistent targets.
-4. `EnterpriseController` action visibility now composes platform RBAC with `TenantAuthorizationService`, matching server route authorization rather than global permission checks alone.
-5. Platform-wide user chooser is no longer disclosed to ordinary organization admins. Existing platform identities can be directly attached only by a Super Admin; ordinary org admins use invitation-by-email.
-6. Direct member attachment accepts active platform users only and remains server-enforced Super Admin-only.
-7. Impersonation target validation is organization-membership scoped, and the UI target picker is derived from active users already present in the organization member list rather than a platform-wide directory.
-8. SSO adapter health output is now generic/fail-closed; arbitrary adapter-provided diagnostic text is not flashed to the Admin UI.
-
-### APPLY-02 verification infrastructure completed
-
-- Added `tests/Feature/Enterprise/MultisiteOrganizationIsolationTest.php` with cross-org route-root, hidden switch, platform-user non-disclosure/direct-attach denial, invitation preservation, member-scoped impersonation and nested-resource rejection coverage.
+- Added `tests/Feature/Enterprise/MultisiteOrganizationIsolationTest.php` covering:
+  - cross-org route-root authorization replay rejection;
+  - inaccessible organization switch non-disclosure/session preservation;
+  - platform-user directory non-disclosure and direct-attach denial for org admins;
+  - invitation-by-email preservation;
+  - member-scoped impersonation;
+  - nested other-organization resource mutation rejection.
 - Added `scripts/multisite-organizations-product-contract-verify.php`.
-- Wired the new product contract into `scripts/development-readiness.php` and `.github/workflows/release-certification.yml` as a required source gate.
-- Updated `AGENTS.md`: all future agents must read and update `NEXORA_PROGRESS.md` after every meaningful apply; Target Power cannot rise from source CI alone.
-- Self-audited and corrected verifier source-marker interpolation before relying on CI.
+- Wired the new contract into development readiness and GitHub Actions.
+- Integrated source run `32504705855` on head `e6c884f714e6419794b1c11566e978987a73ecad` passed:
+  - Certification preflight;
+  - Source Guard;
+  - every previous product contract;
+  - **Multisite / Organizations Product Contract**;
+  - **Unified Source Certification**.
 
-### Verification still required before SOURCE DONE
+### Target boundary
 
-- First integrated GitHub Actions run must pass the new Multisite / Organizations product source contract.
-- Unified Source Certification and all prior gates must remain green on the same head.
-- Any first-run regression must be fixed without weakening tenant boundaries.
-- Canonical ledger/PR must then be synchronized and a final ledger-only source run confirmed.
-
-N1.16 is **not SOURCE DONE** until the above source gate is green.
+N1.16 is **SOURCE DONE, TARGET PENDING**. No Project/Target claim is inferred from source CI. Real organization switching, member/invitation/domain/SSO/SCIM/impersonation browser/runtime tests remain part of the separate current-branch target QA pass.
 
 ---
 
@@ -217,22 +216,26 @@ Required fields to update:
 | Apply | Date | Head / evidence | What changed | Power impact |
 |---:|---|---|---|---|
 | 001 | 2026-08-21 | pre-file head `11fbcd744f641d241be9bca509dc4b2d64a18020`; CI `32502604979` | Created mandatory detailed weighted progress dashboard after N1.15 SOURCE DONE; N1.16 audit recorded | Baseline Project Power = **76.1%**; no Target Power increase |
-| 002 | 2026-08-21 | implementation head `5e255f8dcf0fc9bf4c2999510067c0161f12705f`; verification pending | N1.16 APPLY-01: current-tenant organization route binding, non-disclosing switching, tenant-aware UI permissions, Super Admin-only direct platform identity attach, member-scoped impersonation, generic SSO health diagnostics | N1.16 source block **15% -> 60%**; weighted Project Power held at **76.1%** until regression/CI evidence |
+| 002 | 2026-08-21 | implementation head `5e255f8dcf0fc9bf4c2999510067c0161f12705f`; verification pending | N1.16 APPLY-01: current-tenant organization route binding, non-disclosing switching, tenant-aware UI permissions, Super Admin-only direct platform identity attach, member-scoped impersonation, generic SSO health diagnostics | N1.16 source block **15% -> 60%**; Project Power held at **76.1%** until regression/CI evidence |
 | 003 | 2026-08-21 | gate head `df50de19f91d03fd6f0aa45c928edb11be39ea28`; integrated CI pending | N1.16 APPLY-02: six acceptance regressions, dedicated product contract, readiness/Actions gate, mandatory progress governance in `AGENTS.md`, verifier self-fix | N1.16 source block **60% -> 90%**; Project Power held at **76.1%** pending green evidence |
+| 004 | 2026-08-21 | verified head `e6c884f714e6419794b1c11566e978987a73ecad`; CI `32504705855` GREEN | N1.16 APPLY-03: integrated source gate passed with all prior gates + Multisite/Organizations contract + Unified Source Certification | N1.16 **90% -> 100% SOURCE DONE**; Source Power **98.0% -> 98.5%**; Project Power **76.1% -> 76.3%**; Target Power remains **50.0%** |
 
 ---
 
 ## 9. Exact next action
 
 ```text
-N1.16 APPLY-03 — VERIFY / CORRECT / CLOSE
-  1. inspect GitHub Actions run for the current progress head
-  2. if red, use exact failed step/log and patch root cause
-  3. update THIS FILE after any correction apply
-  4. require Multisite / Organizations Product Contract + Unified Source Certification + all prior gates GREEN
-  5. after green: mark N1.16 SOURCE DONE, recalculate evidence-based Power Score
-  6. update canonical NEXORA_AI_PROJECT_STATE.md + append history
-  7. update PR #1 through N1.16 while keeping DRAFT until target gates pass
-  8. recheck issue #2; keep OPEN without new real rc.93 evidence
-  9. final ledger/progress-only CI must be GREEN before next source block N1.17
+GOVERNANCE SYNC AFTER N1.16
+  1. update NEXORA_AI_PROJECT_STATE.md to revision 2.3 and append N1.16 history
+  2. synchronize PR #1 title/body through N1.16; keep DRAFT
+  3. recheck issue #2; keep OPEN without real rc.93 recovery evidence
+  4. confirm final progress/ledger-only source CI GREEN
+
+THEN N1.17 SSO / ENTERPRISE GOVERNANCE
+  1. audit SSO provider lifecycle, secret/config boundary, callback tenant binding and enforced-login semantics
+  2. audit SCIM authentication/provisioning tenant identity and replay/revocation behavior
+  3. audit enterprise roles, membership lifecycle, invitation acceptance and governed impersonation lifecycle
+  4. implement smallest fail-closed fixes
+  5. add acceptance + product contract
+  6. update THIS FILE after every apply
 ```
