@@ -17,8 +17,8 @@
 - Issue #2: **OPEN**
 - N1.18 Public APIs / Webhooks / SDK: **implementation complete / executable verification deferred**
 - N1.19 Import / Export / WordPress migrations: **implementation complete / executable verification deferred**
-- Active source block: **N1.20 Observability — ~62% implementation candidate**
-- Latest N1.20 implementation head before this progress commit: `edf59676dbde8570d9c12c78acd2d0a67d70a167`
+- Active source block: **N1.20 Observability — ~82% implementation candidate**
+- Latest N1.20 implementation head before this progress commit: `ba056be4751ffff874803494bf6af1e825a7d4b2`
 
 ---
 
@@ -42,7 +42,7 @@ Verified Power remains unchanged because N1.18+ deferred blocks have no consolid
 | N1.9–N1.17 | 100% verified source | 0% current target | SOURCE DONE / target pending |
 | N1.18 Public APIs/Webhooks/SDK | implementation complete | 0% | executable verification deferred; NOT SOURCE DONE |
 | N1.19 Import/Export/WP migrations | implementation complete | 0% | executable verification deferred; NOT SOURCE DONE |
-| N1.20 Observability | **~62% candidate** | 0% | **ACTIVE** |
+| N1.20 Observability | **~82% candidate** | 0% | **ACTIVE** |
 | N1.21–N1.26 | planned/partial | 0% | Later roadmap |
 
 ---
@@ -72,16 +72,22 @@ N1.19 remains implementation complete / executable verification deferred: tenant
 - API incidents derive tenant identity from the authenticated API token request attribute; web incidents use resolved `TenantContext`.
 - Recorder is best-effort/fail-open so telemetry persistence failure cannot mask the original application failure.
 - `ObserveRequestOutcome` records normal responses or thrown HTTP/application failures and then preserves/rethrows the original exception.
-- Web middleware runs after enterprise tenant resolution; API middleware can consume the token attribute left by route authentication.
+- Tenant-aware `AuditManager` and `ObservabilityRecorder` are scoped rather than singleton-bound, preventing tenant context capture across long-lived requests/workers.
 
-### Bounded retention
-- Configured slow-request threshold, audit retention, incident retention and prune time live in `config/nexora_observability.php`.
-- Audit retention is bounded to 30–3650 days; incident retention 7–365 days; runtime metric retention reuses the existing bounded cloud policy.
-- `nexora:observability:prune` prunes audit, incident and runtime metric rows through a dedicated service.
-- Observability pruning is scheduled leader-only, daily, without overlap.
+### Admin correlation surface
+- Audit Trail search now includes `request_id`.
+- Audit rows display request IDs.
+- Same-tenant recent incidents are surfaced with 24h failure/slow counters, named route, status, duration, node and correlation ID.
+- Tenant scopes exclude ambiguous/null-tenant platform incidents from ordinary organization audit views.
+
+### Bounded retention / diagnostic safety
+- Audit retention is bounded to 30–3650 days; incident retention 7–365 days.
+- `nexora:observability:prune` prunes audit + incident telemetry and is leader-only/daily/without overlap.
+- Runtime metric retention remains single-owned by the pre-existing `nexora:runtime:prune` policy; duplicate metric pruning was removed from N1.20.
+- Queue backlog probe failures no longer return raw exception messages; they report server logs and expose only a deterministic class fingerprint error code + generic operator message.
 - Provider/middleware bootstrap is registered in `bootstrap/providers.php` and `bootstrap/app.php`.
 
-**Evidence boundary:** N1.20 is still an implementation candidate. Admin incident visibility, raw diagnostic cleanup and acceptance/product-contract wiring remain.
+**Evidence boundary:** N1.20 is still an implementation candidate. Acceptance tests, static product contract, readiness/workflow source wiring and final static privacy/portability audit remain.
 
 ---
 
@@ -109,20 +115,21 @@ N1.19 remains implementation complete / executable verification deferred: tenant
 | 021 | 2026-08-22 | user directive | Actions deferred after quota exhaustion | Power unchanged |
 | 022–027 | 2026-08-22 | through `8afd1f36…` + progress `9f17b1ea…` | N1.19 import/export/WXR implementation, runtime readiness, tests/contracts | implementation complete; verified Power held |
 | 028 | 2026-08-22 | through `e282d883…` | N1.20 audit tenantization, legacy backfill, incident schema/model, sanitized tenant-aware audit recording | ~30% candidate |
-| 029 | 2026-08-22 | through `edf59676…` | 5xx/slow request incident recorder+middleware, privacy-minimal fingerprints, bounded retention command/service, leader-only scheduling and bootstrap wiring | N1.20 **~62% candidate**; verified Power unchanged |
+| 029 | 2026-08-22 | through `edf59676…` | 5xx/slow request recorder+middleware, privacy-minimal fingerprints, retention command/service, leader-only scheduling and bootstrap | ~62% candidate |
+| 030 | 2026-08-22 | through `ba056be4…` | Admin request-ID/incident correlation, queue diagnostic sanitization, scoped tenant-aware service lifetimes, duplicate metric-prune removal | N1.20 **~82% candidate**; verified Power unchanged |
 
 ---
 
 ## 9. Exact next action
 
 ```text
-N1.20 OBSERVABILITY APPLY-03
-  1. expose request ID search/display and current-tenant incidents in Admin Audit UI
-  2. sanitize raw operational exception surfaces (queue backlog and similar diagnostics)
-  3. add acceptance tests for tenant audit isolation, secret redaction, incident thresholds and retention
-  4. add static N1.20 product contract + Development Readiness/workflow source wiring
+N1.20 OBSERVABILITY APPLY-04
+  1. add acceptance tests for tenant audit isolation + secret redaction
+  2. test incident threshold/privacy/tenant scoping + retention pruning
+  3. add static N1.20 product contract
+  4. wire contract into Development Readiness + workflow source (PR trigger remains disabled)
   5. static portability/privacy audit
-  6. implementation complete => move active block to N1.21 while keeping executable certification deferred
-  7. update THIS FILE after each meaningful apply
+  6. implementation complete => move active block to N1.21 while executable certification stays deferred
+  7. update THIS FILE
   8. DO NOT trigger GitHub Actions
 ```
