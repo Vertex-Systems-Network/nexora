@@ -75,12 +75,14 @@ $require($manager, [
     "hash_file('sha256', \$temporaryPath)" => 'source SHA-256 fingerprint',
     "'nexora/migrations/'.\$organization->id" => 'server-controlled tenant staging path',
     "in_array(\$existing->status, ['failed', 'completed_with_errors'], true)" => 'partial run resumability',
+    "\$this->authorization->allows(\$actor, 'documents.create')" => 'service-layer import actor authorization',
     "ProcessContentMigrationJob::dispatch(\$run->id)->onQueue('migrations')" => 'dedicated migration queue',
 ], 'migration manager');
 
 $require($job, [
     "withoutGlobalScope('nexora_tenant')" => 'unscoped tenant identity lookup',
     '$tenantScope->runRequired(' => 'required queue tenant restoration',
+    "! \$authorization->allows(\$actor, 'documents.create')" => 'execution-time creator authorization revalidation',
     'lockForUpdate()->findOrFail($this->runId)' => 'atomic run claim',
     '$seen > 20_000' => '20k item safety limit',
     "'completed_with_errors'" => 'partial completion state',
@@ -107,7 +109,8 @@ $require($export, [
 ], 'document export');
 $require($controller, [
     'ContentMigrationRun::query()' => 'tenant-scoped run listing/re-resolution',
-    'public function resume(string $run' => 'scalar run route argument',
+    'public function resume(Request $request, string $run' => 'scalar run route argument after authenticated request',
+    '$manager->resume($record, $user)' => 'resume actor policy handoff',
     "['required', 'file', 'max:51200']" => 'web upload size bound',
 ], 'migration controller');
 $require($routes, [
@@ -130,10 +133,11 @@ $require($ui, [
 $require($test, [
     'test_wordpress_wxr_is_staged_on_server_path_deduplicated_and_imported_through_tenant_document_engine' => 'WXR replay/tenant acceptance',
     'test_failed_item_state_is_persisted_without_creating_a_destination_document' => 'failed-item persistence acceptance',
+    'test_queue_revalidates_creator_authority_before_importing' => 'execution-time actor authorization acceptance',
     'test_streaming_export_contains_only_the_active_tenant_documents' => 'tenant export isolation acceptance',
 ], 'migration acceptance');
 
-if ($progress !== '' && ! str_contains($progress, 'GitHub Actions: **DEFERRED BY USER')) {
+if ($progress !== '' && ! str_contains($progress, 'Actions: **DEFERRED BY USER')) {
     $errors[] = 'progress governance missing Actions quota deferral state.';
 }
 if ($progress !== '' && ! str_contains($progress, 'TARGET POWER    50.0%')) {
@@ -145,4 +149,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, '[Nexora Content Migration Product Contract] PASS — tenant-owned replay-safe migration state, local-only bounded WXR parsing, canonical Document repository imports, resumable queue tenant restoration, no Core remote-media fetch, private streaming export and acceptance source are present.'.PHP_EOL);
+fwrite(STDOUT, '[Nexora Content Migration Product Contract] PASS — tenant-owned replay-safe migration state, local-only bounded WXR parsing, service/job actor reauthorization, canonical Document repository imports, resumable queue tenant restoration, no Core remote-media fetch, private streaming export and acceptance source are present.'.PHP_EOL);
