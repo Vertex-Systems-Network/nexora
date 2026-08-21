@@ -8,6 +8,7 @@ use App\Models\CommerceCustomer;
 use App\Models\CrmCommerceLink;
 use App\Models\CrmContact;
 use App\Models\CrmCustomFieldDefinition;
+use App\Models\CrmLead;
 use App\Models\CrmPipeline;
 use App\Models\EnterpriseOrganization;
 use App\Models\EnterpriseOrganizationMember;
@@ -16,10 +17,14 @@ use App\Models\MembershipPlan;
 use App\Models\Role;
 use App\Models\User;
 use App\Nexora\Crm\Contracts\CrmCommerceLinkContract;
+use App\Nexora\Crm\Services\CrmLeadConversionService;
 use App\Nexora\Enterprise\Services\TenantContext;
+use App\Nexora\Enterprise\Services\TenantMemberDirectory;
+use App\Nexora\Enterprise\Validation\TenantMemberExists;
 use App\Nexora\Membership\Contracts\MembershipManagerContract;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Validator;
 use InvalidArgumentException;
 use Tests\TestCase;
 
@@ -139,6 +144,56 @@ final class CrmMembershipTenantIsolationTest extends TestCase
         $response->assertOk();
         $response->assertSee('primary-member@example.test');
         $response->assertDontSee('other-member@example.test');
+    }
+
+    public function test_crm_owner_directory_and_validation_exclude_cross_tenant_users(): void
+    {
+        $primary = $this->defaultOrganization();
+        $other = $this->createOrganization('Other owner tenant', 'other-owner-tenant');
+        $primaryUser = User::factory()->create(['name' => 'Primary Owner', 'email' => 'primary-owner@example.test']);
+        $otherUser = User::factory()->create(['name' => 'Other Owner', 'email' => 'other-owner@example.test']);
+
+        $this->addMember($primary, $primaryUser);
+        $this->addMember($other, $otherUser);
+        app(TenantContext::class)->set($primary);
+
+        $ownerIds = array_column(app(TenantMemberDirectory::class)->options(), 'id');
+        self::assertContains($primaryUser->id, $ownerIds);
+        self::assertNotContains($otherUser->id, $ownerIds);
+
+        $validator = Validator::make(
+            ['owner_id' => $otherUser->id],
+            ['owner_id' => ['nullable', 'integer', new TenantMemberExists()]],
+        );
+        self::assertTrue($validator->fails());
+    }
+
+    public function test_crm_lead_conversion_rejects_pipeline_from_another_tenant(): void
+    {
+        $primary = $this->defaultOrganization();
+        $other = $this->createOrganization('Other conversion tenant', 'other-conversion-tenant');
+        $context = app(TenantContext::class);
+
+        $context->set($other);
+        $otherPipeline = CrmPipeline::query()->create([
+            'name' => 'Other tenant pipeline',
+            'slug' => 'other-conversion-pipeline',
+            'is_default' => false,
+            'active' => true,
+        ]);
+
+        $context->set($primary);
+        $lead = CrmLead::query()->create([
+            'title' => 'Primary tenant lead',
+            'status' => 'qualified',
+            'score' => 80,
+            'currency' => 'USD',
+            'estimated_value_minor' => 10000,
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The selected CRM pipeline does not belong to the current organization or is inactive.');
+        app(CrmLeadConversionService::class)->convert($lead, $otherPipeline);
     }
 
     private function createSharedTenantIdentitySet(): void
