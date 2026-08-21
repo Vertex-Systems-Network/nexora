@@ -64,6 +64,7 @@ $run('collaboration_product_contract', 'Collaboration product source contract', 
 $run('automation_product_contract', 'Automation product source contract', [PHP_BINARY, 'scripts/automation-product-contract-verify.php']);
 $run('ai_platform_product_contract', 'AI Platform product source contract', [PHP_BINARY, 'scripts/ai-platform-product-contract-verify.php']);
 $run('multisite_organizations_product_contract', 'Multisite / Organizations product source contract', [PHP_BINARY, 'scripts/multisite-organizations-product-contract-verify.php']);
+$run('enterprise_governance_product_contract', 'SSO / Enterprise Governance product source contract', [PHP_BINARY, 'scripts/enterprise-governance-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
@@ -146,7 +147,7 @@ if ($evidence) {
     $evidencePath = $evidenceDir.'/development-readiness.json';
     $encoded = json_encode($evidencePayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
     if (file_put_contents($evidencePath, $encoded, LOCK_EX) === false) {
-        fwrite(STDERR, "[Nexora Development Readiness] Unable to write QA evidence.\n");
+        fwrite(STDERR, "[Nexora Development Readiness] Unable to write QA evidence directory.\n");
         exit(1);
     }
     $payload['evidence_path'] = 'storage/app/nexora/qa/development-readiness.json';
