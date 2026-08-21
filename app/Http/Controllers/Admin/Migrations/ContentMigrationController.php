@@ -48,6 +48,7 @@ final class ContentMigrationController extends Controller
                 'sourceBytes' => 52_428_800,
                 'itemsPerRun' => 20_000,
                 'remoteMediaFetch' => false,
+                'xmlReaderAvailable' => class_exists(\XMLReader::class),
             ],
         ]);
     }
