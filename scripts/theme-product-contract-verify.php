@@ -25,6 +25,8 @@ $routes = $read('routes/web.php');
 $controller = $read('app/Http/Controllers/Admin/Appearance/ThemeController.php');
 $installer = $read('app/Nexora/Themes/Services/ThemePackageInstaller.php');
 $manager = $read('app/Nexora/Themes/Services/ThemeManager.php');
+$sentinelController = $read('app/Http/Controllers/Admin/Security/SentinelController.php');
+$sentinelPage = $read('resources/js/admin/pages/Admin/Security/Sentinel/Show.tsx');
 $page = $read('resources/js/admin/pages/Admin/Appearance/Themes.tsx');
 $filePicker = $read('resources/js/admin/ui/untitled/file-picker.tsx');
 $test = $read('tests/Feature/Themes/ThemeEngineFlowTest.php');
@@ -44,7 +46,11 @@ foreach ([
     '$this->quarantine->store(' => 'quarantine-before-scan boundary',
     '$this->scans->scan(' => 'Sentinel scan before installation',
     "if (\$scan->decision !== 'allow')" => 'Sentinel ALLOW requirement',
+    "if (\$request->filled('scan_id'))" => 'pre-scanned Sentinel promotion input',
+    "SecurityScan::query()->with('quarantinePackage')" => 'pre-scanned quarantine lookup',
+    'private function promoteApprovedScan(' => 'single Theme Engine promotion path',
     '$this->installer->install(' => 'ThemePackageInstaller promotion',
+    "'pre_scanned' => \$preScanned" => 'promotion audit provenance',
     '$this->themes->createPreviewToken(' => 'private preview token generation',
     '$this->themes->activate(' => 'atomic activation path',
     '$this->themes->rollback(' => 'activation rollback path',
@@ -76,6 +82,25 @@ foreach ([
 }
 
 foreach ([
+    "'kind' => 'theme'" => 'Sentinel theme promotion kind',
+    "'url' => route('admin.themes.install')" => 'Sentinel-to-Theme install handoff',
+    "'payload' => ['scan_id' => (string) \$scan->id]" => 'exact approved scan promotion payload',
+] as $needle => $label) {
+    if ($sentinelController !== '' && ! str_contains($sentinelController, $needle)) {
+        $errors[] = "Theme Product Sentinel promotion contract missing: {$label}.";
+    }
+}
+foreach ([
+    'type Promotion =' => 'typed Sentinel promotion payload',
+    'router.post(promotion.url, promotion.payload' => 'explicit promotion request',
+    'Sentinel never activates package code directly.' => 'visible trust-boundary explanation',
+] as $needle => $label) {
+    if ($sentinelPage !== '' && ! str_contains($sentinelPage, $needle)) {
+        $errors[] = "Theme Product Sentinel UI contract missing: {$label}.";
+    }
+}
+
+foreach ([
     'Scan & install theme' => 'install UX',
     'error={upload.errors.package}' => 'theme package validation error UX',
     'setPreviewError(' => 'preview failure state',
@@ -100,6 +125,9 @@ foreach ([
 
 foreach ([
     'test_uploaded_safe_theme_is_scanned_installed_previewed_activated_and_rolled_back' => 'end-to-end theme acceptance test',
+    'test_pre_scanned_theme_can_be_promoted_after_sentinel_approval' => 'pre-scanned Theme Engine promotion acceptance test',
+    '/admin/security/sentinel' => 'generic Sentinel scan request',
+    "['scan_id' => \$scan->id]" => 'approved scan promotion request',
     '/admin/appearance/themes/install' => 'theme test install request',
     '/preview' => 'theme test preview request',
     '/activate' => 'theme test activate request',
@@ -117,4 +145,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora Theme Product Contract] PASS — upload/quarantine/Sentinel/install/preview/activate/rollback/token UX and end-to-end acceptance-test source are aligned.\n");
+fwrite(STDOUT, "[Nexora Theme Product Contract] PASS — upload or pre-scanned Sentinel packages converge on one ThemePackageInstaller promotion path; ALLOW/digest/safe-engine gates, preview/activate/rollback/token UX and end-to-end acceptance-test source remain aligned.\n");
