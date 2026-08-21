@@ -65,7 +65,15 @@ final class AuthenticatedSessionController extends Controller
         $user?->forceFill(['last_login_at' => now()])->save();
         $audit->record('auth.login', $user);
 
-        return redirect()->intended(route('admin.dashboard'));
+        if ($user?->canAccessAdmin()) {
+            return redirect()->intended(route('admin.dashboard'));
+        }
+
+        // Ordinary customer/member accounts must never inherit an intended Admin
+        // URL and land on a permission error after an otherwise successful sign-in.
+        $request->session()->forget('url.intended');
+
+        return redirect()->route('portal.dashboard');
     }
 
     public function destroy(Request $request, AuditManager $audit, SessionSecurityManager $sessions): RedirectResponse
