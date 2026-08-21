@@ -9,7 +9,7 @@ type Run = {
   processed:number; imported:number; skipped:number; failed:number; errorCode?:string|null;
   createdBy?:string|null; createdAt?:string|null; startedAt?:string|null; completedAt?:string|null; canResume:boolean;
 };
-type Props = { runs:Run[]; limits:{sourceBytes:number;itemsPerRun:number;remoteMediaFetch:boolean} };
+type Props = { runs:Run[]; limits:{sourceBytes:number;itemsPerRun:number;remoteMediaFetch:boolean;xmlReaderAvailable:boolean} };
 
 const tone=(status:string):"success"|"warning"|"danger"|"neutral"=>status==="completed"?"success":status==="failed"?"danger":status==="running"||status==="queued"||status==="completed_with_errors"?"warning":"neutral";
 const when=(value?:string|null)=>value?new Date(value).toLocaleString():"—";
@@ -29,9 +29,10 @@ export default function MigrationIndex({runs,limits}:Props){
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--nx-brand-soft)] text-[var(--nx-brand)]"><Icon name="download" className="h-4 w-4"/></span>
           <div><h2 className="font-semibold text-[var(--nx-text)]">WordPress WXR import</h2><p className="mt-1 text-sm leading-6 text-[var(--nx-text-muted)]">Upload a local WordPress XML export. Posts and pages are imported through the Nexora document repository. Remote media is not fetched by Core.</p></div>
         </div>
-        <form className="mt-5 grid gap-4" onSubmit={e=>{e.preventDefault();submit();}}>
-          <Input label="WordPress export" type="file" accept=".xml,.wxr,text/xml,application/xml" onChange={e=>form.setData("source",e.target.files?.[0]??null)} error={form.errors.source} hint={`Maximum ${bytes(limits.sourceBytes)} · ${limits.itemsPerRun.toLocaleString()} mapped items/run`}/>
-          <div><Button type="submit" loading={form.processing} disabled={!form.data.source} leadingIcon={<Icon name="download" className="h-4 w-4"/>}>Queue import</Button></div>
+        {!limits.xmlReaderAvailable&&<div className="mt-4 rounded-xl border border-[var(--nx-danger)]/30 bg-[var(--nx-danger)]/5 p-4 text-sm leading-6 text-[var(--nx-text)]"><strong>WXR import unavailable:</strong> enable the PHP XMLReader extension on this runtime. Export remains available.</div>}
+        <form className="mt-5 grid gap-4" onSubmit={e=>{e.preventDefault();if(limits.xmlReaderAvailable)submit();}}>
+          <Input label="WordPress export" type="file" accept=".xml,.wxr,text/xml,application/xml" disabled={!limits.xmlReaderAvailable} onChange={e=>form.setData("source",e.target.files?.[0]??null)} error={form.errors.source} hint={`Maximum ${bytes(limits.sourceBytes)} · ${limits.itemsPerRun.toLocaleString()} mapped items/run`}/>
+          <div><Button type="submit" loading={form.processing} disabled={!limits.xmlReaderAvailable||!form.data.source} leadingIcon={<Icon name="download" className="h-4 w-4"/>}>Queue import</Button></div>
         </form>
         <div className="mt-5 rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-4 text-sm leading-6 text-[var(--nx-text-muted)]">
           WXR parsing disables network entity access and DTD/entity substitution. Imported HTML is converted to bounded plain-text blocks. Source URLs remain metadata only; <strong>remote media fetch is {limits.remoteMediaFetch?"enabled":"disabled"}</strong>.
@@ -43,7 +44,7 @@ export default function MigrationIndex({runs,limits}:Props){
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--nx-brand-soft)] text-[var(--nx-brand)]"><Icon name="archive" className="h-4 w-4"/></span>
           <div><h2 className="font-semibold text-[var(--nx-text)]">Nexora JSON export</h2><p className="mt-1 text-sm leading-6 text-[var(--nx-text-muted)]">Stream the active organization&apos;s document records in the versioned Nexora export format. The export is private and not cached.</p></div>
         </div>
-        <a className="mt-5 inline-flex" href="/admin/migrations/export/documents"><Button type="button" leadingIcon={<Icon name="archive" className="h-4 w-4"/>}>Export documents</Button></a>
+        <div className="mt-5"><Button type="button" leadingIcon={<Icon name="archive" className="h-4 w-4"/>} onClick={()=>window.location.assign("/admin/migrations/export/documents")}>Export documents</Button></div>
       </Card>
     </div>
 
@@ -53,7 +54,7 @@ export default function MigrationIndex({runs,limits}:Props){
         {runs.map(run=><div key={run.id} className="p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div><div className="flex flex-wrap items-center gap-2"><p className="font-medium text-[var(--nx-text)]">{run.sourceName}</p><Badge tone={tone(run.status)}>{run.status}</Badge></div><p className="mt-1 text-xs text-[var(--nx-text-muted)]">{bytes(run.sourceBytes)} · created {when(run.createdAt)}{run.createdBy?` by ${run.createdBy}`:""}</p></div>
-            {run.canResume&&<Button size="sm" variant="secondary" onClick={()=>router.post(`/admin/migrations/${run.id}/resume`,{}, {preserveScroll:true})}>Resume</Button>}
+            {run.canResume&&<Button size="sm" variant="secondary" disabled={!limits.xmlReaderAvailable} onClick={()=>router.post(`/admin/migrations/${run.id}/resume`,{}, {preserveScroll:true})}>Resume</Button>}
           </div>
           <div className="mt-3 grid gap-2 text-xs text-[var(--nx-text-muted)] sm:grid-cols-4"><span>Processed <strong>{run.processed}</strong></span><span>Imported <strong>{run.imported}</strong></span><span>Replay-skipped <strong>{run.skipped}</strong></span><span>Failed <strong>{run.failed}</strong></span></div>
           {run.errorCode&&<p className="mt-2 text-xs text-[var(--nx-danger)]">Error reference: {run.errorCode}</p>}
