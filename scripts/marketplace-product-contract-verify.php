@@ -78,6 +78,9 @@ foreach ([
 }
 
 foreach ([
+    'private function authorizeStage(' => 'type-aware staging authorization boundary',
+    "\$requiredPermission = \$item->type === 'theme' ? 'themes.install' : 'extensions.install';" => 'owning-engine staging permission selection',
+    "\$user->hasPermission(\$requiredPermission)" => 'server-side staging permission enforcement',
     "if (! \$item->source->isActive())" => 'paused-source staging rejection',
     'Marketplace package metadata is stale.' => 'stale catalog staging rejection',
     "\$item->source->last_synced_at === null" => 'unsynchronized resumed-source staging rejection',
@@ -141,8 +144,6 @@ foreach ([
 foreach ([
     "Route::post('/extensions/marketplace/sources'" => 'source create route',
     "permission:marketplace.manage" => 'Marketplace management permission',
-    "Route::post('/extensions/marketplace/items/{item}/stage'" => 'catalog stage route',
-    "permission:extensions.install" => 'extension-install staging permission',
 ] as $needle => $label) {
     if ($routes !== '' && ! str_contains($routes, $needle)) {
         $errors[] = "Marketplace web route contract missing: {$label}.";
@@ -151,7 +152,9 @@ foreach ([
 foreach ([
     "Route::patch('/sources/{source}/status'" => 'source status route',
     "Route::delete('/sources/{source}'" => 'source removal route',
+    "Route::post('/catalog/{item}/stage'" => 'type-aware catalog stage route',
     "permission:marketplace.manage" => 'lifecycle permission guard',
+    "throttle:8,1" => 'catalog staging throttle',
 ] as $needle => $label) {
     if ($lifecycleRoutes !== '' && ! str_contains($lifecycleRoutes, $needle)) {
         $errors[] = "Marketplace lifecycle route contract missing: {$label}.";
@@ -166,6 +169,9 @@ if ($providers !== '' && ! str_contains($providers, 'MarketplaceServiceProvider:
 
 foreach ([
     'canManageMarketplace' => 'Marketplace-specific UI authorization',
+    'const canInstallTheme = permissions.includes("themes.install")' => 'Theme install permission discovery',
+    'const canStageCatalogItem = (item: Catalog) => item.type === "theme" ? canInstallTheme : canInstall;' => 'package-aware staging UI policy',
+    '/admin/extensions/marketplace/catalog/${item.id}/stage' => 'type-aware Marketplace staging route target',
     '<ConfirmDialog' => 'destructive source removal confirmation',
     'Active catalog packages' => 'active catalog summary semantics',
     'Only active, synchronized sources are listed.' => 'active-source catalog guidance',
@@ -208,5 +214,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Marketplace Product Contract] PASS — extension/app/integration/Studio-pack/theme catalogs are lifecycle-controlled, atomically synchronized and validation-bounded; resumed sources require fresh synchronization; withdrawn entries retire locally; inactive/stale sources cannot stage; all package bytes enter quarantine/Sentinel and approved packages are explicitly promoted into their owning Theme or Extension Engine.'.PHP_EOL,
+    '[Nexora Marketplace Product Contract] PASS — extension/app/integration/Studio-pack/theme catalogs are lifecycle-controlled, atomically synchronized and validation-bounded; staging is authorized by the owning engine permission; resumed sources require fresh synchronization; withdrawn entries retire locally; inactive/stale sources cannot stage; all package bytes enter quarantine/Sentinel and approved packages are explicitly promoted into their owning Theme or Extension Engine.'.PHP_EOL,
 );
