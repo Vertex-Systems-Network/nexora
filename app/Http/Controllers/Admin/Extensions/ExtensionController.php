@@ -12,6 +12,7 @@ use App\Models\MarketplaceCatalogItem;
 use App\Models\MarketplaceSource;
 use App\Models\SupplyChainArtifact;
 use App\Nexora\Automation\Services\WebhookUrlPolicy;
+use App\Nexora\Enterprise\Services\TenantAuthorizationService;
 use App\Nexora\Extensions\Services\ExtensionLifecycleManager;
 use App\Nexora\Extensions\Services\ExtensionPackageInstaller;
 use App\Nexora\Extensions\Services\MarketplaceCatalogService;
@@ -27,7 +28,7 @@ use Throwable;
 
 final class ExtensionController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, TenantAuthorizationService $tenantAuthorization): Response
     {
         $extensions = Extension::query()->with(['publisher:id,name,key_id,trust_tier,status'])->withCount('versions')->latest('installed_at')->paginate(20)->withQueryString()->through(static fn (Extension $e) => [
             'id' => $e->id, 'identifier' => $e->identifier, 'name' => $e->name, 'type' => $e->type, 'status' => $e->status, 'current_version' => $e->current_version, 'versions_count' => $e->versions_count,
@@ -45,11 +46,27 @@ final class ExtensionController extends Controller
             'id' => $s->id, 'name' => $s->name, 'base_url' => $s->base_url, 'status' => $s->status, 'trusted_only' => $s->trusted_publishers_only, 'items_count' => $s->items_count,
             'last_synced_at' => $s->last_synced_at?->toIso8601String(), 'last_error' => $s->last_error,
         ]);
-        $freshSource = static fn ($query) => $query->where('status', 'active')->whereNotNull('last_synced_at');
-        $catalog = MarketplaceCatalogItem::query()->with('source:id,name,status,last_synced_at')->whereHas('source', $freshSource)->latest('synced_at')->limit(100)->get()->map(static fn (MarketplaceCatalogItem $i) => [
-            'id' => $i->id, 'identifier' => $i->package_identifier, 'name' => $i->name, 'type' => $i->type, 'version' => $i->latest_version, 'description' => $i->description,
-            'publisher_key_id' => $i->publisher_key_id, 'source' => $i->source?->name, 'synced_at' => $i->synced_at?->toIso8601String(),
-        ]);
+        $freshSource = static fn ($query) => $query->where('status', 'active')->whereNotNull('catalog_generation');
+        $catalog = MarketplaceCatalogItem::query()
+            ->with('source:id,name,status,last_synced_at,catalog_generation')
+            ->whereNotNull('sync_generation')
+            ->whereHas('source', $freshSource)
+            ->latest('synced_at')
+            ->limit(100)
+            ->get()
+            ->filter(static fn (MarketplaceCatalogItem $i): bool => $i->source !== null
+                && is_string($i->source->catalog_generation)
+                && is_string($i->sync_generation)
+                && hash_equals($i->source->catalog_generation, $i->sync_generation))
+            ->map(static fn (MarketplaceCatalogItem $i) => [
+                'id' => $i->id, 'identifier' => $i->package_identifier, 'name' => $i->name, 'type' => $i->type, 'version' => $i->latest_version, 'description' => $i->description,
+                'publisher_key_id' => $i->publisher_key_id, 'source' => $i->source?->name, 'synced_at' => $i->synced_at?->toIso8601String(),
+            ])->values();
+
+        $user = $request->user();
+        $canManage = $user?->hasPermission('extensions.manage') === true && $tenantAuthorization->allows($user, 'extensions.manage');
+        $canInstall = $user?->hasPermission('extensions.install') === true && $tenantAuthorization->allows($user, 'extensions.install');
+        $canManageMarketplace = $user?->hasPermission('marketplace.manage') === true && $tenantAuthorization->allows($user, 'marketplace.manage');
 
         return Inertia::render('Admin/Extensions/Index', [
             'extensions' => $extensions,
@@ -60,11 +77,11 @@ final class ExtensionController extends Controller
                 'installed' => Extension::query()->where('status', '!=', 'uninstalled')->count(),
                 'enabled' => Extension::query()->where('status', 'enabled')->count(),
                 'versions' => ExtensionVersion::query()->count(),
-                'catalog' => MarketplaceCatalogItem::query()->whereHas('source', $freshSource)->count(),
+                'catalog' => MarketplaceCatalogItem::query()->whereNotNull('sync_generation')->whereHas('source', $freshSource)->count(),
             ],
-            'canManage' => $request->user()?->hasPermission('extensions.manage') ?? false,
-            'canInstall' => $request->user()?->hasPermission('extensions.install') ?? false,
-            'canManageMarketplace' => $request->user()?->hasPermission('marketplace.manage') ?? false,
+            'canManage' => $canManage,
+            'canInstall' => $canInstall,
+            'canManageMarketplace' => $canManageMarketplace,
         ]);
     }
 
@@ -188,6 +205,7 @@ final class ExtensionController extends Controller
 
         $attributes = ['status' => $next];
         if ($next === 'active') {
+            $attributes['catalog_generation'] = null;
             $attributes['last_synced_at'] = null;
             $attributes['last_error'] = null;
         }
@@ -228,7 +246,7 @@ final class ExtensionController extends Controller
         try {
             $package = $stager->stage($item, $request->user()?->id);
             $audit->record('marketplace.package.staged', $item, ['source_id' => $item->source_id, 'version' => $item->latest_version]);
-            $scan = $package->scans()->latest()->firstOrFail();
+            $scan = $package->scans()->latest('created_at')->firstOrFail();
             return redirect()->route('admin.security.sentinel.show', $scan)->with('success', 'Marketplace package downloaded into quarantine and scanned. Review Sentinel before installation.');
         } catch (Throwable $e) {
             return back()->with('error', $e->getMessage());
