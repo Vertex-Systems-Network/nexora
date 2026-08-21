@@ -85,9 +85,9 @@ $checks['vendor'] = [
 ];
 $checks['node_modules'] = [
     'label' => 'Frontend dependencies',
-    'status' => $nodeReady ? 'pass' : ($full ? 'fail' : 'warning'),
-    'exit_code' => $nodeReady ? 0 : ($full ? 1 : 2),
-    'detail' => $nodeReady ? 'node_modules TypeScript toolchain present' : 'Run npm install before TypeScript/Vite checks.',
+    'status' => $nodeReady ? 'pass' : (($full || $tests) ? 'fail' : 'warning'),
+    'exit_code' => $nodeReady ? 0 : (($full || $tests) ? 1 : 2),
+    'detail' => $nodeReady ? 'node_modules TypeScript toolchain present' : 'Run npm install before frontend execution checks.',
 ];
 
 if ($full && $vendorReady) {
@@ -97,10 +97,16 @@ if ($full && $vendorReady) {
 if ($tests && $vendorReady) {
     $run('phpunit', 'Full Laravel/PHPUnit suite', [PHP_BINARY, 'artisan', 'test', '--colors=never']);
 }
+if ($tests && $nodeReady) {
+    $run('vitest', 'Frontend Vitest suite', ['npm', 'run', 'test']);
+}
 if ($full && $nodeReady) {
     $run('typescript', 'TypeScript noEmit', ['npm', 'exec', '--', 'tsc', '--noEmit']);
     if (($checks['typescript']['status'] ?? 'fail') === 'pass') {
         $run('vite', 'Production frontend build', ['npm', 'run', 'build:raw']);
+        if (($checks['vite']['status'] ?? 'fail') === 'pass') {
+            $run('build_assets', 'Production asset budgets and provenance', [PHP_BINARY, 'scripts/performance-build-verify.php']);
+        }
     }
 }
 
