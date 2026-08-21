@@ -25,6 +25,8 @@ $orders = $read('app/Nexora/Commerce/Services/CommerceOrderService.php');
 $invoices = $read('app/Nexora/Commerce/Services/InvoiceService.php');
 $controller = $read('app/Http/Controllers/Admin/Commerce/OrderController.php');
 $productController = $read('app/Http/Controllers/Admin/Commerce/ProductController.php');
+$portableUnique = $read('app/Nexora/Foundation/Database/PortableNullableUnique.php');
+$tenantIdentityMigration = $read('database/migrations/2026_08_21_000400_scope_commerce_product_identity_to_tenant.php');
 $page = $read('resources/js/admin/pages/Admin/Commerce/Orders.tsx');
 $test = $read('tests/Feature/Commerce/CommerceAdminFlowTest.php');
 
@@ -40,7 +42,7 @@ foreach ([
 }
 
 foreach ([
-    "Amount exceeds the supported Commerce monetary range." => 'fail-closed amount range',
+    'Amount exceeds the supported Commerce monetary range.' => 'fail-closed amount range',
     '(string) PHP_INT_MAX' => 'platform integer range comparison',
     "preg_match('/^\\d+(?:\\.\\d+)?$/'" => 'strict decimal parser',
 ] as $needle => $label) {
@@ -96,11 +98,36 @@ foreach ([
 }
 
 foreach ([
+    "Rule::unique('nx_commerce_products', 'sku')->where" => 'tenant-scoped SKU validation',
+    "Rule::unique('nx_commerce_products', 'slug')->where" => 'tenant-scoped slug validation',
+    "where('tenant_id', \$tenantId)" => 'tenant identity validation predicate',
     "withErrors(['amount' => \$exception->getMessage()])" => 'field-level monetary validation error',
-    "catch (InvalidArgumentException \$exception)" => 'catalog monetary parser error handling',
+    'private function tenantId(): string' => 'tenant validation context resolver',
 ] as $needle => $label) {
     if ($productController !== '' && ! str_contains($productController, $needle)) {
         $errors[] = "Commerce product controller missing: {$label}.";
+    }
+}
+
+foreach ([
+    'public static function createScoped(' => 'portable scoped nullable unique API',
+    "DB::connection()->getDriverName() === 'sqlsrv'" => 'SQL Server filtered-index branch',
+    'WHERE {$quotedColumn} IS NOT NULL' => 'SQL Server nullable scoped filtering',
+    '$blueprint->unique([$scopeColumn, $column], $indexName)' => 'portable composite unique fallback',
+] as $needle => $label) {
+    if ($portableUnique !== '' && ! str_contains($portableUnique, $needle)) {
+        $errors[] = "Portable nullable unique helper missing: {$label}.";
+    }
+}
+
+foreach ([
+    "dropUnique(self::GLOBAL_SKU)" => 'legacy global SKU unique removal',
+    "dropUnique(self::GLOBAL_SLUG)" => 'legacy global slug unique removal',
+    "unique(['tenant_id', 'slug'], self::TENANT_SLUG)" => 'tenant-scoped slug unique index',
+    "PortableNullableUnique::createScoped(self::TABLE, 'tenant_id', 'sku', self::TENANT_SKU)" => 'tenant-scoped nullable SKU unique index',
+] as $needle => $label) {
+    if ($tenantIdentityMigration !== '' && ! str_contains($tenantIdentityMigration, $needle)) {
+        $errors[] = "Commerce tenant identity migration missing: {$label}.";
     }
 }
 
@@ -122,8 +149,10 @@ foreach ([
     'test_archived_product_price_is_not_orderable_or_exposed_as_available' => 'inactive-product price regression',
     'test_order_place_and_invoice_transitions_are_idempotent' => 'order/invoice lifecycle regression',
     'test_catalog_rejects_amounts_outside_supported_integer_range' => 'monetary overflow regression',
+    'test_product_sku_and_slug_are_unique_per_tenant_not_globally' => 'tenant product identity regression',
     "where('event_type', 'commerce.order.placed')" => 'single placement event assertion',
     "CommerceInvoice::query()->where('order_id'" => 'single invoice assertion',
+    'expectException(QueryException::class)' => 'same-tenant duplicate DB rejection',
 ] as $needle => $label) {
     if ($test !== '' && ! str_contains($test, $needle)) {
         $errors[] = "Commerce acceptance-test contract missing: {$label}.";
@@ -137,5 +166,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Commerce Product Contract] PASS — monetary parsing/tax arithmetic are bounded, only active in-window product prices enter orders, placement and invoice creation are serialized/idempotent, and billing actions follow their owning permission.'.PHP_EOL,
+    '[Nexora Commerce Product Contract] PASS — monetary arithmetic is bounded, active price/order and invoice lifecycles are serialized/idempotent, billing permissions are aligned, and product SKU/slug identity is scoped to the active tenant with portable nullable uniqueness.'.PHP_EOL,
 );
