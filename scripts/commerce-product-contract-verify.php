@@ -19,6 +19,15 @@ $read = static function (string $relative) use ($root, &$errors): string {
 };
 
 $routes = $read('routes/web.php');
+$billingRoutes = $read('routes/commerce.php');
+$bootstrapProviders = $read('bootstrap/providers.php');
+$commerceProvider = $read('app/Providers/CommerceServiceProvider.php');
+$providerContract = $read('app/Nexora/Commerce/Contracts/PaymentProviderContract.php');
+$providerBilling = $read('app/Nexora/Commerce/Services/ProviderBillingService.php');
+$refundService = $read('app/Nexora/Commerce/Services/RefundService.php');
+$billingController = $read('app/Http/Controllers/Admin/Commerce/BillingController.php');
+$billingPage = $read('resources/js/admin/pages/Admin/Commerce/Billing.tsx');
+$providerBillingTest = $read('tests/Feature/Commerce/ProviderBillingFlowTest.php');
 $currency = $read('app/Nexora/Commerce/Services/CurrencyManager.php');
 $taxes = $read('app/Nexora/Commerce/Services/TaxCalculator.php');
 $orders = $read('app/Nexora/Commerce/Services/CommerceOrderService.php');
@@ -38,6 +47,112 @@ foreach ([
 ] as $needle => $label) {
     if ($routes !== '' && ! str_contains($routes, $needle)) {
         $errors[] = "Commerce route contract missing: {$label}.";
+    }
+}
+
+foreach ([
+    "Route::post('/billing/invoices/{invoice}/payments'" => 'provider payment action route',
+    "Route::post('/billing/transactions/{payment}/refunds'" => 'provider refund action route',
+    "permission:commerce.billing.manage" => 'provider billing permission boundary',
+    "EnsureTenantRouteBinding::class" => 'provider billing tenant route binding',
+    "throttle:20,1" => 'provider billing action throttle',
+] as $needle => $label) {
+    if ($billingRoutes !== '' && ! str_contains($billingRoutes, $needle)) {
+        $errors[] = "Commerce billing route contract missing: {$label}.";
+    }
+}
+
+foreach ([
+    'CommerceServiceProvider::class' => 'Commerce provider bootstrap registration',
+] as $needle => $label) {
+    if ($bootstrapProviders !== '' && ! str_contains($bootstrapProviders, $needle)) {
+        $errors[] = "Commerce bootstrap contract missing: {$label}.";
+    }
+}
+foreach ([
+    'singleton(ProviderBillingService::class)' => 'provider billing singleton',
+    "loadRoutesFrom(base_path('routes/commerce.php'))" => 'modular Commerce route loading',
+] as $needle => $label) {
+    if ($commerceProvider !== '' && ! str_contains($commerceProvider, $needle)) {
+        $errors[] = "Commerce service provider missing: {$label}.";
+    }
+}
+
+foreach ([
+    "CAPABILITY_PAYMENTS = 'payments'" => 'payments capability constant',
+    "CAPABILITY_REFUNDS = 'refunds'" => 'refunds capability constant',
+    "CAPABILITY_SUBSCRIPTIONS = 'subscriptions'" => 'subscriptions capability constant',
+] as $needle => $label) {
+    if ($providerContract !== '' && ! str_contains($providerContract, $needle)) {
+        $errors[] = "Commerce payment provider contract missing: {$label}.";
+    }
+}
+
+foreach ([
+    "CommercePaymentTransaction::query()->where('idempotency_key', \$idempotencyKey)->first()" => 'pre-provider payment retry short-circuit',
+    "CommerceRefund::query()->where('idempotency_key', \$idempotencyKey)->first()" => 'pre-provider refund retry short-circuit',
+    "CAPABILITY_PAYMENTS" => 'payment capability admission',
+    "CAPABILITY_REFUNDS" => 'refund capability admission',
+    "->where('enabled', true)" => 'enabled-provider admission',
+    "\$provider->health((array) \$config->configuration)" => 'live provider health admission',
+    "Payment provider returned an inconsistent" => 'provider result consistency guard',
+    "Refund amount exceeds the remaining refundable payment balance." => 'pre-provider refund balance guard',
+    "commerce.billing.invoice." => 'invoice provider-operation mutex',
+    "commerce.billing.refund." => 'refund provider-operation mutex',
+] as $needle => $label) {
+    if ($providerBilling !== '' && ! str_contains($providerBilling, $needle)) {
+        $errors[] = "Commerce provider billing service missing: {$label}.";
+    }
+}
+
+foreach ([
+    "'metadata' => \$metadata" => 'provider refund metadata persistence',
+    "whereIn('status', ['succeeded', 'refunded'])" => 'successful-refund aggregate semantics',
+] as $needle => $label) {
+    if ($refundService !== '' && ! str_contains($refundService, $needle)) {
+        $errors[] = "Commerce refund service missing: {$label}.";
+    }
+}
+
+foreach ([
+    "'providers' => \$availableProviders" => 'enabled provider UI projection',
+    "'canManage' => \$request->user()?->hasPermission('commerce.billing.manage')" => 'billing-management UI authorization',
+    'public function collect(' => 'invoice payment controller action',
+    'public function refund(' => 'payment refund controller action',
+    'ProviderBillingService $billing' => 'provider orchestration dependency',
+    "data_get(\$transaction->metadata, 'provider_successful'" => 'provider payment result feedback',
+    "data_get(\$refund->metadata, 'provider_successful'" => 'provider refund result feedback',
+] as $needle => $label) {
+    if ($billingController !== '' && ! str_contains($billingController, $needle)) {
+        $errors[] = "Commerce billing controller missing: {$label}.";
+    }
+}
+
+foreach ([
+    'operationKey=()=>' => 'client billing idempotency key generation',
+    'Collect payment' => 'invoice payment action UX',
+    'Refund payment' => 'refund action UX',
+    'provider.capabilities.includes("payments")' => 'payment capability UI filter',
+    '/admin/commerce/billing/invoices/${paymentInvoice.id}/payments' => 'payment endpoint wiring',
+    '/admin/commerce/billing/transactions/${refundPayment.id}/refunds' => 'refund endpoint wiring',
+] as $needle => $label) {
+    if ($billingPage !== '' && ! str_contains($billingPage, $needle)) {
+        $errors[] = "Commerce Billing UI missing: {$label}.";
+    }
+}
+if ($billingPage !== '' && preg_match('/<(button|input|select|textarea)\b/', $billingPage) === 1) {
+    $errors[] = 'Commerce Billing UI must not bypass shared interactive components.';
+}
+
+foreach ([
+    'test_enabled_provider_collects_and_refunds_with_retry_safe_idempotency' => 'provider payment/refund acceptance flow',
+    'test_disabled_provider_fails_before_external_payment_call' => 'disabled-provider fail-closed regression',
+    'self::assertSame(1, $provider->paymentCalls)' => 'payment retry external-call assertion',
+    'self::assertSame(1, $provider->refundCalls)' => 'refund retry external-call assertion',
+    "'amount' => '20.00'" => 'over-refund rejection case',
+] as $needle => $label) {
+    if ($providerBillingTest !== '' && ! str_contains($providerBillingTest, $needle)) {
+        $errors[] = "Commerce provider billing acceptance contract missing: {$label}.";
     }
 }
 
@@ -166,5 +281,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Commerce Product Contract] PASS — monetary arithmetic is bounded, active price/order and invoice lifecycles are serialized/idempotent, billing permissions are aligned, and product SKU/slug identity is scoped to the active tenant with portable nullable uniqueness.'.PHP_EOL,
+    '[Nexora Commerce Product Contract] PASS — monetary and tenant product identity are bounded, order/invoice lifecycles are serialized, and enabled healthy capability-scoped payment providers execute retry-safe invoice collection/refunds through modular Commerce routes and shared Admin UI.'.PHP_EOL,
 );
