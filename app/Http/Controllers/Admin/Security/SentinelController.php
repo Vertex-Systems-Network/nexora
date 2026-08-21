@@ -135,6 +135,7 @@ final class SentinelController extends Controller
 
         $scan->load(['requester:id,name,email', 'quarantinePackage:id,original_name,status,size_bytes,sha256,scanned_at']);
         $supplyChain = SupplyChainArtifact::query()->where('scan_id', $scan->id)->with(['publisher:id,name,key_id,trust_tier,status'])->withCount('components')->first();
+        $promotion = $this->promotionFor($request, $scan, $supplyChain);
 
         return Inertia::render('Admin/Security/Sentinel/Show', [
             'scan' => [
@@ -162,11 +163,22 @@ final class SentinelController extends Controller
             'findings' => $findings,
             'filters' => ['severity' => $severity],
             'supplyChain' => $supplyChain ? [
-                'id'=>$supplyChain->id,'signature_status'=>$supplyChain->signature_status,'provenance_status'=>$supplyChain->provenance_status,
-                'trust_tier'=>$supplyChain->trust_tier,'sandbox_profile'=>$supplyChain->sandbox_profile,'components_count'=>$supplyChain->components_count,
-                'content_sha256'=>$supplyChain->content_sha256,'verification_error'=>$supplyChain->verification_error,
-                'publisher'=>$supplyChain->publisher ? ['name'=>$supplyChain->publisher->name,'key_id'=>$supplyChain->publisher->key_id,'trust_tier'=>$supplyChain->publisher->trust_tier,'status'=>$supplyChain->publisher->status] : null,
+                'id' => $supplyChain->id,
+                'signature_status' => $supplyChain->signature_status,
+                'provenance_status' => $supplyChain->provenance_status,
+                'trust_tier' => $supplyChain->trust_tier,
+                'sandbox_profile' => $supplyChain->sandbox_profile,
+                'components_count' => $supplyChain->components_count,
+                'content_sha256' => $supplyChain->content_sha256,
+                'verification_error' => $supplyChain->verification_error,
+                'publisher' => $supplyChain->publisher ? [
+                    'name' => $supplyChain->publisher->name,
+                    'key_id' => $supplyChain->publisher->key_id,
+                    'trust_tier' => $supplyChain->publisher->trust_tier,
+                    'status' => $supplyChain->publisher->status,
+                ] : null,
             ] : null,
+            'promotion' => $promotion,
             'canRescan' => $request->user()?->hasPermission('security.sentinel.scan') ?? false,
             'canDelete' => $request->user()?->hasPermission('security.quarantine.manage') ?? false,
         ]);
@@ -192,5 +204,41 @@ final class SentinelController extends Controller
         $this->audit->record('sentinel.quarantine.deleted', $package, ['name' => $name, 'sha256' => $sha256]);
 
         return redirect()->route('admin.security.sentinel.index')->with('success', "Quarantined package [{$name}] was permanently removed.");
+    }
+
+    /** @return array{kind:string,label:string,url:string,payload:array<string,string>}|null */
+    private function promotionFor(Request $request, SecurityScan $scan, ?SupplyChainArtifact $supplyChain): ?array
+    {
+        if ($scan->status !== 'completed' || $scan->decision !== 'allow' || $scan->quarantinePackage === null || $scan->quarantinePackage->status === 'installed') {
+            return null;
+        }
+
+        $type = is_string($scan->manifest['type'] ?? null) ? (string) $scan->manifest['type'] : '';
+        if ($type === 'theme' && ($request->user()?->hasPermission('themes.install') ?? false)) {
+            return [
+                'kind' => 'theme',
+                'label' => 'Install theme',
+                'url' => route('admin.themes.install'),
+                'payload' => ['scan_id' => (string) $scan->id],
+            ];
+        }
+
+        if (in_array($type, ['extension', 'app', 'integration', 'studio-pack'], true)
+            && $supplyChain !== null
+            && ($request->user()?->hasPermission('extensions.install') ?? false)) {
+            return [
+                'kind' => 'extension',
+                'label' => match ($type) {
+                    'app' => 'Install app',
+                    'integration' => 'Install integration',
+                    'studio-pack' => 'Install Studio pack',
+                    default => 'Install extension',
+                },
+                'url' => route('admin.extensions.install', $supplyChain),
+                'payload' => [],
+            ];
+        }
+
+        return null;
     }
 }
