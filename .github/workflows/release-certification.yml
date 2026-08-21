@@ -109,5 +109,8 @@ jobs:
       - name: Multisite / Organizations product source contract
         run: php scripts/multisite-organizations-product-contract-verify.php
 
+      - name: SSO / Enterprise Governance product source contract
+        run: php scripts/enterprise-governance-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
