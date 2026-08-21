@@ -68,6 +68,7 @@ $run('enterprise_governance_product_contract', 'SSO / Enterprise Governance prod
 $run('public_api_sdk_product_contract', 'Public API / SDK product source contract', [PHP_BINARY, 'scripts/public-api-sdk-product-contract-verify.php']);
 $run('content_migration_product_contract', 'Content Migration product source contract', [PHP_BINARY, 'scripts/content-migration-product-contract-verify.php']);
 $run('observability_product_contract', 'Observability product source contract', [PHP_BINARY, 'scripts/observability-product-contract-verify.php']);
+$run('forge_developer_experience_product_contract', 'Forge / Developer Experience product source contract', [PHP_BINARY, 'scripts/forge-developer-experience-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
