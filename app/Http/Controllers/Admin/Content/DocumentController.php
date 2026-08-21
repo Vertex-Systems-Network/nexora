@@ -7,12 +7,13 @@ namespace App\Http\Controllers\Admin\Content;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\MediaAsset;
-use App\Models\User;
 use App\Nexora\Documents\Blocks\BlockRegistry;
 use App\Nexora\Documents\Contracts\DocumentRepositoryContract;
 use App\Nexora\Documents\Editorial\EditorialWorkflowRegistry;
 use App\Nexora\Documents\Services\DocumentAutosaveManager;
 use App\Nexora\Documents\Types\DocumentTypeRegistry;
+use App\Nexora\Enterprise\Services\TenantMemberDirectory;
+use App\Nexora\Enterprise\Validation\TenantMemberExists;
 use App\Nexora\Security\Audit\AuditManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ final class DocumentController extends Controller
         private EditorialWorkflowRegistry $workflow,
         private DocumentAutosaveManager $autosaves,
         private AuditManager $audit,
+        private TenantMemberDirectory $tenantMembers,
     ) {
     }
 
@@ -181,8 +183,8 @@ final class DocumentController extends Controller
             'type' => ['required', 'string', Rule::in($this->types->keys())],
             'status' => ['required', 'string', Rule::in(['draft', 'published', 'archived'])],
             'workflow_status' => ['required', 'string', Rule::in($this->workflow->keys())],
-            'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
-            'reviewer_id' => ['nullable', 'integer', 'exists:users,id'],
+            'assigned_to' => ['nullable', 'integer', new TenantMemberExists($this->tenantMembers)],
+            'reviewer_id' => ['nullable', 'integer', new TenantMemberExists($this->tenantMembers)],
             'review_due_at' => ['nullable', 'date'],
             'excerpt' => ['nullable', 'string', 'max:1000'],
             'content' => ['nullable', 'array'],
@@ -207,7 +209,9 @@ final class DocumentController extends Controller
     /** @return list<array{id:number,name:string,email:string}> */
     private function people(): array
     {
-        return User::query()->where('status', 'active')->orderBy('name')->limit(250)->get(['id', 'name', 'email'])
-            ->map(static fn (User $user): array => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email])->values()->all();
+        return $this->tenantMembers->activeMembers(250)
+            ->map(static fn ($user): array => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email])
+            ->values()
+            ->all();
     }
 }
