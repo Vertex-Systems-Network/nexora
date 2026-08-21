@@ -88,5 +88,8 @@ jobs:
       - name: Commerce product source contract
         run: php scripts/commerce-product-contract-verify.php
 
+      - name: Customer Portal product source contract
+        run: php scripts/customer-portal-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
