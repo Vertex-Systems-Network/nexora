@@ -114,10 +114,21 @@ $require($abilityMiddleware, [
 
 $require($bootstrap, [
     "api: __DIR__.'/../routes/api.php'" => 'Laravel API route registration',
-    "\$middleware->api(append: [AssignRequestId::class, ApplyPerformanceHeaders::class, RedirectIfNotInstalled::class, RuntimeNodeHeartbeat::class]);" => 'pre-token install/runtime API fencing',
     "'api.token' => AuthenticateApiToken::class" => 'token middleware alias',
     "'api.ability' => RequireApiAbility::class" => 'ability middleware alias',
 ], 'Application bootstrap');
+$apiMiddlewareBlock = '';
+if ($bootstrap !== '' && preg_match('/\$middleware->api\(append:\s*\[(.*?)\]\);/s', $bootstrap, $match) === 1) {
+    $apiMiddlewareBlock = (string) $match[1];
+} else {
+    $errors[] = 'Application bootstrap contract missing: API middleware append group.';
+}
+$require($apiMiddlewareBlock, [
+    'AssignRequestId::class' => 'API request-id fencing',
+    'ApplyPerformanceHeaders::class' => 'API performance/security response headers',
+    'RedirectIfNotInstalled::class' => 'pre-token installation fence',
+    'RuntimeNodeHeartbeat::class' => 'pre-token runtime readiness fence',
+], 'Application bootstrap API middleware');
 
 $require($apiRoutes, [
     "Route::prefix('v1')" => 'versioned API prefix',
@@ -210,7 +221,7 @@ $require($inbound, [
     "collect(['content-type', 'user-agent', 'x-request-id', 'idempotency-key'])" => 'safe persisted webhook headers',
 ], 'Inbound webhook');
 
-if ($progress !== '' && ! preg_match('/^##\s+\d+\.\s+Apply Log$/m', $progress)) {
+if ($progress !== '' && ! preg_match('/^##\s+\d+\.\s+Apply Log\s*$/m', $progress)) {
     $errors[] = 'Progress dashboard contract missing: per-apply progress history.';
 }
 if ($progress !== '' && ! str_contains($progress, 'Target Power')) {
