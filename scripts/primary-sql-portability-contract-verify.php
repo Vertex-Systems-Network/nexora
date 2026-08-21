@@ -201,6 +201,7 @@ if ($roundTripTest !== '' && str_contains($roundTripTest, 'assertCount(51,$tenan
 foreach ([
     "--drivers=" => 'explicit driver-selection CLI',
     "--list" => 'matrix driver discovery CLI',
+    "--evidence" => 'durable target-evidence CLI',
     "NEXORA_MATRIX_" => 'isolated matrix environment prefix',
     "^nexora_matrix_[A-Za-z0-9_]+$" => 'network database-name safety allow-list',
     "^nexora_matrix_[A-Za-z0-9_-]+\\.sqlite$" => 'SQLite matrix filename safety allow-list',
@@ -211,6 +212,13 @@ foreach ([
     "NexoraBootstrapProcessEnvironment::build" => 'isolated child process environment',
     "\$provisioner->wipe(\$profile)" => 'post-test object cleanup',
     "supports_create" => 'managed create-policy reuse',
+    "'schema' => 2" => 'target-evidence schema version',
+    "'platform_version'" => 'target-evidence platform identity',
+    "'source_generation'" => 'target-evidence source identity',
+    "'php_version'" => 'target-evidence PHP runtime identity',
+    "'selected_drivers'" => 'target-evidence engine scope',
+    "storage/app/nexora/qa/database-target-matrix.json" => 'canonical secret-free target evidence path',
+    "LOCK_EX" => 'atomic evidence write lock',
     "Only empty databases/files whose names match nexora_matrix_* are accepted" => 'operator-visible destructive scope',
 ] as $needle => $label) {
     if ($targetMatrix !== '' && ! str_contains($targetMatrix, $needle)) {
@@ -223,6 +231,9 @@ if ($targetMatrix !== '' && (str_contains($targetMatrix, 'EnvironmentWriter') ||
 if ($targetMatrix !== '' && preg_match('/DROP\s+DATABASE/i', $targetMatrix) === 1) {
     $errors[] = 'Target database matrix must never drop database containers; cleanup is limited to matrix objects/files.';
 }
+if ($targetMatrix !== '' && preg_match('/evidence.*(password|secret|username|host)/i', $targetMatrix) === 1) {
+    $errors[] = 'Target database matrix evidence must not explicitly serialize connection credentials or endpoint identity.';
+}
 
 if ($errors !== []) {
     fwrite(STDERR, "[Nexora Primary SQL Portability Contract] FAILED\n - ".implode("\n - ", array_values(array_unique($errors)))."\n");
@@ -231,5 +242,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Primary SQL Portability Contract] PASS — MySQL, MariaDB, PostgreSQL, SQLite, SQL Server and SQL-compatible AWS variants are registry/version/config/provisioning/backup/runtime-identity/migration-test aligned, with a disposable target execution matrix guarded against production database destruction.'.PHP_EOL,
+    '[Nexora Primary SQL Portability Contract] PASS — MySQL, MariaDB, PostgreSQL, SQLite, SQL Server and SQL-compatible AWS variants are registry/version/config/provisioning/backup/runtime-identity/migration-test aligned, with a disposable target execution matrix guarded against production database destruction and able to persist secret-free target evidence.'.PHP_EOL,
 );
