@@ -30,6 +30,7 @@ $registryTest = $read('tests/Unit/DatabaseDriverRegistryTest.php');
 $versionTest = $read('tests/Unit/DatabaseVersionPolicyTest.php');
 $provisionerTest = $read('tests/Unit/DatabaseProvisionerConfigurationTest.php');
 $roundTripTest = $read('tests/Compatibility/DatabaseRoundTripCompatibilityTest.php');
+$targetMatrix = $read('scripts/database-target-matrix.php');
 
 foreach ([
     "'mysql' =>" => 'MySQL registry definition',
@@ -197,6 +198,32 @@ if ($roundTripTest !== '' && str_contains($roundTripTest, 'assertCount(51,$tenan
     $errors[] = 'Database round-trip compatibility must not freeze tenant model coverage to the historical 51-root count.';
 }
 
+foreach ([
+    "--drivers=" => 'explicit driver-selection CLI',
+    "--list" => 'matrix driver discovery CLI',
+    "NEXORA_MATRIX_" => 'isolated matrix environment prefix',
+    "^nexora_matrix_[A-Za-z0-9_]+$" => 'network database-name safety allow-list',
+    "^nexora_matrix_[A-Za-z0-9_-]+\\.sqlite$" => 'SQLite matrix filename safety allow-list',
+    "object_count" => 'empty-database safety probe',
+    "Safety refusal: selected matrix database is not empty" => 'non-empty database destructive guard',
+    "DatabaseRoundTripCompatibilityTest" => 'real compatibility test execution',
+    "vendor/bin/phpunit" => 'target PHPUnit runner',
+    "NexoraBootstrapProcessEnvironment::build" => 'isolated child process environment',
+    "\$provisioner->wipe(\$profile)" => 'post-test object cleanup',
+    "supports_create" => 'managed create-policy reuse',
+    "Only empty databases/files whose names match nexora_matrix_* are accepted" => 'operator-visible destructive scope',
+] as $needle => $label) {
+    if ($targetMatrix !== '' && ! str_contains($targetMatrix, $needle)) {
+        $errors[] = "Target database matrix contract missing: {$label}.";
+    }
+}
+if ($targetMatrix !== '' && (str_contains($targetMatrix, 'EnvironmentWriter') || str_contains($targetMatrix, "file_put_contents(\$root.'/.env'"))) {
+    $errors[] = 'Target database matrix must not rewrite the project .env while switching engines.';
+}
+if ($targetMatrix !== '' && preg_match('/DROP\s+DATABASE/i', $targetMatrix) === 1) {
+    $errors[] = 'Target database matrix must never drop database containers; cleanup is limited to matrix objects/files.';
+}
+
 if ($errors !== []) {
     fwrite(STDERR, "[Nexora Primary SQL Portability Contract] FAILED\n - ".implode("\n - ", array_values(array_unique($errors)))."\n");
     exit(1);
@@ -204,5 +231,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Primary SQL Portability Contract] PASS — MySQL, MariaDB, PostgreSQL, SQLite, SQL Server and SQL-compatible AWS variants are registry/version/config/provisioning/backup/runtime-identity/migration-test aligned.'.PHP_EOL,
+    '[Nexora Primary SQL Portability Contract] PASS — MySQL, MariaDB, PostgreSQL, SQLite, SQL Server and SQL-compatible AWS variants are registry/version/config/provisioning/backup/runtime-identity/migration-test aligned, with a disposable target execution matrix guarded against production database destruction.'.PHP_EOL,
 );
