@@ -64,7 +64,7 @@ final readonly class AiGenerationService
                 'output_tokens' => $result->outputTokens,
                 'output_sha256' => hash('sha256', $result->text),
                 'output_chars' => mb_strlen($result->text),
-                'provider_request_id' => $this->boundedRequestId($result->providerRequestId),
+                'provider_request_id' => $this->validatedRequestId($result->providerRequestId),
                 'completed_at' => now(),
                 'error_code' => null,
                 'error_message' => null,
@@ -140,9 +140,13 @@ final readonly class AiGenerationService
         }
     }
 
-    private function boundedRequestId(?string $value): ?string
+    private function validatedRequestId(?string $value): ?string
     {
         $value = trim((string) $value);
-        return $value === '' ? null : mb_substr($value, 0, 255);
+        if ($value === '') return null;
+        if (mb_strlen($value) > 255 || preg_match('/^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,254}$/', $value) !== 1) {
+            throw new InvalidArgumentException('AI provider returned an invalid request identifier.');
+        }
+        return $value;
     }
 }
