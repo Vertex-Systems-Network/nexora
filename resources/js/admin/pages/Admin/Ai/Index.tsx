@@ -41,7 +41,7 @@ export default function AiPlatformIndex({providers,connections,recentRuns}:Props
    const body=await response.json().catch(()=>({message:`AI generation failed (HTTP ${response.status}).`}));
    if(!response.ok){setGenerationError(body?.errors?.prompt?.[0]??body?.message??"AI generation failed.");return;}
    setGeneration(body as Generation);
-   router.reload({only:["recentRuns"],preserveState:true});
+   router.reload({only:["recentRuns"]});
   }finally{setGenerating(false);}
  };
  return <AdminLayout>
@@ -82,7 +82,7 @@ export default function AiPlatformIndex({providers,connections,recentRuns}:Props
 
   <Card className="mt-5 overflow-hidden"><div className="border-b border-[var(--nx-border)] p-5"><h2 className="font-semibold text-[var(--nx-text)]">Recent generation metadata</h2><p className="mt-1 text-sm text-[var(--nx-text-muted)]">Operational visibility without storing prompt or output contents.</p></div><div className="divide-y divide-[var(--nx-border)]">{recentRuns.map(run=><div key={run.id} className="grid gap-2 p-4 md:grid-cols-[minmax(0,1fr)_120px_180px] md:items-center"><div><div className="flex items-center gap-2"><p className="font-medium text-[var(--nx-text)]">{run.connectionName??"Deleted connection"}</p><Badge tone={statusTone(run.status)}>{run.status}</Badge></div><p className="mt-1 text-xs text-[var(--nx-text-muted)]">{run.providerKey} · {run.model} · {run.promptChars.toLocaleString()} prompt chars · {run.outputChars??"—"} output chars</p></div><div className="text-xs text-[var(--nx-text-muted)]">{run.inputTokens??"—"} / {run.outputTokens??"—"} tokens</div><div className="text-xs text-[var(--nx-text-muted)] md:text-right">{when(run.startedAt)}</div></div>)}{recentRuns.length===0&&<p className="p-5 text-sm text-[var(--nx-text-muted)]">No AI generation runs yet.</p>}</div></Card>
 
-  <ConfirmDialog open={deleteTarget!==null} onClose={()=>setDeleteTarget(null)} title="Delete AI connection?" description="Generation metadata linked to this connection will also be removed. Raw prompts and outputs are never stored in those rows." confirmLabel="Delete connection" tone="danger" onConfirm={()=>{if(!deleteTarget)return;router.delete(`/admin/ai/connections/${deleteTarget.id}`,{preserveScroll:true,onFinish:()=>setDeleteTarget(null)});}}/>
+  <ConfirmDialog open={deleteTarget!==null} onCancel={()=>setDeleteTarget(null)} title="Delete AI connection?" description="Generation metadata linked to this connection will also be removed. Raw prompts and outputs are never stored in those rows." confirmLabel="Delete connection" danger onConfirm={()=>{if(!deleteTarget)return;router.delete(`/admin/ai/connections/${deleteTarget.id}`,{preserveScroll:true,onFinish:()=>setDeleteTarget(null)});}}/>
  </AdminLayout>;
 }
 
