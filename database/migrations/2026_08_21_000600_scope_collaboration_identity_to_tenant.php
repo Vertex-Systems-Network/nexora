@@ -19,7 +19,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table(self::REVIEW_COMMENTS, static function (Blueprint $table): void {
-            $table->uuid('tenant_id')->nullable()->after('id');
+            $table->uuid('tenant_id')->nullable();
             $table->index(['tenant_id', 'document_id'], self::REVIEW_TENANT_INDEX);
             $table->foreign('tenant_id', self::REVIEW_TENANT_FOREIGN)
                 ->references('id')
@@ -28,7 +28,7 @@ return new class extends Migration {
         });
 
         Schema::table(self::ADMIN_NOTIFICATIONS, static function (Blueprint $table): void {
-            $table->uuid('tenant_id')->nullable()->after('id');
+            $table->uuid('tenant_id')->nullable();
             $table->index(['tenant_id', 'user_id'], self::NOTIFICATION_TENANT_INDEX);
             $table->foreign('tenant_id', self::NOTIFICATION_TENANT_FOREIGN)
                 ->references('id')
