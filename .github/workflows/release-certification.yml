@@ -1,10 +1,8 @@
 name: Nexora release certification
 
-# Certification is pinned to the dedicated LOCAL-WIN-03 self-hosted Windows runner.
-# LOCAL-WIN-03 must carry a custom runner label named exactly `LOCAL-WIN-03`; otherwise jobs remain queued
-# rather than falling back to another self-hosted machine. Runtime also verifies RUNNER_NAME fail-closed.
-# The runner owns its PHP/Node toolchain; certification verifies the installed versions instead of mutating
-# the machine with hosted-runner setup actions.
+# Certification may run on any idle self-hosted Windows runner.
+# GitHub-hosted runners are intentionally excluded. The selected self-hosted runner owns its PHP/Node
+# toolchain; certification verifies installed versions instead of mutating the machine with hosted-runner setup actions.
 # The active development branch is temporarily push-triggered while the self-hosted workflow is stabilized;
 # remove that extra branch trigger after a stable green run.
 on:
@@ -24,7 +22,7 @@ concurrency:
 jobs:
   source-certification:
     name: Source certification
-    runs-on: [self-hosted, LOCAL-WIN-03]
+    runs-on: [self-hosted, windows]
     timeout-minutes: 30
     defaults:
       run:
@@ -33,13 +31,11 @@ jobs:
       - name: Checkout exact source
         uses: actions/checkout@v5
 
-      - name: Verify dedicated runner identity
+      - name: Report selected self-hosted runner
         run: |
           echo Runner name: %RUNNER_NAME%
-          if /I not "%RUNNER_NAME%"=="LOCAL-WIN-03" (
-            echo Nexora certification is restricted to LOCAL-WIN-03. Current runner is %RUNNER_NAME%.
-            exit /b 1
-          )
+          echo Runner OS: %RUNNER_OS%
+          echo Runner architecture: %RUNNER_ARCH%
 
       - name: Verify local Windows toolchain
         run: |
