@@ -57,7 +57,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
 
       - name: Report GitHub-hosted runner
         run: |
@@ -82,7 +81,7 @@ jobs:
         run: php artisan key:generate --force
 
       - name: Install frontend development dependencies
-        run: npm ci --no-audit --no-fund
+        run: npm install --no-audit --no-fund
 
       - name: Execute full development QA and write evidence
         run: php scripts/development-readiness.php --full --tests --evidence
