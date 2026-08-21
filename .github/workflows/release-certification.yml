@@ -1,9 +1,11 @@
 name: Nexora release certification
 
+# Pull-request auto runs are temporarily disabled while the repository Actions quota is exhausted.
+# Keep main-push certification and workflow_dispatch available. Restore pull_request when capacity returns,
+# then run one consolidated certification for all deferred source blocks.
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -114,6 +116,9 @@ jobs:
 
       - name: Public API / SDK product source contract
         run: php scripts/public-api-sdk-product-contract-verify.php
+
+      - name: Content Migration product source contract
+        run: php scripts/content-migration-product-contract-verify.php
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
