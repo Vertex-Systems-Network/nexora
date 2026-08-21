@@ -51,11 +51,22 @@ final class DocumentController extends Controller
         ]);
     }
 
-    public function show(Document $document): JsonResponse
+    public function show(string $document): JsonResponse
     {
+        // Deliberately re-resolve after API-token middleware has installed the token tenant.
+        // Do not use implicit model binding here because route binding may execute before
+        // the stateless API tenant/auth context is established.
+        $resolved = Document::query()
+            ->select([
+                'id', 'uuid', 'title', 'slug', 'type', 'status', 'workflow_status', 'excerpt',
+                'content', 'metadata', 'published_at', 'created_at', 'updated_at',
+            ])
+            ->whereKey($document)
+            ->firstOrFail();
+
         return response()->json([
             'api_version' => 'v1',
-            'data' => self::resource($document),
+            'data' => self::resource($resolved),
         ]);
     }
 
