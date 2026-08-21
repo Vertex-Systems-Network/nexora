@@ -1,6 +1,6 @@
-import { Link, router, usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import type { ReactNode } from "react";
-import { Button } from "@nexora/admin-ui";
+import { Button, TextLink } from "@nexora/admin-ui";
 import { LanguageSwitcher } from "@admin/components/LanguageSwitcher";
 import { ThemeSwitcher } from "@admin/components/ThemeSwitcher";
 import type { SharedPageProps } from "@admin/types/page";
@@ -13,16 +13,16 @@ export function CustomerPortalLayout({ children }: { children: ReactNode }) {
         <div className="min-h-screen bg-[var(--nx-bg)] text-[var(--nx-text)]">
             <header className="border-b border-[var(--nx-border)] bg-[var(--nx-surface)]/95 backdrop-blur">
                 <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
-                    <Link href="/account" className="flex min-w-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--nx-primary)]">
+                    <TextLink href="/account" tone="neutral" className="flex min-w-0 items-center gap-3 rounded-xl no-underline hover:no-underline">
                         <img src={app.logoUrl} alt="" className="h-10 w-10 rounded-xl object-contain" loading="lazy" decoding="async" />
-                        <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold">{app.name}</p>
-                            <p className="text-xs text-[var(--nx-text-muted)]">Customer portal</p>
-                        </div>
-                    </Link>
+                        <span className="min-w-0">
+                            <span className="block truncate text-sm font-semibold">{app.name}</span>
+                            <span className="block text-xs font-normal text-[var(--nx-text-muted)]">Customer portal</span>
+                        </span>
+                    </TextLink>
                     <div className="flex flex-wrap items-center justify-end gap-2">
-                        <Link href="/" className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--nx-text-secondary)] hover:bg-[var(--nx-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--nx-primary)]">View site</Link>
-                        {user?.permissions.includes("admin.access") && <Link href="/admin" className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--nx-text-secondary)] hover:bg-[var(--nx-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--nx-primary)]">Admin</Link>}
+                        <TextLink href="/" tone="neutral" className="rounded-lg px-3 py-2 text-sm font-medium">View site</TextLink>
+                        {user?.permissions.includes("admin.access") && <TextLink href="/admin" tone="neutral" className="rounded-lg px-3 py-2 text-sm font-medium">Admin</TextLink>}
                         <ThemeSwitcher />
                         <LanguageSwitcher localization={localization} />
                         <Button size="sm" variant="secondary" onClick={() => router.post("/logout")}>Sign out</Button>
