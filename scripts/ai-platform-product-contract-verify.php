@@ -55,7 +55,7 @@ foreach ([
 foreach ([
     '$this->app->singleton(AiProviderRegistry::class)' => 'singleton provider registry',
     '$this->app->singleton(AiGenerationService::class)' => 'singleton generation service',
-    "$this->loadRoutesFrom(base_path('routes/ai.php'))" => 'AI route loading',
+    '$this->loadRoutesFrom(base_path(\'routes/ai.php\'))' => 'AI route loading',
 ] as $needle => $label) {
     if ($provider !== '' && ! str_contains($provider, $needle)) $errors[] = "AI service-provider contract missing: {$label}.";
 }
@@ -120,7 +120,7 @@ foreach ([
     "return response()->json([" => 'browser-local response transport',
     'private function assertSettingsContainNoSecrets' => 'settings secret-key rejection',
     'Changing AI provider requires an explicit Credentials JSON value' => 'cross-provider credential re-entry',
-    "$message = $ok ? 'Healthy.' : 'AI provider health check failed.';" => 'generic provider health diagnostics',
+    "\$message = \$ok ? 'Healthy.' : 'AI provider health check failed.';" => 'generic provider health diagnostics',
     "'hasCredentials' => (array) \$connection->credentials !== []" => 'credential-presence boolean only',
 ] as $needle => $label) {
     if ($controller !== '' && ! str_contains($controller, $needle)) $errors[] = "AI Admin contract missing: {$label}.";
