@@ -63,6 +63,7 @@ $run('search_product_contract', 'Search 2.0 product source contract', [PHP_BINAR
 $run('collaboration_product_contract', 'Collaboration product source contract', [PHP_BINARY, 'scripts/collaboration-product-contract-verify.php']);
 $run('automation_product_contract', 'Automation product source contract', [PHP_BINARY, 'scripts/automation-product-contract-verify.php']);
 $run('ai_platform_product_contract', 'AI Platform product source contract', [PHP_BINARY, 'scripts/ai-platform-product-contract-verify.php']);
+$run('multisite_organizations_product_contract', 'Multisite / Organizations product source contract', [PHP_BINARY, 'scripts/multisite-organizations-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
