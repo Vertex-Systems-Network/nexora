@@ -9,6 +9,7 @@ use App\Providers\CustomerPortalServiceProvider;
 use App\Providers\FormsServiceProvider;
 use App\Providers\MarketplaceServiceProvider;
 use App\Providers\NexoraServiceProvider;
+use App\Providers\ObservabilityServiceProvider;
 
 return [
     AppServiceProvider::class,
@@ -20,4 +21,5 @@ return [
     FormsServiceProvider::class,
     MarketplaceServiceProvider::class,
     NexoraServiceProvider::class,
+    ObservabilityServiceProvider::class,
 ];
