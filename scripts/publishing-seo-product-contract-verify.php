@@ -70,9 +70,9 @@ foreach ([
     '<meta property="og:image"' => 'Open Graph image output',
     '<meta name="twitter:card"' => 'Twitter card output',
     "url(\$this->documentUrl(\$document))" => 'route-correct canonical fallback',
-    '\$this->visibility->apply($featuredQuery)' => 'protected featured-content filtering',
-    '\$this->visibility->apply($latestQuery)' => 'protected latest-content filtering',
-    '\$this->visibility->apply($seriesQuery)' => 'protected series navigation filtering',
+    '$this->visibility->apply($featuredQuery)' => 'protected featured-content filtering',
+    '$this->visibility->apply($latestQuery)' => 'protected latest-content filtering',
+    '$this->visibility->apply($seriesQuery)' => 'protected series navigation filtering',
 ] as $needle => $label) if ($themePage !== '' && ! str_contains($themePage, $needle)) $errors[] = "Public theme contract missing: {$label}.";
 
 foreach ([
