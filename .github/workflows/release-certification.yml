@@ -85,5 +85,8 @@ jobs:
       - name: Marketplace product source contract
         run: php scripts/marketplace-product-contract-verify.php
 
+      - name: Commerce product source contract
+        run: php scripts/commerce-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
