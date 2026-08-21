@@ -148,5 +148,8 @@ jobs:
       - name: Cloud / HA product source contract
         run: php scripts/cloud-ha-product-contract-verify.php
 
+      - name: Backup / DR / Upgrade product source contract
+        run: php scripts/backup-dr-upgrade-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
