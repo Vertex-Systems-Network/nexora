@@ -10,15 +10,16 @@
 
 - Date: `2026-08-22`
 - Branch: `dev/n1-0b-core-functional-qa`
-- PR #1: **DRAFT + OPEN + MERGEABLE**, not ready for merge
-- Last complete green source CI: **`32533298397` SUCCESS** on `73deb80bfaeb2e2b416292c15dde1f1abb02c16c`.
-- That consolidated run passed Certification preflight, Source Guard, every product contract through **N1.26 Performance + Accessibility + Release**, and Unified Source Certification.
+- PR #1: **DRAFT + OPEN + MERGEABLE**, title/body synchronized through N1.26; not ready for merge
+- Consolidated implementation CI: **`32533298397` SUCCESS** on `73deb80bfaeb2e2b416292c15dde1f1abb02c16c`.
+- Latest complete green governance/source CI before this progress commit: **`32533537041` SUCCESS** on `c9f57881a4ef950ee041cda683e4d47829b588b3`.
+- Consolidated certification passed Certification preflight, Source Guard, every product contract through **N1.26 Performance + Accessibility + Release**, and Unified Source Certification.
 - Current runner policy: certification may run on **any idle self-hosted runner** via `runs-on: self-hosted`; there is no runner-name pin and no `LOCAL-WIN-03`-only guard.
 - GitHub-hosted runners remain excluded. The current self-hosted fleet is Windows-based, so repository `run:` steps use `cmd` and verify local PHP/Node/npm before certification.
-- Any-idle dispatch is proven across the pool: successful/diagnostic runs in this pass were claimed by different local runners including `LOCAL-WIN-01`, `LOCAL-WIN-03` and `LOCAL-WIN-4` depending on availability.
-- Current source head before this progress-only commit: `73deb80bfaeb2e2b416292c15dde1f1abb02c16c`.
+- Any-idle dispatch is proven across the pool: runs in this pass were claimed by different local runners including `LOCAL-WIN-01`, `LOCAL-WIN-03` and `LOCAL-WIN-4` depending on availability.
+- Current source head before this progress-only commit: `9a5a32fbcd13c77617893a6d90a719e0e6144019`.
 - Actions: **DEFERRED BY USER** earlier when hosted Actions quota was exhausted; current certification has resumed through the user-approved self-hosted runner pool.
-- Ledger revision before this apply: `2.4`; canonical append-only ledger sync is the next governance action.
+- Canonical ledger: **revision `2.5`**, synchronized through N1.26 / pooled self-hosted certification in commit `9a5a32fbcd13c77617893a6d90a719e0e6144019`.
 - Issue #2: **OPEN**; latest live rc.93 evidence still reports only `environment`, `activation`, `service`, `process` mismatches.
 - **N1.18 Public APIs / Webhooks / SDK: SOURCE DONE / TARGET PENDING**
 - **N1.19 Import / Export / WordPress migrations: SOURCE DONE / TARGET PENDING**
@@ -170,7 +171,7 @@ Consequences:
 
 ## 11. Main protection / target blockers
 
-`main` remains reported `protected=false`; current connector exposes no branch/ruleset mutation endpoint. Desired policy remains PR required + Source certification + stale-review dismissal + review/conversation resolution + no force push/delete + admin enforcement. Issue #2 remains OPEN. Target Power remains 50%.
+`main` remains recorded `protected=false`; current connector exposes no proven branch/ruleset mutation endpoint in this workflow. Desired policy remains PR required + Source certification + stale-review dismissal + review/conversation resolution + no force push/delete + admin enforcement. Issue #2 remains OPEN. Target Power remains 50%.
 
 ---
 
@@ -195,27 +196,28 @@ Consequences:
 | 042 | 2026-08-22 | budget `2b116577…`; build verifier `1b65643e…`; perf contract `35dfa8cc…`; modal test `21b85cb7…`; browser contract `c6fe39ab…`; product gate `4a616965…`; workflow `e4bf0547…`; readiness `d728df74…` | N1.26 lazy-route/first-load-budget + modal focus regression + executable frontend/build QA + C5 boundary source hardening | implementation-complete candidate; verified Power unchanged |
 | 043 | 2026-08-22 | runner selector `736ad761…`; API-token shared UI `c263fc52…`; approved migration queue set `b64ca91f…`; RC18/current queue metric alignment `acbd16ea…`; run `32532484673` | changed certification to any idle self-hosted runner; fixed preflight Admin UI + queue contract; Source Guard and gates through AI Platform green; synchronized progress protocol after Multisite governance failure | verified Power unchanged pending fresh consolidated green run |
 | 044 | 2026-08-22 | Enterprise progress gate `084caed8…`; API bootstrap gate `777591b1…`; Observability Actions governance `5ab8c4f9…`; Forge structural conflict gate `73deb80b…`; CI **`32533298397` SUCCESS** | removed stale formatting-only CI assumptions without weakening product invariants; any-idle self-hosted consolidated certification passed every gate through N1.26 + Unified Source Certification | N1.18–N1.26 promoted to SOURCE DONE; Target 50% / Release 25% unchanged |
+| 045 | 2026-08-22 | progress/governance CI **`32533537041` SUCCESS** on `c9f57881…`; ledger revision `2.5` commit `9a5a32fb…`; PR #1 synchronized through N1.26 | closed source-governance handoff after pooled certification; canonical ledger now records N1.18–N1.26 and any-idle runner policy | Source remains 99%; Target 50% / Release 25% unchanged |
 
 ---
 
 ## 13. Exact next action
 
 ```text
-SOURCE GOVERNANCE SYNC
-  1. append the N1.18-N1.26 + any-idle runner + CI 32533298397 checkpoint to NEXORA_AI_PROJECT_STATE.md
-  2. refresh PR #1 title/body through N1.26 while keeping it DRAFT
-  3. keep issue #2 OPEN; source CI is not rc.93 recovery evidence
+LIVE RC.93 RECOVERY / ISSUE #2
+  1. recover the existing D:\laragon\www\nexora rc.93 installation without replacing it with rc.94
+  2. require `php artisan nexora:runtime:compatibility-status --deep` PASS with no mismatches
+  3. require `php artisan nexora:runtime:post-install-status --assert-ready` PASS
+  4. exercise /login and /admin
+  5. only then close issue #2
 
-TARGET / RELEASE CLOSURE
-  1. recover existing rc.93 target and require compatibility-status --deep PASS
-  2. require post-install-status --assert-ready PASS, then exercise /login and /admin
-  3. on a separate development checkout run full development QA with PHP tests + Vitest + TypeScript + Vite + production asset budgets
-  4. obtain real five-engine SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix evidence
-  5. exercise major product workflows N1.9-N1.26 on the target; controlled provider/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
-  6. perform real disposable-target backup/restore + upgrade rehearsal
-  7. complete C5 real Chrome/Edge/Firefox + assistive-tech + HTTP + Web Vitals evidence
-  8. complete C6 multi-node/final release evidence and reviewed dependency locks
-  9. only when all required target/release gates are real and exact-source bound: close eligible issues, mark PR Ready and merge automatically
+DEVELOPMENT TARGET / RELEASE CLOSURE
+  1. on a separate development checkout run full development QA with PHP tests + Vitest + TypeScript + Vite + production asset budgets
+  2. obtain real five-engine SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix evidence on disposable `nexora_matrix_*` databases
+  3. exercise major product workflows N1.9-N1.26 on the target; controlled provider/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
+  4. perform real disposable-target backup/restore + upgrade rehearsal
+  5. complete C5 real Chrome/Edge/Firefox + assistive-tech + HTTP + Web Vitals evidence
+  6. complete C6 multi-node/final release evidence and reviewed dependency locks
+  7. only when all required target/release gates are real and exact-source bound: close eligible issues, mark PR Ready and merge automatically
 
 EVIDENCE RULE
   - self-hosted source CI never raises Target Power by itself
