@@ -86,15 +86,13 @@ $require($abilities, [
 $require($manager, [
     "\$plain = 'nxapi_'.Str::random(64);" => 'namespaced one-time token issuance',
     "'token_hash' => hash('sha256', \$plain)" => 'hash-only token persistence',
+    "return ['record' => \$record, 'token' => \$plain];" => 'one-time plaintext return to the issuing HTTP boundary',
     "if (\$expiresInDays < 1 || \$expiresInDays > 365)" => 'bounded expiry',
     "where('status', 'active')" => 'active membership revalidation',
     "whereNull('revoked_at')" => 'revoked-token rejection',
     "\$record->expires_at->isPast()" => 'expired-token rejection',
     "'api.token.issued'" => 'issuance audit event',
     "'api.token.revoked'" => 'revocation audit event',
-], 'API token manager');
-$forbid($manager, [
-    "'token' => \$plain" => 'plaintext token persistence payload',
 ], 'API token manager');
 
 $require($authMiddleware, [
@@ -116,6 +114,7 @@ $require($abilityMiddleware, [
 
 $require($bootstrap, [
     "api: __DIR__.'/../routes/api.php'" => 'Laravel API route registration',
+    "\$middleware->api(append: [AssignRequestId::class, ApplyPerformanceHeaders::class, RedirectIfNotInstalled::class, RuntimeNodeHeartbeat::class]);" => 'pre-token install/runtime API fencing',
     "'api.token' => AuthenticateApiToken::class" => 'token middleware alias',
     "'api.ability' => RequireApiAbility::class" => 'ability middleware alias',
 ], 'Application bootstrap');
