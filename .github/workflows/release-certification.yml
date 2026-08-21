@@ -1,9 +1,10 @@
 name: Nexora release certification
 
-# Pull-request auto runs are temporarily disabled while the repository Actions quota is exhausted.
-# Keep main-push certification and workflow_dispatch available. Restore pull_request when capacity returns,
-# then run one consolidated certification for all deferred source blocks.
+# Certification runs on the repository's attached self-hosted runner so GitHub-hosted minute limits
+# do not block source verification. Pull-request certification is restored for the active development flow.
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -18,8 +19,8 @@ concurrency:
 jobs:
   source-certification:
     name: Source certification
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    runs-on: self-hosted
+    timeout-minutes: 30
     steps:
       - name: Checkout exact source
         uses: actions/checkout@v4
@@ -122,6 +123,9 @@ jobs:
 
       - name: Observability product source contract
         run: php scripts/observability-product-contract-verify.php
+
+      - name: Forge / Developer Experience product source contract
+        run: php scripts/forge-developer-experience-product-contract-verify.php
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
