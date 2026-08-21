@@ -3,13 +3,12 @@ name: Nexora release certification
 # Certification may run on any idle self-hosted runner.
 # GitHub-hosted runners are intentionally excluded. Nexora's current runner fleet is Windows-based, so repository
 # run steps use cmd and the selected runner's local PHP/Node toolchain is verified before certification proceeds.
-# The active development branch is temporarily push-triggered while the self-hosted workflow is stabilized;
-# remove that extra branch trigger after a stable green run.
+# Pull-request synchronization is the canonical development trigger; main is rechecked after merge/push.
 on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, dev/n1-0b-core-functional-qa]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
