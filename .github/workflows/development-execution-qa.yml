@@ -24,6 +24,15 @@ jobs:
     name: Development execution QA
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    env:
+      APP_ENV: testing
+      NEXORA_INSTALLER_BYPASS: 'true'
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_DATABASE: nexora_testing
+      DB_USERNAME: root
+      DB_PASSWORD: root
     services:
       mysql:
         image: mysql:8.4
