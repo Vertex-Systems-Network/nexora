@@ -70,5 +70,8 @@ jobs:
       - name: Forms + Data + Workflows product source contract
         run: php scripts/forms-workflow-product-contract-verify.php
 
+      - name: Data Connections product source contract
+        run: php scripts/data-connection-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
