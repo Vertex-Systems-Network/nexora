@@ -64,6 +64,62 @@ final class DataConnectionFlowTest extends TestCase
         self::assertStringNotContainsString('top-secret-password', $rawSecret);
     }
 
+    public function test_dynamodb_is_endpoint_optional_and_static_keys_must_be_rotated_as_a_pair(): void
+    {
+        $admin = $this->administrator();
+
+        $this->actingAs($admin)->post('/admin/data/connections', [
+            'name' => 'Dynamo via IAM role',
+            'driver' => 'aws_dynamodb',
+            'endpoint' => '',
+            'database' => '',
+            'username' => '',
+            'password' => '',
+            'region' => 'us-east-1',
+            'access_key' => '',
+            'secret_key' => '',
+        ])->assertSessionHasNoErrors();
+
+        $connection = DataConnection::query()->where('name', 'Dynamo via IAM role')->firstOrFail();
+        self::assertSame('aws_dynamodb', $connection->driver);
+        self::assertNull($connection->endpoint);
+        self::assertSame('us-east-1', $connection->options['region'] ?? null);
+        self::assertSame([], (array) $connection->secret_payload);
+
+        $this->actingAs($admin)->post('/admin/data/connections', [
+            'name' => 'Dynamo partial key',
+            'driver' => 'aws_dynamodb',
+            'endpoint' => '',
+            'database' => '',
+            'username' => '',
+            'password' => '',
+            'region' => 'us-east-1',
+            'access_key' => 'AKIAEXAMPLE',
+            'secret_key' => '',
+        ])->assertSessionHasErrors(['access_key']);
+
+        self::assertSame(1, DataConnection::query()->where('driver', 'aws_dynamodb')->count());
+    }
+
+    public function test_non_dynamodb_connectors_still_require_an_endpoint(): void
+    {
+        $admin = $this->administrator();
+
+        $this->actingAs($admin)->post('/admin/data/connections', [
+            'name' => 'Missing Redis endpoint',
+            'driver' => 'redis',
+            'endpoint' => '',
+            'database' => '',
+            'username' => '',
+            'password' => '',
+            'region' => '',
+            'access_key' => '',
+            'secret_key' => '',
+        ])->assertSessionHasErrors(['endpoint']);
+
+        self::assertSame(0, DataConnection::query()->where('name', 'Missing Redis endpoint')->count());
+    }
+
     public function test_rotating_connectivity_preserves_blank_secret_and_forces_fresh_health_test(): void
     {
         $admin = $this->administrator();
