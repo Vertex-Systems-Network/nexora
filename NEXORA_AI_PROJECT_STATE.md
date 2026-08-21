@@ -10,7 +10,7 @@
 ## 0. Ledger metadata
 
 - Ledger schema: `1`
-- Ledger revision: `1.5`
+- Ledger revision: `1.6`
 - Project: `Nexora`
 - Product class: advanced extensible web platform / CMS / site builder / application ecosystem
 - Current development source release: `1.0.0-rc.94`
@@ -21,8 +21,8 @@
 - GitHub default branch: `main`
 - Active development branch: `dev/n1-0b-core-functional-qa`
 - Active GitHub pull request: `#1` — draft, mergeable; keep draft until real-target evidence is available
-- Current branch head before this ledger-only commit: `2035528bae27222446138e65bda50ea32feb9e17`
-- Latest complete green source-certification run: `32427092798`
+- Current branch head before this ledger-only commit: `bfee0fce659c4471bd7a98065b4b48a7fb31682a`
+- Latest complete green source-certification run: `32431449676`
 - Open GitHub issues at this checkpoint: `#2 Nexora runtime identity mismatch`
 - Current target environment: Windows + Laragon (real-target development test environment)
 - Current target path: `D:\laragon\www\nexora`
@@ -85,9 +85,9 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | Public Contracts | Stable APIs for modules/plugins/themes | Foundation implemented |
 | Module Registry | Discover/register/activate modules | Foundation implemented |
 | Capability Runtime | Controlled extension permissions | Foundation implemented |
-| Admin Platform / Design System | Shared UI/navigation/forms/selects/themes/tooltips | Strong foundation; app-wide live QA pending |
-| Document Engine | Structured page/content documents | Foundation implemented; next product closure block |
-| SEO Core | Metadata/canonical/schema/publishing semantics | Foundation implemented |
+| Admin Platform / Design System | Shared UI/navigation/forms/selects/themes/tooltips | Strong source closure; responsive/mobile/accessibility contract green; app-wide target QA pending |
+| Document Engine | Structured page/content documents | Writer CRUD/revisions/autosave/concurrency/Media reuse + generic Collections SOURCE DONE; target execution pending |
+| SEO Core | Metadata/canonical/schema/social/sitemap/publishing semantics | Publishing + SEO workflow SOURCE DONE; target execution pending |
 | Theme Engine | Package/install/activate/render | Product workflow SOURCE DONE; target execution pending |
 | Plugin / Extension Engine | Lifecycle/capabilities/migrations | Product workflow SOURCE DONE; target execution pending |
 | Studio | Visual page/site builder | First create/edit/publish/public-render workflow SOURCE DONE; target execution pending; advanced builder features remain |
@@ -97,7 +97,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | Marketplace | Themes/apps distribution | Foundation/planned expansion |
 | Commerce | Commerce primitives/services | Foundation; Commerce 2.0 later |
 | CRM / Membership / Helpdesk | Business/customer capabilities | Foundation/roadmap |
-| Multisite / Organizations / SSO | Enterprise tenancy/governance | Major upcoming block |
+| Multisite / Organizations / SSO | Enterprise tenancy/governance | Foundation exists; broad product/target closure remains |
 | Cloud / HA Runtime | Distributed workers/storage/deployments | Later roadmap |
 | Installer / Deployment / Recovery | Zero-state install/update/recovery/runtime handoff | rc.94 source stabilization closed; live rc.93 recovery evidence pending |
 
@@ -125,7 +125,7 @@ Never report a feature as simply “100% complete” when only source/static ver
 - Generation: `n1-v5.29`
 - Active branch: `dev/n1-0b-core-functional-qa`
 - PR `#1` is draft and mergeable.
-- Latest green CI run `32427092798` passed:
+- Latest green CI run `32431449676` passed:
   - Certification preflight
   - Source Guard
   - Post-install runtime convergence contract
@@ -133,6 +133,10 @@ Never report a feature as simply “100% complete” when only source/static ver
   - Theme product source contract
   - Extension product source contract
   - Studio product source contract
+  - Document product source contract
+  - Content collection product source contract
+  - Publishing + SEO product source contract
+  - Admin UX product source contract
   - Unified source certification
 - `composer.lock` and `package-lock.json` are not committed; deterministic dependency/release certification remains deferred.
 
@@ -244,8 +248,9 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 
 - Media Library already supports upload, MIME/checksum inspection, image variants, folders, collections, metadata, usage tracking, Trash/restore and guarded permanent delete.
 - Media Library picker JSON mode added for reusable module selection.
-- `MediaPicker.tsx` added as a shared reusable chooser.
-- Settings logo consumes MediaPicker rather than requiring manual URLs only.
+- `MediaPicker.tsx` is the shared reusable chooser and supports canonical selection + clear/removal.
+- Settings logo, Writer image blocks, Publishing hero image and SEO social image reuse MediaPicker rather than fixed/preloaded URL selectors.
+- Writer persists canonical `media_asset_id`; Publishing/SEO retain external URL only as optional fallback where supported.
 - Media feature test source verifies picker returns active assets and excludes Trash.
 - Shared UI/file flow remains within Nexora components.
 
@@ -257,7 +262,7 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 - Required platform slots preserve head/assets/schema/content semantics.
 - Preview token does not change active theme.
 - Activation, version switch, design tokens and rollback paths are present.
-- Shared FilePicker now exposes accessible validation errors (`aria-invalid`, announced error text).
+- Shared FilePicker exposes accessible validation errors (`aria-invalid`, announced error text).
 - Theme preview failures are visible instead of silently swallowed.
 - End-to-end acceptance test source creates a real ZIP fixture and covers scan -> install -> preview -> activate -> public render -> rollback.
 - `scripts/theme-product-contract-verify.php` guards the workflow in CI/development readiness.
@@ -269,7 +274,7 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 - Verified supply-chain artifacts remain the only install input.
 - Capability grants are deny-by-default; unregistered/missing requested capabilities block enablement.
 - Dependencies, trusted-PHP execution policy, schema rollback safety and dependent-extension uninstall guards remain enforced.
-- Destructive uninstall now requires shared `ConfirmDialog` confirmation.
+- Destructive uninstall requires shared `ConfirmDialog` confirmation.
 - End-to-end declarative extension acceptance-test source covers Sentinel -> artifact -> install -> enable -> disable -> uninstall -> lifecycle evidence.
 - `scripts/extension-product-contract-verify.php` guards the workflow in CI/development readiness.
 
@@ -280,16 +285,41 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 - Studio validator enforces node/depth budgets, stable IDs, allowed props/styles/bindings and safe link/target normalization.
 - Published document-scoped canvases integrate into public `ThemePageController`; document renderer remains safe fallback when Studio canvas is absent/draft.
 - Studio renderer escapes output and emits responsive tablet/mobile rules.
-- Acceptance-test source expanded to prove:
-  - create -> save -> publish
-  - real public document rendering from Studio
-  - dynamic `document.title` binding
-  - responsive CSS output
-  - unpublish -> Document Engine fallback
-  - stale-write rejection without overwrite
-  - unsafe `javascript:` button URL normalization
+- Acceptance-test source expanded to prove create/save/publish, public Studio render, document-title binding, responsive CSS, unpublish fallback, stale-write rejection and unsafe `javascript:` URL normalization.
 - `scripts/studio-product-contract-verify.php` guards the workflow in CI/development readiness.
-- First Studio contract CI attempt exposed a wrong static marker; the gate itself was corrected and final CI run `32427092798` passed.
+
+### Document / Writer + Content Collections source closure
+
+- Writer CRUD, revisions, autosave, optimistic concurrency and structured block validation are source-gated.
+- Writer image block selects from the complete searchable Media Library and stores canonical asset IDs.
+- Public document renderer resolves canonical Media assets and ignores trashed/non-image invalid selections.
+- Generic tenant-native Content Collections added without mutating the historical enterprise backfill migration.
+- Collections support name/slug/status/document type, typed custom field schema, document membership, per-entry values, position, non-destructive detach/delete, audit and permission boundaries.
+- Database source guard now distinguishes historical tenant-manifest roots from forward tenant-native models while preserving the original 51-table backfill invariant.
+- `scripts/document-product-contract-verify.php` and `scripts/collection-product-contract-verify.php` run in CI/development readiness.
+
+### Publishing + SEO end-to-end source closure
+
+- Publishing Article Settings no longer preload a fixed 250-image list; shared searchable MediaPicker selects canonical hero assets.
+- Hero assets are tenant-safe, image-only, public and non-trashed; optional external hero URL remains a fallback.
+- SEO social metadata can persist canonical Media Library image IDs with usage tracking and an external URL fallback.
+- Public SEO manager resolves canonical social title/description/image/type/Twitter card.
+- Public document head emits route-correct canonical URL, robots index/follow + extra directives, Open Graph and Twitter metadata.
+- `PublicDocumentVisibility` centralizes anonymous exclusion for membership-protected documents.
+- Home, blog/taxonomy/author/series archives, series navigation, related content and sitemap generation exclude protected published documents from anonymous discovery.
+- Publishing/SEO acceptance-test source covers scheduling/taxonomy/series plus protected archive non-disclosure and real public OG/Twitter/robots output.
+- `scripts/publishing-seo-product-contract-verify.php` runs in CI/development readiness.
+
+### Application-wide Admin UX source closure pass
+
+- Existing browser UX analyzer already guards shared component usage, raw-control bans, logical RTL, focus-visible, modal focus, DataTable semantics, command palette semantics, reduced-motion and browser evidence structure.
+- OrganizationSwitcher and LanguageSwitcher are reusable across responsive surfaces rather than desktop-only wrappers.
+- Mobile navigation exposes tenant/organization switching and language switching; desktop header retains responsive selectors.
+- Language flag images use lazy/async loading.
+- Global toast feedback uses canonical Lucide-compatible icons, remains live-region accessible, is mobile-width safe and supports explicit dismissal through shared IconButton.
+- Shared Select exposes invalid state to React Aria, visual danger state and announced error message.
+- Route progress tracks/cleans both delayed-show and delayed-hide timers to avoid stale post-navigation updates.
+- `scripts/admin-ux-product-contract-verify.php` composes these product invariants with the existing browser UX analyzer and runs in CI/development readiness.
 
 ---
 
@@ -298,7 +328,7 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 ### Platform implementation
 
 ```text
-██████████████████░░  ~88%
+███████████████████░  ~92%
 ```
 
 ### Real functional verification
@@ -307,7 +337,7 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 ██████████░░░░░░░░░░  ~50%
 ```
 
-Real verification intentionally did not rise with source-only Theme/Extension/Studio work.
+Real verification intentionally did not rise with source-only Documents/Collections/Publishing/SEO/Admin UX work.
 
 | Phase | Progress | Status |
 |---|---:|---|
@@ -316,11 +346,14 @@ Real verification intentionally did not rise with source-only Theme/Extension/St
 | DEV-2A Historical TypeScript remediation | 100% | SOURCE DONE |
 | DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for the reported Laragon build |
 | DEV-3 Laravel/install runtime | 80% source / 75% live | PARTIAL — source convergence gate green; live rc.93 repair evidence pending |
-| DEV-4 Login/admin/core functional QA | 70% source / 30% live | PARTIAL — settings/media/theme/extensions/Studio source workflows gated; target QA pending |
+| DEV-4 Login/admin/core functional QA | 90% source / 30% live | PARTIAL — major product workflows source-gated; broad target QA pending |
 | DEV-4A Site settings + media reuse | 100% source / target pending | SOURCE DONE |
 | DEV-4B Theme workflow | 100% source contract / target pending | SOURCE DONE |
 | DEV-4C Extension workflow | 100% source contract / target pending | SOURCE DONE |
 | DEV-4D Studio first publish workflow | 100% source contract / target pending | SOURCE DONE |
+| DEV-4E Documents + Collections | 100% source contract / target pending | SOURCE DONE |
+| DEV-4F Publishing + SEO | 100% source contract / target pending | SOURCE DONE |
+| DEV-4G Admin UX source pass | 100% source contract / target pending | SOURCE DONE for current pass |
 | DEV-5 DB/services portability | 60% | PARTIAL |
 | DEV-6 Final C1-C6/release certification | 10% | DEFERRED CERTIFICATION |
 
@@ -369,24 +402,23 @@ http://nexora/admin
 Use a separate development checkout of `dev/n1-0b-core-functional-qa`, then run:
 
 ```bat
-php scripts\development-readiness.php --full
-php artisan test --filter=SettingsFlowTest
-php artisan test --filter=MediaLibraryFlowTest
-php artisan test --filter=ThemeEngineFlowTest
-php artisan test --filter=ExtensionsAdminFlowTest
-php artisan test --filter=StudioFlowTest
+scripts\development-readiness.bat --full
+php artisan test
+npm run build
 ```
 
-Do not report Theme/Extension/Studio as TARGET VERIFIED until these execute successfully in the real target environment.
+At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing and SEO workflows plus responsive Admin navigation on the real target.
+
+Do not report current source closures as TARGET VERIFIED until these execute successfully in the real target environment.
 
 ### Next source implementation order
 
 ```text
-CMS / Documents / Collections product closure
-  -> Media selection inside content/editor workflows
-  -> SEO / Publishing end-to-end closure
-  -> Admin Design System application-wide UX pass
-  -> Forms / Data / Workflows
+Continue application-wide Admin/product workflow review
+  -> Forms / Data / Workflows closure
+  -> DEV-5 DB/services portability closure
+  -> target functional QA evidence
+  -> final DEV-6 C1-C6/release certification
 ```
 
 During every block, inspect GitHub open issues first and again before final handoff.
@@ -627,6 +659,36 @@ Use `No release` when no rc release was produced.
 - Remaining blocker: live issue #2 + target execution of current branch workflows.
 - Next exact action: recover/verify rc.93 live target; in parallel move source work to CMS/Documents/Collections product closure.
 
+### 2026-08-21 — No release — Documents, Media reuse and Content Collections source closure
+
+- Trigger / observed blocker: Writer media choice had to scale beyond fixed lists and Nexora lacked a generic Webflow/WordPress-class Content Collections workflow.
+- Root cause: Writer preview/media ownership was split across caller/static assumptions; no generic tenant-native collection model/schema/routes/admin workflow existed; historical tenant source guard assumed all future tenant models must be in the original 51-table backfill manifest.
+- Changes applied: Writer uses shared searchable MediaPicker and canonical `media_asset_id`; added tenant-native Content Collections, typed custom fields, document membership/per-entry data, permissions/audit/non-destructive lifecycle, acceptance tests and product contract; source guard now distinguishes historical manifest roots from forward tenant-native models without mutating historical migration semantics.
+- Verification completed: GitHub Actions run `32429295616` SUCCESS with Document + Content Collection gates and unified source certification PASS.
+- Real-target evidence: no Laragon execution of these new workflows; SOURCE DONE only.
+- Remaining blocker: live issue #2 + target execution.
+- Next exact action: Publishing/SEO end-to-end source closure while preserving live target boundary.
+
+### 2026-08-21 — No release — Publishing, SEO and protected public visibility source closure
+
+- Trigger / observed blocker: Article Settings preloaded a fixed 250-image dropdown; social SEO media lacked durable Media Library references; saved social/extra robots fields were not fully emitted in public head; membership-protected documents could surface in anonymous discovery lists.
+- Root cause: Publishing/SEO workflows were built from strong foundations but were not fully connected through canonical media, public metadata output and one shared public-visibility policy.
+- Changes applied: Publishing hero + SEO social MediaPicker integration; canonical social media IDs + usage tracking; resolved social SEO contract; route-correct canonical fallback; robots/OG/Twitter public tags; `PublicDocumentVisibility`; filtering across home/blog/taxonomy/authors/series/related/sitemap; expanded acceptance tests; added Publishing + SEO product contract.
+- Verification completed: GitHub Actions run `32430956498` SUCCESS after performance delegation and contract-marker regressions were corrected; all product gates and unified source certification passed.
+- Real-target evidence: no Laragon execution of Publishing/SEO changes; SOURCE DONE only.
+- Remaining blocker: live issue #2 + target execution.
+- Next exact action: application-wide Admin UX source pass and live recovery evidence.
+
+### 2026-08-21 — No release — Application-wide Admin UX responsive/accessibility source closure pass
+
+- Trigger / observed blocker: desktop-only organization switching made tenant changes impossible from mobile Admin; global toast feedback had no explicit dismiss action/canonical status icons; shared Select did not expose invalid state as strongly as Input/Textarea; route-progress hide timers could outlive navigation lifecycle.
+- Root cause: shared primitives were strong but a few cross-app interaction details remained outside the existing browser/UX static gate.
+- Changes applied: responsive OrganizationSwitcher/LanguageSwitcher APIs; mobile sidebar tenant/language controls; responsive header selectors; lazy/async flag images; dismissible icon-based toast; Select `isInvalid` + announced error state; route-progress show/hide timer cleanup; dedicated Admin UX product contract composed with existing browser UX analyzer.
+- Verification completed: GitHub Actions run `32431449676` SUCCESS — preflight, Source Guard, runtime, all Theme/Extension/Studio/Document/Collection/Publishing+SEO/Admin UX product gates and Unified Source Certification PASS.
+- Real-target evidence: no new Laragon execution for this Admin UX pass; SOURCE DONE only.
+- Remaining blocker: live rc.93 issue #2 and broad target functional QA.
+- Next exact action: safe rc.93 recovery -> compatibility/post-install PASS -> login/admin; continue Forms/Data/Workflows + DEV-5 source review in parallel.
+
 ---
 
 ## 13. Known deferred work / not the current blocker
@@ -640,7 +702,7 @@ Use `No release` when no rc release was produced.
 - final performance/accessibility certification
 - Marketplace 2.0 / Sentinel 2.0 / Commerce 2.0
 
-Do not let these pull work away from: **live runtime convergence -> login/admin target QA -> current product workflow target tests -> CMS/SEO product closure**.
+Do not let these pull work away from: **live runtime convergence -> login/admin target QA -> current product workflow target tests -> Forms/Data/Workflows + DB/services portability closure**.
 
 ---
 
@@ -652,19 +714,19 @@ GOAL: Advanced extensible WordPress/Webflow/Wix/Shopify-class platform ecosystem
 GITHUB: Vertex-Systems-Network/nexora
 DEV SOURCE: rc.94 / v5.29 / n1-v5.29
 DEV BRANCH: dev/n1-0b-core-functional-qa
-PR: #1 DRAFT + MERGEABLE; DO NOT MERGE BEFORE TARGET EVIDENCE
-BRANCH HEAD BEFORE LEDGER COMMIT: 2035528bae27222446138e65bda50ea32feb9e17
-LATEST GREEN CI: 32427092798
+PR: #1 DRAFT + MERGEABLE; MARK READY ONLY AFTER REQUIRED TARGET EVIDENCE
+BRANCH HEAD BEFORE LEDGER COMMIT: bfee0fce659c4471bd7a98065b4b48a7fb31682a
+LATEST GREEN CI: 32431449676
 OPEN ISSUE: #2 runtime identity mismatch
 LIVE TARGET: rc.93 installed on Laragon
 LIVE BLOCKER: post-install environment/activation/service/process fingerprints stale
 SOURCE/DEPLOYMENT/DB ON LIVE EVIDENCE: matching
 DEPENDENCY RUNTIME: matching
 LOCK REVIEW: missing, deferred
-SOURCE DONE NOW: runtime convergence regression + site settings + MediaPicker + Theme workflow + Extension workflow + first Studio publish/public-render workflow
+SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + current Admin UX pass
 NEXT LIVE: safe rc.93 repair -> compatibility PASS -> post-install PASS -> /login -> /admin -> issue #2 close only after evidence
-NEXT TARGET TESTS: development-readiness --full + Settings/Media/Theme/Extensions/Studio feature tests on separate dev checkout
-NEXT SOURCE: CMS/Documents/Collections -> content Media selection -> SEO/Publishing closure
+NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + explicit major product workflow browser QA on separate dev checkout
+NEXT SOURCE: continue Admin/product workflow review -> Forms/Data/Workflows -> DEV-5 DB/services portability
 ISSUE RULE: inspect open GitHub issues every pass and solve applicable defects alongside roadmap work
-DO NOT: overwrite installed rc.93 with rc.94 as repair; do not merge PR #1 or return to C1-C6 before target usability evidence
+DO NOT: overwrite installed rc.93 with rc.94 as repair; do not mark PR #1 Ready or return to C1-C6 before target usability evidence
 ```
