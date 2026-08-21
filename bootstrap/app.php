@@ -9,6 +9,7 @@ use App\Http\Middleware\EnforceRequestLimits;
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnsureAdminAccess;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\ObserveRequestOutcome;
 use App\Http\Middleware\RedirectIfNotInstalled;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\RequireApiAbility;
@@ -34,8 +35,23 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn (): string => route('login'));
         $middleware->prepend([ConfigureTrustedProxies::class, EnforceRequestLimits::class]);
         $middleware->preventRequestForgery(except: ['hooks/*', 'scim/*', 'sso/*/*/callback']);
-        $middleware->web(append: [AssignRequestId::class, ApplyPerformanceHeaders::class, RedirectIfNotInstalled::class, RuntimeNodeHeartbeat::class, ResolveEnterpriseOrganization::class, SetLocale::class, HandleInertiaRequests::class]);
-        $middleware->api(append: [AssignRequestId::class, ApplyPerformanceHeaders::class, RedirectIfNotInstalled::class, RuntimeNodeHeartbeat::class]);
+        $middleware->web(append: [
+            AssignRequestId::class,
+            ApplyPerformanceHeaders::class,
+            RedirectIfNotInstalled::class,
+            RuntimeNodeHeartbeat::class,
+            ResolveEnterpriseOrganization::class,
+            ObserveRequestOutcome::class,
+            SetLocale::class,
+            HandleInertiaRequests::class,
+        ]);
+        $middleware->api(append: [
+            AssignRequestId::class,
+            ApplyPerformanceHeaders::class,
+            RedirectIfNotInstalled::class,
+            RuntimeNodeHeartbeat::class,
+            ObserveRequestOutcome::class,
+        ]);
         $middleware->alias([
             'admin' => EnsureAdminAccess::class,
             'permission' => RequirePermission::class,
