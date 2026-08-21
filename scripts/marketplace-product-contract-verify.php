@@ -71,6 +71,7 @@ foreach ([
     "['extension', 'app', 'integration', 'studio-pack', 'theme']" => 'controlled Marketplace extension/theme package types',
     "preg_match('/^[a-f0-9]{64}$/'" => 'artifact digest validation',
     'trusted_publishers_only && $publisherKey === null' => 'trusted-source publisher identity requirement',
+    "'package_identifier' => \$identifier" => 'normalized package identity retention',
 ] as $needle => $label) {
     if ($catalog !== '' && ! str_contains($catalog, $needle)) {
         $errors[] = "Marketplace catalog service missing: {$label}.";
@@ -81,9 +82,12 @@ foreach ([
     'private function authorizeStage(' => 'type-aware staging authorization boundary',
     "\$requiredPermission = \$item->type === 'theme' ? 'themes.install' : 'extensions.install';" => 'owning-engine staging permission selection',
     "\$user->hasPermission(\$requiredPermission)" => 'server-side staging permission enforcement',
+    "\$this->tenantAuthorization->allows(\$user, \$requiredPermission)" => 'current-tenant staging permission enforcement',
     "if (! \$item->source->isActive())" => 'paused-source staging rejection',
     'Marketplace package metadata is stale.' => 'stale catalog staging rejection',
-    "\$item->source->last_synced_at === null" => 'unsynchronized resumed-source staging rejection',
+    "\$sourceGeneration = trim((string) \$item->source->catalog_generation)" => 'source sync-generation freshness identity',
+    "\$itemGeneration = trim((string) \$item->sync_generation)" => 'item sync-generation freshness identity',
+    "hash_equals(\$sourceGeneration, \$itemGeneration)" => 'exact generation freshness enforcement',
     "TrustedPublisher::query()->where('key_id'" => 'local trusted publisher lookup',
     "signature_status !== 'verified'" => 'post-download signature verification',
     "\$this->scanner->scan(\$package, \$userId)" => 'Sentinel scan boundary',
@@ -96,11 +100,12 @@ foreach ([
 }
 
 foreach ([
-    "'canManageMarketplace' => \$request->user()?->hasPermission('marketplace.manage')" => 'Marketplace-specific UI permission',
-    "\$freshSource = static fn (\$query) => \$query->where('status', 'active')->whereNotNull('last_synced_at');" => 'active synchronized-source catalog visibility',
+    "'canManageMarketplace' => \$canManageMarketplace" => 'Marketplace-specific tenant-aware UI permission',
+    "\$freshSource = static fn (\$query) => \$query->where('status', 'active')->whereNotNull('catalog_generation');" => 'active synchronized-generation catalog visibility',
     'public function sourceStatus(' => 'source pause/resume lifecycle',
     "Rule::in(['active', 'paused'])" => 'controlled source lifecycle states',
-    "\$attributes['last_synced_at'] = null;" => 'resume requires fresh synchronization',
+    "\$attributes['catalog_generation'] = null;" => 'resume invalidates prior catalog generation',
+    "\$attributes['last_synced_at'] = null;" => 'resume requires fresh synchronization timestamp',
     "'fresh_sync_required' => \$next === 'active'" => 'resume freshness audit evidence',
     'public function deleteSource(' => 'source removal lifecycle',
     "if (\$source->isActive())" => 'active-source deletion guard',
@@ -215,5 +220,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Marketplace Product Contract] PASS — extension/app/integration/Studio-pack/theme catalogs are lifecycle-controlled, atomically synchronized and validation-bounded; staging is authorized by the owning engine permission; resumed sources require fresh synchronization; withdrawn entries retire locally; inactive/stale sources cannot stage; all package bytes enter quarantine/Sentinel and approved packages are explicitly promoted into their owning Theme or Extension Engine.'.PHP_EOL,
+    '[Nexora Marketplace Product Contract] PASS — extension/app/integration/Studio-pack/theme catalogs are lifecycle-controlled, atomically synchronized with explicit generation identity and validation budgets; staging is authorized by the owning engine permission plus current tenant role; resumed sources require fresh synchronization; withdrawn entries retire locally; inactive/stale sources cannot stage; all package bytes enter quarantine/Sentinel and approved packages are explicitly promoted into their owning Theme or Extension Engine.'.PHP_EOL,
 );
