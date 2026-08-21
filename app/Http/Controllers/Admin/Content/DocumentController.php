@@ -183,8 +183,8 @@ final class DocumentController extends Controller
             'type' => ['required', 'string', Rule::in($this->types->keys())],
             'status' => ['required', 'string', Rule::in(['draft', 'published', 'archived'])],
             'workflow_status' => ['required', 'string', Rule::in($this->workflow->keys())],
-            'assigned_to' => ['nullable', 'integer', new TenantMemberExists($this->tenantMembers)],
-            'reviewer_id' => ['nullable', 'integer', new TenantMemberExists($this->tenantMembers)],
+            'assigned_to' => ['nullable', 'integer', new TenantMemberExists()],
+            'reviewer_id' => ['nullable', 'integer', new TenantMemberExists()],
             'review_due_at' => ['nullable', 'date'],
             'excerpt' => ['nullable', 'string', 'max:1000'],
             'content' => ['nullable', 'array'],
@@ -209,7 +209,8 @@ final class DocumentController extends Controller
     /** @return list<array{id:number,name:string,email:string}> */
     private function people(): array
     {
-        return $this->tenantMembers->activeMembers(250)
+        return $this->tenantMembers->activeUsers()
+            ->take(250)
             ->map(static fn ($user): array => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email])
             ->values()
             ->all();
