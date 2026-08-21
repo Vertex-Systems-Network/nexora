@@ -23,6 +23,12 @@ $databaseContracts = $read('scripts/lib/database-contracts.php');
 $linkModel = $read('app/Models/CrmCommerceLink.php');
 $linkService = $read('app/Nexora/Crm/Services/CrmCommerceLinkService.php');
 $crmSettings = $read('app/Http/Controllers/Admin/Crm/CrmSettingsController.php');
+$organizationController = $read('app/Http/Controllers/Admin/Crm/OrganizationController.php');
+$contactController = $read('app/Http/Controllers/Admin/Crm/ContactController.php');
+$leadController = $read('app/Http/Controllers/Admin/Crm/LeadController.php');
+$opportunityController = $read('app/Http/Controllers/Admin/Crm/OpportunityController.php');
+$leadConversion = $read('app/Nexora/Crm/Services/CrmLeadConversionService.php');
+$tenantMemberDirectory = $read('app/Nexora/Enterprise/Services/TenantMemberDirectory.php');
 $membershipController = $read('app/Http/Controllers/Admin/Membership/MembershipController.php');
 $membershipPlanController = $read('app/Http/Controllers/Admin/Membership/MembershipPlanController.php');
 $membershipManager = $read('app/Nexora/Membership/Services/MembershipManager.php');
@@ -88,12 +94,57 @@ foreach ([
 }
 
 foreach ([
-    "->whereHas('enterpriseMemberships'" => 'tenant-member user chooser',
-    "->where('organization_id', \$tenantId)" => 'membership chooser organization predicate',
-    "new TenantMemberExists()" => 'membership write tenant-member validation',
+    'private TenantContext $tenant' => 'shared tenant context dependency',
+    "->whereHas('enterpriseMemberships'" => 'tenant-member relationship filter',
+    "->where('organization_id', \$tenantId)" => 'tenant-member organization predicate',
+    "->where('status', 'active')" => 'active membership/user filter',
+    'public function options(bool $includeEmail = false): array' => 'shared owner/member option projection',
+] as $needle => $label) {
+    if ($tenantMemberDirectory !== '' && ! str_contains($tenantMemberDirectory, $needle)) {
+        $errors[] = "Tenant member directory missing: {$label}.";
+    }
+}
+
+foreach ([
+    'TenantMemberDirectory $members' => 'shared tenant-member chooser dependency',
+    '$members->options(true)' => 'tenant-member user chooser',
+    'new TenantMemberExists()' => 'membership write tenant-member validation',
 ] as $needle => $label) {
     if ($membershipController !== '' && ! str_contains($membershipController, $needle)) {
         $errors[] = "Membership controller missing: {$label}.";
+    }
+}
+
+foreach ([
+    'Organization' => $organizationController,
+    'Contact' => $contactController,
+    'Lead' => $leadController,
+    'Opportunity' => $opportunityController,
+] as $controllerLabel => $controllerSource) {
+    foreach ([
+        'TenantMemberDirectory $members' => 'shared tenant-member owner chooser dependency',
+        '$members->options()' => 'tenant-scoped owner options',
+        'new TenantMemberExists()' => 'tenant-member owner validation',
+    ] as $needle => $label) {
+        if ($controllerSource !== '' && ! str_contains($controllerSource, $needle)) {
+            $errors[] = "CRM {$controllerLabel} controller missing: {$label}.";
+        }
+    }
+    if ($controllerSource !== '' && str_contains($controllerSource, 'exists:users,id')) {
+        $errors[] = "CRM {$controllerLabel} controller still exposes platform-wide owner validation.";
+    }
+}
+
+foreach ([
+    'private function resolvePipeline(' => 'lead conversion pipeline re-resolution',
+    '->whereKey($pipeline->id)' => 'current-scope pipeline lookup',
+    "->where('active',true)" => 'active pipeline requirement',
+    'does not belong to the current organization or is inactive.' => 'cross-tenant pipeline rejection',
+    'private function resolveStage(' => 'stage re-resolution against resolved pipeline',
+    "CrmPipelineStage::query()->where('pipeline_id',\$pipeline->id)" => 'stage/pipeline consistency re-resolution',
+] as $needle => $label) {
+    if ($leadConversion !== '' && ! str_contains($leadConversion, $needle)) {
+        $errors[] = "CRM lead conversion service missing: {$label}.";
     }
 }
 
@@ -138,6 +189,8 @@ foreach ([
     'test_crm_and_membership_identity_keys_can_repeat_across_tenants' => 'cross-tenant identity acceptance test',
     'test_membership_manager_rejects_cross_tenant_commerce_customer' => 'Membership service isolation acceptance test',
     'test_membership_member_picker_excludes_users_from_other_tenants' => 'Membership picker non-disclosure acceptance test',
+    'test_crm_owner_directory_and_validation_exclude_cross_tenant_users' => 'CRM owner-directory isolation acceptance test',
+    'test_crm_lead_conversion_rejects_pipeline_from_another_tenant' => 'CRM lead-conversion tenant isolation acceptance test',
     "assertDontSee('other-member@example.test')" => 'other-tenant user non-disclosure assertion',
     "withoutGlobalScope('nexora_tenant')" => 'cross-tenant duplicate identity DB assertions',
 ] as $needle => $label) {
@@ -153,5 +206,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora CRM + Membership Product Contract] PASS — CRM Commerce links, CRM configuration identities, Membership plan/access identities, member selection, service-layer Commerce references and Commerce-to-Membership synchronization are tenant-scoped and fail closed on cross-organization misuse.'.PHP_EOL,
+    '[Nexora CRM + Membership Product Contract] PASS — CRM Commerce links, CRM configuration identities, CRM owner assignment, lead conversion, Membership plan/access identities, member selection, service-layer Commerce references and Commerce-to-Membership synchronization are tenant-scoped and fail closed on cross-organization misuse.'.PHP_EOL,
 );
