@@ -44,8 +44,20 @@ final class SentinelTrustHardeningTest extends TestCase
         $package->forceFill(['status' => 'scanned'])->save();
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('newer Sentinel scan');
+        $this->expectExceptionMessage('newer or ambiguously concurrent Sentinel scan');
         app(SentinelApprovalGuard::class)->assertCurrent($package->fresh(), $oldAllow);
+    }
+
+    public function test_same_timestamp_competing_scan_fails_closed(): void
+    {
+        [$package, $allow] = $this->packageWithAllowScan('sentinel-tie');
+        $this->assertNotNull($allow->created_at);
+        $this->createScan($package, 'block', $allow->created_at);
+        $package->forceFill(['status' => 'scanned'])->save();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('ambiguously concurrent Sentinel scan');
+        app(SentinelApprovalGuard::class)->assertCurrent($package->fresh(), $allow);
     }
 
     public function test_approved_package_digest_mutation_is_rejected(): void
