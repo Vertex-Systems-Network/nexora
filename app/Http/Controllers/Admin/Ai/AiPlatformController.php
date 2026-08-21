@@ -75,14 +75,18 @@ final class AiPlatformController extends Controller
     {
         $data = $this->validatedConnection($request, true);
         $this->assertUniqueName((string) $data['name']);
+        $credentials = $this->decodeObject((string) ($data['credentials_json'] ?? ''), 'credentials_json');
+        $settings = $this->decodeObject((string) ($data['settings_json'] ?? ''), 'settings_json');
+        $this->assertSettingsContainNoSecrets($settings);
+
         $connection = AiConnection::query()->create([
             'uuid' => (string) Str::uuid(),
             'name' => trim((string) $data['name']),
             'provider_key' => $data['provider_key'],
             'model' => trim((string) $data['model']),
             'enabled' => false,
-            'credentials' => $this->decodeObject((string) ($data['credentials_json'] ?? ''), 'credentials_json'),
-            'settings' => $this->decodeObject((string) ($data['settings_json'] ?? ''), 'settings_json'),
+            'credentials' => $credentials,
+            'settings' => $settings,
             'max_input_chars' => $data['max_input_chars'],
             'max_output_tokens' => $data['max_output_tokens'],
             'daily_request_limit' => $data['daily_request_limit'],
@@ -101,6 +105,7 @@ final class AiPlatformController extends Controller
             ? (array) $connection->credentials
             : $this->decodeObject((string) $data['credentials_json'], 'credentials_json');
         $nextSettings = $this->decodeObject((string) ($data['settings_json'] ?? ''), 'settings_json');
+        $this->assertSettingsContainNoSecrets($nextSettings);
         $providerKey = (string) ($data['provider_key'] ?? $connection->provider_key);
         $connectivityChanged = $providerKey !== $connection->provider_key
             || trim((string) $data['model']) !== $connection->model
@@ -134,11 +139,10 @@ final class AiPlatformController extends Controller
         try {
             $health = $provider->health((array) $connection->credentials, (array) $connection->settings);
             $ok = ($health['ok'] ?? false) === true;
-            $message = mb_substr(trim((string) ($health['message'] ?? ($ok ? 'Healthy.' : 'Provider health check failed.'))), 0, 500);
         } catch (Throwable) {
             $ok = false;
-            $message = 'AI provider health check failed.';
         }
+        $message = $ok ? 'Healthy.' : 'AI provider health check failed.';
 
         $connection->forceFill([
             'last_health_status' => $ok ? 'healthy' : 'unhealthy',
@@ -227,6 +231,23 @@ final class AiPlatformController extends Controller
             throw ValidationException::withMessages([$field => 'Enter a JSON object with named keys.']);
         }
         return $decoded;
+    }
+
+    /** @param array<string,mixed> $settings */
+    private function assertSettingsContainNoSecrets(array $settings): void
+    {
+        $walk = function (array $values, string $path = 'settings') use (&$walk): void {
+            foreach ($values as $key => $value) {
+                $normalized = strtolower(str_replace(['-', ' '], '_', (string) $key));
+                if (preg_match('/(?:^|_)(?:password|passwd|secret|token|api_?key|access_?key|private_?key|credential)(?:_|$)/', $normalized) === 1) {
+                    throw ValidationException::withMessages([
+                        'settings_json' => "Secret-like setting [{$path}.{$key}] must be stored in Credentials JSON instead.",
+                    ]);
+                }
+                if (is_array($value) && ! array_is_list($value)) $walk($value, $path.'.'.$key);
+            }
+        };
+        $walk($settings);
     }
 
     private function assertUniqueName(string $name, ?int $ignoreId = null): void
