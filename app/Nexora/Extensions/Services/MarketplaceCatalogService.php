@@ -8,8 +8,10 @@ use App\Models\MarketplaceCatalogItem;
 use App\Models\MarketplaceSource;
 use App\Nexora\Automation\Services\WebhookUrlPolicy;
 use App\Nexora\Foundation\Network\ApprovedHttpClient;
+use App\Nexora\Foundation\Transfers\TransferSafety;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use JsonException;
 use RuntimeException;
 
 final readonly class MarketplaceCatalogService
@@ -20,6 +22,7 @@ final readonly class MarketplaceCatalogService
     public function __construct(
         private WebhookUrlPolicy $urls,
         private ApprovedHttpClient $http,
+        private TransferSafety $transfers,
     ) {
     }
 
@@ -31,12 +34,46 @@ final readonly class MarketplaceCatalogService
 
         $url = rtrim((string) $source->base_url, '/').'/nexora-marketplace.json';
         $this->urls->assertAllowed($url, true);
-        $response = $this->http->external($url)->acceptJson()->timeout(12)->get($url);
-        if (! $response->successful()) {
-            throw new RuntimeException('Marketplace catalog returned HTTP '.$response->status().'.');
+        $maximum = max(1024, (int) config('nexora-transfers.marketplace.max_catalog_bytes', 8_388_608));
+        $this->transfers->assertLocalCapacity($this->transfers->temporaryRoot(), min($maximum, 1_048_576));
+        $temp = $this->transfers->temporaryPath('marketplace-catalog', '.json');
+
+        try {
+            $response = $this->http->external($url)->acceptJson()->timeout(12)->withOptions([
+                'sink' => $temp,
+                'progress' => static function ($downloadTotal, $downloadedBytes) use ($maximum): void {
+                    if ((is_numeric($downloadTotal) && (float) $downloadTotal > $maximum)
+                        || (is_numeric($downloadedBytes) && (float) $downloadedBytes > $maximum)) {
+                        throw new RuntimeException('Marketplace catalog exceeds the configured download limit.');
+                    }
+                },
+            ])->get($url);
+            if (! $response->successful()) {
+                throw new RuntimeException('Marketplace catalog returned HTTP '.$response->status().'.');
+            }
+
+            $length = trim((string) $response->header('Content-Length'));
+            if ($length !== '' && ctype_digit($length) && (int) $length > $maximum) {
+                throw new RuntimeException('Marketplace catalog Content-Length exceeds the configured download limit.');
+            }
+            $size = $this->transfers->assertSourceFile($temp, $maximum, 'Marketplace catalog');
+            if ($length !== '' && ctype_digit($length) && (int) $length !== $size) {
+                throw new RuntimeException('Marketplace catalog Content-Length does not match the downloaded bytes.');
+            }
+
+            $raw = file_get_contents($temp);
+            if (! is_string($raw)) {
+                throw new RuntimeException('Marketplace catalog could not be read after bounded download.');
+            }
+            try {
+                $payload = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+            } catch (JsonException) {
+                throw new RuntimeException('Marketplace catalog JSON is invalid.');
+            }
+        } finally {
+            if (is_file($temp)) @unlink($temp);
         }
 
-        $payload = $response->json();
         if (! is_array($payload) || ! is_array($payload['packages'] ?? null)) {
             throw new RuntimeException('Marketplace catalog format is invalid.');
         }
@@ -59,7 +96,8 @@ final readonly class MarketplaceCatalogService
             $normalized[$entry['package_identifier']] = $entry;
         }
 
-        DB::transaction(function () use ($source, $normalized): void {
+        $generation = (string) Str::uuid();
+        DB::transaction(function () use ($source, $normalized, $generation): void {
             foreach ($normalized as $identifier => $entry) {
                 $catalogItem = MarketplaceCatalogItem::query()->firstOrNew([
                     'source_id' => $source->id,
@@ -68,7 +106,10 @@ final readonly class MarketplaceCatalogService
                 if (! $catalogItem->exists) {
                     $catalogItem->id = (string) Str::uuid();
                 }
-                $catalogItem->fill($entry + ['synced_at' => now()]);
+                $catalogItem->fill($entry + [
+                    'sync_generation' => $generation,
+                    'synced_at' => now(),
+                ]);
                 $catalogItem->save();
             }
 
@@ -80,6 +121,7 @@ final readonly class MarketplaceCatalogService
             }
 
             $source->forceFill([
+                'catalog_generation' => $generation,
                 'last_synced_at' => now(),
                 'last_error' => null,
             ])->save();
@@ -153,6 +195,7 @@ final readonly class MarketplaceCatalogService
         }
 
         return [
+            'package_identifier' => $identifier,
             'name' => $name,
             'type' => $type,
             'latest_version' => $version,
