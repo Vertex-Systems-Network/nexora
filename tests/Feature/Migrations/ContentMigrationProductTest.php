@@ -8,7 +8,9 @@ use App\Jobs\ProcessContentMigrationJob;
 use App\Models\ContentMigrationRun;
 use App\Models\Document;
 use App\Models\EnterpriseOrganization;
+use App\Models\Role;
 use App\Models\User;
+use App\Nexora\Enterprise\Services\TenantAuthorizationService;
 use App\Nexora\Enterprise\Services\TenantContext;
 use App\Nexora\Enterprise\Services\TenantExecutionScope;
 use App\Nexora\Migrations\Services\ContentExportService;
@@ -21,6 +23,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Tests\TestCase;
 
 final class ContentMigrationProductTest extends TestCase
@@ -42,7 +45,7 @@ final class ContentMigrationProductTest extends TestCase
 
         Queue::fake();
         $organization = $this->defaultOrganization();
-        $actor = User::factory()->create(['status' => 'active']);
+        $actor = $this->superAdmin();
         app(TenantContext::class)->set($organization);
         $manager = app(ContentMigrationManager::class);
 
@@ -60,11 +63,7 @@ final class ContentMigrationProductTest extends TestCase
         self::assertStringNotContainsString('dangerous', $run->source_path);
         Storage::disk('local')->assertExists($run->source_path);
 
-        (new ProcessContentMigrationJob($run->id))->handle(
-            app(TenantExecutionScope::class),
-            app(WordPressWxrReader::class),
-            app(WordPressContentImporter::class),
-        );
+        $this->runJob($run);
 
         $run->refresh();
         self::assertSame('completed', $run->status);
@@ -83,9 +82,9 @@ final class ContentMigrationProductTest extends TestCase
     public function test_failed_item_state_is_persisted_without_creating_a_destination_document(): void
     {
         $organization = $this->defaultOrganization();
-        $actor = User::factory()->create(['status' => 'active']);
+        $actor = $this->superAdmin();
         app(TenantContext::class)->set($organization);
-        $run = $this->run($organization, $actor);
+        $run = $this->run($organization, $actor, 'running');
 
         $outcome = app(WordPressContentImporter::class)->import($run, [
             'source_key' => 'wordpress:post:oversized',
@@ -106,6 +105,29 @@ final class ContentMigrationProductTest extends TestCase
             'destination_id' => null,
         ]);
         self::assertSame(0, Document::query()->where('title', 'Oversized')->count());
+    }
+
+    public function test_queue_revalidates_creator_authority_before_importing(): void
+    {
+        if (! class_exists(\XMLReader::class)) {
+            $this->markTestSkipped('XMLReader is required for the WordPress WXR acceptance flow.');
+        }
+
+        $organization = $this->defaultOrganization();
+        $unauthorized = User::factory()->create(['status' => 'active']);
+        app(TenantContext::class)->set($organization);
+        Storage::disk('local')->put('nexora/migrations/blocked.xml', $this->wxr());
+        $run = $this->run($organization, $unauthorized, 'queued', 'nexora/migrations/blocked.xml');
+
+        try {
+            $this->runJob($run);
+            self::fail('A stale/unauthorized migration creator must not execute queued imports.');
+        } catch (RuntimeException) {
+            self::assertTrue(true);
+        }
+
+        self::assertSame('failed', $run->fresh()->status);
+        self::assertSame(0, Document::query()->where('title', 'Hello World')->count());
     }
 
     public function test_streaming_export_contains_only_the_active_tenant_documents(): void
@@ -133,23 +155,44 @@ final class ContentMigrationProductTest extends TestCase
         self::assertStringContainsString('nexora.documents.export.v1', $json);
     }
 
+    private function runJob(ContentMigrationRun $run): void
+    {
+        (new ProcessContentMigrationJob($run->id))->handle(
+            app(TenantExecutionScope::class),
+            app(TenantAuthorizationService::class),
+            app(WordPressWxrReader::class),
+            app(WordPressContentImporter::class),
+        );
+    }
+
     private function defaultOrganization(): EnterpriseOrganization
     {
         return EnterpriseOrganization::query()->where('is_default', true)->firstOrFail();
     }
 
-    private function run(EnterpriseOrganization $organization, User $actor): ContentMigrationRun
+    private function superAdmin(): User
     {
+        $user = User::factory()->create(['status' => 'active']);
+        $user->roles()->attach(Role::query()->where('slug', 'super-admin')->value('id'));
+        return $user;
+    }
+
+    private function run(
+        EnterpriseOrganization $organization,
+        User $actor,
+        string $status,
+        string $path = 'nexora/migrations/test.xml',
+    ): ContentMigrationRun {
         return ContentMigrationRun::query()->create([
             'id' => (string) Str::uuid(),
             'tenant_id' => $organization->id,
             'created_by' => $actor->id,
             'source_type' => 'wordpress_wxr',
             'source_name' => 'test.xml',
-            'source_path' => 'nexora/migrations/test.xml',
+            'source_path' => $path,
             'source_hash' => hash('sha256', 'test-'.Str::uuid()),
             'source_bytes' => 128,
-            'status' => 'running',
+            'status' => $status,
         ]);
     }
 
