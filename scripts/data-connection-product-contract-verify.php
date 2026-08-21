@@ -18,6 +18,7 @@ $read = static function (string $relative) use ($root, &$errors): string {
     return $contents;
 };
 
+$enterpriseMigration = $read('database/migrations/2026_08_16_002000_add_nexora_enterprise_tenancy.php');
 $migration = $read('database/migrations/2026_08_21_000300_tenant_scope_nexora_data_connections.php');
 $model = $read('app/Models/DataConnection.php');
 $catalog = $read('app/Nexora/Data/ConnectionCatalog.php');
@@ -27,18 +28,25 @@ $page = $read('resources/js/admin/pages/Admin/Data/Connections.tsx');
 $routes = $read('routes/web.php');
 $test = $read('tests/Feature/DataConnections/DataConnectionFlowTest.php');
 
+if ($enterpriseMigration !== '' && ! str_contains($enterpriseMigration, "'nx_data_connections'")) {
+    $errors[] = 'Canonical enterprise tenancy manifest must own nx_data_connections.';
+}
 foreach ([
-    "uuid('tenant_id')->nullable()->index('nx_data_conn_tenant_idx')" => 'tenant key/index',
+    "Schema::hasColumn('nx_data_connections', 'tenant_id')" => 'upgrade-safe tenant-column detection',
+    "'nx_tenant_'.substr(hash('sha256', 'nx_data_connections'), 0, 12).'_idx'" => 'canonical tenant index naming',
+    "'nx_tenant_'.substr(hash('sha256', 'nx_data_connections'), 0, 12).'_fk'" => 'upgrade-path enterprise foreign key',
     "where('is_default', true)" => 'legacy default-tenant backfill',
     "'credential-rotation-required'" => 'legacy plaintext credential quarantine',
     "'is_enabled' => false" => 'legacy unsafe connection disablement',
     "dropUnique(['provider', 'name'])" => 'global uniqueness removal',
     "['tenant_id', 'provider', 'name']" => 'tenant-local provider/name uniqueness',
-    "'nx_data_conn_tenant_fk'" => 'organization foreign key',
 ] as $needle => $label) {
     if ($migration !== '' && ! str_contains($migration, $needle)) {
         $errors[] = "Data connection tenancy migration missing: {$label}.";
     }
+}
+if ($migration !== '' && str_contains($migration, "dropColumn('tenant_id')")) {
+    $errors[] = 'Data connection hardening rollback must not remove enterprise-owned tenant_id.';
 }
 
 foreach ([
@@ -148,5 +156,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Data Connections Product Contract] PASS — auxiliary connectors are tenant-scoped, secrets remain encrypted/non-disclosed, plaintext endpoint credentials are quarantined, rotation invalidates stale health and destructive removal is guarded.'.PHP_EOL,
+    '[Nexora Data Connections Product Contract] PASS — auxiliary connectors are enterprise-tenant-scoped, secrets remain encrypted/non-disclosed, plaintext endpoint credentials are quarantined, rotation invalidates stale health and destructive removal is guarded.'.PHP_EOL,
 );
