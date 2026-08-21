@@ -17,7 +17,7 @@ final readonly class WordPressContentImporter
 {
     public function __construct(private DocumentRepositoryContract $documents) {}
 
-    /** @param array<string,mixed> $source */
+    /** @param array<string,mixed> $source @return 'imported'|'skipped'|'failed' */
     public function import(ContentMigrationRun $run, array $source): string
     {
         $sourceKey = trim((string) ($source['source_key'] ?? ''));
@@ -63,11 +63,15 @@ final readonly class WordPressContentImporter
                 return 'imported';
             } catch (Throwable $exception) {
                 $item->forceFill([
+                    'source_hash' => $sourceHash,
                     'status' => 'failed',
+                    'destination_type' => null,
+                    'destination_id' => null,
                     'error_code' => $this->errorCode($exception),
                     'metadata' => ['message' => 'The source item could not be imported.'],
                 ])->save();
-                throw $exception;
+
+                return 'failed';
             }
         }, 3);
     }
