@@ -16,29 +16,27 @@
 - Generation: `n1-v5.29`
 - Branch: `dev/n1-0b-core-functional-qa`
 - PR: `#1` — **DRAFT + MERGEABLE**, synchronized through N1.16
-- Current implementation head before this progress update: `61027bbdd4483bad15e5dd3aad116c78f7a95cc9`
+- Current N1.17 gate head before this progress update: `c316b7c86ec1db1d171d5ef0cd947338db96670f`
 - Latest fully green source CI: `32505428674` on the N1.16 final governance checkpoint
 - Canonical ledger revision: `2.3`
 - Open blocking issue: `#2 Nexora runtime identity mismatch` — still OPEN
 - Completed source block: `N1.16 Multisite / Organizations` — **SOURCE DONE / TARGET PENDING**
 - Current source block: `N1.17 SSO / Enterprise Governance`
-- N1.17 state: **APPLY-01 ROOT FIXES COMPLETE — ACCEPTANCE/PRODUCT GATE PENDING**
+- N1.17 state: **SOURCE GATE IMPLEMENTED — FIRST INTEGRATED CI PENDING**
 
 ---
 
 ## 2. Weighted Project Power Score
 
-The **Power Score** is a weighted readiness indicator, not a claim that the product is production complete.
-
 | Power plane | Weight | Current score | Weighted contribution | Meaning |
 |---|---:|---:|---:|---|
 | Architecture & core platform design | 10% | 98% | 9.8 | Core/module/capability/tenant architecture is mature |
-| Source implementation | 35% | 98.5% | 34.475 | Verified closure through N1.16; N1.17 root fixes await dedicated source verification |
-| Source verification / CI contracts | 15% | 100% | 15.0 | Latest completed required source gates are green through N1.16 |
+| Source implementation | 35% | 98.5% | 34.475 | Verified closure through N1.16; N1.17 awaits integrated certification |
+| Source verification / CI contracts | 15% | 100% | 15.0 | Latest completed gate set green through N1.16; N1.17 required gate now wired |
 | Real target functional verification | 20% | 50% | 10.0 | Broad current-branch Laragon/browser/runtime QA still pending |
 | Database / portability target proof | 10% | 45% | 4.5 | Source/harness strong; real multi-engine matrix evidence pending |
 | Release / operations / certification | 10% | 25% | 2.5 | Final reviewed locks, C1-C6 and release proof deferred |
-| **TOTAL PROJECT POWER** | **100%** |  | **76.3%** | **Held until N1.17 source verification completes** |
+| **TOTAL PROJECT POWER** | **100%** |  | **76.3%** | **Held until N1.17 integrated verification completes** |
 
 ```text
 PROJECT POWER   76.3%  ███████████████░░░░░
@@ -55,8 +53,8 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 
 | Dimension | Progress | State |
 |---|---:|---|
-| Platform source implementation | ~98.5% verified | Strong source closure through N1.16; N1.17 root fixes implemented |
-| Source certification | 100% for last completed required gates | GREEN through N1.16; N1.17 gate pending |
+| Platform source implementation | ~98.5% verified | N1.17 implementation + source gate present; integrated verification pending |
+| Source certification | 100% for last completed required gates | GREEN through N1.16; first N1.17 integrated run pending |
 | Real functional verification | ~50% | PARTIAL |
 | DEV-5 SQL/services portability source | ~95% | SOURCE STRONG / TARGET PENDING |
 | Real DB matrix | ~0% current-branch certified engines | TARGET PENDING |
@@ -79,11 +77,11 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 | N1.10 Commerce 2.0 | 100% | 0% | SOURCE DONE; provider/browser target pending |
 | N1.11 CRM/Membership/Portal | 100% | 0% | SOURCE DONE; target pending |
 | N1.12 Search 2.0 | 100% | 0% | SOURCE DONE; target pending |
-| N1.13 Collaboration | 100% | 0% | SOURCE DONE; browser/runtime target pending |
+| N1.13 Collaboration | 100% | 0% | SOURCE DONE; target pending |
 | N1.14 Automation | 100% | 0% | SOURCE DONE; queue/webhook target pending |
 | N1.15 AI Platform | 100% | 0% | SOURCE DONE; real adapter/provider target evidence pending |
 | N1.16 Multisite / Organizations | 100% source | 0% | SOURCE DONE; real organization/browser/runtime execution pending |
-| N1.17 SSO / Enterprise Governance | 65% implementation | 0% | **ACTIVE** — root fixes complete; acceptance/contract/CI pending |
+| N1.17 SSO / Enterprise Governance | 90% source / CI pending | 0% | **ACTIVE** — root fixes + acceptance + required product gate wired |
 | N1.18 Public APIs / Webhooks / SDK | foundation/partial | 0% | Planned |
 | N1.19 Import / Export / WP migrations | planned | 0% | Planned |
 | N1.20 Observability | foundation/partial | 0% | Planned |
@@ -103,43 +101,38 @@ N1.16 remains **SOURCE DONE, TARGET PENDING**. Final source evidence is ledger r
 
 ---
 
-## 6. Current N1.17 SSO / Enterprise Governance
+## 6. N1.17 SSO / Enterprise Governance — current source closure candidate
 
-### Confirmed defects closed in APPLY-01
+### Root fixes implemented
 
-1. SSO `enforce_for_members` was metadata-only; local password authentication ignored it.
-2. SSO state/callback lacked complete organization/provider/protocol trust binding and bounded adapter output handling.
-3. Public SSO configuration could carry secret-like values outside encrypted `secret_payload`.
-4. SCIM tokens could remain valid for an inactive organization; SCIM active state was inconsistent between global user and tenant membership.
-5. SCIM could attach an existing platform identity to a tenant, demote an owner/admin through duplicate POST, or deactivate a privileged membership.
-6. Multiple current invitations for the same organization/email could replay obsolete role grants; acceptance could demote a privileged existing member.
-7. Invitation acceptance did not explicitly select the accepted tenant for the next request.
-8. Governed impersonation depended too much on controller middleware and allowed nested-session ambiguity.
+- Enforced SSO is now real policy, not metadata: active ordinary tenant members cannot bypass an enabled enforced provider with local passwords; Super Admin retains explicit break-glass access.
+- Login UI exposes only registered protocol-compatible enabled SSO choices and explains required/unavailable state.
+- SSO start/callback binds one-time state to organization + provider + expiry; rechecks adapter protocol; bounds redirect URLs; validates provider identity email; requires active user/membership; rotates session/selects tenant; adapter exceptions/messages are not trusted.
+- Public SSO configuration recursively rejects secret-like keys; secret payload remains encrypted and hidden.
+- SCIM tokens require active tenant + enabled/non-revoked/unexpired token state.
+- SCIM lifecycle is tenant-local: organization membership carries active/suspended state, existing platform identities cannot be cross-attached, privileged roles are preserved and owner/admin deactivation is blocked.
+- Invitations supersede stale pending tokens for the same tenant/email, validate active account/tenant, preserve owner/admin roles and select accepted tenant in session.
+- Impersonation rejects nested sessions, inactive/unauthorized actors and invalid targets; stop validates actor/target/current-session integrity and restores actor only while still authorized.
 
-### APPLY-01 implementation
+### APPLY-02 verification infrastructure
 
-- `SsoEnforcementPolicy` enforces local-password denial for active non-Super-Admin tenant members when an enabled provider is marked enforced; Super Admin has explicit break-glass access; missing adapters do not reopen password auth.
-- Login context exposes only enabled protocol-compatible registered SSO adapters; Auth controller audits/block-invalidates an enforced local login; Login UI surfaces organization SSO choices.
-- `SsoController` binds one-time state to organization+provider+expiry, rechecks adapter protocol, catches adapter exceptions generically, validates redirect scheme/host and normalized email, requires active user+membership, rotates session, selects tenant and emits minimal audit metadata.
-- `EnterpriseSsoProvider` recursively rejects secret-like keys from unencrypted configuration; hidden `secret_payload` remains `encrypted:array`.
-- `ScimTokenManager` issues only for active organizations and resolves only prefixed, enabled, non-revoked, unexpired tokens whose organization remains active.
-- `ScimController` models `active` as tenant membership state, keeps global identity active, prevents foreign identity attach, preserves existing tenant role, blocks privileged deactivation, bounds PATCH operations and uses privacy-minimal audit metadata.
-- `InvitationManager` supersedes stale pending tokens, validates active organization/account + safe role, preserves existing owner/admin role and supersedes remaining pending tokens after acceptance; audits email hash instead of raw email.
-- `InvitationController` selects the accepted tenant and redirects Admin-capable vs portal users correctly.
-- `ImpersonationManager` now:
-  - requires an active organization and active actor;
-  - requires a non-Super-Admin actor to be an active member of that organization;
-  - rejects nested impersonation session markers;
-  - requires an active tenant-member target and preserves Super Admin target restrictions;
-  - stores tenant session identity before switching user;
-  - audits a reason hash rather than raw reason text;
-  - on stop, validates session record actor/target/current-user consistency and active unfinished state;
-  - fail-closed logs out/invalidates on inconsistent session state;
-  - restores the original actor only if the actor and organization remain active/authorized.
+- Added `tests/Feature/Enterprise/EnterpriseIdentityGovernanceTest.php` covering:
+  - enforced member password denial + Super Admin break-glass;
+  - SSO provider-state binding + callback protocol drift rejection;
+  - secret-like SSO public configuration denial;
+  - suspended-tenant SCIM token rejection;
+  - SCIM foreign identity attach denial;
+  - tenant-local SCIM active status, role preservation and privileged deactivation block;
+  - invitation token supersession + privileged role preservation;
+  - invitation accepted-tenant session selection;
+  - nested impersonation denial.
+- Added required `scripts/enterprise-governance-product-contract-verify.php`.
+- Wired the Enterprise Governance product contract into `scripts/development-readiness.php` and `.github/workflows/release-certification.yml` immediately after N1.16.
+- Static self-review corrected the expected callback status for adapter protocol drift: valid state + incompatible adapter/protocol fails at the 503 adapter boundary, not the 419 state boundary.
 
-### Verification state
+### Verification still required
 
-APPLY-01 is implementation-complete but **not SOURCE DONE**. Latest fully green source evidence remains run `32505428674` through N1.16. N1.17 requires acceptance regressions, a dedicated product contract, readiness/Actions wiring, and a full green run on one head.
+N1.17 remains **not SOURCE DONE** until one current-head GitHub Actions run passes Certification preflight, every existing product gate, the new SSO / Enterprise Governance Product Contract and Unified Source Certification. Any red gate must be fixed at root cause without weakening governance.
 
 ---
 
@@ -187,30 +180,28 @@ After **every meaningful apply**, update this file in the same pass or immediate
 
 | Apply | Date | Head / evidence | What changed | Power impact |
 |---:|---|---|---|---|
-| 001 | 2026-08-21 | pre-file head `11fbcd744f641d241be9bca509dc4b2d64a18020`; CI `32502604979` | Created mandatory detailed weighted progress dashboard after N1.15 SOURCE DONE; N1.16 audit recorded | Baseline Project Power = **76.1%**; no Target Power increase |
-| 002 | 2026-08-21 | implementation head `5e255f8dcf0fc9bf4c2999510067c0161f12705f`; verification pending | N1.16 APPLY-01 root authorization/privacy fixes | N1.16 **15% -> 60%**; Power held pending evidence |
-| 003 | 2026-08-21 | gate head `df50de19f91d03fd6f0aa45c928edb11be39ea28`; integrated CI pending | N1.16 acceptance/product gate + progress governance | N1.16 **60% -> 90%**; Power held pending green |
-| 004 | 2026-08-21 | verified head `e6c884f714e6419794b1c11566e978987a73ecad`; CI `32504705855` GREEN | N1.16 integrated source gate closure | N1.16 **SOURCE DONE**; Source **98.5%**, Project **76.3%**, Target **50%** |
-| 005 | 2026-08-21 | final governance head `b8b8641f92b5e1cfa0528afe5ff8f0c26f0e132d`; CI `32505428674` GREEN | Ledger 2.3 + PR/issue N1.16 governance sync | Power unchanged; Target **50%** |
-| 006 | 2026-08-21 | N1.17 partial head `39f991c396e69f44a83cbf2a354e9e5d6bb75ec7`; verification pending | SSO enforcement/callback/privacy, SCIM tenant/privilege lifecycle, replay-safe invitations | N1.17 **10% -> 55% implementation**; verified Power unchanged |
-| 007 | 2026-08-21 | N1.17 root-fix head `61027bbdd4483bad15e5dd3aad116c78f7a95cc9`; verification pending | Impersonation service authority, nesting, session integrity, safe actor restoration and privacy-minimal reason audit | N1.17 **55% -> 65% implementation**; Project/Source Power held at verified **76.3% / 98.5%**; Target **50%** |
+| 001 | 2026-08-21 | pre-file head `11fbcd744f641d241be9bca509dc4b2d64a18020`; CI `32502604979` | Created weighted dashboard after N1.15 SOURCE DONE | Project **76.1%** baseline |
+| 002 | 2026-08-21 | `5e255f8d…`; pending | N1.16 root authorization/privacy fixes | N1.16 15% -> 60%; verified Power held |
+| 003 | 2026-08-21 | `df50de19…`; pending | N1.16 acceptance/product gate + progress governance | N1.16 60% -> 90%; verified Power held |
+| 004 | 2026-08-21 | `e6c884f7…`; CI `32504705855` GREEN | N1.16 integrated closure | N1.16 SOURCE DONE; Project **76.3%**, Source **98.5%**, Target **50%** |
+| 005 | 2026-08-21 | `b8b8641f…`; CI `32505428674` GREEN | Ledger 2.3 + PR/issue N1.16 governance sync | Power unchanged |
+| 006 | 2026-08-21 | `39f991c3…`; pending | N1.17 SSO/SCIM/invitation root fixes | N1.17 10% -> 55%; verified Power held |
+| 007 | 2026-08-21 | `61027bbd…`; pending | N1.17 impersonation service authority/nesting/session integrity | N1.17 55% -> 65%; verified Power held |
+| 008 | 2026-08-21 | gate head `c316b7c86ec1db1d171d5ef0cd947338db96670f`; integrated CI pending | N1.17 executable acceptance source, dedicated Enterprise Governance contract, Development Readiness + Actions required wiring | N1.17 **65% -> 90% source candidate**; Project/Source Power held at verified **76.3% / 98.5%** until green; Target remains **50%** |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-N1.17 APPLY-02 — ACCEPTANCE + SOURCE GATE
-  1. add EnterpriseIdentityGovernance acceptance tests for:
-     - enforced member local-password denial + Super Admin break-glass
-     - SSO state/provider/protocol binding and secret-config rejection
-     - inactive-tenant SCIM token rejection
-     - SCIM foreign-identity attach denial, tenant-local active state, role preservation and privileged deactivation block
-     - stale invitation supersession + privileged-role preservation + tenant selection
-     - nested/unauthorized impersonation rejection and safe stop restoration
-  2. add SSO / Enterprise Governance product source contract
-  3. wire development-readiness + GitHub Actions
-  4. update THIS FILE immediately
-  5. inspect first integrated CI and patch root cause if red
-  6. require all prior gates + new Enterprise Governance contract + Unified Source Certification GREEN before SOURCE DONE
+N1.17 APPLY-03 — VERIFY / CORRECT / CLOSE
+  1. inspect GitHub Actions for current progress head
+  2. require Certification preflight + all prior product contracts + SSO/Enterprise Governance Product Contract + Unified Source Certification
+  3. if red, inspect exact failed step/log and patch root cause
+  4. update THIS FILE after every correction apply
+  5. after full green: mark N1.17 SOURCE DONE and recalculate Source/Project Power conservatively; Target stays 50% without real execution
+  6. sync canonical ledger revision 2.4 + append history
+  7. synchronize PR #1 through N1.17 but keep DRAFT
+  8. post issue #2 source-only checkpoint; keep OPEN
+  9. require final governance/progress-only CI GREEN before starting N1.18
 ```
