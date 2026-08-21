@@ -104,7 +104,10 @@ final readonly class ScanRecorder
                 $scan->forceFill(['summary'=>$summary])->save();
             }
         } catch (Throwable $exception) {
-            $failure = $this->failures->for($exception, (string) $scan->id);
+            $failure = $this->failures->report($exception, (string) $scan->id, [
+                'scan_id' => (string) $scan->id,
+                'package_id' => (string) $package->id,
+            ]);
             $summary = (array) ($scan->summary ?? []);
             $summary['failure'] = [
                 'reference' => $failure['reference'],
