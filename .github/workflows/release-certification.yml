@@ -67,5 +67,8 @@ jobs:
       - name: Admin UX product source contract
         run: php scripts/admin-ux-product-contract-verify.php
 
+      - name: Forms + Data + Workflows product source contract
+        run: php scripts/forms-workflow-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
