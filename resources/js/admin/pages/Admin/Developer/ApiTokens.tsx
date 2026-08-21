@@ -66,7 +66,7 @@ export default function ApiTokens({ organization, tokens, abilities, baseUrl }: 
       }
       setIssued(body as Issued);
       setName("");
-      router.reload({ only: ["tokens"], preserveState: true });
+      router.reload({ only: ["tokens"] });
     } finally {
       setIssuing(false);
     }
@@ -183,11 +183,11 @@ export default function ApiTokens({ organization, tokens, abilities, baseUrl }: 
 
     <ConfirmDialog
       open={revokeTarget !== null}
-      onClose={() => setRevokeTarget(null)}
+      onCancel={() => setRevokeTarget(null)}
       title="Revoke API token?"
       description="Requests using this credential will fail immediately. Revocation cannot reveal or restore the original plaintext token."
       confirmLabel="Revoke token"
-      tone="danger"
+      danger
       onConfirm={() => {
         if (!revokeTarget) return;
         router.delete(`/admin/developer/api-tokens/${revokeTarget.id}`, { preserveScroll: true, onFinish: () => setRevokeTarget(null) });
