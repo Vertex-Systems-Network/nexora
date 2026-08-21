@@ -61,6 +61,7 @@ $run('customer_portal_product_contract', 'Customer Portal product source contrac
 $run('crm_membership_product_contract', 'CRM + Membership product source contract', [PHP_BINARY, 'scripts/crm-membership-product-contract-verify.php']);
 $run('search_product_contract', 'Search 2.0 product source contract', [PHP_BINARY, 'scripts/search-product-contract-verify.php']);
 $run('collaboration_product_contract', 'Collaboration product source contract', [PHP_BINARY, 'scripts/collaboration-product-contract-verify.php']);
+$run('automation_product_contract', 'Automation product source contract', [PHP_BINARY, 'scripts/automation-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
