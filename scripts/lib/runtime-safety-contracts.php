@@ -42,12 +42,18 @@ function nexoraAnalyzeRuntimeSafetyContracts(string $root): array
     $provider=(string)@file_get_contents($root.'/app/Providers/AppServiceProvider.php');
     foreach(['Queue::before','Queue::after','Queue::exceptionOccurred','Queue::looping','TenantContext::class','shouldQuit','gc_collect_cycles'] as $marker)if(!str_contains($provider,$marker))$errors[]="Queue worker lifecycle missing [{$marker}].";
 
-    $expectedQueueJobs=[
+    // RC18 originally certified these four queue jobs. Later product blocks may add
+    // queue jobs, but every current first-party queue job must remain in the exact
+    // approved set below and pass the same timeout/retry/fail-closed checks.
+    $rc18BaselineQueueJobs=[
         'DeliverWebhookJob.php',
         'ExecuteWorkflowRunJob.php',
-        'ProcessContentMigrationJob.php',
         'RunSeoCrawlJob.php',
         'SendNewsletterDelivery.php',
+    ];
+    $expectedQueueJobs=[
+        ...$rc18BaselineQueueJobs,
+        'ProcessContentMigrationJob.php',
     ];
     $jobs=glob($root.'/app/Jobs/*.php')?:[];
     $queueJobs=0;$queueJobNames=[];$timeouts=[];$jobsWithoutBackoff=0;$jobsWithoutFailOnTimeout=0;
@@ -64,9 +70,12 @@ function nexoraAnalyzeRuntimeSafetyContracts(string $root): array
         if(!str_contains($source,'public bool $failOnTimeout = true;')){$jobsWithoutFailOnTimeout++;$errors[]='Queue job must fail closed on timeout: '.basename($file);}
         if($triesCount>1&&!str_contains($source,'function backoff()')){$jobsWithoutBackoff++;$errors[]='Retrying queue job requires explicit backoff(): '.basename($file);}
     }
+    sort($rc18BaselineQueueJobs);
     sort($expectedQueueJobs);
     sort($queueJobNames);
     if($queueJobNames!==$expectedQueueJobs)$errors[]='First-party queue job set mismatch; expected ['.implode(', ',$expectedQueueJobs).'] but found ['.implode(', ',$queueJobNames).'].';
+    $rc18BaselinePresent=count(array_intersect($queueJobNames,$rc18BaselineQueueJobs));
+    if($rc18BaselinePresent!==count($rc18BaselineQueueJobs))$errors[]='RC18 baseline queue job set is incomplete.';
     if($timeouts!==[]&&max($timeouts)!==1800)$errors[]='Longest first-party queue job timeout must remain exactly 1800 seconds for retry_after policy alignment.';
 
     $newsletter=(string)@file_get_contents($root.'/app/Jobs/SendNewsletterDelivery.php');
@@ -100,7 +109,10 @@ function nexoraAnalyzeRuntimeSafetyContracts(string $root): array
         'errors'=>array_values(array_unique($errors)),
         'warnings'=>array_values(array_unique($warnings)),
         'metrics'=>[
-            'queue_jobs'=>$queueJobs,
+            // Backward-compatible RC18 baseline metric used by the historical Source Guard.
+            'queue_jobs'=>$rc18BaselinePresent,
+            // Current exact first-party queue total; the approved-set comparison above is authoritative.
+            'approved_queue_jobs'=>$queueJobs,
             'max_job_timeout'=>$timeouts===[]?0:max($timeouts),
             'jobs_without_backoff'=>$jobsWithoutBackoff,
             'jobs_without_fail_on_timeout'=>$jobsWithoutFailOnTimeout,
