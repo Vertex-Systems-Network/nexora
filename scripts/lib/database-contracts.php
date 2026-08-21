@@ -217,11 +217,14 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
             'Schema::table',
             'public static function createScoped(',
             '$blueprint->unique([$scopeColumn, $column], $indexName)',
+            'public static function drop(',
+            'DROP INDEX',
+            '$blueprint->dropUnique($indexName)',
         ] as $marker) {
             if (! str_contains($helperSource,$marker)) $errors[]='Portable nullable-unique helper is missing required SQL Server/non-SQL Server behavior: '.$marker;
         }
     }
-    if ($portableNullableUniqueCount !== 9) $errors[]="Expected 9 portable nullable-unique declarations; found {$portableNullableUniqueCount}.";
+    if ($portableNullableUniqueCount !== 11) $errors[]="Expected 11 portable nullable-unique declarations; found {$portableNullableUniqueCount}.";
 
     $certScript=(string)@file_get_contents($root.'/scripts/create-certification-database.php');
     if(!str_contains($certScript,'Unsafe certification database name'))$errors[]='Certification database script is missing destructive database-name protection.';
