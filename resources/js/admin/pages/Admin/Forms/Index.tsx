@@ -185,23 +185,23 @@ export default function FormsIndex({ forms, summary }: Props) {
 
             {forms.last_page > 1 && (
                 <nav className="flex items-center justify-between gap-3" aria-label="Forms pagination">
-                    <ButtonLink
-                        href={forms.prev_page_url ?? "#"}
-                        variant="secondary"
-                        disabled={!forms.prev_page_url}
-                    >
-                        Previous
-                    </ButtonLink>
+                    <div>
+                        {forms.prev_page_url && (
+                            <ButtonLink href={forms.prev_page_url} variant="secondary">
+                                Previous
+                            </ButtonLink>
+                        )}
+                    </div>
                     <span className="text-sm text-[var(--nx-text-muted)]">
                         Page {forms.current_page} of {forms.last_page}
                     </span>
-                    <ButtonLink
-                        href={forms.next_page_url ?? "#"}
-                        variant="secondary"
-                        disabled={!forms.next_page_url}
-                    >
-                        Next
-                    </ButtonLink>
+                    <div>
+                        {forms.next_page_url && (
+                            <ButtonLink href={forms.next_page_url} variant="secondary">
+                                Next
+                            </ButtonLink>
+                        )}
+                    </div>
                 </nav>
             )}
         </AdminLayout>
