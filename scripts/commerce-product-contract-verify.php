@@ -53,6 +53,8 @@ foreach ([
 foreach ([
     "Route::post('/billing/invoices/{invoice}/payments'" => 'provider payment action route',
     "Route::post('/billing/transactions/{payment}/refunds'" => 'provider refund action route',
+    "Route::post('/billing/subscriptions'" => 'provider subscription creation route',
+    "Route::post('/billing/subscriptions/{subscription}/cancel'" => 'provider subscription cancellation route',
     "permission:commerce.billing.manage" => 'provider billing permission boundary',
     "EnsureTenantRouteBinding::class" => 'provider billing tenant route binding',
     "throttle:20,1" => 'provider billing action throttle',
@@ -82,6 +84,8 @@ foreach ([
     "CAPABILITY_PAYMENTS = 'payments'" => 'payments capability constant',
     "CAPABILITY_REFUNDS = 'refunds'" => 'refunds capability constant',
     "CAPABILITY_SUBSCRIPTIONS = 'subscriptions'" => 'subscriptions capability constant',
+    'createSubscription(SubscriptionRequest $request)' => 'provider subscription creation contract',
+    'cancelSubscription(string $providerReference' => 'provider subscription cancellation contract',
 ] as $needle => $label) {
     if ($providerContract !== '' && ! str_contains($providerContract, $needle)) {
         $errors[] = "Commerce payment provider contract missing: {$label}.";
@@ -91,14 +95,20 @@ foreach ([
 foreach ([
     "CommercePaymentTransaction::query()->where('idempotency_key', \$idempotencyKey)->first()" => 'pre-provider payment retry short-circuit',
     "CommerceRefund::query()->where('idempotency_key', \$idempotencyKey)->first()" => 'pre-provider refund retry short-circuit',
+    "where('metadata->provider_idempotency_key', \$idempotencyKey)" => 'pre-provider subscription retry short-circuit',
+    "(\$metadata['last_cancel_idempotency_key'] ?? null) === \$idempotencyKey" => 'pre-provider subscription cancellation retry short-circuit',
     "CAPABILITY_PAYMENTS" => 'payment capability admission',
     "CAPABILITY_REFUNDS" => 'refund capability admission',
+    "CAPABILITY_SUBSCRIPTIONS" => 'subscription capability admission',
     "->where('enabled', true)" => 'enabled-provider admission',
     "\$provider->health((array) \$config->configuration)" => 'live provider health admission',
     "Payment provider returned an inconsistent" => 'provider result consistency guard',
     "Refund amount exceeds the remaining refundable payment balance." => 'pre-provider refund balance guard',
+    "Subscriptions require an active recurring product price." => 'recurring active-price subscription guard',
     "commerce.billing.invoice." => 'invoice provider-operation mutex',
     "commerce.billing.refund." => 'refund provider-operation mutex',
+    "commerce.billing.subscription." => 'subscription provider-operation mutex',
+    "commerce.subscription.cancel_failed" => 'failed cancellation audit event',
 ] as $needle => $label) {
     if ($providerBilling !== '' && ! str_contains($providerBilling, $needle)) {
         $errors[] = "Commerce provider billing service missing: {$label}.";
@@ -117,11 +127,19 @@ foreach ([
 foreach ([
     "'providers' => \$availableProviders" => 'enabled provider UI projection',
     "'canManage' => \$request->user()?->hasPermission('commerce.billing.manage')" => 'billing-management UI authorization',
+    "'subscriptionCustomers' => CommerceCustomer::query()" => 'tenant-scoped subscription customer projection',
+    "'subscriptionPrices' => \$subscriptionPrices" => 'active recurring price projection',
     'public function collect(' => 'invoice payment controller action',
     'public function refund(' => 'payment refund controller action',
+    'public function subscribe(' => 'subscription creation controller action',
+    'public function cancelSubscription(' => 'subscription cancellation controller action',
+    "new TenantExists('nx_commerce_customers')" => 'tenant customer validation',
+    "TenantExists::through('nx_commerce_prices', 'nx_commerce_products', 'product_id')" => 'tenant recurring-price validation',
     'ProviderBillingService $billing' => 'provider orchestration dependency',
     "data_get(\$transaction->metadata, 'provider_successful'" => 'provider payment result feedback',
     "data_get(\$refund->metadata, 'provider_successful'" => 'provider refund result feedback',
+    "data_get(\$subscription->metadata, 'provider_successful'" => 'provider subscription result feedback',
+    "last_cancel_provider_result.provider_successful" => 'provider cancellation result feedback',
 ] as $needle => $label) {
     if ($billingController !== '' && ! str_contains($billingController, $needle)) {
         $errors[] = "Commerce billing controller missing: {$label}.";
@@ -132,9 +150,14 @@ foreach ([
     'operationKey=()=>' => 'client billing idempotency key generation',
     'Collect payment' => 'invoice payment action UX',
     'Refund payment' => 'refund action UX',
+    'Start subscription' => 'subscription creation UX',
+    'Cancel subscription' => 'subscription cancellation UX',
     'provider.capabilities.includes("payments")' => 'payment capability UI filter',
+    'provider.capabilities.includes("subscriptions")' => 'subscription capability UI filter',
     '/admin/commerce/billing/invoices/${paymentInvoice.id}/payments' => 'payment endpoint wiring',
     '/admin/commerce/billing/transactions/${refundPayment.id}/refunds' => 'refund endpoint wiring',
+    '/admin/commerce/billing/subscriptions' => 'subscription endpoint wiring',
+    '/admin/commerce/billing/subscriptions/${subscription.id}/cancel' => 'subscription cancellation endpoint wiring',
 ] as $needle => $label) {
     if ($billingPage !== '' && ! str_contains($billingPage, $needle)) {
         $errors[] = "Commerce Billing UI missing: {$label}.";
@@ -146,10 +169,15 @@ if ($billingPage !== '' && preg_match('/<(button|input|select|textarea)\b/', $bi
 
 foreach ([
     'test_enabled_provider_collects_and_refunds_with_retry_safe_idempotency' => 'provider payment/refund acceptance flow',
+    'test_provider_subscription_create_and_cancel_are_retry_safe' => 'provider subscription create/cancel acceptance flow',
+    'test_failed_subscription_cancel_is_recorded_without_state_corruption_or_duplicate_provider_call' => 'failed subscription cancellation regression',
     'test_disabled_provider_fails_before_external_payment_call' => 'disabled-provider fail-closed regression',
     'self::assertSame(1, $provider->paymentCalls)' => 'payment retry external-call assertion',
     'self::assertSame(1, $provider->refundCalls)' => 'refund retry external-call assertion',
+    'self::assertSame(1, $provider->subscriptionCalls)' => 'subscription retry external-call assertion',
+    'self::assertSame(1, $provider->cancelCalls)' => 'subscription cancellation retry external-call assertion',
     "'amount' => '20.00'" => 'over-refund rejection case',
+    "self::assertSame('active', \$subscription->status)" => 'failed cancellation state preservation',
 ] as $needle => $label) {
     if ($providerBillingTest !== '' && ! str_contains($providerBillingTest, $needle)) {
         $errors[] = "Commerce provider billing acceptance contract missing: {$label}.";
@@ -281,5 +309,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Commerce Product Contract] PASS — monetary and tenant product identity are bounded, order/invoice lifecycles are serialized, and enabled healthy capability-scoped payment providers execute retry-safe invoice collection/refunds through modular Commerce routes and shared Admin UI.'.PHP_EOL,
+    '[Nexora Commerce Product Contract] PASS — monetary and tenant product identity are bounded, order/invoice lifecycles are serialized, and enabled healthy capability-scoped providers execute retry-safe payments, refunds and subscriptions through modular Commerce routes and shared Admin UI.'.PHP_EOL,
 );
