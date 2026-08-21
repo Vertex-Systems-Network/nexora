@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { UntitledInput } from "./input";
 import { UntitledTextarea } from "./textarea";
@@ -44,8 +44,9 @@ describe("Nexora accessibility primitives", () => {
         );
 
         const dialog = screen.getByRole("dialog", { name: "Edit record" });
-        const first = screen.getByRole("button", { name: "First action" });
-        const close = screen.getByRole("button", { name: "Close dialog" });
+        const dialogQueries = within(dialog);
+        const first = dialogQueries.getByRole("button", { name: "First action" });
+        const close = dialogQueries.getByRole("button", { name: "Close dialog" });
 
         for (const element of Array.from(dialog.querySelectorAll<HTMLElement>('button,[tabindex]'))) {
             Object.defineProperty(element, "offsetParent", { configurable: true, get: () => dialog });
