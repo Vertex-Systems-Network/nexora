@@ -6,6 +6,8 @@ namespace App\Jobs;
 
 use App\Models\ContentMigrationItem;
 use App\Models\ContentMigrationRun;
+use App\Models\User;
+use App\Nexora\Enterprise\Services\TenantAuthorizationService;
 use App\Nexora\Enterprise\Services\TenantExecutionScope;
 use App\Nexora\Migrations\Services\WordPressContentImporter;
 use App\Nexora\Migrations\WordPress\WordPressWxrReader;
@@ -28,6 +30,7 @@ final class ProcessContentMigrationJob implements ShouldQueue
 
     public function handle(
         TenantExecutionScope $tenantScope,
+        TenantAuthorizationService $authorization,
         WordPressWxrReader $reader,
         WordPressContentImporter $importer,
     ): void {
@@ -38,13 +41,17 @@ final class ProcessContentMigrationJob implements ShouldQueue
         $tenantScope->runRequired(
             is_string($tenantId) ? $tenantId : null,
             "content migration {$this->runId}",
-            function () use ($reader, $importer): void {
+            function () use ($authorization, $reader, $importer): void {
                 $run = $this->claim();
                 if (! $run) {
                     return;
                 }
 
                 try {
+                    $actor = $run->created_by ? User::query()->find((int) $run->created_by) : null;
+                    if (! $actor || $actor->status !== 'active' || ! $authorization->allows($actor, 'documents.create')) {
+                        throw new RuntimeException('The migration creator no longer has permission to import documents for this organization.');
+                    }
                     if ($run->source_type !== 'wordpress_wxr') {
                         throw new RuntimeException('Unsupported content migration source type.');
                     }
