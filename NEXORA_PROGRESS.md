@@ -12,15 +12,13 @@
 - Branch: `dev/n1-0b-core-functional-qa`
 - PR #1: **DRAFT + OPEN + MERGEABLE**, not ready for merge
 - Last executable green source CI: `32509858655` on `45e527c43c69f89c5519dde13bad6c771d171915`
-- Self-hosted run `32523602178` executed on runner `LOCAL-WIN-01`; checkout PASS, then failed before source gates because `shivammathur/setup-php` required missing `pwsh`.
-- Workflow correction head: `7310223dd951995245be69124639a51904a8c320` — hosted-style setup actions removed; installed Windows PHP/Node/npm now verified and used directly.
-- Sentinel 2.0 workflow gate wiring: `e412df465ec3215933f84296e0cb566f6acad955`.
-- N1.22 hardening implementation checkpoint: `d31e8524a16c4708dde68cffdec84b3fb4bff00d`.
-- Sentinel contract literal-safety correction: `06750699e44dad5b25608b8c95f4b4ce69012b36`.
-- N1.23 Marketplace 2.0 implementation head before this progress commit: `3c170397f50c3b8330db8923f1d3d7f539429dc0`.
-- Actions runner: **Windows local runner via `runs-on: self-hosted`**.
+- Earlier self-hosted runs proved repository jobs could execute on other local runners, but those runners are no longer valid certification targets by user directive.
+- Runner restriction head: `ea7b87a8e3ce774285f154a22b24a059cc74f74b`.
+- Actions certification runner: **ONLY `LOCAL-WIN-03`** via `runs-on: [self-hosted, LOCAL-WIN-03]` plus a fail-closed `%RUNNER_NAME% == LOCAL-WIN-03` runtime assertion.
+- `LOCAL-WIN-03` must have a custom GitHub Actions runner label named exactly `LOCAL-WIN-03`; if that label is absent, certification intentionally remains queued rather than falling back to another self-hosted runner.
+- Workflow shell: `cmd` for repository `run:` steps, avoiding host Windows PowerShell ExecutionPolicy dependence.
 - PR certification trigger: restored; temporary dev-branch push trigger remains during runner stabilization.
-- Ledger: `2.4` — governance sync for N1.18–N1.23 pending after consolidated certification result
+- Ledger: `2.4` — governance sync for N1.18–N1.23 and dedicated-runner policy pending consolidated certification result
 - Issue #2: **OPEN**
 - N1.18 Public APIs / Webhooks / SDK: implementation complete / certification pending
 - N1.19 Import / Export / WordPress migrations: implementation complete / certification pending
@@ -54,7 +52,7 @@ Verified Power remains unchanged. Self-hosted source certification can promote S
 | N1.20 Observability | implementation complete | 0% current target | certification pending |
 | N1.21 Forge / Developer Experience | implementation complete candidate | 0% current target | SELF-HOSTED CERTIFICATION PENDING |
 | N1.22 Sentinel 2.0 | first trust-hardening workflow implementation complete candidate | 0% current target | SELF-HOSTED CERTIFICATION PENDING |
-| N1.23 Marketplace 2.0 | first hardening workflow implementation complete candidate | 0% current target | **SELF-HOSTED CERTIFICATION PENDING** |
+| N1.23 Marketplace 2.0 | first hardening workflow implementation complete candidate | 0% current target | **LOCAL-WIN-03 CERTIFICATION PENDING** |
 | N1.24–N1.26 | planned/partial | 0% | Later roadmap |
 
 ---
@@ -74,23 +72,27 @@ Verified Power remains unchanged. Self-hosted source certification can promote S
 
 ---
 
-## 5. Self-hosted runner evidence
+## 5. Dedicated self-hosted runner policy
 
-Run `32523602178` proves the attached runner is registered and accepting repository jobs:
+Certification must run only on the organization runner named `LOCAL-WIN-03`.
 
-```text
-Runner: LOCAL-WIN-01
-Machine: ABDUL-HANAN
-Runner version: 2.336.0
-Checkout exact source: PASS
-Failure: setup-php action could not locate pwsh
+Workflow enforcement:
+
+```yaml
+runs-on: [self-hosted, LOCAL-WIN-03]
 ```
 
-Correction:
-- removed `shivammathur/setup-php` and `actions/setup-node` from self-hosted certification;
-- upgraded checkout to `actions/checkout@v5`;
-- added Windows PowerShell toolchain verification for PHP >= 8.3, Node >= 22 and npm;
-- certification uses the machine's installed toolchain instead of mutating the local runner.
+Runtime defense-in-depth:
+
+```bat
+if /I not "%RUNNER_NAME%"=="LOCAL-WIN-03" exit /b 1
+```
+
+Consequences:
+- `LOCAL-WIN-01`, `LOCAL-WIN-4`, or any other runner is not valid certification evidence.
+- If the custom label `LOCAL-WIN-03` is missing from that runner, jobs remain queued intentionally.
+- No GitHub-hosted setup actions are used to mutate the local PHP/Node toolchain.
+- Repository `run:` steps use `cmd`, avoiding unsigned temporary PowerShell-script ExecutionPolicy failures.
 
 ---
 
@@ -127,7 +129,7 @@ Correction:
 - `scripts/marketplace2-product-contract-verify.php` guards bounded catalog transfer, generation identity, tenant-aware dynamic authorization and fail-closed visibility.
 - Existing N1.9 Marketplace contract was advanced from timestamp freshness assumptions to the stronger generation + tenant semantics so both gates describe one coherent product invariant.
 - Marketplace 2.0 contract is required by Development Readiness and the self-hosted release workflow.
-- Legacy `/extensions/marketplace/items/{item}/stage` route remains registered for compatibility, but server-side staging now applies the same generation + tenant authorization guard; canonical UI route is `/admin/extensions/marketplace/catalog/{item}/stage`. Physical legacy-route removal remains cleanup, not a current authorization bypass.
+- Legacy `/extensions/marketplace/items/{item}/stage` route remains registered for compatibility, but server-side staging applies the same generation + tenant authorization guard; canonical UI route is `/admin/extensions/marketplace/catalog/{item}/stage`.
 
 ---
 
@@ -148,19 +150,20 @@ Correction:
 | 028–031 | 2026-08-22 | through `97824bd4…` | N1.20 observability/privacy/correlation/retention + tests/contracts | implementation complete; verified Power held |
 | 032–033 | 2026-08-22 | through Forge contract `39beaac0…` | N1.21 Forge hardening/tests/docs/contract | implementation-complete candidate |
 | 034 | 2026-08-22 | readiness `74ca8c89…`; workflow `8e612c5a…` | self-hosted runner + PR trigger + Forge gate wiring | verified Power unchanged |
-| 035 | 2026-08-22 | run `32523602178`; workflow correction `7310223d…` | real LOCAL-WIN-01 execution; diagnosed missing `pwsh`; switched certification to installed Windows toolchain | verified Power unchanged pending rerun |
+| 035 | 2026-08-22 | earlier local-runner executions | generic self-hosted runner stabilization; those runners are no longer valid certification targets | verified Power unchanged |
 | 036 | 2026-08-22 | Sentinel files through `d31e8524…`; workflow `e412df46…` | N1.22 privacy-safe correlated failures, legacy scrub, portable ordering, latest/tie-safe immutable approval, Theme/Extension replay prevention, tests + static/CI gate | implementation-complete candidate; verified Power unchanged pending consolidated run |
 | 037 | 2026-08-22 | contract correction `06750699…` | fixed PHP interpolation-sensitive Sentinel contract needles | verified Power unchanged pending consolidated run |
 | 038 | 2026-08-22 | migration `372a551f…`; catalog `62a2d4aa…`; stager `85a319e7…`; controller `b0e42d2c…`; config `14eedb5d…`; tests `512f2ad2…`; contract `c635a2fc…`; readiness `66bf801f…`; workflow `eac15d72…`; base contract `3c170397…` | N1.23 bounded catalog download, explicit atomic sync generation, fail-closed legacy/resume freshness, tenant-aware dynamic stage permission and compatibility-gate migration | implementation-complete candidate; verified Power unchanged pending consolidated run |
+| 039 | 2026-08-22 | runner restriction `ea7b87a8…` | certification pinned exclusively to `LOCAL-WIN-03` with custom-label scheduling + runtime runner-name assertion; other local runners invalidated as certification evidence | verified Power unchanged pending LOCAL-WIN-03 run |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-SELF-HOSTED CONSOLIDATED CERTIFICATION
-  1. execute latest branch head on LOCAL-WIN-01
-  2. verify installed PHP/Node/npm toolchain
+LOCAL-WIN-03 CONSOLIDATED CERTIFICATION
+  1. execute latest branch head only on runner LOCAL-WIN-03
+  2. verify RUNNER_NAME == LOCAL-WIN-03 and installed PHP/Node/npm toolchain
   3. run every source/product gate through Sentinel 2.0 + Marketplace 2.0 + Unified Source certification
   4. inspect exact failed job logs and fix only real failures until green
   5. after green only: promote N1.18-N1.23 SOURCE DONE where justified
@@ -169,6 +172,6 @@ SELF-HOSTED CONSOLIDATED CERTIFICATION
 
 TARGET BOUNDARY
   - issue #2 stays OPEN until rc.93 compatibility + post-install + /login + /admin evidence
-  - self-hosted source CI never raises Target Power by itself
+  - LOCAL-WIN-03 source CI never raises Target Power by itself
   - real DB/provider/SSO/product target evidence remains separately required
 ```
