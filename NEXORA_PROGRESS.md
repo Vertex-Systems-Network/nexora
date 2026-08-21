@@ -18,8 +18,8 @@
 - N1.18 Public APIs / Webhooks / SDK: **implementation complete / executable verification deferred**
 - N1.19 Import / Export / WordPress migrations: **implementation complete / executable verification deferred**
 - N1.20 Observability: **implementation complete / executable verification deferred**
-- Active source block: **N1.21 Forge / Developer Experience**
-- Latest N1.20 implementation head before this progress commit: `97824bd42e405ee357d841ffff8ffd829fe7a267`
+- Active source block: **N1.21 Forge / Developer Experience — ~45% implementation candidate**
+- Latest N1.21 implementation head before this progress commit: `567ead33ff34f3fac662dd4d6d03dc173b7b785a`
 
 ---
 
@@ -32,7 +32,7 @@ TARGET POWER    50.0%  ██████████░░░░░░░░░
 RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
 ```
 
-Verified Power remains unchanged because N1.18–N1.20 have no consolidated executable certification yet. Static implementation completion is tracked separately and never promotes Target Power.
+Verified Power remains unchanged while N1.18+ blocks await consolidated executable certification. Implementation percentages never promote Target Power.
 
 ---
 
@@ -43,8 +43,8 @@ Verified Power remains unchanged because N1.18–N1.20 have no consolidated exec
 | N1.9–N1.17 | 100% verified source | 0% current target | SOURCE DONE / target pending |
 | N1.18 Public APIs/Webhooks/SDK | implementation complete | 0% | executable verification deferred; NOT SOURCE DONE |
 | N1.19 Import/Export/WP migrations | implementation complete | 0% | executable verification deferred; NOT SOURCE DONE |
-| N1.20 Observability | **implementation complete** | 0% | executable verification deferred; NOT SOURCE DONE |
-| N1.21 Forge / Developer Experience | foundation/planned | 0% | **ACTIVE** |
+| N1.20 Observability | implementation complete | 0% | executable verification deferred; NOT SOURCE DONE |
+| N1.21 Forge / Developer Experience | **~45% candidate** | 0% | **ACTIVE** |
 | N1.22 Sentinel 2.0 | foundation | 0% | Next |
 | N1.23–N1.26 | planned/partial | 0% | Later roadmap |
 
@@ -52,73 +52,68 @@ Verified Power remains unchanged because N1.18–N1.20 have no consolidated exec
 
 ## 4. Deferred implementation-complete blocks
 
-### N1.18 Public APIs / Webhooks / SDK
-Tenant-bound hash-only API credentials, explicit abilities, `/api/v1/documents`, bounded cursor pagination, tenant re-resolution, one-time browser-local token display, stable public API descriptor, API tests/contracts and preserved webhook replay/signature safety are source-complete; executable certification deferred.
-
-### N1.19 Import / Export / WordPress migrations
-Tenant-safe replayable WXR import, bounded local-only XML parsing, canonical Document repository mapping, service+queue authorization rechecks, streaming tenant JSON export, Admin UI, tests/contracts and runtime readiness are source-complete; executable certification deferred.
-
-### N1.20 Observability
-- `nx_audit_logs` forward tenantization with only unambiguous legacy membership backfill; ambiguous/system history remains null and fail-closed in tenant views.
-- Tenant-scoped Audit model + explicit tenant writes in `AuditManager`.
-- Recursive telemetry sanitizer redacts password/token/authorization/cookie/session/credential/API/private-key style metadata, bounds depth/count/string size and drops unsupported objects.
-- Privacy-minimal `nx_observability_incidents` for request ID, tenant/user, named route, 5xx/slow category, status, duration, node and sanitized metadata.
-- Only 5xx or configurable slow requests are retained; healthy fast requests are ignored.
-- Raw body/query values/arbitrary headers/raw exception messages are not persisted; exception class is SHA-256 fingerprinted.
-- API token tenant correlation + web TenantContext correlation.
-- Observability persistence is best-effort/fail-open and never replaces the original application exception.
-- `AuditManager`/`ObservabilityRecorder` use scoped lifecycle to avoid long-lived tenant capture.
-- Audit & Incidents Admin surface supports request-ID search, tenant-only incident visibility and 24h failure/latency summaries.
-- Bounded audit/incident retention with leader-only daily prune; runtime metric retention remains single-owned by existing `nexora:runtime:prune`.
-- Queue backlog diagnostics no longer expose raw provider/driver exception messages.
-- Acceptance source: tenant audit isolation/redaction, incident threshold/privacy, tenant incident isolation, retention preservation/pruning.
-- `scripts/observability-product-contract-verify.php` is required by Development Readiness and release workflow source.
-- Static portability/privacy review: no N1.20 raw SQL migration statement, no `->after(...)`, no intended raw request content/header/query persistence.
-
-**Evidence boundary:** N1.20 is implementation complete but **NOT SOURCE DONE** until consolidated executable source certification is available after Actions quota restoration.
+N1.18, N1.19 and N1.20 remain implementation-complete / executable-verification-deferred. Their implementation details and acceptance/product contracts are retained in prior Apply Log checkpoints. None is promoted to SOURCE DONE until consolidated executable certification is available.
 
 ---
 
-## 5. Actions quota mode
+## 5. N1.21 Forge implemented so far
+
+- Existing `nexora:make:extension` foundation was retained rather than creating a second generator.
+- New `ForgeExtensionScaffolder` separates planning/writes from CLI presentation.
+- Identifier/type/name validation is service-level, not CLI-only.
+- Generated `nexora.json` is self-validated through the authoritative `ExtensionManifestValidator` before any scaffold write.
+- Workspace is restricted to project `extensions/<identifier>` and lexical/symlink traversal is checked with `PortablePath`.
+- Forge workspace itself may not be a symbolic link.
+- `--dry-run` provides deterministic destination/file preview with **zero writes**.
+- Existing destination is refused by default.
+- `--force` is accepted only when the destination carries `.nexora-forge.json` with the same Forge schema + identifier; arbitrary directories cannot be clobbered.
+- Existing symbolic-link generated files are refused even in force mode.
+- Generated JSON and README content is deterministic (no timestamps/random IDs).
+- Scaffold README/CLI explicitly state trust boundary: Forge generates source only; package review/Sentinel ALLOW remains mandatory and Forge does not install/enable/grant trust.
+
+**Evidence boundary:** N1.21 remains an implementation candidate. Acceptance tests, template edge hardening, docs and static product contract remain.
+
+---
+
+## 6. Actions quota mode
 
 - Release workflow PR auto-trigger remains temporarily removed; `push: main` + `workflow_dispatch` remain.
 - Do not trigger/re-run Actions while quota is exhausted.
-- Continue source/tests/contracts and mark blocks implementation-complete separately from SOURCE DONE.
-- When capacity returns: restore `pull_request`, then run one consolidated certification across N1.18+ deferred blocks.
+- When capacity returns: restore `pull_request`, then run one consolidated certification across deferred blocks.
 
 ---
 
-## 6. Main protection / target blockers
+## 7. Main protection / target blockers
 
-`main` remains reported `protected=false`; the connector still has no branch/ruleset mutation endpoint. Desired policy remains PR required + Source certification + stale approval dismissal + review/conversation resolution + no force push/delete + admin enforcement. Issue #2 remains OPEN. Target Power remains 50%.
+`main` remains reported `protected=false`; connector has no branch/ruleset mutation endpoint. Issue #2 remains OPEN. Target Power remains 50%.
 
 ---
 
-## 7. Apply Log
+## 8. Apply Log
 
 | Apply | Date | Evidence | Change | Power impact |
 |---:|---|---|---|---|
 | 001–013 | 2026-08-21 | through `45e527c4…`; CI `32509858655` | N1.16/N1.17 verified closures/governance | Project 76.5%, Source 99%, Target 50% |
 | 014–020 | 2026-08-21 | through `95eb4bd4…`; zero-step Actions | N1.18 API/token/SDK implementation | implementation complete; verified Power held |
 | 021 | 2026-08-22 | user directive | Actions deferred after quota exhaustion | Power unchanged |
-| 022–027 | 2026-08-22 | through `8afd1f36…` + progress `9f17b1ea…` | N1.19 import/export/WXR implementation, runtime readiness, tests/contracts | implementation complete; verified Power held |
-| 028–030 | 2026-08-22 | through `ba056be4…` | N1.20 audit tenantization, incidents, retention, Admin correlation, lifecycle + diagnostic hardening | ~82% candidate |
-| 031 | 2026-08-22 | through `97824bd4…`; tests `5353d908…`; contract `3c5c3b45…`; readiness `767a9f20…`; workflow `84d27bda…` | N1.20 acceptance/product contract/gate wiring + lazy console schedule correction | **N1.20 implementation complete / executable verification deferred**; verified Power unchanged |
+| 022–027 | 2026-08-22 | through `8afd1f36…` + progress `9f17b1ea…` | N1.19 import/export/WXR implementation | implementation complete; verified Power held |
+| 028–031 | 2026-08-22 | through `97824bd4…` + progress `e796d283…` | N1.20 tenant observability/privacy/correlation/retention + tests/contracts | implementation complete; verified Power held |
+| 032 | 2026-08-22 | service `2e922995…`; command `567ead33…` | N1.21 deterministic Forge planner/writer, dry-run, Forge-owned force guard, symlink safety and Sentinel trust-boundary CLI | N1.21 **~45% candidate**; verified Power unchanged |
 
 ---
 
-## 8. Exact next action
+## 9. Exact next action
 
 ```text
-N1.21 FORGE / DEVELOPER EXPERIENCE
-  1. audit CLI/generator/scaffolding/package-development foundations
-  2. identify unsafe filesystem/code generation or missing deterministic templates
-  3. implement smallest production-shaped Forge workflow with dry-run/overwrite safety
-  4. add tests + static product contract
-  5. update THIS FILE after each meaningful apply
-  6. DO NOT trigger GitHub Actions
+N1.21 FORGE APPLY-02
+  1. harden file-vs-directory and generated directory/template edge cases
+  2. add executable tests for dry-run/no-write, traversal, arbitrary overwrite refusal, Forge-owned force refresh and deterministic manifest validation
+  3. add Forge developer guide + stable scaffold contract
+  4. add static N1.21 product contract + readiness/workflow source wiring
+  5. implementation complete => N1.22 active; certification still deferred
+  6. update THIS FILE after each meaningful apply
+  7. DO NOT trigger GitHub Actions
 
-GOVERNANCE FOLLOW-UP
-  - update canonical ledger from 2.4 with N1.18–N1.20 implementation-complete / verification-deferred state
-  - keep PR #1 draft; do not imply deferred blocks are SOURCE DONE
+GOVERNANCE
+  - canonical ledger 2.4 full history has been recovered safely; sync N1.18–N1.21 in one append-only governance commit after Forge checkpoint
 ```
