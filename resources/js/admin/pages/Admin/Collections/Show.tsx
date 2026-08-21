@@ -13,19 +13,26 @@ type CollectionData = { id: number; uuid: string; name: string; slug: string; de
 type DocumentRow = { id: number; title: string; slug: string | null; type: string; status: string; position: number; data: Record<string, unknown> };
 type AvailableDocument = { id: number; title: string; slug: string | null; type: string; status: string };
 type TypeOption = { key: string; name: string; description: string };
+type EntryValue = string | number | boolean | null;
+type EntryData = Record<string, EntryValue>;
 
 const fieldTypes = [
     { value: "text", label: "Text" }, { value: "long-text", label: "Long text" }, { value: "number", label: "Number" },
     { value: "boolean", label: "Boolean" }, { value: "date", label: "Date" }, { value: "url", label: "URL" },
 ];
 const newField = (): CollectionField => ({ key: "", label: "", type: "text", required: false });
-const initialData = (schema: CollectionField[]) => Object.fromEntries(schema.map((field) => [field.key, field.type === "boolean" ? false : ""]));
+const initialData = (schema: CollectionField[]): EntryData => Object.fromEntries(schema.map((field) => [field.key, field.type === "boolean" ? false : ""])) as EntryData;
+const normalizeEntryData = (data: Record<string, unknown>): EntryData => Object.fromEntries(Object.entries(data).map(([key, value]) => {
+    if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") return [key, value];
+    if (value === undefined) return [key, null];
+    return [key, String(value)];
+})) as EntryData;
 
-function FieldInput({ field, value, onChange }: { field: CollectionField; value: unknown; onChange: (value: unknown) => void }) {
+function FieldInput({ field, value, onChange }: { field: CollectionField; value: unknown; onChange: (value: EntryValue) => void }) {
     if (field.type === "long-text") return <Textarea label={`${field.label}${field.required ? " *" : ""}`} value={String(value ?? "")} onChange={(event) => onChange(event.target.value)} rows={4} />;
     if (field.type === "boolean") return <Select label={`${field.label}${field.required ? " *" : ""}`} value={value === true || value === "true" || value === 1 ? "true" : "false"} onChange={(next) => onChange(next === "true")} options={[{ value: "false", label: "No" }, { value: "true", label: "Yes" }]} />;
     const type = field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "url" ? "url" : "text";
-    return <Input label={`${field.label}${field.required ? " *" : ""}`} type={type} value={String(value ?? "")} onChange={(event) => onChange(field.type === "number" ? event.target.value : event.target.value)} />;
+    return <Input label={`${field.label}${field.required ? " *" : ""}`} type={type} value={String(value ?? "")} onChange={(event) => onChange(field.type === "number" && event.target.value !== "" ? Number(event.target.value) : event.target.value)} />;
 }
 
 export default function CollectionShow({ collection, documents, availableDocuments, types }: { collection: CollectionData; documents: DocumentRow[]; availableDocuments: AvailableDocument[]; types: TypeOption[] }) {
@@ -36,20 +43,20 @@ export default function CollectionShow({ collection, documents, availableDocumen
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [detachTarget, setDetachTarget] = useState<DocumentRow | null>(null);
     const [editTarget, setEditTarget] = useState<DocumentRow | null>(null);
-    const [entryData, setEntryData] = useState<Record<string, unknown>>({});
+    const [entryData, setEntryData] = useState<EntryData>({});
     const [entrySaving, setEntrySaving] = useState(false);
 
     const settings = useForm<{ name: string; slug: string; description: string; status: "active" | "archived"; document_type: string; schema: CollectionField[] }>({
         name: collection.name, slug: collection.slug, description: collection.description ?? "", status: collection.status, document_type: collection.document_type ?? "", schema: collection.schema ?? [],
     });
-    const attach = useForm<{ document_id: string; data: any }>({ document_id: "", data: initialData(collection.schema ?? []) });
+    const attach = useForm<{ document_id: string; data: EntryData }>({ document_id: "", data: initialData(collection.schema ?? []) });
     const availableOptions = useMemo(() => availableDocuments.map((document) => ({ value: String(document.id), label: document.title, description: `${document.type} · ${document.status}` })), [availableDocuments]);
 
     const updateField = (index: number, patch: Partial<CollectionField>) => settings.setData("schema", settings.data.schema.map((field, position) => position === index ? { ...field, ...patch } : field));
     const removeField = (index: number) => settings.setData("schema", settings.data.schema.filter((_, position) => position !== index));
     const saveSettings = () => settings.put(`/admin/collections/${collection.id}`, { preserveScroll: true, onSuccess: () => setSettingsOpen(false) });
     const attachDocument = () => attach.post(`/admin/collections/${collection.id}/documents`, { preserveScroll: true, onSuccess: () => { setAttachOpen(false); attach.reset(); attach.setData("data", initialData(collection.schema ?? [])); } });
-    const openEntry = (document: DocumentRow) => { setEditTarget(document); setEntryData({ ...initialData(collection.schema ?? []), ...(document.data ?? {}) }); };
+    const openEntry = (document: DocumentRow) => { setEditTarget(document); setEntryData({ ...initialData(collection.schema ?? []), ...normalizeEntryData(document.data ?? {}) }); };
     const saveEntry = () => {
         if (!editTarget) return;
         setEntrySaving(true);
