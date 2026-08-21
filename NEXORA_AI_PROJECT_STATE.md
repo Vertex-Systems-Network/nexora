@@ -4,13 +4,15 @@
 > This is the canonical cross-chat handoff file for Nexora. Any AI/agent working on Nexora must read this file before planning, modifying, auditing, packaging, or certifying the project, and must update it after every meaningful implementation/audit/release pass.
 >
 > This is operational documentation and is intentionally outside the immutable source-attestation roots so history/status updates do not create deployment/runtime drift.
+>
+> `NEXORA_PROGRESS.md` is the mandatory human-readable weighted progress dashboard. Every meaningful apply must update it as required by `AGENTS.md`; it complements this ledger and never replaces SOURCE DONE vs TARGET VERIFIED semantics.
 
 ---
 
 ## 0. Ledger metadata
 
 - Ledger schema: `1`
-- Ledger revision: `2.2`
+- Ledger revision: `2.3`
 - Project: `Nexora`
 - Product class: advanced extensible web platform / CMS / site builder / application ecosystem
 - Current development source release: `1.0.0-rc.94`
@@ -20,9 +22,10 @@
 - GitHub canonical repository: `Vertex-Systems-Network/nexora`
 - GitHub default branch: `main`
 - Active development branch: `dev/n1-0b-core-functional-qa`
-- Active GitHub pull request: `#1` — draft, mergeable; title to synchronize as `DEV-4/DEV-5 + N1.9-N1.15: product QA, Commerce, CRM/Membership, Search, Collaboration, Automation and AI source closure`
-- Current branch head before this ledger-only commit: `3b9eb2d1012336b43aa06a2d01841f7fc9d19b5e`
-- Latest complete green source-certification run before this ledger-only commit: `32501783846`
+- Active GitHub pull request: `#1` — draft, mergeable; title to synchronize as `DEV-4/DEV-5 + N1.9-N1.16: product QA, Commerce, CRM/Membership, Search, Collaboration, Automation, AI and Multisite source closure`
+- Current branch head before this ledger-only commit: `9f26b27b48e55a1d5f7f7ef2b3d7b210b2adb29f`
+- Latest complete green source-certification run before this ledger-only commit: `32504935527`
+- Current weighted Project Power before this ledger-only commit: `76.3%` (`Source 98.5%`, `Target 50.0%`, `Release 25.0%`)
 - Open GitHub issues at this checkpoint: `#2 Nexora runtime identity mismatch`
 - Current target environment: Windows + Laragon (real-target development test environment)
 - Current target path: `D:\laragon\www\nexora`
@@ -76,6 +79,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 15. **GitHub issues are an execution input, not a separate backlog.** At the start and end of every meaningful pass, inspect open repository issues. Fix applicable source defects alongside roadmap work, add regression protection, and do not close runtime/environment issues until the required real-target evidence exists.
 16. **Disposable DB verification is mandatory for cross-engine claims.** Source contracts prove source alignment only; a database engine becomes TARGET VERIFIED only after the guarded real target matrix passes on that engine.
 17. **Final PRs merge automatically once genuinely final.** When the required source CI, target/runtime/product QA and applicable issue gates all pass, mark the PR Ready for review and merge it without waiting for another user confirmation. Never auto-merge a draft, red, stale-head or target-unverified PR.
+18. **Weighted progress is evidence-based.** Read and update `NEXORA_PROGRESS.md` after every meaningful apply. Never increase Target Power from source/static CI alone and never inflate progress because file/change volume is large.
 
 ---
 
@@ -101,13 +105,14 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | Collaboration | Document assignment/review and Admin notifications | N1.13 first workflow SOURCE DONE; tenant-member collaborators plus tenant-scoped review/notification identity source-gated; target execution pending |
 | Automation | Event-driven workflows, actions, inbound/outbound webhooks | N1.14 first workflow SOURCE DONE; tenant-member notification targets, tenant-native workflow/event identity, tenant-restored queue execution and webhook safety source-gated; target execution pending |
 | AI Platform | Tenant AI connections, provider-neutral text generation, privacy-minimal run metadata | N1.15 first workflow SOURCE DONE; encrypted credentials, bounded generation and provider-neutral adapter boundary source-gated; target execution + real provider-adapter evidence pending |
+| Multisite / Organizations | Tenant root, organization switching, member/domain/identity governance boundaries | N1.16 first workflow SOURCE DONE; organization-root route binding, non-disclosing switching, direct-identity restrictions and member-scoped impersonation source-gated; target execution pending |
+| SSO / Enterprise Governance | Identity adapter lifecycle, enforced login, SCIM, roles/invitations/impersonation governance | Foundation exists; N1.17 NEXT SOURCE BLOCK |
 | Forge / SDK | Developer extension tooling | Foundation/planned expansion |
 | Sentinel | Theme/plugin trust/security | Foundation implemented; 2.0 later |
 | Marketplace | Theme/app/extension catalog, trusted staging and promotion | N1.9 first workflow SOURCE DONE; target execution pending; Marketplace 2.0 later |
 | Commerce | Catalog/orders/invoices/provider-neutral billing | N1.10 first workflow SOURCE DONE including provider payments/refunds/subscriptions; target execution pending |
 | CRM / Membership / Customer Portal | Business/customer/member capabilities | N1.11 first product workflow SOURCE DONE; target execution pending |
 | Helpdesk | Support/customer service | Foundation exists; later product closure |
-| Multisite / Organizations / SSO | Enterprise tenancy/governance | Foundation exists; broad product/target closure remains |
 | Cloud / HA Runtime | Distributed workers/storage/deployments | Later roadmap |
 | Installer / Deployment / Recovery | Zero-state install/update/recovery/runtime handoff | rc.94 source stabilization + DB UX closure green; live rc.93 recovery evidence pending |
 
@@ -135,7 +140,7 @@ Never report a feature as simply “100% complete” when only source/static ver
 - Generation: `n1-v5.29`
 - Active branch: `dev/n1-0b-core-functional-qa`
 - PR `#1` is draft and mergeable; it must remain draft until the required real-target gates pass.
-- Latest green source CI before this ledger-only commit: `32501783846` on head `3b9eb2d1012336b43aa06a2d01841f7fc9d19b5e`.
+- Latest green source CI before this ledger-only commit: `32504935527` on head `9f26b27b48e55a1d5f7f7ef2b3d7b210b2adb29f`.
 - That run passed:
   - Certification preflight
   - Source Guard
@@ -161,8 +166,9 @@ Never report a feature as simply “100% complete” when only source/static ver
   - Collaboration product source contract
   - Automation product source contract
   - AI Platform product source contract
+  - Multisite / Organizations product source contract
   - Unified source certification
-- Source/static gates are green through N1.15 AI Platform Capabilities.
+- Source/static gates are green through N1.16 Multisite / Organizations.
 - `composer.lock` and `package-lock.json` are not committed; deterministic dependency/release certification remains deferred.
 
 ### 5.2 Open GitHub issue status
@@ -182,7 +188,7 @@ as mismatches. Version, generation, deployment/source, database, storage, host, 
 
 Permanent rc.94 source fix is present and CI-guarded through `scripts/post-install-runtime-convergence-contract-verify.php`. The contract guarantees fresh `/install/runtime-handoff`, an exact mutable-plane reconciliation allow-list, immutable mismatch rejection, service/process health gates, one-time post-install identity finalization and post-write compatibility reassessment.
 
-Issue #2 remains **OPEN** because the existing rc.93 Laragon target still needs real recovery verification. The latest N1.11-N1.15 source passes do not change that live evidence.
+Issue #2 remains **OPEN** because the existing rc.93 Laragon target still needs real recovery verification. The latest N1.11-N1.16 source passes do not change that live evidence.
 
 ### 5.3 Current live Laragon installation
 
@@ -254,7 +260,7 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 
 ### GitHub-first DEV-4 foundation
 
-- Root `AGENTS.md` requires agents to read/update this ledger.
+- Root `AGENTS.md` requires agents to read/update the canonical ledger and `NEXORA_PROGRESS.md` after each meaningful apply.
 - Product-facing source contracts run in development readiness and GitHub Actions.
 - PR #1 remains draft until target evidence is available.
 
@@ -292,7 +298,7 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 ### Document / Writer + Content Collections source closure
 
 - Writer CRUD, revisions, autosave, optimistic concurrency, structured block validation and Media reuse are source-gated.
-- Generic tenant-native Content Collections support typed custom fields, document membership, per-entry data, permissions, audit and non-destructive lifecycle.
+- Generic tenant-native Content Collections support typed custom fields, document membership/per-entry data, permissions, audit and non-destructive lifecycle.
 - Historical tenant baseline remains immutable while forward tenant-native models are recognized.
 
 ### Publishing + SEO end-to-end source closure
@@ -410,14 +416,41 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 - GitHub Actions run `32501783846` SUCCESS on source head `3b9eb2d1012336b43aa06a2d01841f7fc9d19b5e`, including AI Platform Product Contract, Unified Source Certification and every prior source gate.
 - Real Laragon PHPUnit/browser AI execution and controlled real provider-adapter verification remain TARGET PENDING.
 
+### N1.16 Multisite / Organizations first workflow source closure
+
+- Existing Enterprise foundations already provided organization models, memberships, domains, roles, SSO/SCIM primitives, tenant context and tenant-role authorization; the audit therefore focused on cross-organization route and identity boundaries rather than rewriting the subsystem.
+- Root cause closed: `RequirePermission` authorized the active organization, but `EnterpriseOrganization` is the tenant root and has no `tenant_id`, so generic route binding did not reject a different `{organization}` route root after current-tenant permission success.
+- `EnsureTenantRouteBinding` now treats `EnterpriseOrganization` specially and requires its primary key to match the active `TenantContext`; current-tenant permissions cannot be replayed against another organization's route and mismatches return 404.
+- Organization management navigation switches the session tenant before visiting a different organization's management route.
+- Organization switching now validates UUID shape, resolves active organizations, verifies access and returns 404 for inaccessible/nonexistent IDs without a platform-wide `exists` validation disclosure.
+- Enterprise Admin action props now compose global RBAC with `TenantAuthorizationService`, matching route authorization instead of displaying controls from global permission state alone.
+- Ordinary organization admins no longer receive a platform-wide user directory. Direct attachment of an existing platform identity is server/UI restricted to Super Admin; ordinary organization admins retain invitation-by-email.
+- Direct attachment accepts only active users. Impersonation validation is scoped to active organization membership and its UI picker is derived from the organization's own member list.
+- SSO adapter health output is generic/fail-closed so arbitrary adapter diagnostic text is not flashed to Admin.
+- `tests/Feature/Enterprise/MultisiteOrganizationIsolationTest.php` adds six source acceptance regressions for cross-org route replay, hidden switching, platform-user non-disclosure/direct-attach denial, invitation preservation, member-scoped impersonation and nested-resource rejection.
+- `scripts/multisite-organizations-product-contract-verify.php` is required by development readiness and GitHub Actions. It also guards repository-level mandatory weighted progress tracking through `AGENTS.md` + `NEXORA_PROGRESS.md`.
+- Integrated run `32504705855` passed Multisite / Organizations Product Contract, Unified Source Certification and every prior gate on implementation/progress head `e6c884f714e6419794b1c11566e978987a73ecad`; progress-only head `9f26b27b48e55a1d5f7f7ef2b3d7b210b2adb29f` was reconfirmed green by run `32504935527`.
+- Real Laragon/browser/PHPUnit organization switching, invitation, domain, SSO/SCIM and impersonation execution remains TARGET PENDING.
+
 ---
 
 ## 7. Current progress dashboard
 
+### Weighted Project Power
+
+```text
+PROJECT POWER   76.3%  ███████████████░░░░░
+SOURCE POWER    98.5%  ████████████████████
+TARGET POWER    50.0%  ██████████░░░░░░░░░░
+RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
+```
+
+Detailed weights, per-block status and every-apply history are maintained in `NEXORA_PROGRESS.md`.
+
 ### Platform implementation
 
 ```text
-████████████████████  ~98%
+████████████████████  ~98.5%
 ```
 
 ### Real functional verification
@@ -426,7 +459,7 @@ No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED 
 ██████████░░░░░░░░░░  ~50%
 ```
 
-Source implementation increased through N1.15; real verification intentionally did not rise because N1.11-N1.15 and prior DEV-4/DEV-5 product work have not yet been executed across the required real targets.
+Source implementation increased through N1.16; real verification intentionally did not rise because N1.11-N1.16 and prior DEV-4/DEV-5 product work have not yet been executed across the required real targets.
 
 | Phase | Progress | Status |
 |---|---:|---|
@@ -435,7 +468,7 @@ Source implementation increased through N1.15; real verification intentionally d
 | DEV-2A Historical TypeScript remediation | 100% | SOURCE DONE |
 | DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for the previously reported Laragon build |
 | DEV-3 Laravel/install runtime | 80% source / 75% live | PARTIAL — source convergence gate green; live rc.93 repair evidence pending |
-| DEV-4 Login/admin/core functional QA | 97% source / 30% live | PARTIAL — major product workflows source-gated; broad target QA pending |
+| DEV-4 Login/admin/core functional QA | 98% source / 30% live | PARTIAL — major product workflows source-gated; broad target QA pending |
 | DEV-4A Site settings + media reuse | 100% source / target pending | SOURCE DONE |
 | DEV-4B Theme workflow | 100% source contract / target pending | SOURCE DONE |
 | DEV-4C Extension workflow | 100% source contract / target pending | SOURCE DONE |
@@ -453,7 +486,8 @@ Source implementation increased through N1.15; real verification intentionally d
 | N1.13 Collaboration | 100% source contract / target pending | SOURCE DONE |
 | N1.14 Automation | 100% source contract / target pending | SOURCE DONE |
 | N1.15 AI Platform Capabilities | 100% source contract / target pending | SOURCE DONE |
-| N1.16 Multisite / Organizations | Foundation exists; product audit pending | NEXT SOURCE BLOCK |
+| N1.16 Multisite / Organizations | 100% source contract / target pending | SOURCE DONE |
+| N1.17 SSO / Enterprise Governance | Foundation exists; product audit pending | NEXT SOURCE BLOCK |
 | DEV-6 Final C1-C6/release certification | 10% | DEFERRED CERTIFICATION |
 
 ---
@@ -508,14 +542,14 @@ php scripts\database-target-matrix.php --list
 php scripts\database-target-matrix.php --drivers=sqlite,mysql,mariadb,pgsql,sqlsrv --evidence
 ```
 
-At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing, SEO, Forms, Data Workflows, Data Connections, Marketplace, Commerce, Customer Portal, CRM, Membership, Search, Collaboration, Automation, AI Platform and responsive Admin navigation on the real target.
+At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing, SEO, Forms, Data Workflows, Data Connections, Marketplace, Commerce, Customer Portal, CRM, Membership, Search, Collaboration, Automation, AI Platform, Multisite / Organizations and responsive Admin navigation on the real target.
 
 For network engines use only disposable databases whose names start with `nexora_matrix_`. For auxiliary connectors/provider actions, use controlled target services and record separate evidence. Never infer target verification from source fixtures. For AI, a provider becomes TARGET VERIFIED only after a controlled registered adapter is exercised without exposing credentials/raw generation history.
 
 ### Remaining source/target sequence
 
 ```text
-N1.16 Multisite / Organizations source audit + closure
+N1.17 SSO / Enterprise Governance source audit + closure
   ||
 Live rc.93 runtime recovery evidence
   -> separate dev checkout full PHPUnit/build/product browser QA
@@ -571,11 +605,12 @@ N2.0   Stable Production
 ### Before work
 
 1. Read this entire file.
-2. Inspect current GitHub branch/source before trusting old claims.
-3. Query open GitHub issues for `Vertex-Systems-Network/nexora`; classify each as source, target/runtime, UX, data or certification.
-4. Identify dev source version, installed target version, blocker class, current PR/branch and latest CI state.
-5. Do not repeat completed work without regression evidence.
-6. Prefer the next roadmap gate while solving applicable open issues in the same pass.
+2. Read `NEXORA_PROGRESS.md` in full.
+3. Inspect current GitHub branch/source before trusting old claims.
+4. Query open GitHub issues for `Vertex-Systems-Network/nexora`; classify each as source, target/runtime, UX, data or certification.
+5. Identify dev source version, installed target version, blocker class, current PR/branch and latest CI state.
+6. Do not repeat completed work without regression evidence.
+7. Prefer the next roadmap gate while solving applicable open issues in the same pass.
 
 ### During work
 
@@ -587,13 +622,15 @@ N2.0   Stable Production
 6. Use development branch + PR for meaningful source changes.
 7. Do not close runtime/environment GitHub issues from source CI alone.
 8. For DB portability, never point the target matrix at customer/staging/production/shared data; use the guarded disposable naming contract only.
+9. After every meaningful apply, update `NEXORA_PROGRESS.md` with exact head/evidence, weighted progress where justified, blockers, next action and a new Apply Log row.
 
 ### After work
 
 1. Re-query open GitHub issues and update issue comments/state with source/target evidence.
-2. Update this file before final response/merge/package: metadata/branch/PR/release/CI, open issue state, checkpoint/live target state, completed work, progress dashboard, `NEXT ACTION`, and append history.
-3. Keep PR #1 draft until the real-target gate is satisfied.
-4. Once all required source CI, target/runtime/product QA, DB evidence and applicable issue gates pass, mark the PR Ready and merge automatically without requesting another user confirmation.
+2. Update `NEXORA_PROGRESS.md` for the final apply/checkpoint.
+3. Update this file before final response/merge/package: metadata/branch/PR/release/CI, open issue state, checkpoint/live target state, completed work, progress dashboard, `NEXT ACTION`, and append history.
+4. Keep PR #1 draft until the real-target gate is satisfied.
+5. Once all required source CI, target/runtime/product QA, DB evidence and applicable issue gates pass, mark the PR Ready and merge automatically without requesting another user confirmation.
 
 Never delete prior history entries. Corrections are appended and explain what changed.
 
@@ -731,7 +768,7 @@ Use `No release` when no rc release was produced.
 
 ### 2026-08-21 — No release — Reusable Media + Theme product workflow source closure
 
-- Trigger / observed blocker: Media needed central reusable selection and Theme Engine needed a real user workflow/acceptance contract rather than foundation-only claims.
+- Trigger / observed blocker: Media needed central reusable selection and Theme Engine needed a real user workflow/acceptance contract rather than foundation-only claims alone.
 - Root cause: Media reuse was not a shared chooser; Theme tests did not prove scan/install/preview/activate/public-render/rollback in one acceptance flow; upload/preview errors were weakly surfaced.
 - Changes applied: Media picker JSON mode + shared `MediaPicker`; Settings logo integration; picker feature-test source; accessible shared FilePicker error API; Theme preview error UX; Theme real-ZIP acceptance-test source; Theme Product source contract.
 - Verification completed: GitHub Actions run `32426200738` SUCCESS with runtime, DEV-4, Theme and unified source contracts PASS.
@@ -793,7 +830,7 @@ Use `No release` when no rc release was produced.
 
 - Trigger / observed blocker: Nexora needed a complete first forms/data workflow rather than isolated form/schema primitives.
 - Root cause: public submission semantics, privacy-minimal storage, Automation bridging, tenant permissions and non-destructive lifecycle needed one enforceable product contract.
-- Changes applied: tenant form/submission schema and models, controlled form definition validator, schema-derived public validation/storage, CSRF/honeypot/throttle/status gates, `form.submitted` Automation bridge, Admin workflow and acceptance contract.
+- Changes applied: tenant form/submission schema and models, controlled form definition validator, schema-derived public validation/storage, CSRF/honeypot/throttle/status guards, `form.submitted` Automation bridge, Admin workflow and acceptance contract.
 - Verification completed: Forms + Data + Workflows product source gate PASS in full source run `32476210643` and subsequent full runs.
 - Real-target evidence: no new Laragon execution for this workflow; SOURCE DONE only.
 - Remaining blocker: target functional execution.
@@ -899,6 +936,16 @@ Use `No release` when no rc release was produced.
 - Remaining blocker: live issue #2 + broad dev target QA + real DB matrix + controlled AI provider-adapter target evidence.
 - Next exact action: begin N1.16 Multisite / Organizations source audit while live rc.93 recovery remains a separate target gate.
 
+### 2026-08-21 — No release — N1.16 Multisite / Organizations tenant-root authorization closure
+
+- Trigger / observed blocker: Enterprise organization foundations were substantial, but tenant-role permission checks were resolved from the active organization while route-bound `EnterpriseOrganization` roots had no `tenant_id`; normal organization Admin also received a platform user directory for direct member assignment, and SSO health surfaced adapter-owned diagnostics.
+- Root cause: generic `EnsureTenantRouteBinding` skipped tenant-root organization models, creating a current-tenant-vs-route-organization confused-deputy gap. Platform identity attachment and impersonation discovery also needed explicit organization/privacy boundaries.
+- Changes applied: organization-root route binding to active `TenantContext`; switch-before-manage UI; non-disclosing active organization switching; tenant-aware UI capability resolution; Super Admin-only direct platform identity attachment; organization-admin invitation preservation; member-scoped impersonation validation/picker; generic SSO adapter health diagnostics; six cross-organization acceptance regressions; required Multisite / Organizations product source contract; repository-governed `NEXORA_PROGRESS.md` weighted progress protocol.
+- Verification completed: integrated run `32504705855` passed Multisite / Organizations Product Contract, Unified Source Certification and every prior source gate; progress-only head `9f26b27b48e55a1d5f7f7ef2b3d7b210b2adb29f` was reconfirmed by green run `32504935527`.
+- Real-target evidence: no current-branch Laragon browser/PHPUnit execution of organization switching/member/invitation/domain/SSO/SCIM/impersonation workflows; SOURCE DONE only.
+- Remaining blocker: live issue #2 + broad dev target QA + real DB matrix/provider evidence.
+- Next exact action: synchronize PR/issue, confirm ledger/progress-only CI, then begin N1.17 SSO / Enterprise Governance source audit.
+
 ---
 
 ## 13. Known deferred work / not the current blocker
@@ -929,26 +976,30 @@ GITHUB: Vertex-Systems-Network/nexora
 DEV SOURCE: rc.94 / v5.29 / n1-v5.29
 DEV BRANCH: dev/n1-0b-core-functional-qa
 PR: #1 DRAFT + MERGEABLE; FINAL GATES PASS => MARK READY + MERGE AUTOMATICALLY
-BRANCH HEAD BEFORE LEDGER COMMIT: 3b9eb2d1012336b43aa06a2d01841f7fc9d19b5e
-LATEST GREEN CI BEFORE LEDGER COMMIT: 32501783846
+BRANCH HEAD BEFORE LEDGER COMMIT: 9f26b27b48e55a1d5f7f7ef2b3d7b210b2adb29f
+LATEST GREEN CI BEFORE LEDGER COMMIT: 32504935527
+PROGRESS DASHBOARD: NEXORA_PROGRESS.md — mandatory every-apply update
+PROJECT POWER: 76.3% | SOURCE 98.5% | TARGET 50.0% | RELEASE 25.0%
 OPEN ISSUE: #2 runtime identity mismatch
 LIVE TARGET: rc.93 installed on Laragon
 LIVE BLOCKER: post-install environment/activation/service/process fingerprints stale
 SOURCE/DEPLOYMENT/DB ON LIVE EVIDENCE: matching
 DEPENDENCY RUNTIME: matching
 LOCK REVIEW: missing, deferred
-SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + Admin UX + Forms/Data/Workflows + Data Connections + Primary SQL portability + Installer DB UX + guarded real-DB matrix harness + Marketplace N1.9 + Commerce N1.10 + Customer Portal/CRM/Membership N1.11 + Search N1.12 + Collaboration N1.13 + Automation N1.14 + AI Platform N1.15
+SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + Admin UX + Forms/Data/Workflows + Data Connections + Primary SQL portability + Installer DB UX + guarded real-DB matrix harness + Marketplace N1.9 + Commerce N1.10 + Customer Portal/CRM/Membership N1.11 + Search N1.12 + Collaboration N1.13 + Automation N1.14 + AI Platform N1.15 + Multisite/Organizations N1.16
 DEV-5: ~95% SOURCE; real engine TARGET VERIFIED evidence pending
 N1.11: SOURCE DONE; target pending
 N1.12: SOURCE DONE; target pending
 N1.13: SOURCE DONE; target pending
 N1.14: SOURCE DONE; target pending
 N1.15: SOURCE DONE; target/provider-adapter evidence pending
+N1.16: SOURCE DONE; target organization/identity workflow evidence pending
 DB MATRIX: scripts/database-target-matrix.php; use only empty nexora_matrix_* targets; --evidence -> storage/app/nexora/qa/database-target-matrix.json
 NEXT LIVE: safe rc.93 repair -> compatibility PASS -> post-install PASS -> /login -> /admin -> issue #2 close only after evidence
-NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + major product browser QA including AI Platform + real DB target matrix on separate dev checkout
-NEXT SOURCE: N1.16 Multisite / Organizations source audit and closure
+NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + major product browser QA including AI + Multisite/Organizations + real DB target matrix on separate dev checkout
+NEXT SOURCE: N1.17 SSO / Enterprise Governance source audit and closure
 ISSUE RULE: inspect open GitHub issues every pass and solve applicable defects alongside roadmap work
+PROGRESS RULE: update NEXORA_PROGRESS.md after every meaningful apply; Target Power only moves on real target evidence
 MERGE RULE: when required source + target + issue gates are final, mark Ready and merge automatically without asking again
 DO NOT: overwrite installed rc.93 with rc.94 as repair; do not mark PR #1 Ready or claim DB/provider TARGET VERIFIED from source CI alone
 ```
