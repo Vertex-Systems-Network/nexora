@@ -42,6 +42,7 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
             $errors[]="{$basename}: nullable unique columns must use PortableNullableUnique for SQL Server-compatible NULL semantics.";
         }
         $portableNullableUniqueCount += substr_count($source, 'PortableNullableUnique::create(');
+        $portableNullableUniqueCount += substr_count($source, 'PortableNullableUnique::createScoped(');
         if(preg_match('/Schema::create\([\'\"](?:phase_|milestone_)/i',$source)===1)$errors[]="{$basename}: phase/milestone table names are forbidden.";
         foreach(preg_split('/\R/',$source) ?: [] as $lineNo=>$line){
             if(preg_match('/Schema::create\([\'\"]([^\'\"]+)[\'\"]/', $line,$m)===1){
@@ -139,11 +140,18 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
         $errors[]='Portable nullable-unique database helper is missing.';
     } else {
         $helperSource=(string)file_get_contents($portableHelper);
-        foreach (["getDriverName() === 'sqlsrv'",'CREATE UNIQUE INDEX','IS NOT NULL','Schema::table'] as $marker) {
+        foreach ([
+            "getDriverName() === 'sqlsrv'",
+            'CREATE UNIQUE INDEX',
+            'IS NOT NULL',
+            'Schema::table',
+            'public static function createScoped(',
+            '$blueprint->unique([$scopeColumn, $column], $indexName)',
+        ] as $marker) {
             if (! str_contains($helperSource,$marker)) $errors[]='Portable nullable-unique helper is missing required SQL Server/non-SQL Server behavior: '.$marker;
         }
     }
-    if ($portableNullableUniqueCount !== 7) $errors[]="Expected 7 portable nullable-unique declarations; found {$portableNullableUniqueCount}.";
+    if ($portableNullableUniqueCount !== 9) $errors[]="Expected 9 portable nullable-unique declarations; found {$portableNullableUniqueCount}.";
 
     $certScript=(string)@file_get_contents($root.'/scripts/create-certification-database.php');
     if(!str_contains($certScript,'Unsafe certification database name'))$errors[]='Certification database script is missing destructive database-name protection.';
