@@ -120,5 +120,8 @@ jobs:
       - name: Content Migration product source contract
         run: php scripts/content-migration-product-contract-verify.php
 
+      - name: Observability product source contract
+        run: php scripts/observability-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
