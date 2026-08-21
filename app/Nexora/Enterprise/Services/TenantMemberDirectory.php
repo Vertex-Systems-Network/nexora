@@ -28,6 +28,31 @@ final readonly class TenantMemberDirectory
             ->get(['id', 'name', 'email']);
     }
 
+    /** @return Collection<int, User> */
+    public function search(string $query, int $limit = 20): Collection
+    {
+        $tenantId = $this->tenant->id();
+        $query = trim($query);
+        if ($tenantId === null || $query === '') {
+            return collect();
+        }
+
+        $limit = max(1, min(100, $limit));
+
+        return User::query()
+            ->where('status', 'active')
+            ->whereHas('enterpriseMemberships', fn ($membership) => $membership
+                ->where('organization_id', $tenantId)
+                ->where('status', 'active'))
+            ->where(function ($builder) use ($query): void {
+                $builder->where('name', 'like', '%'.$query.'%')
+                    ->orWhere('email', 'like', '%'.$query.'%');
+            })
+            ->orderBy('name')
+            ->limit($limit)
+            ->get(['id', 'name', 'email']);
+    }
+
     /** @return array<int, array{id:int,name:string}> */
     public function options(bool $includeEmail = false): array
     {
