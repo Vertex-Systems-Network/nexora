@@ -10,17 +10,17 @@ use Illuminate\Console\Command;
 final class PruneObservability extends Command
 {
     protected $signature = 'nexora:observability:prune';
-    protected $description = 'Prune retained Nexora audit, incident and runtime metric telemetry within bounded retention policies.';
+    protected $description = 'Prune retained Nexora tenant audit and operational incident telemetry within bounded retention policies.';
 
     public function handle(ObservabilityRetentionService $retention): int
     {
         $deleted = $retention->prune();
         $this->info(sprintf(
-            'Pruned %d audit log(s), %d incident(s) and %d runtime metric row(s).',
+            'Pruned %d audit log(s) and %d operational incident(s).',
             $deleted['audit_logs'],
             $deleted['incidents'],
-            $deleted['runtime_metrics'],
         ));
+        $this->line('Runtime metrics remain owned by the existing nexora:runtime:prune policy.');
 
         return self::SUCCESS;
     }
