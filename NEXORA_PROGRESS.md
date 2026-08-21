@@ -15,15 +15,13 @@
 - Installer protocol: `v5.29`
 - Generation: `n1-v5.29`
 - Branch: `dev/n1-0b-core-functional-qa`
-- PR: `#1` — **DRAFT + MERGEABLE**, synchronized through N1.16
-- Current N1.17 correction head before this progress update: `255ed88beb9c2a324408c36eb417c9df244c96f6`
-- Latest fully green source CI: `32505428674` on the N1.16 final governance checkpoint
-- Latest N1.17 CI evidence: `32508273140` — Source Guard and every product gate through AI Platform PASS; Multisite/Organizations failed only on a stale progress-heading marker
-- Canonical ledger revision: `2.3`
+- PR: `#1` — **DRAFT + MERGEABLE**, PR metadata still synchronized through N1.16; N1.17 sync is the current governance action
+- Verified N1.17 source head before this progress update: `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3`
+- Latest fully green source CI: `32508900897`
+- Canonical ledger revision: `2.3` — revision `2.4` synchronization pending in this governance pass
 - Open blocking issue: `#2 Nexora runtime identity mismatch` — still OPEN
-- Completed source block: `N1.16 Multisite / Organizations` — **SOURCE DONE / TARGET PENDING**
-- Current source block: `N1.17 SSO / Enterprise Governance`
-- N1.17 state: **SOURCE GATE IMPLEMENTED — INTEGRATED CORRECTION CI PENDING**
+- Completed source block: `N1.17 SSO / Enterprise Governance` — **SOURCE DONE / TARGET PENDING**
+- Next source block: `N1.18 Public APIs / Webhooks / SDK`
 
 ---
 
@@ -32,16 +30,16 @@
 | Power plane | Weight | Current score | Weighted contribution | Meaning |
 |---|---:|---:|---:|---|
 | Architecture & core platform design | 10% | 98% | 9.8 | Core/module/capability/tenant architecture is mature |
-| Source implementation | 35% | 98.5% | 34.475 | Verified closure through N1.16; N1.17 awaits integrated certification |
-| Source verification / CI contracts | 15% | 100% | 15.0 | Latest completed required gate set remains green through N1.16; N1.17 correction run pending |
+| Source implementation | 35% | 99.0% | 34.65 | Major product workflows source-gated through N1.17 |
+| Source verification / CI contracts | 15% | 100% | 15.0 | All currently required source gates green through N1.17 |
 | Real target functional verification | 20% | 50% | 10.0 | Broad current-branch Laragon/browser/runtime QA still pending |
 | Database / portability target proof | 10% | 45% | 4.5 | Source/harness strong; real multi-engine matrix evidence pending |
 | Release / operations / certification | 10% | 25% | 2.5 | Final reviewed locks, C1-C6 and release proof deferred |
-| **TOTAL PROJECT POWER** | **100%** |  | **76.3%** | **Held until N1.17 integrated verification completes** |
+| **TOTAL PROJECT POWER** | **100%** |  | **76.5%** | **Evidence-based weighted readiness** |
 
 ```text
-PROJECT POWER   76.3%  ███████████████░░░░░
-SOURCE POWER    98.5%  ████████████████████
+PROJECT POWER   76.5%  ███████████████░░░░░
+SOURCE POWER    99.0%  ████████████████████
 TARGET POWER    50.0%  ██████████░░░░░░░░░░
 RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
 ```
@@ -54,8 +52,8 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 
 | Dimension | Progress | State |
 |---|---:|---|
-| Platform source implementation | ~98.5% verified | N1.17 implementation + source gate present; integrated correction verification pending |
-| Source certification | 100% for last completed required gates | GREEN through N1.16; N1.17 latest run advanced through AI Platform before stale Multisite marker |
+| Platform source implementation | ~99.0% | Strong source closure through N1.17 |
+| Source certification | 100% for current required gates | GREEN through N1.17 |
 | Real functional verification | ~50% | PARTIAL |
 | DEV-5 SQL/services portability source | ~95% | SOURCE STRONG / TARGET PENDING |
 | Real DB matrix | ~0% current-branch certified engines | TARGET PENDING |
@@ -82,8 +80,8 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 | N1.14 Automation | 100% | 0% | SOURCE DONE; queue/webhook target pending |
 | N1.15 AI Platform | 100% | 0% | SOURCE DONE; real adapter/provider target evidence pending |
 | N1.16 Multisite / Organizations | 100% source | 0% | SOURCE DONE; real organization/browser/runtime execution pending |
-| N1.17 SSO / Enterprise Governance | 90% source / correction CI pending | 0% | **ACTIVE** — root fixes + acceptance + required product gate wired |
-| N1.18 Public APIs / Webhooks / SDK | foundation/partial | 0% | Planned |
+| N1.17 SSO / Enterprise Governance | 100% source | 0% | **SOURCE DONE** — real SSO adapter/SCIM/browser/impersonation target execution pending |
+| N1.18 Public APIs / Webhooks / SDK | foundation/partial | 0% | **NEXT SOURCE BLOCK** |
 | N1.19 Import / Export / WP migrations | planned | 0% | Planned |
 | N1.20 Observability | foundation/partial | 0% | Planned |
 | N1.21 Forge / Developer Experience | foundation | 0% | Planned |
@@ -96,60 +94,59 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 
 ---
 
-## 5. N1.16 Multisite / Organizations closure
+## 5. N1.17 SSO / Enterprise Governance closure
 
-N1.16 remains **SOURCE DONE, TARGET PENDING**. Final source evidence is ledger revision 2.3 head `b8b8641f92b5e1cfa0528afe5ff8f0c26f0e132d`, release-certification run `32505428674` GREEN. PR #1 is synchronized through N1.16 and stays draft. Issue #2 remains open because no real rc.93 target evidence changed.
+### SOURCE DONE implementation
 
----
+- Enforced SSO is now actual authentication policy: active ordinary members cannot bypass an enabled enforced provider using local passwords; Super Admin retains explicit break-glass local access.
+- Login UI exposes only enabled, registered, protocol-compatible SSO providers and communicates required/unavailable states.
+- SSO state is one-time, expiring and bound to organization + provider; callbacks re-check adapter/protocol, validate bounded HTTP(S) redirects and normalized email identity, require active user + active membership, rotate session and select the tenant.
+- Provider/adapter exceptions and arbitrary diagnostics remain behind generic Core failure messages.
+- Public SSO configuration recursively rejects secret-like keys; secret payload remains encrypted/hidden.
+- SCIM tokens require active tenant, canonical prefix, enabled/non-revoked/unexpired state; suspended tenants fail closed.
+- SCIM lifecycle is tenant-local: membership owns active/suspended state, foreign existing platform identities cannot be silently cross-attached, existing tenant roles are preserved, and owner/admin deactivation is blocked.
+- Invitations supersede stale pending tokens for the same tenant/email, require active user/tenant, preserve privileged existing roles, and select the accepted tenant in session.
+- Impersonation now rejects nested sessions, inactive/unauthorized actors and invalid targets; stop validates session record, current target and actor authority before restoration, otherwise fails closed.
+- Source Guard SSO/SCIM invariants are semantic rather than whitespace-format dependent.
+- Multisite progress governance contract is section-number independent.
 
-## 6. N1.17 SSO / Enterprise Governance — current source closure candidate
+### Regression/source verification
 
-### Root fixes implemented
-
-- Enforced SSO is now real policy, not metadata: active ordinary tenant members cannot bypass an enabled enforced provider with local passwords; Super Admin retains explicit break-glass access.
-- Login UI exposes only registered protocol-compatible enabled SSO choices and explains required/unavailable state.
-- SSO start/callback binds one-time state to organization + provider + expiry; rechecks adapter protocol; bounds redirect URLs; validates provider identity email; requires active user/membership; rotates session/selects tenant; adapter exceptions/messages are not trusted.
-- Public SSO configuration recursively rejects secret-like keys; secret payload remains encrypted and hidden.
-- SCIM tokens require active tenant + enabled/non-revoked/unexpired token state.
-- SCIM lifecycle is tenant-local: organization membership carries active/suspended state, existing platform identities cannot be cross-attached, privileged roles are preserved and owner/admin deactivation is blocked.
-- Invitations supersede stale pending tokens for the same tenant/email, validate active account/tenant, preserve owner/admin roles and select accepted tenant in session.
-- Impersonation rejects nested sessions, inactive/unauthorized actors and invalid targets; stop validates actor/target/current-session integrity and restores actor only while still authorized.
-
-### Acceptance / source gate
-
-- `tests/Feature/Enterprise/EnterpriseIdentityGovernanceTest.php` covers enforced password denial + break-glass, SSO state/protocol binding, public-config secret denial, SCIM tenant/token/identity/privilege lifecycle, invitation replay/role/session selection and nested impersonation denial.
+- `tests/Feature/Enterprise/EnterpriseIdentityGovernanceTest.php` covers SSO enforcement/break-glass, provider state/protocol binding, secret configuration denial, SCIM token/tenant/identity/privilege lifecycle, invitation replay/role/session semantics and nested impersonation denial.
 - `scripts/enterprise-governance-product-contract-verify.php` is required by Development Readiness and GitHub Actions.
-- Existing Source Guard was corrected from formatting-sensitive SSO/SCIM markers to whitespace-tolerant semantic matching without removing or weakening the security requirements.
-- Existing Multisite/Organizations contract was corrected so `Apply Log` governance is section-number independent; dashboard section renumbering no longer produces a false security/product failure.
+- Run `32508900897` on head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3` passed:
+  - Certification preflight;
+  - Source Guard;
+  - every previous product contract;
+  - Multisite / Organizations Product Contract;
+  - **SSO / Enterprise Governance Product Contract**;
+  - **Unified Source Certification**.
 
-### Integrated CI evidence so far
+### Target boundary
 
-- Run `32508054237`: Certification preflight PASS; failed at old Source Guard formatting markers.
-- Source Guard semantic correction commit: `6856de412a1f483892944b6c91b64e4969506236`.
-- Run `32508273140`: Certification preflight, Source Guard, runtime convergence and every product gate through AI Platform PASS; Multisite/Organizations failed only because it hard-coded `## 8. Apply Log` after the dashboard had evolved to `## 9. Apply Log`.
-- Multisite heading-drift correction commit: `255ed88beb9c2a324408c36eb417c9df244c96f6`.
-
-N1.17 remains **not SOURCE DONE** until one current-head run passes Multisite/Organizations, the new SSO / Enterprise Governance Product Contract and Unified Source Certification together with all prior required gates.
-
----
-
-## 7. Repository governance / main protection
-
-The requested GitHub `main` branch server-side protection is a repository setting, not a source-file claim. Desired enforcement is:
-
-- changes to `main` only through pull requests;
-- required successful source-certification status before merge;
-- stale approvals dismissed when new commits arrive;
-- conversation/review resolution before merge where supported;
-- force pushes disabled;
-- branch deletion disabled;
-- administrators included unless an explicit emergency bypass is configured.
-
-Current connected GitHub capability exposes repository/PR/CI writes but does **not** expose branch-protection/ruleset mutation. Therefore this dashboard must not claim server-side protection is active until GitHub returns direct settings evidence. Source-side contracts may complement this but cannot substitute for GitHub branch protection.
+N1.17 is **SOURCE DONE, TARGET PENDING**. Real SSO provider/adapters, enforced browser login, SCIM provisioning/revocation, invitation acceptance and governed impersonation still require current-branch target execution. No Target Power increase is inferred from source CI.
 
 ---
 
-## 8. Blocking target work
+## 6. Repository governance / main protection
+
+Direct GitHub branch metadata currently reports `main` as `protected=false`; source files cannot substitute for server-side protection.
+
+Requested target policy:
+
+- changes to `main` through pull requests only;
+- require the repository Source certification check before merge;
+- dismiss stale approvals after new commits;
+- require conversation/review resolution where supported;
+- block force pushes;
+- block branch deletion;
+- include administrators unless a deliberate emergency bypass is configured.
+
+The currently connected GitHub action surface can read the branch protection state and mutate repo content/PRs/CI, but it does not expose branch-protection or repository-ruleset mutation. Therefore server-side protection is **not yet claimed as applied**. This remains an external repository-governance action until an authorized branch/ruleset write capability is exposed.
+
+---
+
+## 7. Blocking target work
 
 Issue #2 remains OPEN. Required real rc.93 evidence is still:
 
@@ -174,7 +171,7 @@ Only real execution may increase Target Power.
 
 ---
 
-## 9. Progress update protocol — mandatory
+## 8. Progress update protocol — mandatory
 
 After **every meaningful apply**, update this file in the same pass or immediately after it. Required fields: current head/CI, active block/state, evidence-based Power values, per-block progress, newly discovered defects, completed fixes, blockers, exact next action and Apply Log entry.
 
@@ -189,7 +186,7 @@ After **every meaningful apply**, update this file in the same pass or immediate
 
 ---
 
-## 10. Apply Log
+## 9. Apply Log
 
 | Apply | Date | Head / evidence | What changed | Power impact |
 |---:|---|---|---|---|
@@ -201,27 +198,32 @@ After **every meaningful apply**, update this file in the same pass or immediate
 | 006 | 2026-08-21 | `39f991c3…`; pending | N1.17 SSO/SCIM/invitation root fixes | N1.17 10% -> 55%; verified Power held |
 | 007 | 2026-08-21 | `61027bbd…`; pending | N1.17 impersonation service authority/nesting/session integrity | N1.17 55% -> 65%; verified Power held |
 | 008 | 2026-08-21 | gate head `c316b7c86ec1db1d171d5ef0cd947338db96670f`; integrated CI pending | N1.17 executable acceptance source, dedicated Enterprise Governance contract, Development Readiness + Actions required wiring | N1.17 **65% -> 90% source candidate**; verified Power held |
-| 009 | 2026-08-21 | `6856de412a1f483892944b6c91b64e4969506236`; run `32508054237` exposed Source Guard marker drift | Migrated SSO/SCIM Source Guard checks from exact formatting markers to semantic whitespace-tolerant requirements; security contract remained fail-closed | N1.17 stays **90%**; Project/Source/Target Power unchanged pending full green |
-| 010 | 2026-08-21 | correction head `255ed88beb9c2a324408c36eb417c9df244c96f6`; run `32508273140` reached Multisite gate | Made mandatory Apply Log detection section-number independent after dashboard renumbering; prior gates through AI Platform already GREEN in this run | N1.17 stays **90%**; verified Power unchanged until Enterprise Governance + Unified source gates pass |
+| 009 | 2026-08-21 | `6856de412a1f483892944b6c91b64e4969506236`; run `32508054237` exposed Source Guard marker drift | Migrated SSO/SCIM Source Guard checks from exact formatting markers to semantic whitespace-tolerant requirements; security contract remained fail-closed | N1.17 stays **90%**; verified Power unchanged pending full green |
+| 010 | 2026-08-21 | `255ed88beb9c2a324408c36eb417c9df244c96f6`; run `32508273140` reached Multisite gate | Made mandatory Apply Log detection section-number independent after dashboard renumbering | N1.17 stays **90%**; verified Power unchanged |
+| 011 | 2026-08-21 | verified head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3`; CI `32508900897` GREEN | N1.17 integrated source closure passed all prior gates + Enterprise Governance contract + Unified Source Certification | N1.17 **90% -> 100% SOURCE DONE**; Source Power **98.5% -> 99.0%**; Project Power **76.3% -> 76.5%**; Target remains **50.0%** |
 
 ---
 
-## 11. Exact next action
+## 10. Exact next action
 
 ```text
-N1.17 APPLY-03 — VERIFY / CORRECT / CLOSE
-  1. inspect GitHub Actions for the current progress/correction head
-  2. require Certification preflight + all prior product contracts + Multisite/Organizations + SSO/Enterprise Governance + Unified Source Certification
-  3. if red, inspect exact failed step/log and patch root cause
-  4. update THIS FILE after every correction apply
-  5. after full green: mark N1.17 SOURCE DONE and recalculate Source/Project Power conservatively; Target stays 50% without real execution
-  6. sync canonical ledger revision 2.4 + append history
-  7. synchronize PR #1 through N1.17 but keep DRAFT
-  8. post issue #2 source-only checkpoint; keep OPEN
-  9. require final governance/progress-only CI GREEN before starting N1.18
+N1.17 GOVERNANCE SYNC
+  1. update NEXORA_AI_PROJECT_STATE.md to revision 2.4 and append N1.17 history
+  2. synchronize PR #1 title/body through N1.17; keep DRAFT
+  3. post issue #2 source-only checkpoint; keep OPEN without real rc.93 recovery evidence
+  4. require final governance/progress source CI GREEN
 
 MAIN BRANCH PROTECTION
-  - keep attempting a direct GitHub server-side ruleset/protection mutation only through an authorized capability
-  - never claim protection active from source files alone
-  - when direct mutation becomes available, require PR + Source certification, dismiss stale approvals, block force push/delete and apply to admins
+  - direct evidence currently says main protected=false
+  - apply GitHub server-side ruleset/protection only through an authorized settings mutation capability
+  - desired rule: PR required + Source certification required + stale-review dismissal + review resolution + no force push/delete + admin enforcement
+  - do not substitute a source workflow for actual branch protection
+
+THEN N1.18 PUBLIC APIS / WEBHOOKS / SDK
+  1. audit API authentication/token scopes, tenant binding, pagination/rate limits and versioning
+  2. audit public webhook/API replay/idempotency and secret lifecycle
+  3. audit SDK/public contracts and extension capability boundaries
+  4. implement smallest fail-closed fixes
+  5. add acceptance + product contract
+  6. update THIS FILE after every apply
 ```
