@@ -8,7 +8,9 @@ use App\Http\Controllers\Controller;
 use App\Models\CommerceCurrency;
 use App\Models\CommercePrice;
 use App\Models\CommerceProduct;
+use App\Models\EnterpriseOrganization;
 use App\Nexora\Commerce\Services\CurrencyManager;
+use App\Nexora\Enterprise\Services\TenantContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +19,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use InvalidArgumentException;
+use RuntimeException;
 
 final class ProductController extends Controller
 {
@@ -52,10 +55,11 @@ final class ProductController extends Controller
 
     public function store(Request $request, CurrencyManager $currencies): RedirectResponse
     {
+        $tenantId = $this->tenantId();
         $data = $request->validate([
             'name' => ['required', 'string', 'max:200'],
-            'sku' => ['nullable', 'string', 'max:120', 'unique:nx_commerce_products,sku'],
-            'slug' => ['nullable', 'string', 'max:220', 'unique:nx_commerce_products,slug'],
+            'sku' => ['nullable', 'string', 'max:120', Rule::unique('nx_commerce_products', 'sku')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
+            'slug' => ['nullable', 'string', 'max:220', Rule::unique('nx_commerce_products', 'slug')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
             'type' => ['required', Rule::in(['product', 'service', 'digital'])],
             'status' => ['required', Rule::in(['draft', 'active', 'archived'])],
             'description' => ['nullable', 'string', 'max:10000'],
@@ -130,5 +134,17 @@ final class ProductController extends Controller
         ]);
 
         return back()->with('success', 'Product status updated.');
+    }
+
+    private function tenantId(): string
+    {
+        $tenantId = app(TenantContext::class)->id()
+            ?? EnterpriseOrganization::query()->where('is_default', true)->value('id');
+
+        if (! is_string($tenantId) || $tenantId === '') {
+            throw new RuntimeException('Commerce catalog requires an active organization context.');
+        }
+
+        return $tenantId;
     }
 }
