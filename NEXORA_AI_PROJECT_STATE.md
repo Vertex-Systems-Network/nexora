@@ -10,7 +10,7 @@
 ## 0. Ledger metadata
 
 - Ledger schema: `1`
-- Ledger revision: `1.6`
+- Ledger revision: `1.7`
 - Project: `Nexora`
 - Product class: advanced extensible web platform / CMS / site builder / application ecosystem
 - Current development source release: `1.0.0-rc.94`
@@ -20,9 +20,9 @@
 - GitHub canonical repository: `Vertex-Systems-Network/nexora`
 - GitHub default branch: `main`
 - Active development branch: `dev/n1-0b-core-functional-qa`
-- Active GitHub pull request: `#1` — draft, mergeable; keep draft until real-target evidence is available
-- Current branch head before this ledger-only commit: `bfee0fce659c4471bd7a98065b4b48a7fb31682a`
-- Latest complete green source-certification run: `32431449676`
+- Active GitHub pull request: `#1` — draft, mergeable; title now `DEV-4/DEV-5: product QA, data workflows and database portability closure`
+- Current branch head before this ledger-only commit: `ebbcc22e912749f92fae68e8e7e8d8faed5762a1`
+- Latest complete green source-certification run: `32456834492`
 - Open GitHub issues at this checkpoint: `#2 Nexora runtime identity mismatch`
 - Current target environment: Windows + Laragon (real-target development test environment)
 - Current target path: `D:\laragon\www\nexora`
@@ -74,6 +74,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 13. **Ledger/history updates must not mutate deployed source identity.**
 14. **GitHub is the canonical source-control workflow.** Meaningful source changes go through a development branch/PR; do not push unverified runtime changes directly to `main`.
 15. **GitHub issues are an execution input, not a separate backlog.** At the start and end of every meaningful pass, inspect open repository issues. Fix applicable source defects alongside roadmap work, add regression protection, and do not close runtime/environment issues until the required real-target evidence exists.
+16. **Disposable DB verification is mandatory for cross-engine claims.** Source contracts prove source alignment only; a database engine becomes TARGET VERIFIED only after the guarded real target matrix passes on that engine.
 
 ---
 
@@ -92,6 +93,9 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | Plugin / Extension Engine | Lifecycle/capabilities/migrations | Product workflow SOURCE DONE; target execution pending |
 | Studio | Visual page/site builder | First create/edit/publish/public-render workflow SOURCE DONE; target execution pending; advanced builder features remain |
 | Media / DAM | Upload/inspect/variants/folders/collections/reuse | Foundation + reusable picker SOURCE DONE; target execution pending |
+| Forms / Data / Workflows | Tenant forms, public submissions, Automation bridge | SOURCE DONE for current product workflow; target execution pending |
+| Data Connections | Auxiliary Mongo/Redis/AWS data-service handles | Product/security + DEV-5 portability source closure green; live connector target tests pending |
+| Primary SQL Portability | MySQL/MariaDB/PostgreSQL/SQLite/SQL Server + managed aliases | Source/harness closure green; real engine matrix evidence pending |
 | Forge / SDK | Developer extension tooling | Foundation/planned expansion |
 | Sentinel | Theme/plugin trust/security | Foundation implemented; 2.0 later |
 | Marketplace | Themes/apps distribution | Foundation/planned expansion |
@@ -99,7 +103,7 @@ Vertical products such as Books, CV/Profile, LMS, Booking, Projects and future v
 | CRM / Membership / Helpdesk | Business/customer capabilities | Foundation/roadmap |
 | Multisite / Organizations / SSO | Enterprise tenancy/governance | Foundation exists; broad product/target closure remains |
 | Cloud / HA Runtime | Distributed workers/storage/deployments | Later roadmap |
-| Installer / Deployment / Recovery | Zero-state install/update/recovery/runtime handoff | rc.94 source stabilization closed; live rc.93 recovery evidence pending |
+| Installer / Deployment / Recovery | Zero-state install/update/recovery/runtime handoff | rc.94 source stabilization + DB UX closure green; live rc.93 recovery evidence pending |
 
 ---
 
@@ -125,7 +129,7 @@ Never report a feature as simply “100% complete” when only source/static ver
 - Generation: `n1-v5.29`
 - Active branch: `dev/n1-0b-core-functional-qa`
 - PR `#1` is draft and mergeable.
-- Latest green CI run `32431449676` passed:
+- Latest green CI run `32456834492` passed:
   - Certification preflight
   - Source Guard
   - Post-install runtime convergence contract
@@ -137,7 +141,12 @@ Never report a feature as simply “100% complete” when only source/static ver
   - Content collection product source contract
   - Publishing + SEO product source contract
   - Admin UX product source contract
+  - Forms + Data + Workflows product source contract
+  - Data Connections product source contract
+  - Primary SQL portability source contract
+  - Installer database UX source contract
   - Unified source certification
+- Source/static gates are green through DEV-5 portability hardening.
 - `composer.lock` and `package-lock.json` are not committed; deterministic dependency/release certification remains deferred.
 
 ### 5.2 Open GitHub issue status
@@ -196,6 +205,24 @@ Do not overwrite installed rc.93 with rc.94 merely to repair this state.
 ### 5.4 Dependency review state
 
 Runtime dependencies match the live installed lock state, but formal reviewed-lock attestation is missing. This is not the current usability blocker and remains final N1.0/C1-C6 certification work.
+
+### 5.5 DEV-5 target-evidence state
+
+The real target matrix harness now exists, but no cross-engine result is allowed to be inferred from source CI.
+
+Canonical runner:
+
+```text
+scripts/database-target-matrix.php
+```
+
+Durable secret-free evidence path when `--evidence` is used:
+
+```text
+storage/app/nexora/qa/database-target-matrix.json
+```
+
+No MySQL/MariaDB/PostgreSQL/SQL Server or managed AWS engine is TARGET VERIFIED from the current source-only CI. SQLite also requires an actual target run of the runner before this new matrix gate can call it target-verified for the current branch generation.
 
 ---
 
@@ -295,12 +322,13 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 - Public document renderer resolves canonical Media assets and ignores trashed/non-image invalid selections.
 - Generic tenant-native Content Collections added without mutating the historical enterprise backfill migration.
 - Collections support name/slug/status/document type, typed custom field schema, document membership, per-entry values, position, non-destructive detach/delete, audit and permission boundaries.
-- Database source guard now distinguishes historical tenant-manifest roots from forward tenant-native models while preserving the original 51-table backfill invariant.
+- Database source guard distinguishes historical tenant-manifest roots from forward tenant-native models while preserving the original 51-table historical backfill metric.
+- Current tenant-aware model/table discovery is dynamic; Data Connections raised the current tenant root set without falsifying historical migration semantics.
 - `scripts/document-product-contract-verify.php` and `scripts/collection-product-contract-verify.php` run in CI/development readiness.
 
 ### Publishing + SEO end-to-end source closure
 
-- Publishing Article Settings no longer preload a fixed 250-image list; shared searchable MediaPicker selects canonical hero assets.
+- Publishing Article Settings no longer preload a fixed 250-image dropdown; shared searchable MediaPicker selects canonical hero assets.
 - Hero assets are tenant-safe, image-only, public and non-trashed; optional external hero URL remains a fallback.
 - SEO social metadata can persist canonical Media Library image IDs with usage tracking and an external URL fallback.
 - Public SEO manager resolves canonical social title/description/image/type/Twitter card.
@@ -312,7 +340,7 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 
 ### Application-wide Admin UX source closure pass
 
-- Existing browser UX analyzer already guards shared component usage, raw-control bans, logical RTL, focus-visible, modal focus, DataTable semantics, command palette semantics, reduced-motion and browser evidence structure.
+- Existing browser UX analyzer guards shared component usage, raw-control bans, logical RTL, focus-visible, modal focus, DataTable semantics, command palette semantics, reduced-motion and browser evidence structure.
 - OrganizationSwitcher and LanguageSwitcher are reusable across responsive surfaces rather than desktop-only wrappers.
 - Mobile navigation exposes tenant/organization switching and language switching; desktop header retains responsive selectors.
 - Language flag images use lazy/async loading.
@@ -321,6 +349,58 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 - Route progress tracks/cleans both delayed-show and delayed-hide timers to avoid stale post-navigation updates.
 - `scripts/admin-ux-product-contract-verify.php` composes these product invariants with the existing browser UX analyzer and runs in CI/development readiness.
 
+### Forms + Data + Workflows source closure
+
+- Tenant-native `nx_forms` and `nx_form_submissions` plus tenant-local form slugs and form permissions are source-gated.
+- Controlled form schema allows text/email/textarea/number/select/checkbox/date with a 50-field budget and stable payload keys.
+- Public submission validation is derived from saved schema and stores validated values only.
+- Submission metadata is privacy-minimal; raw IP/user-agent persistence is explicitly rejected by the contract.
+- `form.submitted` bridges into Automation using a stable submission idempotency key and queued workflow execution.
+- Public routes are fail-closed by lifecycle status, CSRF-protected, honeypot-protected and throttled.
+- Initial lifecycle is non-destructive: draft/active/paused/archived rather than delete-first behavior.
+- Forms Admin surfaces consume shared Nexora Admin UI.
+- `scripts/forms-workflow-product-contract-verify.php` is wired into CI/development readiness and is green in run `32456834492`.
+
+### Data Connections product + auxiliary portability source closure
+
+- `nx_data_connections` is enterprise-tenant-owned and uses encrypted secret payloads; browser payloads expose secret presence only, not decrypted secret values.
+- Plaintext credentials embedded in endpoints are rejected; legacy unsafe credentials are quarantined/disabled by migration logic.
+- Connectivity changes force disablement and invalidate stale health tests; enabled connections cannot be deleted.
+- Connection names and records are tenant scoped.
+- Connector catalog covers MongoDB, MongoDB Atlas, Redis, DocumentDB, ElastiCache Redis and DynamoDB.
+- Connector capabilities are explicit: endpoint/database/user-password/region/AWS-key-pair requirements are driver-aware.
+- DynamoDB is endpoint-optional, region-aware and supports the runtime IAM chain when static access/secret keys are both blank; partial static key pairs fail closed.
+- ElastiCache default example is TLS-first; Redis `rediss://`/`tls://` normalizes to TLS for both PhpRedis and Predis, while unsupported URL schemes are rejected.
+- DocumentDB example carries TLS/replica/read-preference/retry policy rather than a misleading bare endpoint.
+- Feature coverage proves Dynamo endpoint-optional storage, paired-key validation and non-Dynamo endpoint requirements.
+- Unit portability coverage proves Dynamo partial-key rejection and Redis TCP/TLS parser behavior.
+- `scripts/data-connection-product-contract-verify.php` guards all of the above and is green in run `32456834492`.
+
+### DEV-5 Primary SQL portability + installer DB UX source closure
+
+- Primary/managed SQL registry covers MySQL, MariaDB, PostgreSQL, SQLite, SQL Server, RDS MySQL/MariaDB/PostgreSQL/SQL Server and Aurora MySQL/PostgreSQL.
+- Managed aliases map to compatible Laravel/PDO drivers while preserving provider policy; managed database creation remains disabled.
+- Version policy, Laravel connection configuration, installer environment generation and backup policy are unit-covered without requiring network access.
+- Migration source analyzer rejects known non-portable constructs such as column placement, enum/set, full-text/spatial, generated columns and raw DB statements; portable nullable-unique handling is accounted for.
+- `DatabaseRoundTripCompatibilityTest` dynamically discovers tenant-aware model tables instead of freezing the historical 51-root count; Forms, Collections and Data Connections are explicitly covered.
+- Installer database selector carries registry metadata; SQLite disables network inputs; managed services disable create; driver switches clear the previous password and use driver defaults without blindly overwriting deliberate user values.
+- A successful DB test is invalidated by subsequent driver/host/port/database/username/password/create changes; Continue/Install requires a fresh test.
+- `scripts/primary-sql-portability-contract-verify.php` and `scripts/installer-database-ux-contract-verify.php` are CI/development-readiness gates and are green in run `32456834492`.
+
+### DEV-5 guarded real database target matrix
+
+- `scripts/database-target-matrix.php` is the canonical real-engine compatibility runner.
+- Only disposable `nexora_matrix_*` network databases and `nexora_matrix_*.sqlite` basenames are accepted.
+- Non-empty databases are refused before test mutation.
+- The runner never rewrites `.env` and never drops database containers.
+- It executes `DatabaseRoundTripCompatibilityTest` through target PHPUnit and cleans matrix-created objects afterward.
+- Managed aliases reuse registry create policy and therefore require a pre-created empty matrix database.
+- `--list` exposes available engines and required environment prefixes.
+- `--evidence` writes `storage/app/nexora/qa/database-target-matrix.json` using an explicit secret-free allow-list.
+- Evidence schema `2` records platform/source/PHP identity, selected drivers, server versions, pre-test object counts, PHPUnit exit codes and cleanup state; host/user/password/verbose diagnostics are excluded.
+- `docs/DEV5_DATABASE_TARGET_MATRIX.md` is the operator runbook for native and managed engines.
+- The target matrix itself is source-gated by the Primary SQL Portability contract.
+
 ---
 
 ## 7. Current progress dashboard
@@ -328,7 +408,7 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 ### Platform implementation
 
 ```text
-███████████████████░  ~92%
+███████████████████░  ~95%
 ```
 
 ### Real functional verification
@@ -337,16 +417,16 @@ Runtime dependencies match the live installed lock state, but formal reviewed-lo
 ██████████░░░░░░░░░░  ~50%
 ```
 
-Real verification intentionally did not rise with source-only Documents/Collections/Publishing/SEO/Admin UX work.
+Source implementation increased; real verification intentionally did not rise because the new DEV-4/DEV-5 work has not yet been executed across the required real targets.
 
 | Phase | Progress | Status |
 |---|---:|---|
 | DEV-0 Package/bootstrap | 90% | PARTIAL — final dependency certification deferred |
 | DEV-1 Installer | 100% source | SOURCE DONE — clean live rc.94 install confirmation still required |
 | DEV-2A Historical TypeScript remediation | 100% | SOURCE DONE |
-| DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for the reported Laragon build |
+| DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for the previously reported Laragon build |
 | DEV-3 Laravel/install runtime | 80% source / 75% live | PARTIAL — source convergence gate green; live rc.93 repair evidence pending |
-| DEV-4 Login/admin/core functional QA | 90% source / 30% live | PARTIAL — major product workflows source-gated; broad target QA pending |
+| DEV-4 Login/admin/core functional QA | 95% source / 30% live | PARTIAL — major product workflows source-gated; broad target QA pending |
 | DEV-4A Site settings + media reuse | 100% source / target pending | SOURCE DONE |
 | DEV-4B Theme workflow | 100% source contract / target pending | SOURCE DONE |
 | DEV-4C Extension workflow | 100% source contract / target pending | SOURCE DONE |
@@ -354,7 +434,9 @@ Real verification intentionally did not rise with source-only Documents/Collecti
 | DEV-4E Documents + Collections | 100% source contract / target pending | SOURCE DONE |
 | DEV-4F Publishing + SEO | 100% source contract / target pending | SOURCE DONE |
 | DEV-4G Admin UX source pass | 100% source contract / target pending | SOURCE DONE for current pass |
-| DEV-5 DB/services portability | 60% | PARTIAL |
+| DEV-4H Forms + Data + Workflows | 100% source contract / target pending | SOURCE DONE |
+| DEV-4I Data Connections product | 100% source contract / target pending | SOURCE DONE |
+| DEV-5 DB/services portability | ~95% source / real matrix pending | PARTIAL — source/harness green, TARGET VERIFIED evidence pending |
 | DEV-6 Final C1-C6/release certification | 10% | DEFERRED CERTIFICATION |
 
 ---
@@ -405,20 +487,27 @@ Use a separate development checkout of `dev/n1-0b-core-functional-qa`, then run:
 scripts\development-readiness.bat --full
 php artisan test
 npm run build
+php scripts\database-target-matrix.php --list
+php scripts\database-target-matrix.php --drivers=sqlite,mysql,mariadb,pgsql,sqlsrv --evidence
 ```
 
-At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing and SEO workflows plus responsive Admin navigation on the real target.
+For network engines, configure only disposable databases whose names start with `nexora_matrix_` as documented in `docs/DEV5_DATABASE_TARGET_MATRIX.md`.
 
-Do not report current source closures as TARGET VERIFIED until these execute successfully in the real target environment.
+At minimum explicitly exercise Settings, Media, Theme, Extensions, Studio, Documents, Collections, Publishing, SEO, Forms, Data Workflows, Data Connections and responsive Admin navigation on the real target.
 
-### Next source implementation order
+For auxiliary connectors, execute real connection tests only where the appropriate adapter/service is available; record connector-specific target evidence separately from primary SQL matrix evidence.
+
+Do not report current source closures or an engine as TARGET VERIFIED until the corresponding real target execution passes.
+
+### Remaining source/target sequence
 
 ```text
-Continue application-wide Admin/product workflow review
-  -> Forms / Data / Workflows closure
-  -> DEV-5 DB/services portability closure
-  -> target functional QA evidence
-  -> final DEV-6 C1-C6/release certification
+Live rc.93 runtime recovery evidence
+  -> separate dev checkout full PHPUnit/build/product browser QA
+  -> real SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix evidence
+  -> optional managed AWS/auxiliary connector target evidence where services exist
+  -> close remaining DEV-5 target gaps
+  -> final DEV-6 reviewed locks + C1-C6/release certification
 ```
 
 During every block, inspect GitHub open issues first and again before final handoff.
@@ -481,6 +570,7 @@ N2.0   Stable Production
 5. Never mark target PASS from static checks alone.
 6. Use development branch + PR for meaningful source changes.
 7. Do not close runtime/environment GitHub issues from source CI alone.
+8. For DB portability, never point the target matrix at customer/staging/production/shared data; use the guarded disposable naming contract only.
 
 ### After work
 
@@ -689,6 +779,46 @@ Use `No release` when no rc release was produced.
 - Remaining blocker: live rc.93 issue #2 and broad target functional QA.
 - Next exact action: safe rc.93 recovery -> compatibility/post-install PASS -> login/admin; continue Forms/Data/Workflows + DEV-5 source review in parallel.
 
+### 2026-08-21 — No release — Forms + Data + Workflows source closure
+
+- Trigger / observed blocker: Nexora needed a complete first forms/data workflow rather than isolated form/schema primitives.
+- Root cause: public submission semantics, privacy-minimal storage, Automation bridging, tenant permissions and non-destructive lifecycle needed one enforceable product contract.
+- Changes applied: tenant form/submission schema and models, controlled form definition validator, schema-derived public validation/storage, CSRF/honeypot/throttle/status gates, `form.submitted` Automation bridge, Admin workflow and acceptance contract.
+- Verification completed: Forms + Data + Workflows product source gate PASS in latest full source run `32456834492`.
+- Real-target evidence: no new Laragon execution for this workflow; SOURCE DONE only.
+- Remaining blocker: target functional execution.
+- Next exact action: include Forms/Data/Workflows in the separate dev-checkout PHPUnit/browser QA pass.
+
+### 2026-08-21 — No release — Data Connections tenancy/product source closure
+
+- Trigger / observed blocker: auxiliary data-service records required enterprise tenant ownership, encrypted credential handling, safe rotation and reusable runtime testers.
+- Root cause: the original global connection shape and historical tenant manifest assumptions were insufficient for a multi-organization product workflow.
+- Changes applied: tenant-scoped `nx_data_connections`, migration/backfill/quarantine rules, encrypted secrets, non-disclosing Admin payload, fresh-health requirements, test/enable/remove lifecycle, dynamic tenant-root round-trip coverage and dedicated product gate.
+- Verification completed: Data Connections product gate PASS; historical 51-root migration metric remains frozen while current tenant-aware model discovery validates the expanded set.
+- Real-target evidence: no external connector target execution yet.
+- Remaining blocker: connector-specific target evidence + broad target QA.
+- Next exact action: continue DEV-5 connector and primary SQL portability review.
+
+### 2026-08-21 — No release — Primary SQL portability and installer database UX source closure
+
+- Trigger / observed blocker: supported SQL labels existed, but DEV-5 needed enforceable native/managed driver mapping, version/config/backup/migration coverage and installer state correctness.
+- Root cause: managed aliases had incomplete test coverage; runtime tenant test had a stale historical count; installer could preserve a successful DB test after configuration changes or carry stale defaults between drivers.
+- Changes applied: complete registry/version/provisioner unit matrix, dynamic tenant compatibility coverage, Primary SQL source gate, registry-driven installer DB defaults/policy and mandatory re-test invalidation; managed create remains disabled.
+- Verification completed: GitHub Actions run `32435144381` first closed the installer DB UX gate; latest run `32456834492` reconfirmed Primary SQL + Installer Database UX + Unified Source Certification PASS.
+- Real-target evidence: no new cross-engine real matrix run yet.
+- Remaining blocker: real disposable engine execution.
+- Next exact action: run the guarded target matrix on the separate dev checkout.
+
+### 2026-08-21 — No release — Guarded real DB matrix + auxiliary connector portability hardening
+
+- Trigger / observed blocker: DEV-5 had source portability checks but no safe reproducible way to prove each real engine; auxiliary connector audit also found Dynamo endpoint validation and Redis TLS behavior inconsistent with their actual deployment models.
+- Root cause: no disposable multi-engine runner/evidence artifact; Admin treated every auxiliary service as endpoint/user-password shaped; PhpRedis path did not explicitly preserve TLS transport from `rediss://`.
+- Changes applied: `scripts/database-target-matrix.php` with strict `nexora_matrix_*` empty-database safety, real round-trip test/cleanup, no `.env` rewrite/no DB-container drop; secret-free schema-2 `--evidence`; operator runbook; Dynamo driver-aware endpoint/region/IAM/static-key rules; Redis TLS normalization across PhpRedis/Predis; feature/unit regression coverage; contracts strengthened.
+- Verification completed: GitHub Actions run `32456834492` FULL SUCCESS — all product/runtime/DEV-5 source gates and Unified Source Certification PASS.
+- Real-target evidence: source/harness only; no current-branch real SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix artifact has been supplied yet.
+- Remaining blocker: live rc.93 recovery + separate dev-checkout product/runtime QA + real DB matrix evidence.
+- Next exact action: obtain those target results before claiming DEV-5 TARGET VERIFIED or moving PR #1 out of draft.
+
 ---
 
 ## 13. Known deferred work / not the current blocker
@@ -697,12 +827,14 @@ Use `No release` when no rc release was produced.
 - C1-C6 final certification
 - release signing/provenance finalization
 - broad cross-platform matrix
-- full cross-database live matrix
+- real cross-database target matrix execution/evidence
+- managed AWS SQL target verification where test services are available
+- auxiliary Mongo/Redis/AWS connector target verification where adapters/services are available
 - HA/distributed runtime
 - final performance/accessibility certification
 - Marketplace 2.0 / Sentinel 2.0 / Commerce 2.0
 
-Do not let these pull work away from: **live runtime convergence -> login/admin target QA -> current product workflow target tests -> Forms/Data/Workflows + DB/services portability closure**.
+Do not let these pull work away from: **live runtime convergence -> login/admin target QA -> current product workflow target tests -> guarded DB target matrix -> final DEV-6 certification**.
 
 ---
 
@@ -715,18 +847,20 @@ GITHUB: Vertex-Systems-Network/nexora
 DEV SOURCE: rc.94 / v5.29 / n1-v5.29
 DEV BRANCH: dev/n1-0b-core-functional-qa
 PR: #1 DRAFT + MERGEABLE; MARK READY ONLY AFTER REQUIRED TARGET EVIDENCE
-BRANCH HEAD BEFORE LEDGER COMMIT: bfee0fce659c4471bd7a98065b4b48a7fb31682a
-LATEST GREEN CI: 32431449676
+BRANCH HEAD BEFORE LEDGER COMMIT: ebbcc22e912749f92fae68e8e7e8d8faed5762a1
+LATEST GREEN CI: 32456834492
 OPEN ISSUE: #2 runtime identity mismatch
 LIVE TARGET: rc.93 installed on Laragon
 LIVE BLOCKER: post-install environment/activation/service/process fingerprints stale
 SOURCE/DEPLOYMENT/DB ON LIVE EVIDENCE: matching
 DEPENDENCY RUNTIME: matching
 LOCK REVIEW: missing, deferred
-SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + current Admin UX pass
+SOURCE DONE NOW: runtime convergence regression + settings + reusable Media + Theme + Extension + Studio + Documents + Content Collections + Publishing/SEO + Admin UX + Forms/Data/Workflows + Data Connections + Primary SQL portability + Installer DB UX + guarded real-DB matrix harness
+DEV-5: ~95% SOURCE; real engine TARGET VERIFIED evidence pending
+DB MATRIX: scripts/database-target-matrix.php; use only empty nexora_matrix_* targets; --evidence -> storage/app/nexora/qa/database-target-matrix.json
 NEXT LIVE: safe rc.93 repair -> compatibility PASS -> post-install PASS -> /login -> /admin -> issue #2 close only after evidence
-NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + explicit major product workflow browser QA on separate dev checkout
-NEXT SOURCE: continue Admin/product workflow review -> Forms/Data/Workflows -> DEV-5 DB/services portability
+NEXT TARGET TESTS: development-readiness --full + full PHPUnit/build + major product browser QA + real DB target matrix on separate dev checkout
+NEXT SOURCE/TARGET: close any defects exposed by target QA/matrix; then DEV-6 reviewed locks/C1-C6
 ISSUE RULE: inspect open GitHub issues every pass and solve applicable defects alongside roadmap work
-DO NOT: overwrite installed rc.93 with rc.94 as repair; do not mark PR #1 Ready or return to C1-C6 before target usability evidence
+DO NOT: overwrite installed rc.93 with rc.94 as repair; do not mark PR #1 Ready or claim DB TARGET VERIFIED from source CI alone
 ```
