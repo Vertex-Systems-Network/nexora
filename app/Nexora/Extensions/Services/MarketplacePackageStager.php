@@ -10,6 +10,7 @@ use App\Models\SupplyChainArtifact;
 use App\Models\TrustedPublisher;
 use App\Models\User;
 use App\Nexora\Automation\Services\WebhookUrlPolicy;
+use App\Nexora\Enterprise\Services\TenantAuthorizationService;
 use App\Nexora\Foundation\Network\ApprovedHttpClient;
 use App\Nexora\Foundation\Transfers\TransferSafety;
 use App\Nexora\Security\Sentinel\Support\QuarantineManager;
@@ -25,6 +26,7 @@ final readonly class MarketplacePackageStager
         private ScanRecorder $scanner,
         private TransferSafety $transfers,
         private ApprovedHttpClient $http,
+        private TenantAuthorizationService $tenantAuthorization,
     ) {
     }
 
@@ -38,7 +40,10 @@ final readonly class MarketplacePackageStager
         if (! $item->source->isActive()) {
             throw new RuntimeException('Marketplace source is paused. Resume and synchronize it before staging packages.');
         }
-        if ($item->source->last_synced_at === null || $item->synced_at === null || $item->synced_at->lt($item->source->last_synced_at->copy()->subSecond())) {
+
+        $sourceGeneration = trim((string) $item->source->catalog_generation);
+        $itemGeneration = trim((string) $item->sync_generation);
+        if ($sourceGeneration === '' || $itemGeneration === '' || ! hash_equals($sourceGeneration, $itemGeneration)) {
             throw new RuntimeException('Marketplace package metadata is stale. Synchronize the source before staging this package.');
         }
 
@@ -121,7 +126,9 @@ final readonly class MarketplacePackageStager
 
         $user = User::query()->find($userId);
         $requiredPermission = $item->type === 'theme' ? 'themes.install' : 'extensions.install';
-        if (! $user || ! $user->hasPermission($requiredPermission)) {
+        if (! $user
+            || ! $user->hasPermission($requiredPermission)
+            || ! $this->tenantAuthorization->allows($user, $requiredPermission)) {
             throw new AuthorizationException('You do not have permission to stage this Marketplace package type.');
         }
     }
