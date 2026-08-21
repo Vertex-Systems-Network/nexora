@@ -9,20 +9,26 @@ use App\Models\SecurityScan;
 use App\Models\Theme;
 use App\Models\ThemeVersion;
 use App\Nexora\Foundation\Filesystem\PortablePath;
-use App\Nexora\Foundation\Transfers\TransferSafety;
 use App\Nexora\Foundation\Runtime\VersionConstraintMatcher;
+use App\Nexora\Foundation\Transfers\TransferSafety;
+use App\Nexora\Security\Sentinel\Support\SentinelApprovalGuard;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use ZipArchive;
 
 final readonly class ThemePackageInstaller
 {
-    public function __construct(private ThemeManifestValidator $validator, private VersionConstraintMatcher $versions, private TransferSafety $transfers)
-    {
+    public function __construct(
+        private ThemeManifestValidator $validator,
+        private VersionConstraintMatcher $versions,
+        private TransferSafety $transfers,
+        private SentinelApprovalGuard $approval,
+    ) {
     }
 
     public function install(QuarantinePackage $package, SecurityScan $scan, ?int $userId): ThemeVersion
     {
+        $this->approval->assertCurrent($package, $scan);
         if ($scan->quarantine_package_id !== $package->id || $scan->decision !== 'allow' || $scan->status !== 'completed') {
             throw new \RuntimeException('Only a completed Sentinel ALLOW decision can enter the Theme Engine.');
         }
