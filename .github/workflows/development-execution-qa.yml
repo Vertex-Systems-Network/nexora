@@ -1,8 +1,8 @@
 name: Nexora development execution QA
 
 # Real development-checkout execution evidence. This is intentionally separate from source certification
-# and from the installed rc.93 Laragon recovery target. The workflow never creates/drops/retargets databases
-# and never upgrades the live recovery installation.
+# and from the installed rc.93 Laragon recovery target. The workflow never creates/drops/retargets live
+# databases and never upgrades the recovery installation.
 on:
   pull_request:
     branches: [main]
@@ -22,11 +22,21 @@ concurrency:
 jobs:
   development-execution-qa:
     name: Development execution QA
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 90
-    defaults:
-      run:
-        shell: cmd
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nexora_testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - name: Checkout exact development source
         uses: actions/checkout@v5
@@ -35,11 +45,25 @@ jobs:
           fetch-depth: 1
           clean: true
 
-      - name: Report selected self-hosted runner
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: fileinfo, mbstring, openssl, pdo, pdo_mysql, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Report GitHub-hosted runner
         run: |
-          echo Runner name: %RUNNER_NAME%
-          echo Runner OS: %RUNNER_OS%
-          echo Runner architecture: %RUNNER_ARCH%
+          echo "Runner name: $RUNNER_NAME"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Runner architecture: $RUNNER_ARCH"
 
       - name: Verify development toolchain
         run: |
@@ -48,11 +72,17 @@ jobs:
           composer --version
           npm --version
 
+      - name: Prepare Laravel environment
+        run: cp .env.example .env
+
       - name: Install backend development dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Generate application key
+        run: php artisan key:generate --force
+
       - name: Install frontend development dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Execute full development QA and write evidence
         run: php scripts/development-readiness.php --full --tests --evidence
