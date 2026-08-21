@@ -490,19 +490,38 @@ final class HaReadinessService
     private function schedulerLeaderCheck(array &$checks): void
     {
         $leaseOk = false;
-        if (Schema::hasTable('nx_runtime_leases')) {
+        $detail = 'no active scheduler leader lease';
+
+        if (! Schema::hasTable('nx_runtime_leases')) {
+            $detail = 'runtime lease table unavailable';
+        } elseif (! Schema::hasTable('nx_runtime_nodes')) {
+            $detail = 'runtime node table unavailable';
+        } else {
+            $now = $this->hostClock->databaseNow();
             $lease = RuntimeLease::query()->where('name', 'scheduler-leader')->first();
-            $leaseOk = $lease !== null
+            if ($lease !== null
                 && $lease->owner_node_key !== null
                 && $lease->expires_at !== null
-                && $lease->expires_at->gt($this->hostClock->databaseNow());
+                && $lease->expires_at->gt($now)) {
+                $freshSeconds = max(30, (int) config('nexora-ha.fresh_node_seconds', 180));
+                $ownerIsFresh = RuntimeNode::query()
+                    ->where('node_key', $lease->owner_node_key)
+                    ->where('status', 'active')
+                    ->where('last_heartbeat_at', '>=', $now->copy()->subSeconds($freshSeconds))
+                    ->exists();
+
+                $leaseOk = $ownerIsFresh;
+                $detail = $ownerIsFresh
+                    ? 'active scheduler lease owned by a fresh active node'
+                    : 'scheduler lease owner is missing, stale, or inactive';
+            }
         }
 
         $this->add(
             $checks,
             'scheduler_leader',
             $leaseOk,
-            $leaseOk ? 'active scheduler lease found' : 'no active scheduler leader lease',
+            $detail,
         );
     }
 
@@ -535,7 +554,7 @@ final class HaReadinessService
     {
         $metadata = is_array($node->metadata) ? $node->metadata : [];
 
-        return strtolower(trim((string) ($metadata[$key] ?? '')));
+        return strtolower(trim((string) ($metadata[$key] ?? ''));
     }
 
     /** @param array<int,array{name:string,status:string,detail:string}> $checks */
