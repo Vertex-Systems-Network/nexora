@@ -112,5 +112,8 @@ jobs:
       - name: SSO / Enterprise Governance product source contract
         run: php scripts/enterprise-governance-product-contract-verify.php
 
+      - name: Public API / SDK product source contract
+        run: php scripts/public-api-sdk-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
