@@ -1,0 +1,67 @@
+name: Nexora development execution QA
+
+# Real development-checkout execution evidence. This is intentionally separate from source certification
+# and from the installed rc.93 Laragon recovery target. The workflow never creates/drops/retargets databases
+# and never upgrades the live recovery installation.
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'NEXORA_AI_PROJECT_STATE.md'
+      - 'NEXORA_PROGRESS.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexora-development-execution-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  development-execution-qa:
+    name: Development execution QA
+    runs-on: self-hosted
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - name: Checkout exact development source
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          clean: true
+
+      - name: Report selected self-hosted runner
+        run: |
+          echo Runner name: %RUNNER_NAME%
+          echo Runner OS: %RUNNER_OS%
+          echo Runner architecture: %RUNNER_ARCH%
+
+      - name: Verify development toolchain
+        run: |
+          php -r "if (version_compare(PHP_VERSION, '8.3.0', '<')) { fwrite(STDERR, 'Nexora development QA requires PHP >= 8.3.0; runner has '.PHP_VERSION.PHP_EOL); exit(1); } echo 'PHP '.PHP_VERSION.PHP_EOL;"
+          node -e "const v=process.versions.node; if (Number(v.split('.')[0]) < 22) { console.error('Nexora development QA requires Node >= 22.0.0; runner has '+v); process.exit(1); } console.log('Node '+v);"
+          composer --version
+          npm --version
+
+      - name: Install backend development dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install frontend development dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Execute full development QA and write evidence
+        run: php scripts/development-readiness.php --full --tests --evidence
+
+      - name: Upload development QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-development-readiness-${{ github.event.pull_request.head.sha || github.sha }}
+          path: storage/app/nexora/qa/development-readiness.json
+          if-no-files-found: warn
+          retention-days: 14
