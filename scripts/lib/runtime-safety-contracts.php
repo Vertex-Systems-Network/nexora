@@ -42,12 +42,20 @@ function nexoraAnalyzeRuntimeSafetyContracts(string $root): array
     $provider=(string)@file_get_contents($root.'/app/Providers/AppServiceProvider.php');
     foreach(['Queue::before','Queue::after','Queue::exceptionOccurred','Queue::looping','TenantContext::class','shouldQuit','gc_collect_cycles'] as $marker)if(!str_contains($provider,$marker))$errors[]="Queue worker lifecycle missing [{$marker}].";
 
+    $expectedQueueJobs=[
+        'DeliverWebhookJob.php',
+        'ExecuteWorkflowRunJob.php',
+        'ProcessContentMigrationJob.php',
+        'RunSeoCrawlJob.php',
+        'SendNewsletterDelivery.php',
+    ];
     $jobs=glob($root.'/app/Jobs/*.php')?:[];
-    $queueJobs=0;$timeouts=[];$jobsWithoutBackoff=0;$jobsWithoutFailOnTimeout=0;
+    $queueJobs=0;$queueJobNames=[];$timeouts=[];$jobsWithoutBackoff=0;$jobsWithoutFailOnTimeout=0;
     foreach($jobs as $file){
         $source=(string)file_get_contents($file);
         if(!str_contains($source,'ShouldQueue'))continue;
         $queueJobs++;
+        $queueJobNames[]=basename($file);
         if(!preg_match('/public int \\$timeout = (\\d+);/',$source,$m)){$errors[]='Queue job missing explicit timeout: '.basename($file);continue;}
         $timeout=(int)$m[1];$timeouts[]=$timeout;
         if($timeout>1800)$errors[]='Queue job timeout exceeds RC18 maximum 1800s: '.basename($file);
@@ -56,7 +64,9 @@ function nexoraAnalyzeRuntimeSafetyContracts(string $root): array
         if(!str_contains($source,'public bool $failOnTimeout = true;')){$jobsWithoutFailOnTimeout++;$errors[]='Queue job must fail closed on timeout: '.basename($file);}
         if($triesCount>1&&!str_contains($source,'function backoff()')){$jobsWithoutBackoff++;$errors[]='Retrying queue job requires explicit backoff(): '.basename($file);}
     }
-    if($queueJobs!==4)$errors[]="Expected exactly four first-party queue jobs; found {$queueJobs}.";
+    sort($expectedQueueJobs);
+    sort($queueJobNames);
+    if($queueJobNames!==$expectedQueueJobs)$errors[]='First-party queue job set mismatch; expected ['.implode(', ',$expectedQueueJobs).'] but found ['.implode(', ',$queueJobNames).'].';
     if($timeouts!==[]&&max($timeouts)!==1800)$errors[]='Longest first-party queue job timeout must remain exactly 1800 seconds for retry_after policy alignment.';
 
     $newsletter=(string)@file_get_contents($root.'/app/Jobs/SendNewsletterDelivery.php');
