@@ -16,6 +16,11 @@ type CatalogItem = {
     requirement: string;
     example: string;
     availability_message: string;
+    endpoint_required: boolean;
+    database_supported: boolean;
+    username_password_supported: boolean;
+    region_required: boolean;
+    aws_key_pair_supported: boolean;
 };
 
 type Connection = {
@@ -80,7 +85,7 @@ function emptyConnection(): ConnectionFields {
         database: "",
         username: "",
         password: "",
-        region: "us-east-1",
+        region: "",
         access_key: "",
         secret_key: "",
     };
@@ -136,6 +141,25 @@ export default function DataConnections({
         ),
     }));
 
+    const selectDriver = (value: string) => {
+        const item = catalog.find((entry) => entry.key === value);
+        if (!item) return;
+
+        form.clearErrors();
+        form.setData({
+            ...form.data,
+            name: form.data.name.trim() === "" ? item.label : form.data.name,
+            driver: value,
+            endpoint: item.endpoint_required ? item.example : "",
+            database: item.database_supported ? form.data.database : "",
+            username: item.username_password_supported ? form.data.username : "",
+            password: "",
+            region: item.region_required ? (form.data.region || "us-east-1") : "",
+            access_key: item.aws_key_pair_supported ? form.data.access_key : "",
+            secret_key: item.aws_key_pair_supported ? form.data.secret_key : "",
+        });
+    };
+
     const submit = () => {
         form.post("/admin/data/connections", {
             preserveScroll: true,
@@ -147,15 +171,16 @@ export default function DataConnections({
     };
 
     const openEdit = (connection: Connection) => {
+        const definition = catalog.find((item) => item.key === connection.driver);
         editForm.clearErrors();
         editForm.setData({
             name: connection.name,
             driver: connection.driver,
-            endpoint: connection.endpoint ?? "",
-            database: connection.database ?? "",
-            username: connection.username ?? "",
+            endpoint: definition?.endpoint_required === false ? "" : (connection.endpoint ?? ""),
+            database: definition?.database_supported === false ? "" : (connection.database ?? ""),
+            username: definition?.username_password_supported === false ? "" : (connection.username ?? ""),
             password: "",
-            region: connection.region || "us-east-1",
+            region: definition?.region_required ? (connection.region || "us-east-1") : "",
             access_key: "",
             secret_key: "",
         });
@@ -313,7 +338,11 @@ export default function DataConnections({
 
                             <div className="mt-4 rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-3 text-xs text-[var(--nx-text-muted)]">
                                 <div className="truncate">
-                                    {connection.endpoint ?? "No endpoint configured"}
+                                    {connection.endpoint ?? (
+                                        connection.driver === "aws_dynamodb"
+                                            ? `Region: ${connection.region || "us-east-1"} · AWS SDK credential chain`
+                                            : "No endpoint configured"
+                                    )}
                                 </div>
                                 {connection.database && (
                                     <div className="mt-1">
@@ -415,16 +444,7 @@ export default function DataConnections({
                     <Select
                         label="Service"
                         value={form.data.driver}
-                        onChange={(value) => {
-                            form.setData("driver", value);
-                            const item = catalog.find((entry) => entry.key === value);
-                            if (item) {
-                                form.setData("endpoint", item.example);
-                                if (form.data.name.trim() === "") {
-                                    form.setData("name", item.label);
-                                }
-                            }
-                        }}
+                        onChange={selectDriver}
                         options={options}
                         error={form.errors.driver}
                     />
@@ -437,56 +457,76 @@ export default function DataConnections({
                             </div>
                         </div>
                     )}
-                    <Input
-                        label="Endpoint / connection string"
-                        value={form.data.endpoint}
-                        onChange={(event) => form.setData("endpoint", event.target.value)}
-                        error={form.errors.endpoint}
-                        placeholder={selected?.example}
-                        hint="Keep credentials out of the endpoint; use the encrypted fields below."
-                    />
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    {selected?.endpoint_required !== false ? (
                         <Input
-                            label="Database / namespace"
-                            value={form.data.database}
-                            onChange={(event) => form.setData("database", event.target.value)}
-                            error={form.errors.database}
+                            label="Endpoint / connection string"
+                            value={form.data.endpoint}
+                            onChange={(event) => form.setData("endpoint", event.target.value)}
+                            error={form.errors.endpoint}
+                            placeholder={selected?.example}
+                            hint="Keep credentials out of the endpoint; use the encrypted fields below."
                         />
+                    ) : (
+                        <div className="rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-3 text-xs leading-5 text-[var(--nx-text-muted)]">
+                            No endpoint is required for this connector. Nexora uses the AWS SDK,
+                            selected region and the runtime IAM chain or the optional encrypted key pair below.
+                        </div>
+                    )}
+                    {(selected?.database_supported !== false || selected?.username_password_supported !== false) && (
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            {selected?.database_supported !== false && (
+                                <Input
+                                    label="Database / namespace"
+                                    value={form.data.database}
+                                    onChange={(event) => form.setData("database", event.target.value)}
+                                    error={form.errors.database}
+                                />
+                            )}
+                            {selected?.username_password_supported !== false && (
+                                <Input
+                                    label="Username"
+                                    value={form.data.username}
+                                    onChange={(event) => form.setData("username", event.target.value)}
+                                    error={form.errors.username}
+                                />
+                            )}
+                        </div>
+                    )}
+                    {selected?.username_password_supported !== false && (
                         <Input
-                            label="Username"
-                            value={form.data.username}
-                            onChange={(event) => form.setData("username", event.target.value)}
-                            error={form.errors.username}
+                            label="Password / token"
+                            type="password"
+                            value={form.data.password}
+                            onChange={(event) => form.setData("password", event.target.value)}
+                            error={form.errors.password}
                         />
-                    </div>
-                    <Input
-                        label="Password / token"
-                        type="password"
-                        value={form.data.password}
-                        onChange={(event) => form.setData("password", event.target.value)}
-                        error={form.errors.password}
-                    />
-                    {form.data.driver === "aws_dynamodb" && (
-                        <>
+                    )}
+                    {selected?.region_required && (
+                        <Input
+                            label="AWS region"
+                            value={form.data.region}
+                            onChange={(event) => form.setData("region", event.target.value)}
+                            error={form.errors.region}
+                            placeholder="us-east-1"
+                        />
+                    )}
+                    {selected?.aws_key_pair_supported && (
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <Input
-                                label="AWS region"
-                                value={form.data.region}
-                                onChange={(event) => form.setData("region", event.target.value)}
+                                label="Access key (optional with IAM role)"
+                                value={form.data.access_key}
+                                onChange={(event) => form.setData("access_key", event.target.value)}
+                                error={form.errors.access_key}
                             />
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <Input
-                                    label="Access key (optional with IAM role)"
-                                    value={form.data.access_key}
-                                    onChange={(event) => form.setData("access_key", event.target.value)}
-                                />
-                                <Input
-                                    label="Secret key"
-                                    type="password"
-                                    value={form.data.secret_key}
-                                    onChange={(event) => form.setData("secret_key", event.target.value)}
-                                />
-                            </div>
-                        </>
+                            <Input
+                                label="Secret key"
+                                type="password"
+                                value={form.data.secret_key}
+                                onChange={(event) => form.setData("secret_key", event.target.value)}
+                                error={form.errors.secret_key}
+                                hint="Leave both key fields blank to use the runtime IAM credential chain."
+                            />
+                        </div>
                     )}
                     <div className="rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-3 text-xs leading-5 text-[var(--nx-text-muted)]">
                         New connections start disabled. Run a successful connection test before
@@ -531,61 +571,80 @@ export default function DataConnections({
                             {editSelected.availability_message}
                         </div>
                     )}
-                    <Input
-                        label="Endpoint / connection string"
-                        value={editForm.data.endpoint}
-                        onChange={(event) => editForm.setData("endpoint", event.target.value)}
-                        error={editForm.errors.endpoint}
-                        hint="Credentials inside the endpoint are rejected."
-                    />
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    {editSelected?.endpoint_required !== false ? (
                         <Input
-                            label="Database / namespace"
-                            value={editForm.data.database}
-                            onChange={(event) => editForm.setData("database", event.target.value)}
-                            error={editForm.errors.database}
+                            label="Endpoint / connection string"
+                            value={editForm.data.endpoint}
+                            onChange={(event) => editForm.setData("endpoint", event.target.value)}
+                            error={editForm.errors.endpoint}
+                            hint="Credentials inside the endpoint are rejected."
                         />
+                    ) : (
+                        <div className="rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-3 text-xs leading-5 text-[var(--nx-text-muted)]">
+                            This connector has no endpoint field. Runtime access is resolved from its
+                            region and AWS credential chain.
+                        </div>
+                    )}
+                    {(editSelected?.database_supported !== false || editSelected?.username_password_supported !== false) && (
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            {editSelected?.database_supported !== false && (
+                                <Input
+                                    label="Database / namespace"
+                                    value={editForm.data.database}
+                                    onChange={(event) => editForm.setData("database", event.target.value)}
+                                    error={editForm.errors.database}
+                                />
+                            )}
+                            {editSelected?.username_password_supported !== false && (
+                                <Input
+                                    label="Username"
+                                    value={editForm.data.username}
+                                    onChange={(event) => editForm.setData("username", event.target.value)}
+                                    error={editForm.errors.username}
+                                />
+                            )}
+                        </div>
+                    )}
+                    {editSelected?.username_password_supported !== false && (
                         <Input
-                            label="Username"
-                            value={editForm.data.username}
-                            onChange={(event) => editForm.setData("username", event.target.value)}
-                            error={editForm.errors.username}
+                            label="Rotate password / token"
+                            type="password"
+                            value={editForm.data.password}
+                            onChange={(event) => editForm.setData("password", event.target.value)}
+                            error={editForm.errors.password}
+                            placeholder={editTarget?.hasPassword ? "Encrypted value is stored" : "No password stored"}
+                            hint="Leave blank to preserve the current encrypted value."
                         />
-                    </div>
-                    <Input
-                        label="Rotate password / token"
-                        type="password"
-                        value={editForm.data.password}
-                        onChange={(event) => editForm.setData("password", event.target.value)}
-                        error={editForm.errors.password}
-                        placeholder={editTarget?.hasPassword ? "Encrypted value is stored" : "No password stored"}
-                        hint="Leave blank to preserve the current encrypted value."
-                    />
-                    {editForm.data.driver === "aws_dynamodb" && (
-                        <>
+                    )}
+                    {editSelected?.region_required && (
+                        <Input
+                            label="AWS region"
+                            value={editForm.data.region}
+                            onChange={(event) => editForm.setData("region", event.target.value)}
+                            error={editForm.errors.region}
+                            placeholder="us-east-1"
+                        />
+                    )}
+                    {editSelected?.aws_key_pair_supported && (
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <Input
-                                label="AWS region"
-                                value={editForm.data.region}
-                                onChange={(event) => editForm.setData("region", event.target.value)}
+                                label="Rotate access key"
+                                value={editForm.data.access_key}
+                                onChange={(event) => editForm.setData("access_key", event.target.value)}
+                                error={editForm.errors.access_key}
+                                placeholder={editTarget?.hasAccessKey ? "Encrypted key is stored" : "No key stored"}
+                                hint="Leave blank to preserve the stored key."
                             />
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <Input
-                                    label="Rotate access key"
-                                    value={editForm.data.access_key}
-                                    onChange={(event) => editForm.setData("access_key", event.target.value)}
-                                    placeholder={editTarget?.hasAccessKey ? "Encrypted key is stored" : "No key stored"}
-                                    hint="Leave blank to preserve the stored key."
-                                />
-                                <Input
-                                    label="Rotate secret key"
-                                    type="password"
-                                    value={editForm.data.secret_key}
-                                    onChange={(event) => editForm.setData("secret_key", event.target.value)}
-                                    placeholder={editTarget?.hasSecretKey ? "Encrypted secret is stored" : "No secret stored"}
-                                    hint="Leave blank to preserve the stored secret."
-                                />
-                            </div>
-                        </>
+                            <Input
+                                label="Rotate secret key"
+                                type="password"
+                                value={editForm.data.secret_key}
+                                onChange={(event) => editForm.setData("secret_key", event.target.value)}
+                                error={editForm.errors.secret_key}
+                                placeholder={editTarget?.hasSecretKey ? "Encrypted secret is stored" : "No secret stored"}
+                                hint="Leave both blank to preserve the stored key pair; when rotating, enter both values together."
+                            />
+                        </div>
                     )}
                     <div className="rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-3 text-xs leading-5 text-[var(--nx-text-muted)]">
                         Changing endpoint, namespace, username, region or credentials invalidates
