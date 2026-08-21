@@ -84,13 +84,14 @@ final class ConnectionTester
         if ($this->hasEmbeddedCredentials($endpoint)) {
             throw new RuntimeException('Embedded endpoint credentials are not allowed. Store username and password in encrypted credential fields.');
         }
-        [$host, $port] = $this->hostPort($endpoint, 6379);
+        [$transport, $host, $port] = $this->redisEndpoint($endpoint, 6379);
         $username = (string) ($payload['username'] ?? '');
         $password = (string) ($payload['password'] ?? '');
 
         if (extension_loaded('redis') && class_exists(Redis::class)) {
             $redis = new Redis();
-            if (! $redis->connect($host, $port, 5.0)) {
+            $connectHost = $transport === 'tls' ? 'tls://'.$host : $host;
+            if (! $redis->connect($connectHost, $port, 5.0)) {
                 throw new RuntimeException('Redis connection could not be opened.');
             }
             if ($password !== '') {
@@ -106,7 +107,7 @@ final class ConnectionTester
 
         if (class_exists(\Predis\Client::class)) {
             $parameters = [
-                'scheme' => str_starts_with(strtolower($endpoint), 'rediss://') ? 'tls' : 'tcp',
+                'scheme' => $transport,
                 'host' => $host,
                 'port' => $port,
                 'timeout' => 5.0,
@@ -124,6 +125,11 @@ final class ConnectionTester
     /** @param array<string,mixed> $payload */
     private function dynamo(array $payload): array
     {
+        $accessKey = trim((string) ($payload['access_key'] ?? ''));
+        $secretKey = (string) ($payload['secret_key'] ?? '');
+        if (($accessKey === '') !== ($secretKey === '')) {
+            throw new RuntimeException('AWS access key and secret key must be provided together.');
+        }
         if (! class_exists(\Aws\DynamoDb\DynamoDbClient::class)) {
             throw new RuntimeException('AWS SDK connector is not installed.');
         }
@@ -131,8 +137,6 @@ final class ConnectionTester
             'version' => 'latest',
             'region' => trim((string) ($payload['region'] ?? '')) ?: 'us-east-1',
         ];
-        $accessKey = (string) ($payload['access_key'] ?? '');
-        $secretKey = (string) ($payload['secret_key'] ?? '');
         if ($accessKey !== '' && $secretKey !== '') {
             $config['credentials'] = ['key' => $accessKey, 'secret' => $secretKey];
         }
@@ -142,24 +146,37 @@ final class ConnectionTester
         return ['ok' => true, 'message' => 'Amazon DynamoDB API connection succeeded.'];
     }
 
-    /** @return array{0:string,1:int} */
-    private function hostPort(string $endpoint, int $defaultPort): array
+    /** @return array{0:'tcp'|'tls',1:string,2:int} */
+    private function redisEndpoint(string $endpoint, int $defaultPort): array
     {
         $trimmed = trim($endpoint);
-        if ($trimmed === '') return ['127.0.0.1', $defaultPort];
+        if ($trimmed === '') return ['tcp', '127.0.0.1', $defaultPort];
 
         if (str_contains($trimmed, '://')) {
             $parts = parse_url($trimmed);
-            if (is_array($parts) && isset($parts['host'])) {
-                return [
-                    (string) $parts['host'],
-                    isset($parts['port']) ? (int) $parts['port'] : $defaultPort,
-                ];
+            if (! is_array($parts) || ! isset($parts['host'])) {
+                throw new RuntimeException('Redis endpoint is invalid.');
             }
+            $scheme = strtolower((string) ($parts['scheme'] ?? 'redis'));
+            $transport = match ($scheme) {
+                'redis', 'tcp' => 'tcp',
+                'rediss', 'tls' => 'tls',
+                default => throw new RuntimeException('Redis endpoint scheme must be redis://, rediss://, tcp:// or tls://.'),
+            };
+            return [
+                $transport,
+                (string) $parts['host'],
+                isset($parts['port']) ? (int) $parts['port'] : $defaultPort,
+            ];
+        }
+
+        if (str_starts_with($trimmed, '[') && preg_match('/^\[([^]]+)](?::(\d+))?$/', $trimmed, $match) === 1) {
+            return ['tcp', $match[1], isset($match[2]) ? (int) $match[2] : $defaultPort];
         }
 
         $parts = explode(':', $trimmed, 2);
         return [
+            'tcp',
             $parts[0] ?: '127.0.0.1',
             isset($parts[1]) && is_numeric($parts[1]) ? (int) $parts[1] : $defaultPort,
         ];
