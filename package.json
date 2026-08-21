@@ -56,7 +56,8 @@
         "verify:npm-bundled-integrity": "php scripts/n1-target-npm-bundled-integrity-contract-verify.php",
         "verify:semantic-lock-reproducibility": "php scripts/n1-target-semantic-lock-reproducibility-contract-verify.php",
         "verify:typescript-depth": "php scripts/n1-target-typescript-depth-contract-verify.php",
-        "dev:check": "php scripts/development-readiness.php --full"
+        "dev:check": "php scripts/development-readiness.php --full",
+        "dev:target-qa": "php scripts/development-readiness.php --full --tests --evidence"
     },
     "dependencies": {
         "@inertiajs/react": "^3.6.1",
