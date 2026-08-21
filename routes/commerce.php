@@ -16,4 +16,10 @@ Route::prefix('admin/commerce')
         Route::post('/billing/transactions/{payment}/refunds', [BillingController::class, 'refund'])
             ->middleware(['permission:commerce.billing.manage', 'throttle:20,1'])
             ->name('billing.refunds.store');
+        Route::post('/billing/subscriptions', [BillingController::class, 'subscribe'])
+            ->middleware(['permission:commerce.billing.manage', 'throttle:20,1'])
+            ->name('billing.subscriptions.store');
+        Route::post('/billing/subscriptions/{subscription}/cancel', [BillingController::class, 'cancelSubscription'])
+            ->middleware(['permission:commerce.billing.manage', 'throttle:20,1'])
+            ->name('billing.subscriptions.cancel');
     });
