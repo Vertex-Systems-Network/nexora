@@ -10,6 +10,7 @@ use App\Models\AiGenerationRun;
 use App\Nexora\Ai\Services\AiGenerationService;
 use App\Nexora\Ai\Services\AiProviderRegistry;
 use App\Nexora\Security\Audit\AuditManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -27,7 +28,7 @@ final class AiPlatformController extends Controller
         private AuditManager $audit,
     ) {}
 
-    public function index(Request $request): Response
+    public function index(): Response
     {
         $providers = collect($this->providers->all())
             ->map(fn ($provider, string $key): array => ['key' => $key, 'label' => $provider->label()])
@@ -67,7 +68,6 @@ final class AiPlatformController extends Controller
                 'startedAt' => $run->started_at?->toIso8601String(),
                 'completedAt' => $run->completed_at?->toIso8601String(),
             ])->values(),
-            'lastGeneration' => $request->session()->pull('ai_generation'),
         ]);
     }
 
@@ -170,7 +170,7 @@ final class AiPlatformController extends Controller
         return back()->with('success', 'AI connection deleted.');
     }
 
-    public function generate(Request $request, AiConnection $connection): RedirectResponse
+    public function generate(Request $request, AiConnection $connection): JsonResponse
     {
         $data = $request->validate([
             'prompt' => ['required', 'string', 'max:200000'],
@@ -189,13 +189,14 @@ final class AiPlatformController extends Controller
             'input_tokens' => $result->inputTokens,
             'output_tokens' => $result->outputTokens,
         ], $request);
-        return back()->with('ai_generation', [
+
+        return response()->json([
             'connectionName' => $connection->name,
             'model' => $connection->model,
             'text' => $result->text,
             'inputTokens' => $result->inputTokens,
             'outputTokens' => $result->outputTokens,
-        ])->with('success', 'AI generation completed. Raw output is not written to generation history.');
+        ]);
     }
 
     /** @return array<string,mixed> */
