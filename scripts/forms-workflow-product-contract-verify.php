@@ -114,7 +114,7 @@ foreach ([
     "csrf_token()" => 'CSRF token output',
     'aria-invalid="true"' => 'public validation accessibility',
     'role="alert"' => 'public error announcement',
-    'content="noindex,follow"' => 'noindex-first public policy marker',
+    "? 'index,follow' : 'noindex,follow'" => 'noindex-first public policy',
 ] as $needle => $label) {
     if ($public !== '' && ! str_contains($public, $needle)) {
         $errors[] = "Public form contract missing: {$label}.";
