@@ -76,5 +76,8 @@ jobs:
       - name: Primary SQL portability source contract
         run: php scripts/primary-sql-portability-contract-verify.php
 
+      - name: Installer database UX source contract
+        run: php scripts/installer-database-ux-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
