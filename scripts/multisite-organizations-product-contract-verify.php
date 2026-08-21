@@ -129,12 +129,14 @@ foreach ([
 }
 foreach ([
     '## 2. Weighted Project Power Score' => 'weighted project power dashboard',
-    '## 8. Apply Log' => 'per-apply progress history',
     'After **every meaningful apply**' => 'progress-update protocol',
 ] as $needle => $label) {
     if ($progress !== '' && ! str_contains($progress, $needle)) {
         $errors[] = "Progress dashboard contract missing: {$label}.";
     }
+}
+if ($progress !== '' && preg_match('/^##\s+\d+\.\s+Apply Log\s*$/m', $progress) !== 1) {
+    $errors[] = 'Progress dashboard contract missing: per-apply progress history.';
 }
 
 if ($errors !== []) {
