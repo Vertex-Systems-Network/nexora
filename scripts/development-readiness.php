@@ -59,6 +59,7 @@ $run('marketplace_product_contract', 'Marketplace product source contract', [PHP
 $run('commerce_product_contract', 'Commerce product source contract', [PHP_BINARY, 'scripts/commerce-product-contract-verify.php']);
 $run('customer_portal_product_contract', 'Customer Portal product source contract', [PHP_BINARY, 'scripts/customer-portal-product-contract-verify.php']);
 $run('crm_membership_product_contract', 'CRM + Membership product source contract', [PHP_BINARY, 'scripts/crm-membership-product-contract-verify.php']);
+$run('search_product_contract', 'Search 2.0 product source contract', [PHP_BINARY, 'scripts/search-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
@@ -155,7 +156,7 @@ if ($json) {
 fwrite(STDOUT, "Nexora Development Readiness - {$status}\n");
 foreach ($checks as $check) {
     $mark = $check['status'] === 'pass' ? 'PASS' : strtoupper($check['status']);
-    fwrite(STDOUT, sprintf("%-8s %-28s %s\n", $mark, $check['label'], str_replace(["\r", "\n"], ' ', (string) $check['detail'])));
+    fwrite(STDOUT, sprintf("%-8s %-28s %s\n", $mark, str_replace(["\r", "\n"], ' ', (string) $check['label']), str_replace(["\r", "\n"], ' ', (string) $check['detail'])));
 }
 if (isset($payload['evidence_path'])) {
     fwrite(STDOUT, "\nEvidence: {$payload['evidence_path']}\n");
