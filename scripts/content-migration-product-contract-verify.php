@@ -70,6 +70,7 @@ $forbid($reader, [
 ], 'WXR reader');
 
 $require($manager, [
+    "class_exists(\\XMLReader::class)" => 'admission-time XMLReader runtime check',
     "in_array(\$extension, ['xml', 'wxr'], true)" => 'source extension allow-list',
     "stripos(\$header, 'wordpress.org/export')" => 'WXR signature check',
     "hash_file('sha256', \$temporaryPath)" => 'source SHA-256 fingerprint',
@@ -109,6 +110,7 @@ $require($export, [
 ], 'document export');
 $require($controller, [
     'ContentMigrationRun::query()' => 'tenant-scoped run listing/re-resolution',
+    "'xmlReaderAvailable' => class_exists(\\XMLReader::class)" => 'runtime parser readiness exposed to Admin',
     'public function resume(Request $request, string $run' => 'scalar run route argument after authenticated request',
     '$manager->resume($record, $user)' => 'resume actor policy handoff',
     "['required', 'file', 'max:51200']" => 'web upload size bound',
@@ -126,8 +128,10 @@ $require($provider, [
 $require($providers, ['ContentMigrationServiceProvider::class' => 'provider bootstrap'], 'provider bootstrap');
 $require($ui, [
     'WordPress WXR import' => 'WXR upload UX',
+    'WXR import unavailable:' => 'missing XMLReader fail-closed UX',
+    'disabled={!limits.xmlReaderAvailable' => 'runtime readiness input/action fence',
     'Remote media is not fetched by Core' => 'SSRF-safe UX disclosure',
-    '/admin/migrations/export/documents' => 'export UX',
+    'window.location.assign("/admin/migrations/export/documents")' => 'export UX',
     '/resume' => 'resume UX',
 ], 'migration UI');
 $require($test, [
@@ -149,4 +153,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, '[Nexora Content Migration Product Contract] PASS — tenant-owned replay-safe migration state, local-only bounded WXR parsing, service/job actor reauthorization, canonical Document repository imports, resumable queue tenant restoration, no Core remote-media fetch, private streaming export and acceptance source are present.'.PHP_EOL);
+fwrite(STDOUT, '[Nexora Content Migration Product Contract] PASS — tenant-owned replay-safe migration state, local-only bounded WXR parsing with explicit runtime admission, service/job actor reauthorization, canonical Document repository imports, resumable queue tenant restoration, no Core remote-media fetch, private streaming export and acceptance source are present.'.PHP_EOL);
