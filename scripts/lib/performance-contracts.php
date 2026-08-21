@@ -49,6 +49,14 @@ function nexoraAnalyzePerformanceContracts(string $root): array
         if (! str_contains($vite, $marker)) $errors[] = 'Vite production contract missing: '.$marker;
     }
 
+    $appEntry = $read('resources/js/app.tsx');
+    foreach (['path: "./admin/pages"', 'extension: ".tsx"', 'lazy: true'] as $marker) {
+        if (! str_contains($appEntry, $marker)) $errors[] = 'Inertia route-splitting contract missing: '.$marker;
+    }
+    foreach (['lazy: false', 'eager: true'] as $forbidden) {
+        if (str_contains($appEntry, $forbidden)) $errors[] = 'Inertia route-splitting must remain lazy; forbidden marker: '.$forbidden;
+    }
+
     $htaccess = $read('public/.htaccess');
     foreach (['BROTLI_COMPRESS', 'DEFLATE', 'NEXORA_IMMUTABLE_ASSET', 'max-age=31536000, immutable', 'X-Content-Type-Options'] as $marker) {
         if (! str_contains($htaccess, $marker)) $errors[] = 'Apache production delivery contract missing: '.$marker;
@@ -79,8 +87,16 @@ function nexoraAnalyzePerformanceContracts(string $root): array
 
     $performanceConfig = is_file($root.'/config/nexora-performance.php') ? require $root.'/config/nexora-performance.php' : [];
     $budgets = is_array($performanceConfig) ? (array) ($performanceConfig['budgets'] ?? []) : [];
-    foreach (['build_total_bytes','javascript_total_bytes','javascript_asset_bytes','css_total_bytes','css_asset_bytes','font_asset_bytes','image_asset_bytes'] as $budget) {
+    foreach (['build_total_bytes','javascript_total_bytes','javascript_asset_bytes','javascript_gzip_total_bytes','initial_javascript_gzip_bytes','css_total_bytes','css_asset_bytes','font_asset_bytes','image_asset_bytes'] as $budget) {
         if ((int) ($budgets[$budget] ?? 0) <= 0) $errors[] = 'invalid performance budget: '.$budget;
+    }
+
+    $buildVerifier = $read('scripts/performance-build-verify.php');
+    foreach (['initial_js_gzip', 'resources/js/app.tsx', "['imports']", 'initial_javascript_gzip_bytes', 'initial_javascript_assets'] as $marker) {
+        if (! str_contains($buildVerifier, $marker)) $errors[] = 'initial JavaScript graph budget contract missing: '.$marker;
+    }
+    if (! str_contains($buildVerifier, "['dynamicImports']") && str_contains($buildVerifier, 'dynamicImports')) {
+        $warnings[] = 'Build verifier references dynamicImports; first-load graph must remain based only on static imports.';
     }
 
     $releaseConfig = is_file($root.'/config/nexora-release.php') ? require $root.'/config/nexora-release.php' : [];
