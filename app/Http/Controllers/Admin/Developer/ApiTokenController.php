@@ -85,9 +85,15 @@ final class ApiTokenController extends Controller
         ], 201);
     }
 
-    public function destroy(Request $request, ApiAccessToken $token, ApiTokenManager $tokens): RedirectResponse
+    public function destroy(Request $request, string $token, ApiTokenManager $tokens): RedirectResponse
     {
-        $tokens->revoke($token, $request->user());
+        $actor = $request->user();
+        abort_unless($actor !== null, 404);
+
+        // Resolve only after web tenant middleware has installed the active organization.
+        // This keeps revocation scoped even when a UUID from another tenant is guessed.
+        $record = ApiAccessToken::query()->whereKey($token)->firstOrFail();
+        $tokens->revoke($record, $actor);
 
         return back()->with('success', 'API token revoked.');
     }
