@@ -4,7 +4,7 @@ import { AdminLayout } from "@admin/layout/AdminLayout";
 import { PageHeader } from "@admin/components/PageHeader";
 import { Icon } from "@admin/components/Icon";
 import { ConfirmDialog } from "@admin/components/ConfirmDialog";
-import { Badge, Button, Card, Input } from "@nexora/admin-ui";
+import { Badge, Button, Card, Checkbox, Input } from "@nexora/admin-ui";
 
 type Ability = { slug: string; label: string; description: string };
 type TokenRecord = {
@@ -122,20 +122,22 @@ export default function ApiTokens({ organization, tokens, abilities, baseUrl }: 
             <div className="mt-2 grid gap-2">
               {abilities.map((ability) => {
                 const chosen = selected.includes(ability.slug);
-                return <button
-                  type="button"
+                return <div
                   key={ability.slug}
-                  aria-pressed={chosen}
-                  onClick={() => toggleAbility(ability.slug)}
-                  className="rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface)] p-3 text-left transition hover:border-[var(--nx-brand)]"
+                  className="rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface)] p-3 transition hover:border-[var(--nx-brand)]"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-medium text-[var(--nx-text)]">{ability.label}</span>
+                  <div className="flex items-start justify-between gap-3">
+                    <Checkbox
+                      checked={chosen}
+                      onChange={() => toggleAbility(ability.slug)}
+                      label={ability.label}
+                      description={ability.description}
+                      aria-label={`Toggle ${ability.label} ability`}
+                    />
                     <Badge tone={chosen ? "success" : "neutral"}>{chosen ? "selected" : "not selected"}</Badge>
                   </div>
-                  <p className="mt-1 text-xs leading-5 text-[var(--nx-text-muted)]">{ability.description}</p>
-                  <code className="mt-2 block text-xs text-[var(--nx-text-muted)]">{ability.slug}</code>
-                </button>;
+                  <code className="mt-2 block ps-7 text-xs text-[var(--nx-text-muted)]">{ability.slug}</code>
+                </div>;
               })}
             </div>
           </fieldset>
