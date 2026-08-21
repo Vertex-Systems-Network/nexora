@@ -115,8 +115,8 @@ foreach([
 ] as $needle=>$label){ if($test!==''&&!str_contains($test,$needle)) $errors[]="Collection Product acceptance-test contract missing: {$label}."; }
 
 foreach([
-    'tenant-native table'=>'forward tenant migration semantics',
-    '$creatorIndex>$enterpriseMigrationIndex'=>'post-enterprise tenant-native ordering',
+    'function nexoraMigrationForwardTenantizesTable('=>'forward tenant migration semantics',
+    '$isPostEnterprise'=>'post-enterprise tenant-native ordering',
     "foreign('tenant_id'"=>'tenant-native foreign key guard',
 ] as $needle=>$label){ if($dbContracts!==''&&!str_contains($dbContracts,$needle)) $errors[]="Collection Product database contract missing: {$label}."; }
 
