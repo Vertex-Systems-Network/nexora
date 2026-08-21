@@ -58,6 +58,7 @@ $run('development_target_qa_contract', 'Development target QA source contract', 
 $run('marketplace_product_contract', 'Marketplace product source contract', [PHP_BINARY, 'scripts/marketplace-product-contract-verify.php']);
 $run('commerce_product_contract', 'Commerce product source contract', [PHP_BINARY, 'scripts/commerce-product-contract-verify.php']);
 $run('customer_portal_product_contract', 'Customer Portal product source contract', [PHP_BINARY, 'scripts/customer-portal-product-contract-verify.php']);
+$run('crm_membership_product_contract', 'CRM + Membership product source contract', [PHP_BINARY, 'scripts/crm-membership-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
