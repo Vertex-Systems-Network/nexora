@@ -73,5 +73,8 @@ jobs:
       - name: Data Connections product source contract
         run: php scripts/data-connection-product-contract-verify.php
 
+      - name: Primary SQL portability source contract
+        run: php scripts/primary-sql-portability-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
