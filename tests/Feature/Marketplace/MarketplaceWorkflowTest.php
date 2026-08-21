@@ -46,6 +46,31 @@ final class MarketplaceWorkflowTest extends TestCase
             ->assertSessionHas('error');
     }
 
+    public function test_resuming_source_requires_fresh_sync_before_catalog_or_staging(): void
+    {
+        $admin = $this->administrator();
+        [$source, $item] = $this->catalogFixture('paused');
+
+        $this->actingAs($admin)
+            ->patch('/admin/extensions/marketplace/sources/'.$source->id.'/status', ['status' => 'active'])
+            ->assertSessionHasNoErrors();
+
+        $fresh = $source->fresh();
+        self::assertSame('active', $fresh?->status);
+        self::assertNull($fresh?->last_synced_at);
+
+        $this->actingAs($admin)
+            ->get('/admin/extensions')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('catalog', 0)
+                ->where('summary.catalog', 0));
+
+        $this->actingAs($admin)
+            ->post('/admin/extensions/marketplace/items/'.$item->id.'/stage')
+            ->assertSessionHas('error');
+    }
+
     public function test_source_must_be_paused_before_removal_and_catalog_cache_cascades(): void
     {
         $admin = $this->administrator();
