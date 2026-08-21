@@ -58,7 +58,8 @@ $requires($service, 'PortablePath::join(', 'Forge scaffold paths must use Portab
 $requires($service, 'PortablePath::assertNoExistingSymlinkTraversal(', 'Forge must reject existing symlink traversal.');
 $requires($service, 'if (is_link($workspace))', 'Forge workspace symlinks must fail closed.');
 $requires($service, 'if ($plan[\'exists\'] && $force && ! $plan[\'forge_owned\'])', 'Forge --force must require Forge ownership.');
-$requires($service, 'is a file, not a directory', 'Forge must reject file-vs-directory target conflicts.');
+$requires($service, 'if (file_exists($target) && ! is_dir($target))', 'Forge must reject a file/non-directory at the extension target path.');
+$requires($service, 'if (file_exists($destination) && ! is_file($destination))', 'Forge must reject directory/non-file conflicts at generated file targets.');
 $requires($service, 'src/.gitkeep', 'Forge stable source directory placeholder is missing.');
 $requires($service, 'resources/.gitkeep', 'Forge stable resources directory placeholder is missing.');
 $requires($service, 'database/migrations/.gitkeep', 'Forge stable migration directory placeholder is missing.');
@@ -83,6 +84,7 @@ foreach ([
     $requires($test, $testMethod, 'Missing Forge acceptance coverage: '.$testMethod);
 }
 $requires($test, 'assertDirectoryDoesNotExist', 'Forge acceptance must prove dry-run does not create the target.');
+$requires($test, 'not a directory', 'Forge acceptance must prove file-vs-directory target conflicts fail closed.');
 $requires($test, 'Custom.php', 'Forge acceptance must prove developer-created files survive force refresh.');
 $requires($test, 'ExtensionManifestValidator::class', 'Forge acceptance must validate generated manifest through the authoritative validator.');
 
