@@ -16,9 +16,9 @@
 - Actions certification runner: **ONLY `LOCAL-WIN-03`** via `runs-on: [self-hosted, LOCAL-WIN-03]` plus a fail-closed `%RUNNER_NAME% == LOCAL-WIN-03` runtime assertion.
 - `LOCAL-WIN-03` must have a custom GitHub Actions runner label named exactly `LOCAL-WIN-03`; if that label is absent/offline, certification intentionally remains queued rather than falling back to another self-hosted runner.
 - Workflow shell: `cmd` for repository `run:` steps, avoiding host Windows PowerShell ExecutionPolicy dependence.
-- Current N1.25 implementation head before this progress-only commit: `e46c97cfa0422450b4bf03b80257e5564c234d49`.
-- Latest observed dedicated-runner run before N1.25 gate wiring: `32529031403` on `c86fe3af2cc5e4bcf68ddc283a678111c5af975f`, status **queued**.
-- Ledger revision before this apply: `2.4`; ledger sync is required after this implementation pass.
+- Current N1.26 implementation head before this progress-only commit: `4a616965a62dac63e64db4ff60f42a7dc4e6d17b`.
+- Latest observed dedicated-runner run: `32531419955` on `4a616965a62dac63e64db4ff60f42a7dc4e6d17b`, status **queued**.
+- Ledger revision before this apply: `2.4`; canonical ledger sync remains required after this implementation pass.
 - Issue #2: **OPEN**; latest live rc.93 evidence still reports only `environment`, `activation`, `service`, `process` mismatches.
 - N1.18 Public APIs / Webhooks / SDK: implementation complete / LOCAL-WIN-03 certification pending
 - N1.19 Import / Export / WordPress migrations: implementation complete / LOCAL-WIN-03 certification pending
@@ -27,7 +27,8 @@
 - N1.22 Sentinel 2.0: first trust-hardening workflow implementation complete candidate / LOCAL-WIN-03 certification pending
 - N1.23 Marketplace 2.0: first hardening workflow implementation complete candidate / LOCAL-WIN-03 certification pending
 - N1.24 Cloud / HA / Distributed Runtime: first coordination/leadership hardening workflow implementation complete candidate / LOCAL-WIN-03 certification pending
-- N1.25 Backup / DR / Upgrade Certification: first recovery-identity/restore-planning workflow implementation complete candidate / **LOCAL-WIN-03 certification pending**
+- N1.25 Backup / DR / Upgrade Certification: first recovery-identity/restore-planning workflow implementation complete candidate / LOCAL-WIN-03 certification pending
+- N1.26 Performance + Accessibility + Release: first route-splitting/first-load-budget/accessibility execution workflow implementation complete candidate / **LOCAL-WIN-03 certification pending**
 
 ---
 
@@ -56,8 +57,9 @@ Verified Power remains unchanged. Implementation volume does not increase eviden
 | N1.22 Sentinel 2.0 | first trust-hardening workflow candidate | 0% current target | LOCAL-WIN-03 CERTIFICATION PENDING |
 | N1.23 Marketplace 2.0 | first hardening workflow candidate | 0% current target | LOCAL-WIN-03 CERTIFICATION PENDING |
 | N1.24 Cloud / HA / Distributed Runtime | first coordination/leadership workflow candidate | 0% current target | LOCAL-WIN-03 CERTIFICATION PENDING |
-| N1.25 Backup / DR / Upgrade Certification | first recovery-identity/restore-planning workflow candidate | 0% current target | **LOCAL-WIN-03 CERTIFICATION PENDING** |
-| N1.26 Performance + Accessibility + Release | planned/partial | 0% | NEXT SOURCE BLOCK after N1.25 certification checkpoint |
+| N1.25 Backup / DR / Upgrade Certification | first recovery-identity/restore-planning workflow candidate | 0% current target | LOCAL-WIN-03 CERTIFICATION PENDING |
+| N1.26 Performance + Accessibility + Release | first source closure workflow candidate | 0% current target | **LOCAL-WIN-03 CERTIFICATION PENDING** |
+| N2.0 Stable Production | not eligible | 0% final release | BLOCKED BY SOURCE + TARGET + C1-C6 EVIDENCE |
 
 ---
 
@@ -154,13 +156,27 @@ Consequences:
 
 ---
 
-## 10. Main protection / target blockers
+## 10. N1.26 Performance + Accessibility + Release implementation checkpoint
+
+- Existing C5 architecture is preserved: source browser/RTL/a11y contracts, production build budgets, real target HTTP checks, browser matrix, assistive-technology evidence and Web Vitals remain separate evidence classes.
+- Admin Inertia page resolution is now explicitly source-guarded to remain `lazy: true`; eager page regression fails the performance contract.
+- `config/nexora-performance.php` now includes a dedicated first-load static JavaScript graph gzip ceiling, separate from total/per-asset JS ceilings.
+- `scripts/performance-build-verify.php` walks only the app entry's static manifest `imports`, excludes dynamic route chunks from first-load accounting, records the first-load asset set and enforces the gzip ceiling after a real production build.
+- Shared Modal already had focus trapping; N1.26 adds an executable Vitest regression proving Tab wraps from the last dialog control back to the first, and the browser UX source contract now guards focus trap + restore semantics.
+- `scripts/development-readiness.php --full --tests` now executes the frontend Vitest suite. A successful production Vite build is immediately followed by `performance-build-verify.php`, so asset budgets/provenance are actually exercised in development target QA.
+- New `scripts/performance-accessibility-release-product-contract-verify.php` binds lazy route splitting, first-load budget, modal focus containment, executable frontend/build QA and the real C5 target evidence boundary.
+- N1.26 product contract is mandatory in Development Readiness and the dedicated `LOCAL-WIN-03` release workflow.
+- Source code does **not** claim Lighthouse/Web Vitals/WCAG target success. Chrome/Edge/Firefox responsive/RTL/theme observations, assistive-technology evidence, HTTP latency/security and Web Vitals remain C5 TARGET/RELEASE PENDING.
+
+---
+
+## 11. Main protection / target blockers
 
 `main` remains reported `protected=false`; current connector exposes no branch/ruleset mutation endpoint. Desired policy remains PR required + Source certification + stale-review dismissal + review/conversation resolution + no force push/delete + admin enforcement. Issue #2 remains OPEN. Target Power remains 50%.
 
 ---
 
-## 11. Apply Log
+## 12. Apply Log
 
 | Apply | Date | Evidence | Change | Power impact |
 |---:|---|---|---|---|
@@ -178,24 +194,33 @@ Consequences:
 | 039 | 2026-08-22 | `ea7b87a8…` | certification pinned exclusively to `LOCAL-WIN-03` with label + runtime guard | verified Power unchanged |
 | 040 | 2026-08-22 | lease `780a169a…`; HA `820c65d8…`; tests `44367739…`; contract `19e4336b…`; workflow `9d166d69…`; readiness `4c053ba4…` | N1.24 fail-closed coordination + fresh-active scheduler ownership | implementation-complete candidate |
 | 041 | 2026-08-22 | backup identity `52cb9ca2…`; planner `c86fe3af…`; rehearsal `16caa03d…`; tests `4ed881a4…`; contract `0dc78c11…`; workflow `796b5cb0…`; readiness `e46c97cf…` | N1.25 recovery identity, cross-generation fencing, non-destructive restore planning, tests + mandatory source gate | implementation-complete candidate; verified Power unchanged pending LOCAL-WIN-03 run |
+| 042 | 2026-08-22 | budget `2b116577…`; build verifier `1b65643e…`; perf contract `35dfa8cc…`; modal test `21b85cb7…`; browser contract `c6fe39ab…`; product gate `4a616965…`; workflow `e4bf0547…`; readiness `d728df74…`; queued run `32531419955` | N1.26 lazy-route/first-load-budget + modal focus regression + executable frontend/build QA + C5 boundary source hardening | implementation-complete candidate; verified Power unchanged pending LOCAL-WIN-03 run |
 
 ---
 
-## 12. Exact next action
+## 13. Exact next action
 
 ```text
 LOCAL-WIN-03 CONSOLIDATED CERTIFICATION
   1. execute latest branch head only on runner LOCAL-WIN-03
   2. verify RUNNER_NAME == LOCAL-WIN-03 and installed PHP/Node/npm toolchain
-  3. run every source/product gate through N1.25 Backup/DR/Upgrade + Unified Source certification
+  3. run every source/product gate through N1.26 Performance + Accessibility + Release + Unified Source certification
   4. inspect exact failed job logs and fix only real failures until green
-  5. after green only: promote N1.18-N1.25 SOURCE DONE where justified
-  6. update canonical ledger, PR #1 and issue #2 source checkpoint
-  7. continue N1.26 Performance + Accessibility + Release source work
+  5. after green only: promote N1.18-N1.26 SOURCE DONE where justified
+  6. sync canonical append-only ledger + PR #1 source checkpoint
 
-TARGET BOUNDARY
-  - issue #2 stays OPEN until rc.93 compatibility + post-install + /login + /admin evidence
+TARGET / RELEASE CLOSURE
+  1. issue #2 stays OPEN until rc.93 compatibility + post-install + /login + /admin evidence
+  2. run full development QA with PHP tests + Vitest + TypeScript + Vite + production asset budgets
+  3. obtain real five-engine database matrix evidence
+  4. obtain controlled provider/identity/API/import/observability/Sentinel/Marketplace/HA evidence where applicable
+  5. perform real disposable-target backup/restore + upgrade rehearsal
+  6. complete C5 real browser/assistive-tech/HTTP/Web Vitals evidence
+  7. complete C6 multi-node/final release evidence and reviewed dependency locks
+  8. only then mark PR Ready, close eligible issues and merge automatically
+
+EVIDENCE RULE
   - LOCAL-WIN-03 source CI never raises Target Power by itself
-  - real backup restore/upgrade rehearsal requires disposable-target evidence
-  - multi-host HA, real DB/provider/SSO/product target evidence remains separately required
+  - N1.26 source checks never substitute for observed WCAG/browser/Web Vitals evidence
+  - N2.0 remains blocked until all required source + target + release evidence is real and exact-source bound
 ```
