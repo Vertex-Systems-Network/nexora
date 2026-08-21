@@ -45,7 +45,8 @@ final class ExtensionController extends Controller
             'id' => $s->id, 'name' => $s->name, 'base_url' => $s->base_url, 'status' => $s->status, 'trusted_only' => $s->trusted_publishers_only, 'items_count' => $s->items_count,
             'last_synced_at' => $s->last_synced_at?->toIso8601String(), 'last_error' => $s->last_error,
         ]);
-        $catalog = MarketplaceCatalogItem::query()->with('source:id,name,status')->whereHas('source', fn ($query) => $query->where('status', 'active'))->latest('synced_at')->limit(100)->get()->map(static fn (MarketplaceCatalogItem $i) => [
+        $freshSource = static fn ($query) => $query->where('status', 'active')->whereNotNull('last_synced_at');
+        $catalog = MarketplaceCatalogItem::query()->with('source:id,name,status,last_synced_at')->whereHas('source', $freshSource)->latest('synced_at')->limit(100)->get()->map(static fn (MarketplaceCatalogItem $i) => [
             'id' => $i->id, 'identifier' => $i->package_identifier, 'name' => $i->name, 'type' => $i->type, 'version' => $i->latest_version, 'description' => $i->description,
             'publisher_key_id' => $i->publisher_key_id, 'source' => $i->source?->name, 'synced_at' => $i->synced_at?->toIso8601String(),
         ]);
@@ -59,7 +60,7 @@ final class ExtensionController extends Controller
                 'installed' => Extension::query()->where('status', '!=', 'uninstalled')->count(),
                 'enabled' => Extension::query()->where('status', 'enabled')->count(),
                 'versions' => ExtensionVersion::query()->count(),
-                'catalog' => MarketplaceCatalogItem::query()->whereHas('source', fn ($query) => $query->where('status', 'active'))->count(),
+                'catalog' => MarketplaceCatalogItem::query()->whereHas('source', $freshSource)->count(),
             ],
             'canManage' => $request->user()?->hasPermission('extensions.manage') ?? false,
             'canInstall' => $request->user()?->hasPermission('extensions.install') ?? false,
@@ -185,8 +186,16 @@ final class ExtensionController extends Controller
             return back()->with('success', 'Marketplace source status is already '.strtolower($next).'.');
         }
 
-        $source->forceFill(['status' => $next])->save();
-        $audit->record('marketplace.source.status_changed', $source, ['status' => $next]);
+        $attributes = ['status' => $next];
+        if ($next === 'active') {
+            $attributes['last_synced_at'] = null;
+            $attributes['last_error'] = null;
+        }
+        $source->forceFill($attributes)->save();
+        $audit->record('marketplace.source.status_changed', $source, [
+            'status' => $next,
+            'fresh_sync_required' => $next === 'active',
+        ]);
 
         return back()->with('success', $next === 'active' ? 'Marketplace source resumed. Synchronize it before staging packages.' : 'Marketplace source paused. Its catalog is hidden and staging is blocked.');
     }
