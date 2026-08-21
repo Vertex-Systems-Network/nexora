@@ -10,7 +10,7 @@ use App\Models\CommerceSubscription;
 use App\Models\Membership;
 use App\Models\MembershipPlan;
 use App\Models\User;
-use App\Nexora\Enterprise\Services\TenantContext;
+use App\Nexora\Enterprise\Services\TenantMemberDirectory;
 use App\Nexora\Enterprise\Validation\TenantExists;
 use App\Nexora\Enterprise\Validation\TenantMemberExists;
 use App\Nexora\Membership\Contracts\MembershipManagerContract;
@@ -23,7 +23,7 @@ use InvalidArgumentException;
 
 final class MembershipController extends Controller
 {
-    public function index(Request $request, TenantContext $tenant): Response
+    public function index(Request $request, TenantMemberDirectory $members): Response
     {
         $query = Membership::query()
             ->with(['plan:id,name', 'user:id,name,email', 'commerceCustomer:id,name,email', 'commerceSubscription:id,status'])
@@ -31,19 +31,6 @@ final class MembershipController extends Controller
         $status = (string) $request->query('status', '');
         if ($status !== '') {
             $query->where('status', $status);
-        }
-
-        $tenantUsers = collect();
-        $tenantId = $tenant->id();
-        if ($tenantId !== null) {
-            $tenantUsers = User::query()
-                ->where('status', 'active')
-                ->whereHas('enterpriseMemberships', fn ($membership) => $membership
-                    ->where('organization_id', $tenantId)
-                    ->where('status', 'active'))
-                ->orderBy('name')
-                ->get(['id', 'name', 'email'])
-                ->map(fn (User $user): array => ['id' => $user->id, 'name' => $user->name.' · '.$user->email]);
         }
 
         return Inertia::render('Admin/Membership/Members', [
@@ -58,7 +45,7 @@ final class MembershipController extends Controller
                 'ends_at' => $membership->ends_at?->toIso8601String(),
             ]),
             'plans' => MembershipPlan::query()->where('status', 'active')->orderBy('name')->get(['id', 'name']),
-            'users' => $tenantUsers,
+            'users' => $members->options(true),
             'customers' => CommerceCustomer::query()->orderBy('name')->get(['id', 'name', 'email'])->map(fn (CommerceCustomer $customer): array => ['id' => $customer->id, 'name' => $customer->name.' · '.$customer->email]),
             'subscriptions' => CommerceSubscription::query()->latest()->limit(200)->get(['id', 'customer_id', 'status'])->map(fn (CommerceSubscription $subscription): array => ['id' => $subscription->id, 'name' => $subscription->status.' · '.substr($subscription->id, 0, 8)]),
             'filters' => ['status' => $status],
