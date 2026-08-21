@@ -15,10 +15,10 @@
 - Installer protocol: `v5.29`
 - Generation: `n1-v5.29`
 - Branch: `dev/n1-0b-core-functional-qa`
-- PR: `#1` — **DRAFT + MERGEABLE**, PR metadata still synchronized through N1.16; N1.17 sync is the current governance action
-- Verified N1.17 source head before this progress update: `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3`
-- Latest fully green source CI: `32508900897`
-- Canonical ledger revision: `2.3` — revision `2.4` synchronization pending in this governance pass
+- PR: `#1` — **DRAFT + MERGEABLE**, N1.17 metadata synchronization pending in this governance pass
+- Current governance head before this progress update: `72a0cbbbcd3b2c2bd91ae1a2a845b9034f324e70`
+- Latest fully green source CI: `32508900897` on N1.17 source head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3`
+- Canonical ledger revision: `2.4`
 - Open blocking issue: `#2 Nexora runtime identity mismatch` — still OPEN
 - Completed source block: `N1.17 SSO / Enterprise Governance` — **SOURCE DONE / TARGET PENDING**
 - Next source block: `N1.18 Public APIs / Webhooks / SDK`
@@ -114,13 +114,8 @@ RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░
 
 - `tests/Feature/Enterprise/EnterpriseIdentityGovernanceTest.php` covers SSO enforcement/break-glass, provider state/protocol binding, secret configuration denial, SCIM token/tenant/identity/privilege lifecycle, invitation replay/role/session semantics and nested impersonation denial.
 - `scripts/enterprise-governance-product-contract-verify.php` is required by Development Readiness and GitHub Actions.
-- Run `32508900897` on head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3` passed:
-  - Certification preflight;
-  - Source Guard;
-  - every previous product contract;
-  - Multisite / Organizations Product Contract;
-  - **SSO / Enterprise Governance Product Contract**;
-  - **Unified Source Certification**.
+- Run `32508900897` on head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3` passed Certification preflight, Source Guard, every previous product contract, Multisite / Organizations Product Contract, **SSO / Enterprise Governance Product Contract** and **Unified Source Certification**.
+- Canonical ledger revision `2.4` commit `72a0cbbbcd3b2c2bd91ae1a2a845b9034f324e70` now records the N1.17 closure, current Power and branch-protection state.
 
 ### Target boundary
 
@@ -142,7 +137,7 @@ Requested target policy:
 - block branch deletion;
 - include administrators unless a deliberate emergency bypass is configured.
 
-The currently connected GitHub action surface can read the branch protection state and mutate repo content/PRs/CI, but it does not expose branch-protection or repository-ruleset mutation. Therefore server-side protection is **not yet claimed as applied**. This remains an external repository-governance action until an authorized branch/ruleset write capability is exposed.
+The authenticated repository user has `admin` permission, but the currently connected GitHub action surface does not expose branch-protection or repository-ruleset mutation. Therefore server-side protection is **not yet claimed as applied**. This remains an external repository-governance action until an authorized branch/ruleset write capability is exposed.
 
 ---
 
@@ -201,20 +196,21 @@ After **every meaningful apply**, update this file in the same pass or immediate
 | 009 | 2026-08-21 | `6856de412a1f483892944b6c91b64e4969506236`; run `32508054237` exposed Source Guard marker drift | Migrated SSO/SCIM Source Guard checks from exact formatting markers to semantic whitespace-tolerant requirements; security contract remained fail-closed | N1.17 stays **90%**; verified Power unchanged pending full green |
 | 010 | 2026-08-21 | `255ed88beb9c2a324408c36eb417c9df244c96f6`; run `32508273140` reached Multisite gate | Made mandatory Apply Log detection section-number independent after dashboard renumbering | N1.17 stays **90%**; verified Power unchanged |
 | 011 | 2026-08-21 | verified head `1b86f3975438e1ba8eb7ede0f7f54fe9e6e088e3`; CI `32508900897` GREEN | N1.17 integrated source closure passed all prior gates + Enterprise Governance contract + Unified Source Certification | N1.17 **90% -> 100% SOURCE DONE**; Source Power **98.5% -> 99.0%**; Project Power **76.3% -> 76.5%**; Target remains **50.0%** |
+| 012 | 2026-08-21 | ledger head `72a0cbbbcd3b2c2bd91ae1a2a845b9034f324e70`; governance CI pending | Canonical ledger synchronized to revision 2.4 with N1.17 closure, Power, next N1.18 block and explicit `main protected=false` server-governance evidence | Power unchanged; governance documentation does not increase Source/Target readiness |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-N1.17 GOVERNANCE SYNC
-  1. update NEXORA_AI_PROJECT_STATE.md to revision 2.4 and append N1.17 history
-  2. synchronize PR #1 title/body through N1.17; keep DRAFT
-  3. post issue #2 source-only checkpoint; keep OPEN without real rc.93 recovery evidence
-  4. require final governance/progress source CI GREEN
+N1.17 FINAL GOVERNANCE SYNC
+  1. synchronize PR #1 title/body through N1.17; keep DRAFT
+  2. post issue #2 source-only checkpoint; keep OPEN without real rc.93 recovery evidence
+  3. require final governance/progress source CI GREEN on the latest branch head
 
 MAIN BRANCH PROTECTION
   - direct evidence currently says main protected=false
+  - authenticated repository user has admin permission
   - apply GitHub server-side ruleset/protection only through an authorized settings mutation capability
   - desired rule: PR required + Source certification required + stale-review dismissal + review resolution + no force push/delete + admin enforcement
   - do not substitute a source workflow for actual branch protection
