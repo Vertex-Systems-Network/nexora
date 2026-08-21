@@ -7,6 +7,7 @@ namespace App\Nexora\Migrations\Services;
 use App\Jobs\ProcessContentMigrationJob;
 use App\Models\ContentMigrationRun;
 use App\Models\User;
+use App\Nexora\Enterprise\Services\TenantAuthorizationService;
 use App\Nexora\Enterprise\Services\TenantContext;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\UploadedFile;
@@ -16,13 +17,19 @@ use Illuminate\Validation\ValidationException;
 
 final class ContentMigrationManager
 {
-    public function __construct(private readonly TenantContext $tenant) {}
+    public function __construct(
+        private readonly TenantContext $tenant,
+        private readonly TenantAuthorizationService $authorization,
+    ) {}
 
     public function stageWordPressWxr(UploadedFile $file, User $actor): ContentMigrationRun
     {
         $organization = $this->tenant->organization();
         if (! $organization || $organization->status !== 'active' || $actor->status !== 'active') {
             throw ValidationException::withMessages(['source' => 'An active organization and active user are required.']);
+        }
+        if (! $this->authorization->allows($actor, 'documents.create')) {
+            throw ValidationException::withMessages(['source' => 'You are not allowed to import documents for this organization.']);
         }
 
         $bytes = $file->getSize();
@@ -57,7 +64,7 @@ final class ContentMigrationManager
                 if (! Storage::disk('local')->exists($existing->source_path)) {
                     $this->restageExisting($existing, $file);
                 }
-                return $this->resume($existing);
+                return $this->resume($existing, $actor);
             }
             if ($existing->status === 'queued') {
                 $this->dispatch($existing);
@@ -100,8 +107,11 @@ final class ContentMigrationManager
         return $run->refresh();
     }
 
-    public function resume(ContentMigrationRun $run): ContentMigrationRun
+    public function resume(ContentMigrationRun $run, User $actor): ContentMigrationRun
     {
+        if (! $this->authorization->allows($actor, 'documents.create')) {
+            throw ValidationException::withMessages(['run' => 'You are not allowed to resume document imports for this organization.']);
+        }
         if (! in_array($run->status, ['failed', 'queued', 'completed_with_errors'], true)) {
             throw ValidationException::withMessages(['run' => 'Only failed, partial or queued migrations can be resumed.']);
         }
