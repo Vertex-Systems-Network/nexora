@@ -66,7 +66,7 @@ final class DataConnectionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateConnectionPayload($request, true);
-        $this->assertEndpointDoesNotContainCredentials((string) $validated['endpoint']);
+        $this->assertEndpointDoesNotContainCredentials((string) ($validated['endpoint'] ?? ''));
         $definition = $this->catalog->get((string) $validated['driver']);
         $this->assertUniqueName((string) $definition['provider'], (string) $validated['name']);
 
@@ -77,7 +77,7 @@ final class DataConnectionController extends Controller
             'purpose' => 'auxiliary',
             'status' => ($definition['available'] ?? false) ? 'untested' : 'adapter-missing',
             'is_enabled' => false,
-            'endpoint' => $validated['endpoint'],
+            'endpoint' => $validated['endpoint'] ?? null,
             'database' => $validated['database'] ?? null,
             'username' => $validated['username'] ?? null,
             'secret_payload' => array_filter([
@@ -150,8 +150,8 @@ final class DataConnectionController extends Controller
 
     private function updateConfiguration(Request $request, DataConnection $connection): RedirectResponse
     {
-        $validated = $this->validateConnectionPayload($request, false);
-        $this->assertEndpointDoesNotContainCredentials((string) $validated['endpoint']);
+        $validated = $this->validateConnectionPayload($request, false, (string) $connection->driver);
+        $this->assertEndpointDoesNotContainCredentials((string) ($validated['endpoint'] ?? ''));
         $this->assertUniqueName((string) $connection->provider, (string) $validated['name'], $connection->id);
 
         $secret = (array) ($connection->secret_payload ?? []);
@@ -166,7 +166,7 @@ final class DataConnectionController extends Controller
         $nextOptions = array_filter($nextOptions, static fn ($value): bool => $value !== null && $value !== '');
 
         $connectivityChanged =
-            (string) $connection->endpoint !== (string) $validated['endpoint']
+            (string) ($connection->endpoint ?? '') !== (string) ($validated['endpoint'] ?? '')
             || (string) ($connection->database ?? '') !== (string) ($validated['database'] ?? '')
             || (string) ($connection->username ?? '') !== (string) ($validated['username'] ?? '')
             || $nextOptions !== $options
@@ -174,7 +174,7 @@ final class DataConnectionController extends Controller
 
         $attributes = [
             'name' => $validated['name'],
-            'endpoint' => $validated['endpoint'],
+            'endpoint' => $validated['endpoint'] ?? null,
             'database' => $validated['database'] ?? null,
             'username' => $validated['username'] ?? null,
             'secret_payload' => $nextSecret,
@@ -206,23 +206,50 @@ final class DataConnectionController extends Controller
     }
 
     /** @return array<string,mixed> */
-    private function validateConnectionPayload(Request $request, bool $includeDriver): array
+    private function validateConnectionPayload(Request $request, bool $includeDriver, ?string $existingDriver = null): array
     {
+        $driverKey = trim((string) ($includeDriver ? $request->input('driver', '') : $existingDriver));
+        $definition = null;
+        if ($driverKey !== '') {
+            try {
+                $definition = $this->catalog->get($driverKey);
+            } catch (\InvalidArgumentException) {
+                $definition = null;
+            }
+        }
+
+        $endpointRequired = (bool) ($definition['endpoint_required'] ?? true);
+        $databaseSupported = (bool) ($definition['database_supported'] ?? true);
+        $usernamePasswordSupported = (bool) ($definition['username_password_supported'] ?? true);
+        $regionRequired = (bool) ($definition['region_required'] ?? false);
+        $awsKeyPairSupported = (bool) ($definition['aws_key_pair_supported'] ?? false);
+
         $rules = [
             'name' => ['required', 'string', 'max:120'],
-            'endpoint' => ['required', 'string', 'max:500'],
-            'database' => ['nullable', 'string', 'max:180'],
-            'username' => ['nullable', 'string', 'max:180'],
-            'password' => ['nullable', 'string', 'max:1000'],
-            'region' => ['nullable', 'string', 'max:80'],
-            'access_key' => ['nullable', 'string', 'max:500'],
-            'secret_key' => ['nullable', 'string', 'max:1000'],
+            'endpoint' => [$endpointRequired ? 'required' : 'nullable', 'string', 'max:500'],
+            'database' => [$databaseSupported ? 'nullable' : 'prohibited', 'string', 'max:180'],
+            'username' => [$usernamePasswordSupported ? 'nullable' : 'prohibited', 'string', 'max:180'],
+            'password' => [$usernamePasswordSupported ? 'nullable' : 'prohibited', 'string', 'max:1000'],
+            'region' => [$regionRequired ? 'required' : 'nullable', 'string', 'max:80'],
+            'access_key' => [$awsKeyPairSupported ? 'nullable' : 'prohibited', 'string', 'max:500'],
+            'secret_key' => [$awsKeyPairSupported ? 'nullable' : 'prohibited', 'string', 'max:1000'],
         ];
         if ($includeDriver) {
             $rules['driver'] = ['required', 'string', Rule::in($this->catalog->keys())];
         }
 
-        return $request->validate($rules);
+        $validated = $request->validate($rules);
+        if ($awsKeyPairSupported) {
+            $accessKey = trim((string) ($validated['access_key'] ?? ''));
+            $secretKey = (string) ($validated['secret_key'] ?? '');
+            if (($accessKey === '') !== ($secretKey === '')) {
+                throw ValidationException::withMessages([
+                    'access_key' => 'AWS access key and secret key must be entered together, or both left blank to use the runtime IAM credential chain.',
+                ]);
+            }
+        }
+
+        return $validated;
     }
 
     private function assertUniqueName(string $provider, string $name, ?int $ignoreId = null): void
