@@ -36,11 +36,18 @@ final readonly class ForgeExtensionScaffolder
         }
 
         $workspace = base_path('extensions');
+        if (file_exists($workspace) && ! is_dir($workspace)) {
+            throw new RuntimeException('Forge workspace path exists but is not a directory.');
+        }
         if (is_link($workspace)) {
             throw new RuntimeException('Forge workspace may not be a symbolic link.');
         }
+
         $target = PortablePath::join($workspace, $identifier);
         PortablePath::assertNoExistingSymlinkTraversal($workspace, $target);
+        if (file_exists($target) && ! is_dir($target)) {
+            throw new RuntimeException('Forge destination exists but is not a directory.');
+        }
 
         $files = array_keys($this->files($identifier, $name, $type));
         sort($files, SORT_STRING);
@@ -81,10 +88,16 @@ final readonly class ForgeExtensionScaffolder
             $destination = PortablePath::join($target, $relative);
             PortablePath::assertNoExistingSymlinkTraversal($target, $destination);
             File::ensureDirectoryExists(dirname($destination), 0755, true);
+            PortablePath::assertNoExistingSymlinkTraversal($target, $destination);
             if (is_link($destination)) {
                 throw new RuntimeException("Forge refuses to overwrite symbolic link [{$relative}].");
             }
-            File::put($destination, $content, true);
+            if (file_exists($destination) && ! is_file($destination)) {
+                throw new RuntimeException("Forge generated path [{$relative}] exists but is not a regular file.");
+            }
+            if (File::put($destination, $content, true) === false) {
+                throw new RuntimeException("Forge could not write generated file [{$relative}].");
+            }
         }
 
         return [
@@ -118,17 +131,21 @@ final readonly class ForgeExtensionScaffolder
             'type' => 'nexora-extension',
             'require' => ['php' => '^8.3'],
         ];
+        $managedFiles = [
+            self::MARKER,
+            'README.md',
+            'composer.json',
+            'database/migrations/.gitkeep',
+            'nexora.json',
+            'resources/.gitkeep',
+            'src/.gitkeep',
+            'tests/.gitkeep',
+        ];
+        sort($managedFiles, SORT_STRING);
         $marker = [
             'schema' => 'nexora.forge.scaffold.v1',
             'identifier' => $identifier,
-            'managed_files' => [
-                self::MARKER,
-                'README.md',
-                'composer.json',
-                'database/migrations/.gitkeep',
-                'nexora.json',
-                'tests/.gitkeep',
-            ],
+            'managed_files' => $managedFiles,
         ];
 
         return [
@@ -137,6 +154,8 @@ final readonly class ForgeExtensionScaffolder
             'composer.json' => $this->json($composer),
             'database/migrations/.gitkeep' => '',
             'nexora.json' => $this->json($manifest),
+            'resources/.gitkeep' => '',
+            'src/.gitkeep' => '',
             'tests/.gitkeep' => '',
         ];
     }
