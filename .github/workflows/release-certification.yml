@@ -2,11 +2,13 @@ name: Nexora release certification
 
 # Certification runs on the repository's attached self-hosted runner so GitHub-hosted minute limits
 # do not block source verification. Pull-request certification is restored for the active development flow.
+# The active development branch is also temporarily push-triggered so its new self-hosted definition can
+# certify itself before this workflow reaches main; remove that extra branch trigger after a stable green run.
 on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: [main, dev/n1-0b-core-functional-qa]
   workflow_dispatch:
 
 permissions:
