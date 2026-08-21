@@ -95,7 +95,7 @@ if ($full && $vendorReady) {
     $run('routes', 'Route registration', [PHP_BINARY, 'artisan', 'route:list', '--json']);
 }
 if ($tests && $vendorReady) {
-    $run('phpunit', 'Full Laravel/PHPUnit suite', [PHP_BINARY, 'artisan', 'test', '--colors=never']);
+    $run('phpunit', 'Full Laravel/PHPUnit suite', [PHP_BINARY, 'artisan', 'test', '--colors=never', '--stop-on-failure']);
 }
 if ($tests && $nodeReady) {
     $run('vitest', 'Frontend Vitest suite', ['npm', 'run', 'test']);

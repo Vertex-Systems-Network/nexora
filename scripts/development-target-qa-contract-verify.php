@@ -28,7 +28,7 @@ $docs = $read('docs/DEVELOPMENT_TARGET_QA.md');
 foreach ([
     "in_array('--tests', \$argv, true)" => 'explicit full-PHPUnit opt-in',
     "in_array('--evidence', \$argv, true)" => 'durable evidence opt-in',
-    "[PHP_BINARY, 'artisan', 'test', '--colors=never']" => 'real Laravel/PHPUnit execution',
+    "[PHP_BINARY, 'artisan', 'test', '--colors=never', '--stop-on-failure']" => 'real Laravel/PHPUnit fail-fast execution',
     "nexoraComputeSourceAttestation(\$root)" => 'source identity in target evidence',
     "storage/app/nexora/qa/development-readiness.json" => 'canonical development QA evidence path',
     "'scope' => 'development-target-functional-qa'" => 'evidence scope identity',
@@ -88,5 +88,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Development Target QA Contract] PASS — development readiness can execute real PHPUnit/build checks, persist source-bound detail-minimal evidence, compose with the disposable DB matrix, expose a one-command operator workflow, and final PR merging remains fail-closed on required target evidence.'.PHP_EOL,
+    '[Nexora Development Target QA Contract] PASS — development readiness can execute real fail-fast PHPUnit/build checks, persist source-bound detail-minimal evidence, compose with the disposable DB matrix, expose a one-command operator workflow, and final PR merging remains fail-closed on required target evidence.'.PHP_EOL,
 );
