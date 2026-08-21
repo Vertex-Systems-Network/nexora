@@ -18,7 +18,7 @@ final readonly class AutomationModule implements ModuleContract
         return new ModuleManifest(
             identifier:'nexora.automation',
             name:'Nexora Forms, Automation & Webhooks',
-            version:'0.28.0',
+            version:'0.27.1',
             description:'Tenant-native forms feeding the event-driven workflow runtime with conditions, retry-safe actions and signed webhook integrations.',
             core:true,
             loadOrder:55,
