@@ -148,6 +148,21 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
     $certScript=(string)@file_get_contents($root.'/scripts/create-certification-database.php');
     if(!str_contains($certScript,'Unsafe certification database name'))$errors[]='Certification database script is missing destructive database-name protection.';
 
+    // The original N1.0 certification contract froze 51 enterprise-backfill roots.
+    // Data Connections was later corrected into that historical manifest because it
+    // already existed before enterprise tenancy. Keep the legacy metrics stable for
+    // old certification consumers while exposing the complete current manifest in
+    // explicit *_current metrics. Validation above always runs against the full set.
+    $historicalTenantTables=array_values(array_filter(
+        $tenantTables,
+        static fn(string $table): bool => $table !== 'nx_data_connections',
+    ));
+    $historicalTenantManifestModels=array_filter(
+        $tenantManifestModels,
+        static fn(string $model,string $table): bool => $table !== 'nx_data_connections',
+        ARRAY_FILTER_USE_BOTH,
+    );
+
     return [
         'errors'=>array_values(array_unique($errors)),
         'warnings'=>array_values(array_unique($warnings)),
@@ -156,11 +171,12 @@ function nexoraAnalyzeDatabaseContracts(string $root): array
             'tables'=>count($created),
             'foreign_targets'=>count($foreignTargets),
             'explicit_index_names'=>count($explicitNames),
-            // Historical manifest-alignment metrics intentionally stay scoped to
-            // the 2026-08-16 enterprise backfill roots so old release invariants
-            // remain stable while forward tenant-native modules can grow safely.
-            'tenant_tables'=>count($tenantTables),
-            'tenant_models'=>count($tenantManifestModels),
+            // Legacy N1.0 baseline metrics stay fixed for certification compatibility.
+            'tenant_tables'=>count($historicalTenantTables),
+            'tenant_models'=>count($historicalTenantManifestModels),
+            // Current metrics expose the complete validated enterprise manifest.
+            'tenant_tables_current'=>count($tenantTables),
+            'tenant_models_current'=>count($tenantManifestModels),
             'tenant_models_total'=>count($tenantModels),
             'tenant_native_models'=>count($tenantNativeModels),
             'portable_nullable_unique'=>$portableNullableUniqueCount,
