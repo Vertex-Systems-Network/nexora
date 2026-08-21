@@ -26,6 +26,7 @@ $organization = $read('resources/js/admin/components/OrganizationSwitcher.tsx');
 $language = $read('resources/js/admin/components/LanguageSwitcher.tsx');
 $theme = $read('resources/js/admin/components/ThemeSwitcher.tsx');
 $toast = $read('resources/js/admin/providers/ToastProvider.tsx');
+$routeProgress = $read('resources/js/admin/providers/RouteProgress.tsx');
 $select = $read('resources/js/admin/ui/untitled/select.tsx');
 $pageHeader = $read('resources/js/admin/components/PageHeader.tsx');
 
@@ -85,6 +86,17 @@ foreach ([
 if ($toast !== '' && str_contains($toast, '●')) $errors[] = 'ToastProvider must use the canonical icon layer instead of a literal status glyph.';
 
 foreach ([
+    'const showTimer = useRef<number | null>(null)' => 'route progress delayed-show timer',
+    'const hideTimer = useRef<number | null>(null)' => 'route progress delayed-hide timer',
+    'const clearTimers = () =>' => 'route progress timer cleanup',
+    'removeStart();' => 'route progress start-listener cleanup',
+    'removeFinish();' => 'route progress finish-listener cleanup',
+    'aria-valuetext="Loading"' => 'indeterminate progress accessible state',
+] as $needle => $label) {
+    if ($routeProgress !== '' && ! str_contains($routeProgress, $needle)) $errors[] = "Route progress contract missing: {$label}.";
+}
+
+foreach ([
     'isInvalid={Boolean(error)}' => 'select invalid state',
     'slot="errorMessage"' => 'select error-message slot',
     'role="alert"' => 'select error announcement',
@@ -107,5 +119,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Admin UX Product Contract] PASS — responsive navigation/tenant/language controls, appearance, global feedback, select validation, shared interaction primitives and base browser accessibility contracts are aligned.'.PHP_EOL,
+    '[Nexora Admin UX Product Contract] PASS — responsive navigation/tenant/language controls, appearance, global feedback, route-progress lifecycle, select validation, shared interaction primitives and base browser accessibility contracts are aligned.'.PHP_EOL,
 );
