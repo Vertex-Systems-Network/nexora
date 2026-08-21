@@ -151,5 +151,8 @@ jobs:
       - name: Backup / DR / Upgrade product source contract
         run: php scripts/backup-dr-upgrade-product-contract-verify.php
 
+      - name: Performance + Accessibility + Release product source contract
+        run: php scripts/performance-accessibility-release-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
