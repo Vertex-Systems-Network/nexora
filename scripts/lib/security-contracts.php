@@ -73,16 +73,28 @@ function nexoraAnalyzeSecurityContracts(string $root): array
         if (! str_contains($tenantBinding, $marker)) $errors[] = 'Tenant-bound route model assertion is missing: '.$marker;
     }
 
-    foreach (['state_hash', 'expires_at', 'hash_equals', "status==='active'", "where('status','active')", 'rotateAuthenticatedSession'] as $marker) {
+    foreach (['state_hash', 'expires_at', 'hash_equals', 'rotateAuthenticatedSession'] as $marker) {
         if (! str_contains($sso, $marker)) $errors[] = 'SSO anti-fixation/state/membership boundary missing: '.$marker;
+    }
+    foreach ([
+        '/status\s*===\s*["\']active["\']/' => 'active organization status assertion',
+        '/where\(\s*["\']status["\']\s*,\s*["\']active["\']\s*\)/' => 'active SSO membership query',
+    ] as $pattern => $label) {
+        if (preg_match($pattern, $sso) !== 1) $errors[] = 'SSO anti-fixation/state/membership boundary missing: '.$label;
     }
     if (str_contains($sso, 'Auth::login($user,true)')) $errors[] = 'Enterprise SSO must not silently force a persistent remember login.';
 
     foreach (['bearerToken()', 'Invalid SCIM bearer token'] as $marker) {
         if (! str_contains($scim, $marker)) $errors[] = 'SCIM bearer authentication missing: '.$marker;
     }
-    foreach (['token_hash', "hash('sha256',\$token)", "hash('sha256',\$plain)"] as $marker) {
-        if (! str_contains($scimTokens, $marker)) $errors[] = 'SCIM token hash-only persistence boundary missing: '.$marker;
+    if (! str_contains($scimTokens, 'token_hash')) {
+        $errors[] = 'SCIM token hash-only persistence boundary missing: token_hash';
+    }
+    foreach ([
+        '/hash\(\s*["\']sha256["\']\s*,\s*\$token\s*\)/' => 'token SHA-256 persistence',
+        '/hash\(\s*["\']sha256["\']\s*,\s*\$plain\s*\)/' => 'bearer SHA-256 lookup',
+    ] as $pattern => $label) {
+        if (preg_match($pattern, $scimTokens) !== 1) $errors[] = 'SCIM token hash-only persistence boundary missing: '.$label;
     }
     if (preg_match('/\$target->update\s*\(\s*\[[^\]]*["\']status["\']/s', $scim) === 1) {
         $errors[] = 'Organization-scoped SCIM PATCH must not suspend the global user account.';
@@ -92,7 +104,6 @@ function nexoraAnalyzeSecurityContracts(string $root): array
         if (! str_contains($webhook, $marker)) $errors[] = 'Inbound webhook authentication/replay boundary missing: '.$marker;
     }
 
-
     foreach (['rotateAuthenticatedSession', "status !== 'active'", 'Auth::login($target, false)', 'Auth::login($actor, false)'] as $marker) {
         if (! str_contains($impersonation, $marker)) $errors[] = 'Impersonation privilege-boundary hardening missing: '.$marker;
     }
@@ -100,7 +111,6 @@ function nexoraAnalyzeSecurityContracts(string $root): array
     foreach (['regenerate()', 'regenerateToken()', 'invalidate()', 'revokeAllSessions', 'revokeOtherSessions'] as $marker) {
         if (! str_contains($sessionManager, $marker)) $errors[] = 'Central session security manager is incomplete: '.$marker;
     }
-
 
     $tenantValidationTargets = [
         'nx_commerce_customers','nx_commerce_prices','nx_documents','nx_crm_contacts','nx_media_folders',
@@ -157,7 +167,7 @@ function nexoraAnalyzeSecurityContracts(string $root): array
         'metrics' => [
             'csrf_exceptions' => $csrfExceptions,
             'session_rotation_paths' => substr_count($login.$register.$sso, 'rotateAuthenticatedSession'),
-            'external_auth_boundaries' => 3, // SSO, SCIM, inbound webhook
+            'external_auth_boundaries' => 3,
             'tenant_route_binding_guards' => str_contains($routes, 'EnsureTenantRouteBinding::class') ? 1 : 0,
             'raw_tenant_exists' => $rawTenantExists,
             'raw_tenant_member_exists' => $rawTenantMemberExists,
