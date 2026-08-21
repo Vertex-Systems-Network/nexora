@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\ApplyPerformanceHeaders;
+use App\Http\Middleware\AuthenticateApiToken;
 use App\Http\Middleware\ConfigureTrustedProxies;
 use App\Http\Middleware\EnforceRequestLimits;
 use App\Http\Middleware\AssignRequestId;
@@ -10,6 +11,7 @@ use App\Http\Middleware\EnsureAdminAccess;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RedirectIfNotInstalled;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\RequireApiAbility;
 use App\Http\Middleware\RequirePermission;
 use App\Http\Middleware\ResolveEnterpriseOrganization;
 use App\Http\Middleware\RuntimeNodeHeartbeat;
@@ -24,6 +26,7 @@ use Illuminate\Auth\AuthenticationException;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -35,6 +38,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => EnsureAdminAccess::class,
             'permission' => RequirePermission::class,
+            'api.token' => AuthenticateApiToken::class,
+            'api.ability' => RequireApiAbility::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
