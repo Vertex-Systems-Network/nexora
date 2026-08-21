@@ -190,6 +190,7 @@ if ($page !== '' && preg_match('/<(button|input|select|textarea)\b/', $page) ===
 foreach ([
     'test_pausing_source_hides_catalog_and_blocks_staging' => 'pause/visibility/staging regression',
     'test_resuming_source_requires_fresh_sync_before_catalog_or_staging' => 'resume freshness regression',
+    'test_staging_permission_matches_the_owning_package_engine' => 'owning-engine staging permission regression',
     'test_source_must_be_paused_before_removal_and_catalog_cache_cascades' => 'safe source deletion regression',
     'test_marketplace_status_only_accepts_known_lifecycle_states' => 'source lifecycle allow-list regression',
 ] as $needle => $label) {
