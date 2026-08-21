@@ -17,8 +17,9 @@
 - Actions certification runner: **ONLY `LOCAL-WIN-03`** via `runs-on: [self-hosted, LOCAL-WIN-03]` plus a fail-closed `%RUNNER_NAME% == LOCAL-WIN-03` runtime assertion.
 - `LOCAL-WIN-03` must have a custom GitHub Actions runner label named exactly `LOCAL-WIN-03`; if that label is absent, certification intentionally remains queued rather than falling back to another self-hosted runner.
 - Workflow shell: `cmd` for repository `run:` steps, avoiding host Windows PowerShell ExecutionPolicy dependence.
+- N1.24 implementation head before this progress-only commit: `4c053ba4f1d2476fbf048428c9d6c7abde15848a`.
 - PR certification trigger: restored; temporary dev-branch push trigger remains during runner stabilization.
-- Ledger: `2.4` — governance sync for N1.18–N1.23 and dedicated-runner policy pending consolidated certification result
+- Ledger: `2.4` — governance sync for N1.18–N1.24 and dedicated-runner policy pending consolidated certification result
 - Issue #2: **OPEN**
 - N1.18 Public APIs / Webhooks / SDK: implementation complete / certification pending
 - N1.19 Import / Export / WordPress migrations: implementation complete / certification pending
@@ -26,6 +27,7 @@
 - N1.21 Forge / Developer Experience: implementation complete candidate / certification pending
 - N1.22 Sentinel 2.0: first trust-hardening workflow implementation complete candidate / certification pending
 - N1.23 Marketplace 2.0: first generation/authorization/transfer hardening workflow implementation complete candidate / certification pending
+- N1.24 Cloud / HA / Distributed Runtime: first coordination/leadership hardening workflow implementation complete candidate / certification pending
 
 ---
 
@@ -50,10 +52,11 @@ Verified Power remains unchanged. Self-hosted source certification can promote S
 | N1.18 Public APIs/Webhooks/SDK | implementation complete | 0% current target | certification pending |
 | N1.19 Import/Export/WP migrations | implementation complete | 0% current target | certification pending |
 | N1.20 Observability | implementation complete | 0% current target | certification pending |
-| N1.21 Forge / Developer Experience | implementation complete candidate | 0% current target | SELF-HOSTED CERTIFICATION PENDING |
-| N1.22 Sentinel 2.0 | first trust-hardening workflow implementation complete candidate | 0% current target | SELF-HOSTED CERTIFICATION PENDING |
-| N1.23 Marketplace 2.0 | first hardening workflow implementation complete candidate | 0% current target | **LOCAL-WIN-03 CERTIFICATION PENDING** |
-| N1.24–N1.26 | planned/partial | 0% | Later roadmap |
+| N1.21 Forge / Developer Experience | implementation complete candidate | 0% current target | LOCAL-WIN-03 CERTIFICATION PENDING |
+| N1.22 Sentinel 2.0 | first trust-hardening workflow implementation complete candidate | 0% current target | LOCAL-WIN-03 CERTIFICATION PENDING |
+| N1.23 Marketplace 2.0 | first hardening workflow implementation complete candidate | 0% current target | LOCAL-WIN-03 CERTIFICATION PENDING |
+| N1.24 Cloud / HA / Distributed Runtime | first coordination/leadership hardening workflow implementation complete candidate | 0% current target | **LOCAL-WIN-03 CERTIFICATION PENDING** |
+| N1.25–N1.26 | planned/partial | 0% | Later roadmap |
 
 ---
 
@@ -133,13 +136,31 @@ Consequences:
 
 ---
 
-## 8. Main protection / target blockers
+## 8. N1.24 Cloud / HA / Distributed Runtime implementation checkpoint
+
+- Existing Cloud foundation retained: node identity/heartbeat, runtime topology, health/readiness, distributed lock abstraction, scheduler leadership, database leases, process/runtime fingerprints and HA rehearsal services.
+- Critical fail-open coordination defect closed: `RuntimeLeaseManager::acquireOrRenew()` no longer returns success when `nx_runtime_leases` is unavailable.
+- Barrier-aware distributed activity has the same fail-closed boundary; missing lease storage can no longer imply that a maintenance/recovery barrier is absent or that this node owns the work.
+- Normal owner-bound `release()` remains bootstrap-safe and no-ops when lease storage does not exist.
+- Lease acquisition continues to use transaction + `lockForUpdate()` and rejects a live competing owner; controlled release permits failover to a new owner.
+- `HaReadinessService` no longer treats an arbitrary unexpired `scheduler-leader` row as sufficient. The lease owner must resolve to an observed runtime node that is active and has a heartbeat inside the configured freshness window.
+- Missing lease/node tables, ghost owners, stale owners and inactive owners all fail the scheduler-leader readiness check.
+- Scheduled product work continues to use shared `ClusterLeadership`; node/scheduler process heartbeats intentionally remain non-leader-gated so every runtime reports itself.
+- Public health probes retain bounded generic healthy/unhealthy output and do not expose raw exception messages.
+- `tests/Feature/Cloud/DistributedRuntimeHardeningTest.php` covers missing-table fail-closed lease/barrier acquisition plus real lease mutual exclusion and failover after owner release.
+- `scripts/cloud-ha-product-contract-verify.php` guards coordination fail-closed semantics, serialized ownership, fresh active scheduler owner readiness, leader-gated schedules and independent heartbeats.
+- Cloud / HA product contract is required by Development Readiness and the dedicated `LOCAL-WIN-03` release workflow.
+- This is SOURCE implementation only; multi-host HA target certification still requires real independent-node evidence and is not inferred from static/one-host tests.
+
+---
+
+## 9. Main protection / target blockers
 
 `main` remains reported `protected=false`; current connector exposes no branch/ruleset mutation endpoint. Desired policy remains PR required + Source certification + stale review dismissal + review/conversation resolution + no force push/delete + admin enforcement. Issue #2 remains OPEN. Target Power remains 50%.
 
 ---
 
-## 9. Apply Log
+## 10. Apply Log
 
 | Apply | Date | Evidence | Change | Power impact |
 |---:|---|---|---|---|
@@ -155,23 +176,24 @@ Consequences:
 | 037 | 2026-08-22 | contract correction `06750699…` | fixed PHP interpolation-sensitive Sentinel contract needles | verified Power unchanged pending consolidated run |
 | 038 | 2026-08-22 | migration `372a551f…`; catalog `62a2d4aa…`; stager `85a319e7…`; controller `b0e42d2c…`; config `14eedb5d…`; tests `512f2ad2…`; contract `c635a2fc…`; readiness `66bf801f…`; workflow `eac15d72…`; base contract `3c170397…` | N1.23 bounded catalog download, explicit atomic sync generation, fail-closed legacy/resume freshness, tenant-aware dynamic stage permission and compatibility-gate migration | implementation-complete candidate; verified Power unchanged pending consolidated run |
 | 039 | 2026-08-22 | runner restriction `ea7b87a8…` | certification pinned exclusively to `LOCAL-WIN-03` with custom-label scheduling + runtime runner-name assertion; other local runners invalidated as certification evidence | verified Power unchanged pending LOCAL-WIN-03 run |
+| 040 | 2026-08-22 | lease fix `780a169a…`; HA readiness `820c65d8…`; tests `44367739…`; contract `19e4336b…`; workflow `9d166d69…`; readiness `4c053ba4…` | N1.24 fail-closed coordination, fresh-active scheduler ownership, focused regression coverage and mandatory Cloud/HA source gate | implementation-complete candidate; verified Power unchanged pending LOCAL-WIN-03 run |
 
 ---
 
-## 10. Exact next action
+## 11. Exact next action
 
 ```text
 LOCAL-WIN-03 CONSOLIDATED CERTIFICATION
   1. execute latest branch head only on runner LOCAL-WIN-03
   2. verify RUNNER_NAME == LOCAL-WIN-03 and installed PHP/Node/npm toolchain
-  3. run every source/product gate through Sentinel 2.0 + Marketplace 2.0 + Unified Source certification
+  3. run every source/product gate through Sentinel 2.0 + Marketplace 2.0 + Cloud/HA + Unified Source certification
   4. inspect exact failed job logs and fix only real failures until green
-  5. after green only: promote N1.18-N1.23 SOURCE DONE where justified
+  5. after green only: promote N1.18-N1.24 SOURCE DONE where justified
   6. update canonical ledger, PR #1 and issue #2 source checkpoint
-  7. continue N1.24 Cloud / HA / Distributed Runtime
+  7. continue N1.25 Backup / DR / Upgrade Certification
 
 TARGET BOUNDARY
   - issue #2 stays OPEN until rc.93 compatibility + post-install + /login + /admin evidence
   - LOCAL-WIN-03 source CI never raises Target Power by itself
-  - real DB/provider/SSO/product target evidence remains separately required
+  - multi-host HA, real DB/provider/SSO/product target evidence remains separately required
 ```
