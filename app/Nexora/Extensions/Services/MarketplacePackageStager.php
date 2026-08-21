@@ -8,11 +8,13 @@ use App\Models\MarketplaceCatalogItem;
 use App\Models\QuarantinePackage;
 use App\Models\SupplyChainArtifact;
 use App\Models\TrustedPublisher;
+use App\Models\User;
 use App\Nexora\Automation\Services\WebhookUrlPolicy;
 use App\Nexora\Foundation\Network\ApprovedHttpClient;
 use App\Nexora\Foundation\Transfers\TransferSafety;
 use App\Nexora\Security\Sentinel\Support\QuarantineManager;
 use App\Nexora\Security\Sentinel\Support\ScanRecorder;
+use Illuminate\Auth\Access\AuthorizationException;
 use RuntimeException;
 
 final readonly class MarketplacePackageStager
@@ -28,6 +30,7 @@ final readonly class MarketplacePackageStager
 
     public function stage(MarketplaceCatalogItem $item, ?int $userId): QuarantinePackage
     {
+        $this->authorizeStage($item, $userId);
         $item->loadMissing('source');
         if (! $item->source) {
             throw new RuntimeException('Marketplace source is no longer available.');
@@ -107,6 +110,19 @@ final readonly class MarketplacePackageStager
             return $package;
         } finally {
             if (is_file($temp)) @unlink($temp);
+        }
+    }
+
+    private function authorizeStage(MarketplaceCatalogItem $item, ?int $userId): void
+    {
+        if ($userId === null) {
+            throw new AuthorizationException('Marketplace package staging requires an authenticated operator.');
+        }
+
+        $user = User::query()->find($userId);
+        $requiredPermission = $item->type === 'theme' ? 'themes.install' : 'extensions.install';
+        if (! $user || ! $user->hasPermission($requiredPermission)) {
+            throw new AuthorizationException('You do not have permission to stage this Marketplace package type.');
         }
     }
 }
