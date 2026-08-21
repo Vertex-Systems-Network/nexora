@@ -10,9 +10,7 @@ use XMLReader;
 
 final class WordPressWxrReader
 {
-    /**
-     * @return Generator<int,array<string,mixed>>
-     */
+    /** @return Generator<int,array<string,mixed>> */
     public function items(string $path): Generator
     {
         if (! class_exists(XMLReader::class)) {
@@ -57,19 +55,9 @@ final class WordPressWxrReader
     {
         $itemDepth = $reader->depth;
         $data = [
-            'title' => '',
-            'link' => '',
-            'guid' => '',
-            'creator' => '',
-            'post_id' => '',
-            'post_date' => '',
-            'status' => 'draft',
-            'post_name' => '',
-            'post_type' => '',
-            'content' => '',
-            'excerpt' => '',
-            'attachment_url' => '',
-            'terms' => [],
+            'title' => '', 'link' => '', 'guid' => '', 'creator' => '', 'post_id' => '',
+            'post_date' => '', 'status' => 'draft', 'post_name' => '', 'post_type' => '',
+            'content' => '', 'excerpt' => '', 'attachment_url' => '', 'terms' => [],
         ];
 
         while ($reader->read()) {
@@ -82,30 +70,24 @@ final class WordPressWxrReader
 
             $name = $reader->name;
             if ($name === 'category') {
+                $domain = trim((string) $reader->getAttribute('domain'));
+                $slug = trim((string) $reader->getAttribute('nicename'));
                 $value = trim($reader->readString());
                 if ($value !== '') {
                     $data['terms'][] = [
-                        'domain' => trim((string) $reader->getAttribute('domain')),
-                        'slug' => trim((string) $reader->getAttribute('nicename')),
-                        'name' => $value,
+                        'domain' => mb_substr($domain, 0, 80),
+                        'slug' => mb_substr($slug, 0, 190),
+                        'name' => mb_substr($value, 0, 255),
                     ];
                 }
                 continue;
             }
 
             $field = match ($name) {
-                'title' => 'title',
-                'link' => 'link',
-                'guid' => 'guid',
-                'dc:creator' => 'creator',
-                'wp:post_id' => 'post_id',
-                'wp:post_date', 'wp:post_date_gmt' => 'post_date',
-                'wp:status' => 'status',
-                'wp:post_name' => 'post_name',
-                'wp:post_type' => 'post_type',
-                'content:encoded' => 'content',
-                'excerpt:encoded' => 'excerpt',
-                'wp:attachment_url' => 'attachment_url',
+                'title' => 'title', 'link' => 'link', 'guid' => 'guid', 'dc:creator' => 'creator',
+                'wp:post_id' => 'post_id', 'wp:post_date', 'wp:post_date_gmt' => 'post_date',
+                'wp:status' => 'status', 'wp:post_name' => 'post_name', 'wp:post_type' => 'post_type',
+                'content:encoded' => 'content', 'excerpt:encoded' => 'excerpt', 'wp:attachment_url' => 'attachment_url',
                 default => null,
             };
 
@@ -124,8 +106,9 @@ final class WordPressWxrReader
 
         $postId = trim((string) $data['post_id']);
         $guid = trim((string) $data['guid']);
-        $sourceKey = $postId !== '' ? 'wordpress:post:'.$postId : 'wordpress:guid:'.hash('sha256', $guid.'|'.(string) $data['title']);
-        $data['source_key'] = $sourceKey;
+        $data['source_key'] = $postId !== ''
+            ? 'wordpress:post:'.$postId
+            : 'wordpress:guid:'.hash('sha256', $guid.'|'.(string) $data['title']);
 
         return $data;
     }
