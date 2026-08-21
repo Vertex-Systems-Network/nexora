@@ -5,9 +5,12 @@ declare(strict_types=1);
 $root = dirname(__DIR__);
 require_once $root.'/bootstrap/nexora-process-environment.php';
 require_once $root.'/scripts/lib/target-composer.php';
+require_once $root.'/scripts/lib/source-attestation.php';
 
 $json = in_array('--json', $argv, true);
 $full = in_array('--full', $argv, true);
+$tests = in_array('--tests', $argv, true);
+$evidence = in_array('--evidence', $argv, true);
 $environment = NexoraBootstrapProcessEnvironment::build($root, $_ENV);
 
 $checks = [];
@@ -56,20 +59,23 @@ $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
 $checks['vendor'] = [
     'label' => 'Composer dependencies',
-    'status' => $vendorReady ? 'pass' : 'warning',
-    'exit_code' => $vendorReady ? 0 : 2,
+    'status' => $vendorReady ? 'pass' : ($tests ? 'fail' : 'warning'),
+    'exit_code' => $vendorReady ? 0 : ($tests ? 1 : 2),
     'detail' => $vendorReady ? 'vendor/autoload.php present' : 'Run composer install before backend execution checks.',
 ];
 $checks['node_modules'] = [
     'label' => 'Frontend dependencies',
-    'status' => $nodeReady ? 'pass' : 'warning',
-    'exit_code' => $nodeReady ? 0 : 2,
+    'status' => $nodeReady ? 'pass' : ($full ? 'fail' : 'warning'),
+    'exit_code' => $nodeReady ? 0 : ($full ? 1 : 2),
     'detail' => $nodeReady ? 'node_modules TypeScript toolchain present' : 'Run npm install before TypeScript/Vite checks.',
 ];
 
 if ($full && $vendorReady) {
     $run('artisan_about', 'Laravel bootstrap', [PHP_BINARY, 'artisan', 'about', '--only=environment']);
     $run('routes', 'Route registration', [PHP_BINARY, 'artisan', 'route:list', '--json']);
+}
+if ($tests && $vendorReady) {
+    $run('phpunit', 'Full Laravel/PHPUnit suite', [PHP_BINARY, 'artisan', 'test', '--colors=never']);
 }
 if ($full && $nodeReady) {
     $run('typescript', 'TypeScript noEmit', ['npm', 'exec', '--', 'tsc', '--noEmit']);
@@ -81,15 +87,60 @@ if ($full && $nodeReady) {
 $requiredFailures = array_filter($checks, static fn (array $check): bool => $check['status'] === 'fail');
 $warnings = array_filter($checks, static fn (array $check): bool => $check['status'] === 'warning');
 $status = $requiredFailures === [] ? ($warnings === [] ? 'ready' : 'dependencies-needed') : 'blocked';
+$platform = require $root.'/config/nexora.php';
 
 $payload = [
-    'schema' => 1,
+    'schema' => 2,
     'mode' => 'development-readiness',
-    'platform_version' => (string) ((require $root.'/config/nexora.php')['version'] ?? 'unknown'),
+    'platform_version' => (string) ($platform['version'] ?? 'unknown'),
     'status' => $status,
+    'full_requested' => $full,
+    'tests_requested' => $tests,
     'audit_required_for_this_check' => false,
     'checks' => $checks,
 ];
+
+if ($evidence) {
+    $attestation = nexoraComputeSourceAttestation($root);
+    $evidenceDir = $root.'/storage/app/nexora/qa';
+    if (! is_dir($evidenceDir) && ! mkdir($evidenceDir, 0775, true) && ! is_dir($evidenceDir)) {
+        fwrite(STDERR, "[Nexora Development Readiness] Unable to create QA evidence directory.\n");
+        exit(1);
+    }
+
+    $evidenceChecks = [];
+    foreach ($checks as $id => $check) {
+        $evidenceChecks[$id] = [
+            'label' => $check['label'],
+            'status' => $check['status'],
+            'exit_code' => $check['exit_code'],
+        ];
+    }
+
+    $evidencePayload = [
+        'schema' => 1,
+        'scope' => 'development-target-functional-qa',
+        'status' => $status,
+        'platform_version' => (string) ($platform['version'] ?? 'unknown'),
+        'source_tree_sha256' => $attestation['tree_sha256'] ?? null,
+        'source_file_count' => $attestation['file_count'] ?? null,
+        'php_version' => PHP_VERSION,
+        'os_family' => PHP_OS_FAMILY,
+        'generated_at' => gmdate(DATE_ATOM),
+        'full_requested' => $full,
+        'tests_requested' => $tests,
+        'checks' => $evidenceChecks,
+        'note' => 'This development evidence does not promote dependency locks or grant final C1-C6 release certification.',
+    ];
+
+    $evidencePath = $evidenceDir.'/development-readiness.json';
+    $encoded = json_encode($evidencePayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
+    if (file_put_contents($evidencePath, $encoded, LOCK_EX) === false) {
+        fwrite(STDERR, "[Nexora Development Readiness] Unable to write QA evidence.\n");
+        exit(1);
+    }
+    $payload['evidence_path'] = 'storage/app/nexora/qa/development-readiness.json';
+}
 
 if ($json) {
     fwrite(STDOUT, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL);
@@ -100,6 +151,9 @@ fwrite(STDOUT, "Nexora Development Readiness - {$status}\n");
 foreach ($checks as $check) {
     $mark = $check['status'] === 'pass' ? 'PASS' : strtoupper($check['status']);
     fwrite(STDOUT, sprintf("%-8s %-28s %s\n", $mark, $check['label'], str_replace(["\r", "\n"], ' ', (string) $check['detail'])));
+}
+if (isset($payload['evidence_path'])) {
+    fwrite(STDOUT, "\nEvidence: {$payload['evidence_path']}\n");
 }
 fwrite(STDOUT, "\nThis command does not promote dependency locks or grant release certification.\n");
 exit($requiredFailures === [] ? 0 : 1);
