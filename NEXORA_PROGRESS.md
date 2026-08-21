@@ -17,15 +17,17 @@
 - Sentinel 2.0 workflow gate wiring: `e412df465ec3215933f84296e0cb566f6acad955`.
 - N1.22 hardening implementation checkpoint: `d31e8524a16c4708dde68cffdec84b3fb4bff00d`.
 - Sentinel contract literal-safety correction: `06750699e44dad5b25608b8c95f4b4ce69012b36`.
+- N1.23 Marketplace 2.0 implementation head before this progress commit: `3c170397f50c3b8330db8923f1d3d7f539429dc0`.
 - Actions runner: **Windows local runner via `runs-on: self-hosted`**.
 - PR certification trigger: restored; temporary dev-branch push trigger remains during runner stabilization.
-- Ledger: `2.4` — governance sync for N1.18–N1.22 pending after consolidated certification result
+- Ledger: `2.4` — governance sync for N1.18–N1.23 pending after consolidated certification result
 - Issue #2: **OPEN**
 - N1.18 Public APIs / Webhooks / SDK: implementation complete / certification pending
 - N1.19 Import / Export / WordPress migrations: implementation complete / certification pending
 - N1.20 Observability: implementation complete / certification pending
 - N1.21 Forge / Developer Experience: implementation complete candidate / certification pending
 - N1.22 Sentinel 2.0: first trust-hardening workflow implementation complete candidate / certification pending
+- N1.23 Marketplace 2.0: first generation/authorization/transfer hardening workflow implementation complete candidate / certification pending
 
 ---
 
@@ -51,8 +53,8 @@ Verified Power remains unchanged. Self-hosted source certification can promote S
 | N1.19 Import/Export/WP migrations | implementation complete | 0% current target | certification pending |
 | N1.20 Observability | implementation complete | 0% current target | certification pending |
 | N1.21 Forge / Developer Experience | implementation complete candidate | 0% current target | SELF-HOSTED CERTIFICATION PENDING |
-| N1.22 Sentinel 2.0 | first trust-hardening workflow implementation complete candidate | 0% current target | **SELF-HOSTED CERTIFICATION PENDING** |
-| N1.23 Marketplace 2.0 | foundation/partial | 0% | Next source block after consolidated green |
+| N1.22 Sentinel 2.0 | first trust-hardening workflow implementation complete candidate | 0% current target | SELF-HOSTED CERTIFICATION PENDING |
+| N1.23 Marketplace 2.0 | first hardening workflow implementation complete candidate | 0% current target | **SELF-HOSTED CERTIFICATION PENDING** |
 | N1.24–N1.26 | planned/partial | 0% | Later roadmap |
 
 ---
@@ -97,28 +99,45 @@ Correction:
 - Sentinel/package scanner foundation retained: bounded ZIP inspection, static scanners, capability mismatch detection, digest recheck/TOCTOU block and RiskEngine.
 - Quarantine retains internal UUID names, atomic copy, source-size limits, path guard and restrictive file permissions.
 - `SentinelFailureReference` creates opaque `SNT-*` references and a non-secret exception-class fingerprint without embedding raw exception text in durable Admin-facing state.
-- Private server diagnostics now log the same opaque `SNT-*` reference so operator-visible failure references are correlatable with server logs.
+- Private server diagnostics log the same opaque `SNT-*` reference so operator-visible failure references are correlatable with server logs.
 - `ScanRecorder` persists only generic failure text + opaque reference/fingerprint metadata; raw throwable details remain server-log-only.
 - Forward migration `2026_08_22_000300_sanitize_sentinel_scan_failures.php` irreversibly scrubs legacy persisted raw scan error strings.
-- Sentinel Admin finding severity ordering now uses portable SQL `CASE`, replacing MySQL-only `FIELD(...)`.
+- Sentinel Admin finding severity ordering uses portable SQL `CASE`, replacing MySQL-only `FIELD(...)`.
 - `SentinelApprovalGuard` binds promotion to completed ALLOW, package ownership, bounded package state and unchanged package/scan SHA-256.
-- Promotion rejects any scan with a newer competing scan and fails closed when multiple scans share the same stored timestamp precision; ambiguous same-second ordering cannot be treated as latest.
-- Theme and Extension installers invoke the approval guard server-side, so crafted POSTs cannot replay an old ALLOW scan after a newer/ambiguous rescan.
-- Sentinel UI promotion discovery uses the same current-approval guard.
-- `tests/Feature/Security/SentinelTrustHardeningTest.php` covers current ALLOW, newer-scan rejection, same-timestamp ambiguity denial, post-approval digest mutation and raw-message privacy.
-- `scripts/sentinel2-product-contract-verify.php` guards failure privacy/correlation, legacy scrub, SQL portability, immutable/current approval and installer replay prevention.
-- Static contract needles that intentionally match PHP `$variable[...]` source are literal-safe and cannot be corrupted by PHP string interpolation.
-- Sentinel 2.0 contract is required by Development Readiness and the self-hosted release workflow.
+- Promotion rejects newer scans and ambiguous equal-timestamp competing scans.
+- Theme and Extension installers invoke the approval guard server-side.
+- Acceptance + static contract + Development Readiness + self-hosted workflow gate are present.
 
 ---
 
-## 7. Main protection / target blockers
+## 7. N1.23 Marketplace 2.0 implementation checkpoint
+
+- Forward migration `2026_08_22_000400_harden_marketplace_catalog_generation.php` adds nullable `catalog_generation` on sources and `sync_generation` on catalog items.
+- Historical rows intentionally remain generation-null; migration does not guess freshness. A successful fresh sync is required before display/staging.
+- Marketplace catalog fetch is streamed to temporary storage with explicit 8 MiB budget before JSON decode; response progress, Content-Length and actual file size are bounded.
+- `MarketplaceCatalogService` now retains `package_identifier` in normalized entries, fixing a latent undefined-key synchronization defect.
+- Every successful catalog synchronization mints one UUID generation and publishes it atomically across retained items + source inside the catalog transaction.
+- Resuming a source clears `catalog_generation`, `last_synced_at` and prior error state, forcing fresh synchronization.
+- Catalog Admin visibility requires active source generation + item generation; exact source/item generation equality is checked before rendering retained entries.
+- `MarketplacePackageStager` replaces timestamp tolerance with exact generation equality; stale/null/mismatched generations fail before download.
+- Dynamic stage permission remains package-type aware (`themes.install` vs `extensions.install`) and now requires both global RBAC and `TenantAuthorizationService` current-organization authority.
+- Marketplace Admin capability props for manage/install/marketplace-management now mirror current tenant authorization.
+- Existing trusted-publisher, digest, download budget, quarantine, Sentinel and post-download signature checks remain intact.
+- `tests/Feature/Marketplace/Marketplace2HardeningTest.php` covers null-generation visibility, matching-generation visibility, generation mismatch denial and tenant-role denial despite global install permission.
+- `scripts/marketplace2-product-contract-verify.php` guards bounded catalog transfer, generation identity, tenant-aware dynamic authorization and fail-closed visibility.
+- Existing N1.9 Marketplace contract was advanced from timestamp freshness assumptions to the stronger generation + tenant semantics so both gates describe one coherent product invariant.
+- Marketplace 2.0 contract is required by Development Readiness and the self-hosted release workflow.
+- Legacy `/extensions/marketplace/items/{item}/stage` route remains registered for compatibility, but server-side staging now applies the same generation + tenant authorization guard; canonical UI route is `/admin/extensions/marketplace/catalog/{item}/stage`. Physical legacy-route removal remains cleanup, not a current authorization bypass.
+
+---
+
+## 8. Main protection / target blockers
 
 `main` remains reported `protected=false`; current connector exposes no branch/ruleset mutation endpoint. Desired policy remains PR required + Source certification + stale review dismissal + review/conversation resolution + no force push/delete + admin enforcement. Issue #2 remains OPEN. Target Power remains 50%.
 
 ---
 
-## 8. Apply Log
+## 9. Apply Log
 
 | Apply | Date | Evidence | Change | Power impact |
 |---:|---|---|---|---|
@@ -131,21 +150,22 @@ Correction:
 | 034 | 2026-08-22 | readiness `74ca8c89…`; workflow `8e612c5a…` | self-hosted runner + PR trigger + Forge gate wiring | verified Power unchanged |
 | 035 | 2026-08-22 | run `32523602178`; workflow correction `7310223d…` | real LOCAL-WIN-01 execution; diagnosed missing `pwsh`; switched certification to installed Windows toolchain | verified Power unchanged pending rerun |
 | 036 | 2026-08-22 | Sentinel files through `d31e8524…`; workflow `e412df46…` | N1.22 privacy-safe correlated failures, legacy scrub, portable ordering, latest/tie-safe immutable approval, Theme/Extension replay prevention, tests + static/CI gate | implementation-complete candidate; verified Power unchanged pending consolidated run |
-| 037 | 2026-08-22 | contract correction `06750699…` | fixed PHP interpolation-sensitive Sentinel contract needles so the new gate verifies literal source semantics instead of mutating its own search strings | verified Power unchanged pending consolidated run |
+| 037 | 2026-08-22 | contract correction `06750699…` | fixed PHP interpolation-sensitive Sentinel contract needles | verified Power unchanged pending consolidated run |
+| 038 | 2026-08-22 | migration `372a551f…`; catalog `62a2d4aa…`; stager `85a319e7…`; controller `b0e42d2c…`; config `14eedb5d…`; tests `512f2ad2…`; contract `c635a2fc…`; readiness `66bf801f…`; workflow `eac15d72…`; base contract `3c170397…` | N1.23 bounded catalog download, explicit atomic sync generation, fail-closed legacy/resume freshness, tenant-aware dynamic stage permission and compatibility-gate migration | implementation-complete candidate; verified Power unchanged pending consolidated run |
 
 ---
 
-## 9. Exact next action
+## 10. Exact next action
 
 ```text
 SELF-HOSTED CONSOLIDATED CERTIFICATION
-  1. allow the final progress/head synchronize run to execute on LOCAL-WIN-01 without further source churn
-  2. verify local PHP/Node/npm toolchain step
-  3. execute every source/product gate through Sentinel 2.0 and Unified Source certification
+  1. execute latest branch head on LOCAL-WIN-01
+  2. verify installed PHP/Node/npm toolchain
+  3. run every source/product gate through Sentinel 2.0 + Marketplace 2.0 + Unified Source certification
   4. inspect exact failed job logs and fix only real failures until green
-  5. after green only: promote N1.18-N1.22 SOURCE DONE where justified
-  6. update this dashboard, canonical ledger, PR #1 and issue #2 source checkpoint
-  7. begin N1.23 Marketplace 2.0
+  5. after green only: promote N1.18-N1.23 SOURCE DONE where justified
+  6. update canonical ledger, PR #1 and issue #2 source checkpoint
+  7. continue N1.24 Cloud / HA / Distributed Runtime
 
 TARGET BOUNDARY
   - issue #2 stays OPEN until rc.93 compatibility + post-install + /login + /admin evidence
