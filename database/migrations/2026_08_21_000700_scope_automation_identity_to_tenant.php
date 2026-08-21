@@ -40,7 +40,7 @@ return new class extends Migration {
             $table->unique(['tenant_id', 'slug'], self::WORKFLOW_TENANT_SLUG);
         });
 
-        $this->dropEventIdempotencyIndex(self::EVENT_GLOBAL_IDEMPOTENCY);
+        PortableNullableUnique::drop(self::EVENTS, self::EVENT_GLOBAL_IDEMPOTENCY);
         PortableNullableUnique::createScoped(
             self::EVENTS,
             'tenant_id',
@@ -51,7 +51,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        $this->dropEventIdempotencyIndex(self::EVENT_TENANT_IDEMPOTENCY);
+        PortableNullableUnique::drop(self::EVENTS, self::EVENT_TENANT_IDEMPOTENCY);
         PortableNullableUnique::create(
             self::EVENTS,
             'idempotency_key',
@@ -97,17 +97,5 @@ return new class extends Migration {
                         ->update(['tenant_id' => $tenantId]);
                 }
             });
-    }
-
-    private function dropEventIdempotencyIndex(string $indexName): void
-    {
-        if (DB::connection()->getDriverName() === 'sqlsrv') {
-            DB::statement('DROP INDEX ['.$indexName.'] ON ['.self::EVENTS.']');
-            return;
-        }
-
-        Schema::table(self::EVENTS, static function (Blueprint $table) use ($indexName): void {
-            $table->dropUnique($indexName);
-        });
     }
 };
