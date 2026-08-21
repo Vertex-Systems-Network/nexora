@@ -76,6 +76,7 @@ foreach ([
 foreach ([
     "if (! \$item->source->isActive())" => 'paused-source staging rejection',
     'Marketplace package metadata is stale.' => 'stale catalog staging rejection',
+    "\$item->source->last_synced_at === null" => 'unsynchronized resumed-source staging rejection',
     "TrustedPublisher::query()->where('key_id'" => 'local trusted publisher lookup',
     "signature_status !== 'verified'" => 'post-download signature verification',
     "\$this->scanner->scan(\$package, \$userId)" => 'Sentinel scan boundary',
@@ -89,9 +90,11 @@ foreach ([
 
 foreach ([
     "'canManageMarketplace' => \$request->user()?->hasPermission('marketplace.manage')" => 'Marketplace-specific UI permission',
-    "whereHas('source', fn (\$query) => \$query->where('status', 'active'))" => 'active-source catalog visibility',
+    "\$freshSource = static fn (\$query) => \$query->where('status', 'active')->whereNotNull('last_synced_at');" => 'active synchronized-source catalog visibility',
     'public function sourceStatus(' => 'source pause/resume lifecycle',
     "Rule::in(['active', 'paused'])" => 'controlled source lifecycle states',
+    "\$attributes['last_synced_at'] = null;" => 'resume requires fresh synchronization',
+    "'fresh_sync_required' => \$next === 'active'" => 'resume freshness audit evidence',
     'public function deleteSource(' => 'source removal lifecycle',
     "if (\$source->isActive())" => 'active-source deletion guard',
     "marketplace.source.synced" => 'sync audit evidence',
@@ -147,6 +150,7 @@ if ($page !== '' && preg_match('/<(button|input|select|textarea)\b/', $page) ===
 
 foreach ([
     'test_pausing_source_hides_catalog_and_blocks_staging' => 'pause/visibility/staging regression',
+    'test_resuming_source_requires_fresh_sync_before_catalog_or_staging' => 'resume freshness regression',
     'test_source_must_be_paused_before_removal_and_catalog_cache_cascades' => 'safe source deletion regression',
     'test_marketplace_status_only_accepts_known_lifecycle_states' => 'source lifecycle allow-list regression',
 ] as $needle => $label) {
@@ -162,5 +166,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora Marketplace Product Contract] PASS — Marketplace catalogs are lifecycle-controlled, atomically synchronized and validation-bounded; withdrawn entries retire locally; inactive/stale sources cannot stage; trusted publisher and artifact integrity checks remain inside the Sentinel quarantine boundary.'.PHP_EOL,
+    '[Nexora Marketplace Product Contract] PASS — Marketplace catalogs are lifecycle-controlled, atomically synchronized and validation-bounded; resumed sources require fresh synchronization; withdrawn entries retire locally; inactive/stale sources cannot stage; trusted publisher and artifact integrity checks remain inside the Sentinel quarantine boundary.'.PHP_EOL,
 );
