@@ -20,7 +20,13 @@ $databaseDefinitions = $kind === 'database'
     @foreach($grouped as $group => $groupOptions)
         @if($group !== '')<optgroup label="{{ $group }}">@endif
         @foreach($groupOptions as $option)
-            @php($databaseDefinition = $databaseDefinitions[(string) ($option['value'] ?? '')] ?? null)
+            @php
+                $databaseDefinition = $databaseDefinitions[(string) ($option['value'] ?? '')] ?? null;
+                $databaseDefault = is_array($databaseDefinition) ? (string) ($databaseDefinition['default_database'] ?? '') : '';
+                if (is_array($databaseDefinition) && ! ($databaseDefinition['network'] ?? true)) {
+                    $databaseDefault = basename(str_replace('\\', '/', $databaseDefault));
+                }
+            @endphp
             <option value="{{ $option['value'] }}"
                 data-description="{{ $option['description'] ?? '' }}"
                 data-provider="{{ $option['provider'] ?? '' }}"
@@ -29,7 +35,7 @@ $databaseDefinitions = $kind === 'database'
                 @if(is_array($databaseDefinition))
                     data-default-host="{{ $databaseDefinition['default_host'] ?? '' }}"
                     data-default-port="{{ $databaseDefinition['default_port'] ?? '' }}"
-                    data-default-database="{{ $databaseDefinition['default_database'] ?? '' }}"
+                    data-default-database="{{ $databaseDefault }}"
                     data-default-username="{{ $databaseDefinition['default_username'] ?? '' }}"
                     data-network="{{ ($databaseDefinition['network'] ?? true) ? '1' : '0' }}"
                     data-supports-create="{{ ($databaseDefinition['supports_create'] ?? false) ? '1' : '0' }}"
