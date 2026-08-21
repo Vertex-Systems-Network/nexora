@@ -71,6 +71,7 @@ $run('observability_product_contract', 'Observability product source contract', 
 $run('forge_developer_experience_product_contract', 'Forge / Developer Experience product source contract', [PHP_BINARY, 'scripts/forge-developer-experience-product-contract-verify.php']);
 $run('sentinel2_product_contract', 'Sentinel 2.0 product source contract', [PHP_BINARY, 'scripts/sentinel2-product-contract-verify.php']);
 $run('marketplace2_product_contract', 'Marketplace 2.0 product source contract', [PHP_BINARY, 'scripts/marketplace2-product-contract-verify.php']);
+$run('cloud_ha_product_contract', 'Cloud / HA product source contract', [PHP_BINARY, 'scripts/cloud-ha-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
