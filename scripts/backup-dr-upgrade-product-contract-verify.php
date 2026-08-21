@@ -41,37 +41,37 @@ $forbid = static function (string $key, string $needle, string $message) use (&$
 };
 
 // Recovery-ready backups must seal artifact + runtime provenance before success is recorded.
-$require('backup', "'platform_version' => $platformVersion", 'Runtime backups must seal the source platform version.');
-$require('backup', "'deployment_generation' => $deploymentGeneration", 'Runtime backups must seal the source deployment generation.');
-$require('backup', "'source_tree_sha256' => $sourceTreeSha256", 'Runtime backups must seal the source-tree SHA-256.');
-$require('backup', "'artifact_checksum_sha256' => $sourceChecksum", 'Runtime backups must bind the manifest to the persisted artifact checksum.');
+$require('backup', "'platform_version' => \$platformVersion", 'Runtime backups must seal the source platform version.');
+$require('backup', "'deployment_generation' => \$deploymentGeneration", 'Runtime backups must seal the source deployment generation.');
+$require('backup', "'source_tree_sha256' => \$sourceTreeSha256", 'Runtime backups must seal the source-tree SHA-256.');
+$require('backup', "'artifact_checksum_sha256' => \$sourceChecksum", 'Runtime backups must bind the manifest to the persisted artifact checksum.');
 $require('backup', 'cannot create a recovery-ready backup without a complete deployment identity', 'Backup creation must fail closed when deployment identity is incomplete.');
 $require('backup', "'stream_verified' => true", 'Runtime backup completion must record streaming verification.');
 $require('backup', 'Backup streaming verification failed. Review server logs and protected storage health.', 'Backup verification failure must remain operator-safe and generic.');
-$forbid('backup', "'message' => $e->getMessage()", 'Backup verification must not disclose raw exception messages to callers.');
+$forbid('backup', "'message' => \$e->getMessage()", 'Backup verification must not disclose raw exception messages to callers.');
 
 // Recovery compatibility must reject ambiguous/legacy/tampered identity rather than guessing.
 $require('compatibility', "!== 'nexora-runtime-backup-v1'", 'Recovery compatibility must require the supported backup manifest format.');
-$require('compatibility', "preg_match('/^[a-f0-9]{64}$/', $hash)", 'Recovery compatibility must validate sealed SHA-256 identities.');
+$require('compatibility', "preg_match('/^[a-f0-9]{64}$/', \$hash)", 'Recovery compatibility must validate sealed SHA-256 identities.');
 $require('compatibility', 'database driver does not match the backup record', 'Recovery compatibility must bind the manifest to the backup driver.');
 $require('compatibility', 'storage disk does not match the backup record', 'Recovery compatibility must bind the manifest to the backup storage disk.');
 $require('compatibility', 'checksum identity does not match the verified backup record', 'Recovery compatibility must bind the manifest checksum to the backup record.');
-$require('compatibility', "'requires_matching_source_runtime' => ! $exact", 'Recovery compatibility must explicitly fence cross-generation restore planning.');
+$require('compatibility', "'requires_matching_source_runtime' => ! \$exact", 'Recovery compatibility must explicitly fence cross-generation restore planning.');
 
 // Restore planning stays non-destructive and source-runtime aware.
 $require('planner', '$this->compatibility->assess($backup)', 'Restore planning must assess backup recovery identity after artifact verification.');
-$require('planner', "'requires_matching_source_runtime' => $recovery['requires_matching_source_runtime']", 'Restore plan must persist source-runtime compatibility state.');
-$require('planner', "'backup_source_version' => $recovery['source_version']", 'Restore plan must persist the backup source version.');
-$require('planner', "'backup_source_generation' => $recovery['source_generation']", 'Restore plan must persist the backup source generation.');
-$require('planner', "'backup_source_tree_sha256' => $recovery['source_tree_sha256']", 'Restore plan must persist the backup source-tree identity.');
+$require('planner', "'requires_matching_source_runtime' => \$recovery['requires_matching_source_runtime']", 'Restore plan must persist source-runtime compatibility state.');
+$require('planner', "'backup_source_version' => \$recovery['source_version']", 'Restore plan must persist the backup source version.');
+$require('planner', "'backup_source_generation' => \$recovery['source_generation']", 'Restore plan must persist the backup source generation.');
+$require('planner', "'backup_source_tree_sha256' => \$recovery['source_tree_sha256']", 'Restore plan must persist the backup source-tree identity.');
 $require('planner', "'automatic_destructive_restore' => false", 'Restore plans must never enable automatic destructive restore.');
 $require('planner', 'disposable recovery target', 'Restore plan must require an isolated/disposable recovery target.');
 $require('planner', 'Provision an isolated recovery runtime matching Nexora', 'Cross-generation restore plans must require a matching source runtime.');
 
 // Rehearsal output must make recovery identity actionable without pretending target recovery happened.
-$require('rehearsal', "'requires_matching_source_runtime' => $matchingSourceRuntime", 'Backup rehearsal output must expose source-runtime compatibility.');
-$require('rehearsal', "'backup_source_generation' => $recordPlan['backup_source_generation'] ?? null", 'Backup rehearsal output must expose the sealed source generation.');
-$require('rehearsal', "'current_runtime_generation' => $recordPlan['current_runtime_generation'] ?? null", 'Backup rehearsal output must expose current runtime generation for comparison.');
+$require('rehearsal', "'requires_matching_source_runtime' => \$matchingSourceRuntime", 'Backup rehearsal output must expose source-runtime compatibility.');
+$require('rehearsal', "'backup_source_generation' => \$recordPlan['backup_source_generation'] ?? null", 'Backup rehearsal output must expose the sealed source generation.');
+$require('rehearsal', "'current_runtime_generation' => \$recordPlan['current_runtime_generation'] ?? null", 'Backup rehearsal output must expose current runtime generation for comparison.');
 $require('rehearsal', 'Final recovery evidence requires restoring to a disposable target', 'Source rehearsal must not claim target recovery certification.');
 
 // Final evidence remains a separately supplied real disposable-target rehearsal.
