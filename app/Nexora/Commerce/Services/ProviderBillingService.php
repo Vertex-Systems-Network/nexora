@@ -209,6 +209,8 @@ final readonly class ProviderBillingService
             'commerce.billing.subscription.cancel.'.hash('sha256', $subscription->id.'|'.$idempotencyKey),
             function () use ($subscription, $idempotencyKey): CommerceSubscription {
                 $locked = CommerceSubscription::query()->with(['customer', 'price'])->findOrFail($subscription->id);
+                $metadata = (array) $locked->metadata;
+                if (($metadata['last_cancel_idempotency_key'] ?? null) === $idempotencyKey) return $locked;
                 if (in_array($locked->status, ['cancelled', 'canceled'], true)) return $locked;
                 if ($locked->provider_reference === null || trim($locked->provider_reference) === '') {
                     throw new InvalidArgumentException('This subscription has no provider reference and cannot be cancelled through its provider.');
@@ -223,7 +225,6 @@ final readonly class ProviderBillingService
                     'idempotency_key' => $idempotencyKey,
                 ]);
                 $status = $this->validatedResultStatus($result, 'subscription cancellation');
-                $metadata = (array) $locked->metadata;
                 $metadata['last_cancel_idempotency_key'] = $idempotencyKey;
                 $metadata['last_cancel_provider_result'] = $this->providerMetadata($result);
 
