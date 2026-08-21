@@ -217,6 +217,11 @@ foreach ([
     "'source_generation'" => 'target-evidence source identity',
     "'php_version'" => 'target-evidence PHP runtime identity',
     "'selected_drivers'" => 'target-evidence engine scope',
+    "\$evidencePayload = [" => 'explicit secret-free evidence allow-list',
+    "'server_version' => \$row['connection']['version'] ?? null" => 'evidence server-version projection',
+    "'object_count_before_test' => \$row['connection']['object_count'] ?? null" => 'evidence pre-test object count projection',
+    "'test_exit_code' => \$row['test_exit_code']" => 'evidence test result projection',
+    "'cleanup' => \$row['cleanup']" => 'evidence cleanup projection',
     "storage/app/nexora/qa/database-target-matrix.json" => 'canonical secret-free target evidence path',
     "LOCK_EX" => 'atomic evidence write lock',
     "Only empty databases/files whose names match nexora_matrix_* are accepted" => 'operator-visible destructive scope',
@@ -231,8 +236,10 @@ if ($targetMatrix !== '' && (str_contains($targetMatrix, 'EnvironmentWriter') ||
 if ($targetMatrix !== '' && preg_match('/DROP\s+DATABASE/i', $targetMatrix) === 1) {
     $errors[] = 'Target database matrix must never drop database containers; cleanup is limited to matrix objects/files.';
 }
-if ($targetMatrix !== '' && preg_match('/evidence.*(password|secret|username|host)/i', $targetMatrix) === 1) {
-    $errors[] = 'Target database matrix evidence must not explicitly serialize connection credentials or endpoint identity.';
+foreach (["'host' => \$row", "'username' => \$row", "'password' => \$row", "'detail' => \$row", "'message' => \$row"] as $forbiddenEvidenceProjection) {
+    if ($targetMatrix !== '' && str_contains($targetMatrix, $forbiddenEvidenceProjection)) {
+        $errors[] = 'Target database matrix evidence allow-list must not serialize endpoint, credential or verbose diagnostic fields.';
+    }
 }
 
 if ($errors !== []) {
