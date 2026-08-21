@@ -19,12 +19,14 @@ $read = static function (string $relative) use ($root, &$errors): string {
 };
 
 $migration = $read('database/migrations/2026_08_21_000500_scope_crm_membership_identity_to_tenant.php');
+$databaseContracts = $read('scripts/lib/database-contracts.php');
 $linkModel = $read('app/Models/CrmCommerceLink.php');
 $linkService = $read('app/Nexora/Crm/Services/CrmCommerceLinkService.php');
 $crmSettings = $read('app/Http/Controllers/Admin/Crm/CrmSettingsController.php');
 $membershipController = $read('app/Http/Controllers/Admin/Membership/MembershipController.php');
 $membershipPlanController = $read('app/Http/Controllers/Admin/Membership/MembershipPlanController.php');
 $membershipManager = $read('app/Nexora/Membership/Services/MembershipManager.php');
+$membershipCommerceSync = $read('app/Nexora/Membership/Services/MembershipCommerceSyncService.php');
 $test = $read('tests/Feature/Crm/CrmMembershipTenantIsolationTest.php');
 
 foreach ([
@@ -39,6 +41,18 @@ foreach ([
 ] as $needle => $label) {
     if ($migration !== '' && ! str_contains($migration, $needle)) {
         $errors[] = "CRM/Membership tenant migration missing: {$label}.";
+    }
+}
+
+foreach ([
+    'function nexoraMigrationSchemaTableBlocks(' => 'forward tenantization Schema::table parser',
+    'function nexoraMigrationForwardTenantizesTable(' => 'forward tenantization classifier',
+    '$tenantForwardModels=[]' => 'forward-tenantized model classification',
+    "'tenant_forward_models'=>count(\$tenantForwardModels)" => 'forward tenantization metric',
+    'nor converted by a later forward tenantization migration' => 'forward-tenantization failure contract',
+] as $needle => $label) {
+    if ($databaseContracts !== '' && ! str_contains($databaseContracts, $needle)) {
+        $errors[] = "Database contract analyzer missing: {$label}.";
     }
 }
 
@@ -109,6 +123,17 @@ foreach ([
 }
 
 foreach ([
+    'private TenantExecutionScope $tenantScope' => 'Membership Commerce tenant execution dependency',
+    "runRequired(\$tenantId, 'membership Commerce synchronization'" => 'tenant-scoped Commerce synchronization',
+    'CommerceSubscription::query()->find($subscription->id)' => 'subscription re-resolution inside tenant scope',
+    'does not belong to the active synchronization tenant.' => 'sync cross-tenant fail-closed rejection',
+] as $needle => $label) {
+    if ($membershipCommerceSync !== '' && ! str_contains($membershipCommerceSync, $needle)) {
+        $errors[] = "Membership Commerce sync missing: {$label}.";
+    }
+}
+
+foreach ([
     'test_crm_commerce_links_are_tenant_scoped_and_cross_tenant_links_fail_closed' => 'CRM link isolation acceptance test',
     'test_crm_and_membership_identity_keys_can_repeat_across_tenants' => 'cross-tenant identity acceptance test',
     'test_membership_manager_rejects_cross_tenant_commerce_customer' => 'Membership service isolation acceptance test',
@@ -128,5 +153,5 @@ if ($errors !== []) {
 
 fwrite(
     STDOUT,
-    '[Nexora CRM + Membership Product Contract] PASS — CRM Commerce links, CRM configuration identities, Membership plan/access identities, member selection and service-layer Commerce references are tenant-scoped and fail closed on cross-organization misuse.'.PHP_EOL,
+    '[Nexora CRM + Membership Product Contract] PASS — CRM Commerce links, CRM configuration identities, Membership plan/access identities, member selection, service-layer Commerce references and Commerce-to-Membership synchronization are tenant-scoped and fail closed on cross-organization misuse.'.PHP_EOL,
 );
