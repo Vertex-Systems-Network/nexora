@@ -31,6 +31,9 @@ final class ContentMigrationManager
         if (! $this->authorization->allows($actor, 'documents.create')) {
             throw ValidationException::withMessages(['source' => 'You are not allowed to import documents for this organization.']);
         }
+        if (! class_exists(\XMLReader::class)) {
+            throw ValidationException::withMessages(['source' => 'WordPress WXR import requires the PHP XMLReader extension on this runtime.']);
+        }
 
         $bytes = $file->getSize();
         if (! is_int($bytes) || $bytes < 1 || $bytes > 52_428_800) {
@@ -85,7 +88,7 @@ final class ContentMigrationManager
                 'tenant_id' => $organization->id,
                 'created_by' => $actor->id,
                 'source_type' => 'wordpress_wxr',
-                'source_name' => mb_substr(basename($file->getClientOriginalName()), 0, 255),
+                'source_name' => $this->displayName($file),
                 'source_path' => $stored,
                 'source_hash' => $sourceHash,
                 'source_bytes' => $bytes,
@@ -109,6 +112,9 @@ final class ContentMigrationManager
 
     public function resume(ContentMigrationRun $run, User $actor): ContentMigrationRun
     {
+        if (! class_exists(\XMLReader::class)) {
+            throw ValidationException::withMessages(['run' => 'WordPress WXR import requires the PHP XMLReader extension on this runtime.']);
+        }
         if (! $this->authorization->allows($actor, 'documents.create')) {
             throw ValidationException::withMessages(['run' => 'You are not allowed to resume document imports for this organization.']);
         }
@@ -140,6 +146,12 @@ final class ContentMigrationManager
             throw ValidationException::withMessages(['source' => 'Unable to restage the migration source.']);
         }
         $run->forceFill(['source_path' => $stored])->save();
+    }
+
+    private function displayName(UploadedFile $file): string
+    {
+        $name = str_replace('\\', '/', $file->getClientOriginalName());
+        return mb_substr(basename($name), 0, 255);
     }
 
     private function dispatch(ContentMigrationRun $run): void
