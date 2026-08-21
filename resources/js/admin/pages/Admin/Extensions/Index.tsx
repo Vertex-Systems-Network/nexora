@@ -99,7 +99,9 @@ export default function ExtensionsIndex({
     const canScan =
         permissions.includes("security.sentinel.scan") &&
         permissions.includes("security.sentinel.view");
+    const canInstallTheme = permissions.includes("themes.install");
     const canUpload = canInstall && canScan;
+    const canStageCatalogItem = (item: Catalog) => item.type === "theme" ? canInstallTheme : canInstall;
     const [sourceOpen, setSourceOpen] = useState(false);
     const [sourceDeleteTarget, setSourceDeleteTarget] = useState<Source | null>(null);
     const source = useForm({ name: "", base_url: "", trusted_publishers_only: true });
@@ -178,11 +180,7 @@ export default function ExtensionsIndex({
                 label: "",
                 className: "w-28 text-right",
                 render: (extension) => (
-                    <ButtonLink
-                        href={`/admin/extensions/${extension.id}`}
-                        size="sm"
-                        variant="secondary"
-                    >
+                    <ButtonLink href={`/admin/extensions/${extension.id}`} size="sm" variant="secondary">
                         Manage
                     </ButtonLink>
                 ),
@@ -289,9 +287,7 @@ export default function ExtensionsIndex({
                                         {canInstall && (
                                             <Button
                                                 size="sm"
-                                                onClick={() =>
-                                                    router.post(`/admin/extensions/install/${artifact.id}`, {}, { preserveScroll: true })
-                                                }
+                                                onClick={() => router.post(`/admin/extensions/install/${artifact.id}`, {}, { preserveScroll: true })}
                                             >
                                                 Install
                                             </Button>
@@ -322,9 +318,7 @@ export default function ExtensionsIndex({
                                                 <p className="font-semibold text-[var(--nx-text)]">{catalogSource.name}</p>
                                                 <Badge tone={tone(catalogSource.status)}>{human(catalogSource.status)}</Badge>
                                             </div>
-                                            <p className="mt-1 truncate text-xs text-[var(--nx-text-muted)]">
-                                                {catalogSource.base_url}
-                                            </p>
+                                            <p className="mt-1 truncate text-xs text-[var(--nx-text-muted)]">{catalogSource.base_url}</p>
                                             <p className="mt-1 text-xs text-[var(--nx-text-muted)]">
                                                 {catalogSource.items_count} cached packages · {catalogSource.trusted_only ? "Trusted publishers only" : "Sentinel-screened publishers"}
                                             </p>
@@ -344,13 +338,7 @@ export default function ExtensionsIndex({
                                                 <Button
                                                     size="sm"
                                                     variant="secondary"
-                                                    onClick={() =>
-                                                        router.post(
-                                                            `/admin/extensions/marketplace/sources/${catalogSource.id}/sync`,
-                                                            {},
-                                                            { preserveScroll: true },
-                                                        )
-                                                    }
+                                                    onClick={() => router.post(`/admin/extensions/marketplace/sources/${catalogSource.id}/sync`, {}, { preserveScroll: true })}
                                                 >
                                                     Sync
                                                 </Button>
@@ -358,22 +346,16 @@ export default function ExtensionsIndex({
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() =>
-                                                    router.patch(
-                                                        `/admin/extensions/marketplace/sources/${catalogSource.id}/status`,
-                                                        { status: catalogSource.status === "active" ? "paused" : "active" },
-                                                        { preserveScroll: true },
-                                                    )
-                                                }
+                                                onClick={() => router.patch(
+                                                    `/admin/extensions/marketplace/sources/${catalogSource.id}/status`,
+                                                    { status: catalogSource.status === "active" ? "paused" : "active" },
+                                                    { preserveScroll: true },
+                                                )}
                                             >
                                                 {catalogSource.status === "active" ? "Pause" : "Resume"}
                                             </Button>
                                             {catalogSource.status === "paused" && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => setSourceDeleteTarget(catalogSource)}
-                                                >
+                                                <Button size="sm" variant="ghost" onClick={() => setSourceDeleteTarget(catalogSource)}>
                                                     Remove
                                                 </Button>
                                             )}
@@ -390,7 +372,7 @@ export default function ExtensionsIndex({
                 <div className="mb-4">
                     <h2 className="font-semibold text-[var(--nx-text)]">Marketplace catalog</h2>
                     <p className="mt-1 text-sm text-[var(--nx-text-muted)]">
-                        Only active, synchronized sources are listed. Stage downloads into Sentinel; never install catalog code directly from the network.
+                        Only active, synchronized sources are listed. Stage downloads into Sentinel; never install catalog code directly from the network. Theme entries require Theme install permission; extension-family entries require Extension install permission.
                     </p>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -414,18 +396,16 @@ export default function ExtensionsIndex({
                                     <p className="mt-3 text-sm leading-6 text-[var(--nx-text-secondary)]">{item.description}</p>
                                 )}
                                 <p className="mt-3 text-xs text-[var(--nx-text-muted)]">Source: {item.source ?? "Catalog"}</p>
-                                {canInstall && (
+                                {canStageCatalogItem(item) && (
                                     <Button
                                         className="mt-3"
                                         size="sm"
                                         variant="secondary"
-                                        onClick={() =>
-                                            router.post(
-                                                `/admin/extensions/marketplace/items/${item.id}/stage`,
-                                                {},
-                                                { preserveScroll: true },
-                                            )
-                                        }
+                                        onClick={() => router.post(
+                                            `/admin/extensions/marketplace/catalog/${item.id}/stage`,
+                                            {},
+                                            { preserveScroll: true },
+                                        )}
                                     >
                                         Send to Sentinel
                                     </Button>
@@ -477,15 +457,13 @@ export default function ExtensionsIndex({
                         <Button variant="secondary" onClick={() => setSourceOpen(false)}>Cancel</Button>
                         <Button
                             loading={source.processing}
-                            onClick={() =>
-                                source.post("/admin/extensions/marketplace/sources", {
-                                    preserveScroll: true,
-                                    onSuccess: () => {
-                                        source.reset();
-                                        setSourceOpen(false);
-                                    },
-                                })
-                            }
+                            onClick={() => source.post("/admin/extensions/marketplace/sources", {
+                                preserveScroll: true,
+                                onSuccess: () => {
+                                    source.reset();
+                                    setSourceOpen(false);
+                                },
+                            })}
                         >
                             Add source
                         </Button>
