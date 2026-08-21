@@ -97,5 +97,8 @@ jobs:
       - name: Search 2.0 product source contract
         run: php scripts/search-product-contract-verify.php
 
+      - name: Collaboration product source contract
+        run: php scripts/collaboration-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
