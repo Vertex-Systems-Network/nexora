@@ -11,25 +11,39 @@ type Provider={key:string;label:string};
 type Connection={id:number;uuid:string;name:string;providerKey:string;model:string;enabled:boolean;hasCredentials:boolean;settings:Record<string,unknown>;maxInputChars:number;maxOutputTokens:number;dailyRequestLimit:number;lastHealthStatus?:string|null;lastHealthMessage?:string|null;lastHealthCheckedAt?:string|null};
 type Run={id:number;uuid:string;connectionName?:string|null;providerKey:string;model:string;status:string;promptChars:number;requestedOutputTokens:number;inputTokens?:number|null;outputTokens?:number|null;outputChars?:number|null;errorCode?:string|null;startedAt?:string|null;completedAt?:string|null};
 type Generation={connectionName:string;model:string;text:string;inputTokens?:number|null;outputTokens?:number|null};
-type Props={providers:Provider[];connections:Connection[];recentRuns:Run[];lastGeneration?:Generation|null};
+type Props={providers:Provider[];connections:Connection[];recentRuns:Run[]};
 
 const when=(value?:string|null)=>value?new Date(value).toLocaleString():"Never";
 const statusTone=(status?:string|null):"success"|"warning"|"danger"|"neutral"=>status==="healthy"||status==="succeeded"?"success":status==="unhealthy"||status==="failed"?"danger":status==="running"?"warning":"neutral";
 
-export default function AiPlatformIndex({providers,connections,recentRuns,lastGeneration}:Props){
+export default function AiPlatformIndex({providers,connections,recentRuns}:Props){
  const permissions=usePage<SharedPageProps>().props.auth.user?.permissions??[];
  const canManage=permissions.includes("ai.connections.manage");
  const canGenerate=permissions.includes("ai.generate");
  const providerOptions=providers.map(item=>({value:item.key,label:item.label,description:item.key}));
  const enabledConnections=connections.filter(item=>item.enabled);
- const [selectedConnection,setSelectedConnection]=useState<string>(enabledConnections[0]?String(enabledConnections[0].id):"");
+ const [selectedConnection,setSelectedConnection]=useState(enabledConnections[0]?String(enabledConnections[0].id):"");
  const [deleteTarget,setDeleteTarget]=useState<Connection|null>(null);
+ const [generation,setGeneration]=useState<Generation|null>(null);
+ const [generationError,setGenerationError]=useState<string|null>(null);
+ const [generating,setGenerating]=useState(false);
+ const [prompt,setPrompt]=useState("");
+ const [maxOutputTokens,setMaxOutputTokens]=useState(1024);
  const form=useForm({name:"",provider_key:providers[0]?.key??"",model:"",credentials_json:"",settings_json:"{}",max_input_chars:20000,max_output_tokens:2048,daily_request_limit:100});
- const generateForm=useForm({prompt:"",max_output_tokens:1024});
  const selected=useMemo(()=>connections.find(item=>String(item.id)===selectedConnection),[connections,selectedConnection]);
  const connectionOptions=enabledConnections.map(item=>({value:String(item.id),label:item.name,description:`${item.providerKey} · ${item.model}`}));
  const create=()=>form.post("/admin/ai/connections",{preserveScroll:true,onSuccess:()=>form.reset("name","model","credentials_json")});
- const generate=()=>{if(!selectedConnection)return;generateForm.post(`/admin/ai/connections/${selectedConnection}/generate`,{preserveScroll:true});};
+ const generate=async()=>{
+  if(!selectedConnection||generating)return;
+  setGenerating(true);setGenerationError(null);setGeneration(null);
+  try{
+   const response=await fetch(`/admin/ai/connections/${selectedConnection}/generate`,{method:"POST",headers:{Accept:"application/json","Content-Type":"application/json","X-CSRF-TOKEN":document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content??""},body:JSON.stringify({prompt,max_output_tokens:maxOutputTokens})});
+   const body=await response.json().catch(()=>({message:`AI generation failed (HTTP ${response.status}).`}));
+   if(!response.ok){setGenerationError(body?.errors?.prompt?.[0]??body?.message??"AI generation failed.");return;}
+   setGeneration(body as Generation);
+   router.reload({only:["recentRuns"],preserveState:true});
+  }finally{setGenerating(false);}
+ };
  return <AdminLayout>
   <Head title="AI Platform"/>
   <PageHeader eyebrow="AI Platform" title="Provider-neutral AI" description="Connect verified AI provider adapters without coupling Nexora Core to a vendor SDK. Core enforces tenant isolation, encrypted credentials, bounded generation and privacy-minimal run history."/>
@@ -45,7 +59,7 @@ export default function AiPlatformIndex({providers,connections,recentRuns,lastGe
 
   <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.8fr)]">
    <Card className="p-5">
-    <div className="mb-5"><h2 className="font-semibold text-[var(--nx-text)]">AI connections</h2><p className="mt-1 text-sm text-[var(--nx-text-muted)]">Secrets are encrypted at rest and never returned to the browser. Configuration changes must be tested before the connection can be enabled.</p></div>
+    <div className="mb-5"><h2 className="font-semibold text-[var(--nx-text)]">AI connections</h2><p className="mt-1 text-sm text-[var(--nx-text-muted)]">Secrets are encrypted at rest and never returned to the browser. Connectivity changes disable the connection until it is tested again.</p></div>
     {canManage&&providers.length>0&&<form className="grid gap-4" onSubmit={e=>{e.preventDefault();create();}}>
      <div className="grid gap-4 md:grid-cols-2"><Input label="Connection name" value={form.data.name} onChange={e=>form.setData("name",e.target.value)} error={form.errors.name} placeholder="Editorial assistant"/><Select label="Provider" value={form.data.provider_key} onChange={value=>form.setData("provider_key",value)} options={providerOptions} error={form.errors.provider_key}/></div>
      <Input label="Model" value={form.data.model} onChange={e=>form.setData("model",e.target.value)} error={form.errors.model} placeholder="Provider model identifier"/>
@@ -53,7 +67,6 @@ export default function AiPlatformIndex({providers,connections,recentRuns,lastGe
      <div className="grid gap-4 md:grid-cols-3"><Input label="Max input characters" type="number" min={1} max={200000} value={form.data.max_input_chars} onChange={e=>form.setData("max_input_chars",Number(e.target.value))} error={form.errors.max_input_chars}/><Input label="Max output tokens" type="number" min={1} max={32768} value={form.data.max_output_tokens} onChange={e=>form.setData("max_output_tokens",Number(e.target.value))} error={form.errors.max_output_tokens}/><Input label="Daily request limit" type="number" min={1} max={100000} value={form.data.daily_request_limit} onChange={e=>form.setData("daily_request_limit",Number(e.target.value))} error={form.errors.daily_request_limit}/></div>
      <div><Button type="submit" loading={form.processing} leadingIcon={<Icon name="plus" className="h-4 w-4"/>}>Create connection</Button></div>
     </form>}
-
     <div className={`${canManage&&providers.length>0?"mt-6":""} divide-y divide-[var(--nx-border)]`}>
      {connections.map(connection=><div key={connection.id} className="py-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex flex-wrap items-center gap-2"><p className="font-medium text-[var(--nx-text)]">{connection.name}</p><Badge tone={connection.enabled?"success":"neutral"}>{connection.enabled?"enabled":"disabled"}</Badge><Badge tone={statusTone(connection.lastHealthStatus)}>{connection.lastHealthStatus??"untested"}</Badge></div><p className="mt-1 text-xs text-[var(--nx-text-muted)]">{connection.providerKey} · {connection.model} · tested {when(connection.lastHealthCheckedAt)}</p><p className="mt-1 text-xs text-[var(--nx-text-muted)]">Limits: {connection.maxInputChars.toLocaleString()} input chars · {connection.maxOutputTokens.toLocaleString()} output tokens · {connection.dailyRequestLimit.toLocaleString()} requests/day</p>{connection.lastHealthMessage&&<p className="mt-1 text-xs text-[var(--nx-text-muted)]">{connection.lastHealthMessage}</p>}</div>{canManage&&<div className="flex flex-wrap gap-2"><Button size="sm" variant="secondary" onClick={()=>router.post(`/admin/ai/connections/${connection.id}/test`,{}, {preserveScroll:true})}>Test</Button><Button size="sm" variant="ghost" disabled={!connection.enabled&&connection.lastHealthStatus!=="healthy"} onClick={()=>router.patch(`/admin/ai/connections/${connection.id}/enabled`,{enabled:!connection.enabled},{preserveScroll:true})}>{connection.enabled?"Disable":"Enable"}</Button>{!connection.enabled&&<Button size="sm" variant="ghost" onClick={()=>setDeleteTarget(connection)}>Delete</Button>}</div>}</div></div>)}
      {connections.length===0&&<p className="py-5 text-sm text-[var(--nx-text-muted)]">No AI connections configured.</p>}
@@ -61,9 +74,9 @@ export default function AiPlatformIndex({providers,connections,recentRuns,lastGe
    </Card>
 
    <Card className="p-5">
-    <div className="mb-5"><h2 className="font-semibold text-[var(--nx-text)]">Text generation workbench</h2><p className="mt-1 text-sm text-[var(--nx-text-muted)]">The prompt is sent to the selected provider for this request only. History stores SHA-256, lengths and token accounting—not prompt or generated text.</p></div>
-    {canGenerate&&enabledConnections.length>0?<form className="grid gap-4" onSubmit={e=>{e.preventDefault();generate();}}><Select label="Enabled connection" value={selectedConnection} onChange={setSelectedConnection} options={connectionOptions}/><Textarea label="Prompt" value={generateForm.data.prompt} onChange={e=>generateForm.setData("prompt",e.target.value)} error={generateForm.errors.prompt} placeholder="Draft a concise summary…"/><Input label="Maximum output tokens" type="number" min={1} max={selected?.maxOutputTokens??32768} value={generateForm.data.max_output_tokens} onChange={e=>generateForm.setData("max_output_tokens",Number(e.target.value))} error={generateForm.errors.max_output_tokens}/><div><Button type="submit" loading={generateForm.processing} leadingIcon={<Icon name="sparkles" className="h-4 w-4"/>}>Generate</Button></div></form>:<p className="text-sm leading-6 text-[var(--nx-text-muted)]">Enable a healthy AI connection and ensure your role has <code>ai.generate</code> permission to use the workbench.</p>}
-    {lastGeneration&&<div className="mt-5 rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="font-medium text-[var(--nx-text)]">Latest response · {lastGeneration.connectionName}</p><span className="text-xs text-[var(--nx-text-muted)]">{lastGeneration.inputTokens??"—"} in / {lastGeneration.outputTokens??"—"} out tokens</span></div><pre className="mt-3 whitespace-pre-wrap break-words font-sans text-sm leading-6 text-[var(--nx-text)]">{lastGeneration.text}</pre><p className="mt-3 text-xs text-[var(--nx-text-muted)]">This raw response is intentionally not present in generation-history rows.</p></div>}
+    <div className="mb-5"><h2 className="font-semibold text-[var(--nx-text)]">Text generation workbench</h2><p className="mt-1 text-sm text-[var(--nx-text-muted)]">The prompt and generated text exist only for this HTTP exchange and browser state. History stores hashes, lengths and token accounting—not raw content.</p></div>
+    {canGenerate&&enabledConnections.length>0?<form className="grid gap-4" onSubmit={e=>{e.preventDefault();void generate();}}><Select label="Enabled connection" value={selectedConnection} onChange={value=>{setSelectedConnection(value);setGeneration(null);setGenerationError(null);}} options={connectionOptions}/><Textarea label="Prompt" value={prompt} onChange={e=>setPrompt(e.target.value)} error={generationError??undefined} placeholder="Draft a concise summary…"/><Input label="Maximum output tokens" type="number" min={1} max={selected?.maxOutputTokens??32768} value={maxOutputTokens} onChange={e=>setMaxOutputTokens(Number(e.target.value))}/><div><Button type="submit" loading={generating} leadingIcon={<Icon name="sparkles" className="h-4 w-4"/>}>Generate</Button></div></form>:<p className="text-sm leading-6 text-[var(--nx-text-muted)]">Enable a healthy AI connection and ensure your role has <code>ai.generate</code> permission to use the workbench.</p>}
+    {generation&&<div className="mt-5 rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="font-medium text-[var(--nx-text)]">Latest response · {generation.connectionName}</p><span className="text-xs text-[var(--nx-text-muted)]">{generation.inputTokens??"—"} in / {generation.outputTokens??"—"} out tokens</span></div><pre className="mt-3 whitespace-pre-wrap break-words font-sans text-sm leading-6 text-[var(--nx-text)]">{generation.text}</pre><p className="mt-3 text-xs text-[var(--nx-text-muted)]">This raw response is browser-local and is not persisted in Nexora generation history or session flash storage.</p></div>}
    </Card>
   </div>
 
