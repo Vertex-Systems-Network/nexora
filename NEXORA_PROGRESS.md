@@ -10,19 +10,21 @@
 
 - Date: `2026-08-22`
 - Branch: `dev/n1-0b-core-functional-qa`
-- PR #1: **DRAFT + OPEN**, not ready for merge
+- PR #1: **DRAFT + OPEN + MERGEABLE**, not ready for merge
 - Last executable green source CI: `32509858655` on `45e527c43c69f89c5519dde13bad6c771d171915`
 - Self-hosted run `32523602178` executed on runner `LOCAL-WIN-01`; checkout PASS, then failed before source gates because `shivammathur/setup-php` required missing `pwsh`.
 - Workflow correction head: `7310223dd951995245be69124639a51904a8c320` — hosted-style setup actions removed; installed Windows PHP/Node/npm now verified and used directly.
+- Sentinel 2.0 workflow gate wiring: `e412df465ec3215933f84296e0cb566f6acad955`.
+- Current N1.22 hardening source head before this progress commit: `d31e8524a16c4708dde68cffdec84b3fb4bff00d`.
 - Actions runner: **Windows local runner via `runs-on: self-hosted`**.
 - PR certification trigger: restored; temporary dev-branch push trigger remains during runner stabilization.
-- Ledger: `2.4` — governance sync for N1.18–N1.21 pending after certification result
+- Ledger: `2.4` — governance sync for N1.18–N1.22 pending after consolidated certification result
 - Issue #2: **OPEN**
 - N1.18 Public APIs / Webhooks / SDK: implementation complete / certification pending
 - N1.19 Import / Export / WordPress migrations: implementation complete / certification pending
 - N1.20 Observability: implementation complete / certification pending
 - N1.21 Forge / Developer Experience: implementation complete candidate / certification pending
-- Active parallel source audit: **N1.22 Sentinel 2.0**
+- N1.22 Sentinel 2.0: first trust-hardening workflow implementation complete candidate / certification pending
 
 ---
 
@@ -47,9 +49,10 @@ Verified Power remains unchanged. Self-hosted source certification can promote S
 | N1.18 Public APIs/Webhooks/SDK | implementation complete | 0% current target | certification pending |
 | N1.19 Import/Export/WP migrations | implementation complete | 0% current target | certification pending |
 | N1.20 Observability | implementation complete | 0% current target | certification pending |
-| N1.21 Forge / Developer Experience | implementation complete candidate | 0% current target | **SELF-HOSTED CERTIFICATION PENDING** |
-| N1.22 Sentinel 2.0 | audit active | 0% | **ACTIVE PARALLEL SOURCE BLOCK** |
-| N1.23–N1.26 | planned/partial | 0% | Later roadmap |
+| N1.21 Forge / Developer Experience | implementation complete candidate | 0% current target | SELF-HOSTED CERTIFICATION PENDING |
+| N1.22 Sentinel 2.0 | first trust-hardening workflow implementation complete candidate | 0% current target | **SELF-HOSTED CERTIFICATION PENDING** |
+| N1.23 Marketplace 2.0 | foundation/partial | 0% | Next source block after consolidated green |
+| N1.24–N1.26 | planned/partial | 0% | Later roadmap |
 
 ---
 
@@ -88,15 +91,22 @@ Correction:
 
 ---
 
-## 6. N1.22 Sentinel audit findings so far
+## 6. N1.22 Sentinel 2.0 implementation checkpoint
 
-- Sentinel/package scanner foundation is strong: bounded ZIP inspection, static scanners, capability mismatch detection, digest recheck/TOCTOU block and RiskEngine.
-- Quarantine uses internal UUID file names, atomic copy, source-size limits, quarantine path guard and restrictive file permissions.
-- Confirmed defects to close:
-  - `ScanRecorder` persists raw scanner exception messages to `SecurityScan.error`.
-  - `SentinelController` audits raw exception message on scan failure and exposes persisted raw scan error to Admin.
-  - findings sorting uses MySQL-specific `FIELD(...)`, violating PostgreSQL/SQLite/SQL Server portability.
-- Sentinel/Supply Chain are tied to the global package-installation plane; tenancy changes will not be applied blindly without preserving global Theme/Extension trust semantics.
+- Sentinel/package scanner foundation retained: bounded ZIP inspection, static scanners, capability mismatch detection, digest recheck/TOCTOU block and RiskEngine.
+- Quarantine retains internal UUID names, atomic copy, source-size limits, path guard and restrictive file permissions.
+- `SentinelFailureReference` creates opaque `SNT-*` references and a non-secret exception-class fingerprint without embedding raw exception text in durable Admin-facing state.
+- Private server diagnostics now log the same opaque `SNT-*` reference so operator-visible failure references are actually correlatable with server logs.
+- `ScanRecorder` persists only generic failure text + opaque reference/fingerprint metadata; raw throwable details remain server-log-only.
+- Forward migration `2026_08_22_000300_sanitize_sentinel_scan_failures.php` irreversibly scrubs legacy persisted raw scan error strings.
+- Sentinel Admin finding severity ordering now uses portable SQL `CASE`, replacing MySQL-only `FIELD(...)`.
+- `SentinelApprovalGuard` binds promotion to completed ALLOW, package ownership, bounded package state and unchanged package/scan SHA-256.
+- Promotion rejects any scan with a newer competing scan and fails closed when multiple scans share the same stored timestamp precision; ambiguous same-second ordering cannot be treated as latest.
+- Theme and Extension installers invoke the approval guard server-side, so crafted POSTs cannot replay an old ALLOW scan after a newer/ambiguous rescan.
+- Sentinel UI promotion discovery uses the same current-approval guard.
+- `tests/Feature/Security/SentinelTrustHardeningTest.php` covers current ALLOW, newer-scan rejection, same-timestamp ambiguity denial, post-approval digest mutation and raw-message privacy.
+- `scripts/sentinel2-product-contract-verify.php` guards failure privacy/correlation, legacy scrub, SQL portability, immutable/current approval and installer replay prevention.
+- Sentinel 2.0 contract is required by Development Readiness and the self-hosted release workflow.
 
 ---
 
@@ -118,26 +128,24 @@ Correction:
 | 032–033 | 2026-08-22 | through Forge contract `39beaac0…` | N1.21 Forge hardening/tests/docs/contract | implementation-complete candidate |
 | 034 | 2026-08-22 | readiness `74ca8c89…`; workflow `8e612c5a…` | self-hosted runner + PR trigger + Forge gate wiring | verified Power unchanged |
 | 035 | 2026-08-22 | run `32523602178`; workflow correction `7310223d…` | real LOCAL-WIN-01 execution; diagnosed missing `pwsh`; switched certification to installed Windows toolchain | verified Power unchanged pending rerun |
+| 036 | 2026-08-22 | Sentinel files through `d31e8524…`; workflow `e412df46…` | N1.22 privacy-safe correlated failures, legacy scrub, portable ordering, latest/tie-safe immutable approval, Theme/Extension replay prevention, tests + static/CI gate | implementation-complete candidate; verified Power unchanged pending consolidated run |
 
 ---
 
 ## 9. Exact next action
 
 ```text
-SELF-HOSTED CERTIFICATION
-  1. inspect run triggered by workflow correction/progress commit
+SELF-HOSTED CONSOLIDATED CERTIFICATION
+  1. allow the final progress/head synchronize run to execute on LOCAL-WIN-01 without further source churn
   2. verify local PHP/Node/npm toolchain step
-  3. execute every source/product gate through Unified Source certification
-  4. fix real gate failures until green
-  5. after green only: promote N1.18-N1.21 SOURCE DONE
-
-N1.22 SENTINEL 2.0 PARALLEL
-  1. replace raw scan failure persistence/disclosure with generic error + non-secret reference/fingerprint
-  2. replace MySQL FIELD severity ordering with portable CASE ordering
-  3. verify promotion/rescan uses immutable current package + trustworthy scan/artifact state
-  4. add acceptance/static regression gates
+  3. execute every source/product gate through Sentinel 2.0 and Unified Source certification
+  4. inspect exact failed job logs and fix only real failures until green
+  5. after green only: promote N1.18-N1.22 SOURCE DONE where justified
+  6. update this dashboard, canonical ledger, PR #1 and issue #2 source checkpoint
+  7. begin N1.23 Marketplace 2.0
 
 TARGET BOUNDARY
   - issue #2 stays OPEN until rc.93 compatibility + post-install + /login + /admin evidence
   - self-hosted source CI never raises Target Power by itself
+  - real DB/provider/SSO/product target evidence remains separately required
 ```
