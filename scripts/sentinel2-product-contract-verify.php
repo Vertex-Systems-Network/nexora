@@ -37,13 +37,13 @@ $forbid = static function (string $key, string $needle, string $message) use (&$
 $require('failure', "'SNT-'", 'Sentinel failure references must use a stable opaque SNT prefix.');
 $require('failure', 'class_fingerprint', 'Sentinel failure references must retain a non-secret exception-class fingerprint.');
 $require('failure', "Log::error('Sentinel security scan failed.'", 'Sentinel must correlate opaque operator references with private server logs.');
-$require('failure', "'error_reference' => $failure['reference']", 'Sentinel server logging must include the same opaque failure reference.');
+$require('failure', "'error_reference' => \$failure['reference']", 'Sentinel server logging must include the same opaque failure reference.');
 $forbid('failure', 'getMessage()', 'Sentinel public failure-reference service must never include raw exception messages.');
 $require('recorder', '$this->failures->report($exception', 'ScanRecorder must create and privately log the correlated Sentinel failure reference.');
-$require('recorder', "'error' => $failure['message']", 'ScanRecorder must persist only the privacy-safe failure message.');
-$require('recorder', "'class_fingerprint' => $failure['class_fingerprint']", 'ScanRecorder must retain the non-secret failure fingerprint.');
-$forbid('recorder', "'error' => $exception->getMessage()", 'ScanRecorder must not persist raw exception messages.');
-$forbid('controller', "['error' => $exception->getMessage()]", 'Sentinel audit events must not persist raw exception messages.');
+$require('recorder', "'error' => \$failure['message']", 'ScanRecorder must persist only the privacy-safe failure message.');
+$require('recorder', "'class_fingerprint' => \$failure['class_fingerprint']", 'ScanRecorder must retain the non-secret failure fingerprint.');
+$forbid('recorder', "'error' => \$exception->getMessage()", 'ScanRecorder must not persist raw exception messages.');
+$forbid('controller', "['error' => \$exception->getMessage()]", 'Sentinel audit events must not persist raw exception messages.');
 $require('controller', "'error_reference' =>", 'Sentinel failed-scan audit must use the opaque error reference.');
 $require('migration', 'Historical raw diagnostic details were removed', 'Legacy Sentinel scan errors must be scrubbed by a forward migration.');
 $forbid('migration', 'DB::statement', 'Sentinel privacy migration must remain portable and avoid raw SQL.');
@@ -54,9 +54,9 @@ $require('controller', "CASE severity WHEN 'critical' THEN 1", 'Sentinel finding
 $forbid('controller', 'FIELD(severity', 'MySQL-only FIELD severity ordering is forbidden.');
 
 // Promotion trust: stale/tied ALLOW scans and digest mutation must fail closed at UI and installer boundaries.
-$require('approval', "->where('id', '<>', (string) $scan->id)", 'Sentinel approval guard must exclude the candidate scan while checking competing scans.');
-$require('approval', "->where('created_at', '>', $approvedAt)", 'Sentinel approval guard must reject newer package scans.');
-$require('approval', "->orWhere('created_at', '=', $approvedAt)", 'Sentinel approval guard must fail closed when scan ordering is ambiguous at the stored timestamp precision.');
+$require('approval', "->where('id', '<>', (string) \$scan->id)", 'Sentinel approval guard must exclude the candidate scan while checking competing scans.');
+$require('approval', "->where('created_at', '>', \$approvedAt)", 'Sentinel approval guard must reject newer package scans.');
+$require('approval', "->orWhere('created_at', '=', \$approvedAt)", 'Sentinel approval guard must fail closed when scan ordering is ambiguous at the stored timestamp precision.');
 $require('approval', "'scanned', 'installed'", 'Sentinel approval guard must bound promotable package states.');
 $require('approval', "hash_file('sha256'", 'Sentinel approval guard must re-hash the quarantined package before promotion.');
 $require('approval', 'hash_equals((string) $package->sha256', 'Sentinel approval guard must compare current bytes to the quarantine baseline digest.');
