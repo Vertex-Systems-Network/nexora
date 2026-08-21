@@ -48,6 +48,7 @@ $run('collection_product_contract', 'Content collection product source contract'
 $run('publishing_seo_product_contract', 'Publishing + SEO product source contract', [PHP_BINARY, 'scripts/publishing-seo-product-contract-verify.php']);
 $run('admin_ux_product_contract', 'Admin UX product source contract', [PHP_BINARY, 'scripts/admin-ux-product-contract-verify.php']);
 $run('forms_workflow_product_contract', 'Forms + Data + Workflows product source contract', [PHP_BINARY, 'scripts/forms-workflow-product-contract-verify.php']);
+$run('data_connection_product_contract', 'Data Connections product source contract', [PHP_BINARY, 'scripts/data-connection-product-contract-verify.php']);
 
 $vendorReady = is_file($root.'/vendor/autoload.php');
 $nodeReady = is_dir($root.'/node_modules') && (is_file($root.'/node_modules/typescript/bin/tsc') || is_file($root.'/node_modules/.bin/tsc'));
