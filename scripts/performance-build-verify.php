@@ -66,7 +66,12 @@ foreach ($iterator as $file) {
     if ($category === 'image' && $size > (int)$budgets['image_asset_bytes']) $errors[] = "Image asset budget exceeded: {$relative} {$size} > {$budgets['image_asset_bytes']}";
     if (in_array($category,['js','css'],true)) {
         $source=(string)file_get_contents($absolute);
-        foreach (['localhost:5173','127.0.0.1:5173','D:\\laragon\\','/Users/'] as $leak) if (str_contains($source,$leak)) $errors[]="local development path leaked in {$relative}: {$leak}";
+        foreach (['localhost:5173','127.0.0.1:5173','D:\\laragon\\'] as $leak) {
+            if (str_contains($source,$leak)) $errors[]="local development path leaked in {$relative}: {$leak}";
+        }
+        if (preg_match('#/Users/[A-Za-z0-9._-]+/#', $source) === 1) {
+            $errors[]="local macOS user-home path leaked in {$relative}";
+        }
         if (str_contains($source,'sourceMappingURL=')) $errors[]='sourceMappingURL leaked in production asset: '.$relative;
     }
     $files[] = ['path'=>$relative,'bytes'=>$size,'sha256'=>hash_file('sha256',$absolute),'category'=>$category];

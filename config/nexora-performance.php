@@ -21,6 +21,11 @@ return [
     | app entry's static import graph; lazy Inertia pages remain outside that
     | first-load graph and are measured by the total/per-asset budgets below.
     |
+    | Nexora intentionally emits one lazy JavaScript chunk for many Inertia
+    | route modules. Keep a bounded whole-build chunk ceiling with enough room
+    | for the current route surface plus shared chunks without treating lazy
+    | routes as first-load payload.
+    |
     */
     'budgets' => [
         'build_total_bytes' => (int) $env('NEXORA_BUDGET_BUILD_TOTAL_BYTES', 6_000_000),
@@ -33,7 +38,7 @@ return [
         'font_asset_bytes' => (int) $env('NEXORA_BUDGET_FONT_ASSET_BYTES', 350_000),
         'image_asset_bytes' => (int) $env('NEXORA_BUDGET_IMAGE_ASSET_BYTES', 1_750_000),
         'static_public_asset_bytes' => (int) $env('NEXORA_BUDGET_STATIC_PUBLIC_ASSET_BYTES', 1_750_000),
-        'max_javascript_assets' => (int) $env('NEXORA_BUDGET_MAX_JS_ASSETS', 64),
+        'max_javascript_assets' => (int) $env('NEXORA_BUDGET_MAX_JS_ASSETS', 128),
         'max_css_assets' => (int) $env('NEXORA_BUDGET_MAX_CSS_ASSETS', 32),
     ],
 
