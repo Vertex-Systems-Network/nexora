@@ -16,4 +16,7 @@ Route::prefix('admin/extensions/marketplace')
         Route::delete('/sources/{source}', [ExtensionController::class, 'deleteSource'])
             ->middleware('permission:marketplace.manage')
             ->name('sources.destroy');
+        Route::post('/catalog/{item}/stage', [ExtensionController::class, 'stage'])
+            ->middleware('throttle:8,1')
+            ->name('catalog.stage');
     });
