@@ -35,7 +35,27 @@ if (($data['status'] ?? null) !== 'pass') $errors[] = 'web-standards status must
 if (($data['platform_version'] ?? null) !== ($platform['version'] ?? null)) $errors[] = 'web-standards platform_version mismatch';
 if (trim((string) ($data['auditor'] ?? '')) === '' || ($data['auditor'] ?? '') === 'operator-name') $errors[] = 'web-standards requires a real auditor';
 if (! nexoraEvidenceTimestampFresh($data['checked_at'] ?? null, nexoraEvidenceMaxAgeHours($root, 'browser', 72))) $errors[] = 'web-standards checked_at must be recent';
-if (($data['wave']['not_an_accessibility_approval'] ?? null) !== true) $errors[] = 'WAVE evidence must explicitly state it is not an accessibility approval';
+
+$waveMeta = (array) ($data['wave'] ?? []);
+if (($waveMeta['not_an_accessibility_approval'] ?? null) !== true) $errors[] = 'WAVE evidence must explicitly state it is not an accessibility approval';
+$waveApiUrl = trim((string) ($waveMeta['api_url'] ?? ''));
+if (! filter_var($waveApiUrl, FILTER_VALIDATE_URL)) {
+    $errors[] = 'WAVE evidence api_url must be valid';
+} else {
+    $waveHost = strtolower((string) parse_url($waveApiUrl, PHP_URL_HOST));
+    $wavePath = rtrim((string) parse_url($waveApiUrl, PHP_URL_PATH), '/');
+    $sharedWave = $waveHost === 'wave.webaim.org' && $wavePath === '/api/request';
+    $authentication = (string) ($waveMeta['authentication'] ?? '');
+    if (! in_array($authentication, ['environment-key', 'standalone-no-key'], true)) {
+        $errors[] = 'WAVE evidence authentication must be environment-key or standalone-no-key';
+    } elseif ($authentication === 'standalone-no-key') {
+        if ($sharedWave) $errors[] = 'Shared wave.webaim.org evidence cannot use standalone-no-key authentication';
+        if (($waveMeta['key_environment'] ?? null) !== null) $errors[] = 'standalone-no-key evidence must not name a key environment';
+    } else {
+        $keyEnvironment = trim((string) ($waveMeta['key_environment'] ?? ''));
+        if (preg_match('/^[A-Z][A-Z0-9_]{2,80}$/', $keyEnvironment) !== 1) $errors[] = 'environment-key evidence requires a valid key environment variable name';
+    }
+}
 
 $base = nexoraNormalizeEvidenceBaseUrl($data['base_url'] ?? null);
 if ($base === null) $errors[] = 'web-standards base_url must be valid';
@@ -83,4 +103,4 @@ $errors = array_merge($errors, nexoraValidateEvidenceSourceBinding($root, $data,
 $errors = array_merge($errors, nexoraValidateEvidenceSessionBinding($root, $data, 'web-standards evidence'));
 if ($errors !== []) $fail(implode('; ', array_values(array_unique($errors))));
 
-fwrite(STDOUT, "[N1.0-C5 Web Standards Evidence] PASS — exact-source W3C Nu + W3C CSS zero-error evidence and WAVE zero-error/zero-contrast human-reviewed evidence are sealed. WAVE is not treated as an accessibility approval.\n");
+fwrite(STDOUT, "[N1.0-C5 Web Standards Evidence] PASS — exact-source W3C Nu + W3C CSS zero-error evidence and WAVE zero-error/zero-contrast human-reviewed evidence are sealed with an explicit authentication boundary. WAVE is not treated as an accessibility approval.\n");
