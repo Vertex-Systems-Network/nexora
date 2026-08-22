@@ -17,6 +17,7 @@ final class N027AutomationArchitectureTest extends TestCase
         $index=(string)file_get_contents($root.'/resources/js/admin/pages/Admin/Automation/Index.tsx');
         $form=(string)file_get_contents($root.'/resources/js/admin/pages/Admin/Automation/Form.tsx');
         $delivery=(string)file_get_contents($root.'/app/Nexora/Automation/Services/WebhookDeliveryService.php');
+        $approvedHttp=(string)file_get_contents($root.'/app/Nexora/Foundation/Network/ApprovedHttpClient.php');
         $inbound=(string)file_get_contents($root.'/app/Http/Controllers/Public/InboundWebhookController.php');
         $bootstrap=(string)file_get_contents($root.'/bootstrap/app.php');
 
@@ -24,7 +25,10 @@ final class N027AutomationArchitectureTest extends TestCase
         foreach(['automation.workflows.read','automation.events.emit','webhooks.inbound.receive','webhooks.outbound.send'] as $capability) self::assertStringContainsString($capability,$config);
         foreach(['nx_workflows','nx_workflow_runs','nx_webhook_endpoints','nx_webhook_deliveries'] as $table) self::assertStringContainsString($table,$migration);
         self::assertStringContainsString('X-Nexora-Signature',$delivery);
-        self::assertStringContainsString('withoutRedirecting()',$delivery);
+        self::assertStringContainsString('ApprovedHttpClient',$delivery);
+        self::assertStringContainsString('$this->http->external($destination->url)',$delivery);
+        self::assertStringContainsString('Http::withoutRedirecting()',$approvedHttp);
+        self::assertStringContainsString("'allow_redirects'=>false",$approvedHttp);
         self::assertStringContainsString('previous_secret_valid_until',$inbound);
         self::assertStringContainsString("preventRequestForgery(except: ['hooks/*'])",$bootstrap);
         foreach([$index,$form] as $source){ self::assertStringContainsString('@nexora/admin-ui',$source); self::assertDoesNotMatchRegularExpression('/<(button|input|select|textarea)\b/',$source); }
