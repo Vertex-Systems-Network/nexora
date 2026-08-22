@@ -5,13 +5,11 @@ name: Nexora development execution QA
 # databases and never upgrades the recovery installation.
 # The single job also publishes the repository ruleset's required `governance` status context, avoiding a
 # second PR runner while keeping the full development QA as the merge-governance boundary.
+# Every pull-request head, including documentation/governance-only commits, must emit this context because
+# the repository ruleset evaluates required checks against the current PR head SHA.
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - '**/*.md'
-      - 'NEXORA_AI_PROJECT_STATE.md'
-      - 'NEXORA_PROGRESS.md'
   workflow_dispatch:
 
 permissions:
