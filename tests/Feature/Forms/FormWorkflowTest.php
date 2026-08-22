@@ -81,19 +81,21 @@ final class FormWorkflowTest extends TestCase
             ->assertSee('name="department"', false)
             ->assertSee('content="noindex,follow"', false);
 
-        $this->post('/forms/contact-form', [
-            'email' => 'not-an-email',
-            'message' => 'Please contact me.',
-            'department' => 'sales',
-        ])->assertSessionHasErrors(['email']);
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.81'])
+            ->post('/forms/contact-form', [
+                'email' => 'not-an-email',
+                'message' => 'Please contact me.',
+                'department' => 'sales',
+            ])->assertSessionHasErrors(['email']);
         self::assertSame(0, FormSubmission::query()->count());
 
-        $this->post('/forms/contact-form', [
-            'email' => 'customer@example.test',
-            'message' => 'Please contact me about Nexora.',
-            'department' => 'sales',
-            'unexpected_admin_flag' => 'must-not-persist',
-        ])->assertSessionHasNoErrors()->assertRedirect('/forms/contact-form');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.82'])
+            ->post('/forms/contact-form', [
+                'email' => 'customer@example.test',
+                'message' => 'Please contact me about Nexora.',
+                'department' => 'sales',
+                'unexpected_admin_flag' => 'must-not-persist',
+            ])->assertSessionHasNoErrors()->assertRedirect('/forms/contact-form');
 
         $submission = FormSubmission::query()->firstOrFail();
         self::assertSame('customer@example.test', $submission->values['email'] ?? null);
@@ -122,11 +124,12 @@ final class FormWorkflowTest extends TestCase
         $this->actingAs($admin)->post('/admin/forms', $payload)->assertSessionHasNoErrors();
         $this->post('/logout');
 
-        $this->post('/forms/contact-form', [
-            'email' => 'guest@example.test',
-            'message' => 'Guest response.',
-            'department' => 'support',
-        ])->assertSessionHasErrors(['form']);
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.83'])
+            ->post('/forms/contact-form', [
+                'email' => 'guest@example.test',
+                'message' => 'Guest response.',
+                'department' => 'support',
+            ])->assertSessionHasErrors(['form']);
         self::assertSame(0, FormSubmission::query()->count());
 
         $form = FormDefinition::query()->where('slug', 'contact-form')->firstOrFail();
@@ -134,12 +137,13 @@ final class FormWorkflowTest extends TestCase
             'settings' => array_merge((array) $form->settings, ['require_auth' => false]),
         ])->save();
 
-        $this->post('/forms/contact-form', [
-            '_nx_website' => 'https://spam.example',
-            'email' => 'spam@example.test',
-            'message' => 'Automated spam.',
-            'department' => 'sales',
-        ])->assertSessionHasNoErrors()->assertRedirect('/forms/contact-form');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.84'])
+            ->post('/forms/contact-form', [
+                '_nx_website' => 'https://spam.example',
+                'email' => 'spam@example.test',
+                'message' => 'Automated spam.',
+                'department' => 'sales',
+            ])->assertSessionHasNoErrors()->assertRedirect('/forms/contact-form');
         self::assertSame(0, FormSubmission::query()->count());
     }
 
@@ -152,11 +156,12 @@ final class FormWorkflowTest extends TestCase
         $this->post('/logout');
 
         $this->get('/forms/contact-form')->assertNotFound();
-        $this->post('/forms/contact-form', [
-            'email' => 'customer@example.test',
-            'message' => 'Should not be accepted.',
-            'department' => 'sales',
-        ])->assertNotFound();
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.85'])
+            ->post('/forms/contact-form', [
+                'email' => 'customer@example.test',
+                'message' => 'Should not be accepted.',
+                'department' => 'sales',
+            ])->assertNotFound();
     }
 
     private function administrator(): User
