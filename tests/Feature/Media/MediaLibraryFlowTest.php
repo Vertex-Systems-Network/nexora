@@ -30,7 +30,7 @@ final class MediaLibraryFlowTest extends TestCase
         $admin->roles()->attach(Role::query()->where('slug','administrator')->value('id'));
 
         $this->actingAs($admin)->post('/admin/media/upload', [
-            'file'=>UploadedFile::fake()->create('guide.pdf', 64, 'application/pdf'),
+            'file'=>$this->fakePdf(),
             'title'=>'Platform guide', 'alt_text'=>'', 'caption'=>'Reference document',
         ])->assertSessionHasNoErrors();
 
@@ -51,7 +51,7 @@ final class MediaLibraryFlowTest extends TestCase
         $admin->roles()->attach(Role::query()->where('slug','administrator')->value('id'));
 
         $this->actingAs($admin)->post('/admin/media/upload', [
-            'file'=>UploadedFile::fake()->create('guide.pdf', 64, 'application/pdf'),
+            'file'=>$this->fakePdf(),
             'title'=>'Reusable guide', 'alt_text'=>'', 'caption'=>'Reusable document',
         ])->assertSessionHasNoErrors();
 
@@ -82,5 +82,15 @@ final class MediaLibraryFlowTest extends TestCase
             'file'=>UploadedFile::fake()->create('payload.svg', 2, 'image/svg+xml'),
         ])->assertSessionHasErrors('file');
         self::assertSame(0, MediaAsset::query()->count());
+    }
+
+    private function fakePdf(): UploadedFile
+    {
+        $header = "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF\n";
+
+        return UploadedFile::fake()->createWithContent(
+            'guide.pdf',
+            str_pad($header, 64 * 1024, "\n"),
+        );
     }
 }
