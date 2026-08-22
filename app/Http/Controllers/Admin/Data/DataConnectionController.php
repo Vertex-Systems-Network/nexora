@@ -227,12 +227,12 @@ final class DataConnectionController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:120'],
             'endpoint' => [$endpointRequired ? 'required' : 'nullable', 'string', 'max:500'],
-            'database' => [$databaseSupported ? 'nullable' : 'prohibited', 'string', 'max:180'],
-            'username' => [$usernamePasswordSupported ? 'nullable' : 'prohibited', 'string', 'max:180'],
-            'password' => [$usernamePasswordSupported ? 'nullable' : 'prohibited', 'string', 'max:1000'],
+            'database' => $databaseSupported ? ['nullable', 'string', 'max:180'] : ['prohibited'],
+            'username' => $usernamePasswordSupported ? ['nullable', 'string', 'max:180'] : ['prohibited'],
+            'password' => $usernamePasswordSupported ? ['nullable', 'string', 'max:1000'] : ['prohibited'],
             'region' => [$regionRequired ? 'required' : 'nullable', 'string', 'max:80'],
-            'access_key' => [$awsKeyPairSupported ? 'nullable' : 'prohibited', 'string', 'max:500'],
-            'secret_key' => [$awsKeyPairSupported ? 'nullable' : 'prohibited', 'string', 'max:1000'],
+            'access_key' => $awsKeyPairSupported ? ['nullable', 'string', 'max:500'] : ['prohibited'],
+            'secret_key' => $awsKeyPairSupported ? ['nullable', 'string', 'max:1000'] : ['prohibited'],
         ];
         if ($includeDriver) {
             $rules['driver'] = ['required', 'string', Rule::in($this->catalog->keys())];
