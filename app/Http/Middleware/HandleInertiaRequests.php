@@ -15,12 +15,26 @@ use App\Nexora\Foundation\Contracts\AdminNavigationContract;
 use App\Nexora\Foundation\Contracts\SettingsContract;
 use App\Nexora\Installation\InstallationState;
 use App\Nexora\Cloud\Services\RuntimeDeploymentIdentity;
+use Closure;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Symfony\Component\HttpFoundation\Response;
 
 final class HandleInertiaRequests extends Middleware
 {
     protected $rootView = 'app';
+
+    public function handle(Request $request, Closure $next): Response
+    {
+        // The liveness probe is intentionally a bounded non-Inertia response.
+        // Avoid resolving deployment/share state here because those checks can
+        // touch the database and belong to readiness or normal application UI.
+        if ($request->is('health/live')) {
+            return $next($request);
+        }
+
+        return parent::handle($request, $next);
+    }
 
     public function version(Request $request): ?string
     {
@@ -128,6 +142,7 @@ final class HandleInertiaRequests extends Middleware
             ],
         ];
     }
+
     /** @return array<string,mixed> */
     private function localization(): array
     {
@@ -154,5 +169,4 @@ final class HandleInertiaRequests extends Middleware
             ],
         ];
     }
-
 }
