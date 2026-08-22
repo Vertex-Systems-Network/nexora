@@ -131,30 +131,10 @@ final class HaReadinessService
         $storageCapabilities = $this->storage->capabilities();
         $storageDriver = (string) ($storageCapabilities['driver'] ?? 'unknown');
 
-        $this->add(
-            $checks,
-            'shared_cache',
-            in_array($cache, (array) config('nexora-ha.shared_cache_stores', []), true),
-            "cache={$cache}",
-        );
-        $this->add(
-            $checks,
-            'shared_session',
-            in_array($session, (array) config('nexora-ha.shared_session_drivers', []), true),
-            "session={$session}",
-        );
-        $this->add(
-            $checks,
-            'async_queue',
-            in_array($queue, (array) config('nexora-ha.async_queue_connections', []), true),
-            "queue={$queue}",
-        );
-        $this->add(
-            $checks,
-            'shared_object_storage',
-            in_array($storageDriver, (array) config('nexora-ha.shared_storage_drivers', []), true),
-            "storage_driver={$storageDriver}",
-        );
+        $this->add($checks, 'shared_cache', in_array($cache, (array) config('nexora-ha.shared_cache_stores', []), true), "cache={$cache}");
+        $this->add($checks, 'shared_session', in_array($session, (array) config('nexora-ha.shared_session_drivers', []), true), "session={$session}");
+        $this->add($checks, 'async_queue', in_array($queue, (array) config('nexora-ha.async_queue_connections', []), true), "queue={$queue}");
+        $this->add($checks, 'shared_object_storage', in_array($storageDriver, (array) config('nexora-ha.shared_storage_drivers', []), true), "storage_driver={$storageDriver}");
     }
 
     /** @param array<int,array{name:string,status:string,detail:string}> $checks */
@@ -162,20 +142,10 @@ final class HaReadinessService
     {
         try {
             $fingerprint = $this->database->fingerprintValue();
-            $this->add(
-                $checks,
-                'local_database_data_plane',
-                preg_match('/^[a-f0-9]{64}$/', $fingerprint) === 1,
-                'database_fingerprint='.substr($fingerprint, 0, 16),
-            );
+            $this->add($checks, 'local_database_data_plane', preg_match('/^[a-f0-9]{64}$/', $fingerprint) === 1, 'database_fingerprint='.substr($fingerprint, 0, 16));
             return $fingerprint;
         } catch (Throwable $exception) {
-            $this->add(
-                $checks,
-                'local_database_data_plane',
-                false,
-                'database identity unavailable: '.$exception->getMessage(),
-            );
+            $this->add($checks, 'local_database_data_plane', false, 'database identity unavailable: '.$exception->getMessage());
             return '';
         }
     }
@@ -186,20 +156,10 @@ final class HaReadinessService
         try {
             $state = $this->services->current(false);
             $fingerprint = (string) ($state['fingerprint'] ?? '');
-            $this->add(
-                $checks,
-                'local_service_data_plane',
-                preg_match('/^[a-f0-9]{64}$/', $fingerprint) === 1,
-                'service_fingerprint='.substr($fingerprint, 0, 16),
-            );
+            $this->add($checks, 'local_service_data_plane', preg_match('/^[a-f0-9]{64}$/', $fingerprint) === 1, 'service_fingerprint='.substr($fingerprint, 0, 16));
             return $fingerprint;
         } catch (Throwable $exception) {
-            $this->add(
-                $checks,
-                'local_service_data_plane',
-                false,
-                'service identity unavailable: '.$exception->getMessage(),
-            );
+            $this->add($checks, 'local_service_data_plane', false, 'service identity unavailable: '.$exception->getMessage());
             return '';
         }
     }
@@ -211,33 +171,17 @@ final class HaReadinessService
         $deep = $this->hostClock->current(true);
         $fingerprint = (string) ($host['fingerprint'] ?? '');
         $skew = $deep['deep']['details']['clock']['skew_ms'] ?? 'unknown';
-
-        $this->add(
-            $checks,
-            'local_host_clock_profile',
-            ($deep['status'] ?? null) === 'pass',
-            'host_fingerprint='.substr($fingerprint, 0, 16).'; clock_skew_ms='.$skew,
-        );
-
+        $this->add($checks, 'local_host_clock_profile', ($deep['status'] ?? null) === 'pass', 'host_fingerprint='.substr($fingerprint, 0, 16).'; clock_skew_ms='.$skew);
         return $fingerprint;
     }
 
     /** @param array<int,array{name:string,status:string,detail:string}> $checks */
     private function resourceFingerprint(array &$checks): string
     {
-        $resource = $this->resources->current(
-            (bool) config('nexora-resource-runtime.require_deep_capacity_for_ha', true),
-        );
+        $resource = $this->resources->current((bool) config('nexora-resource-runtime.require_deep_capacity_for_ha', true));
         $fingerprint = (string) ($resource['fingerprint'] ?? '');
         $deepStatus = (string) ($resource['deep']['status'] ?? $resource['status'] ?? 'unknown');
-
-        $this->add(
-            $checks,
-            'local_resource_envelope',
-            ($resource['status'] ?? null) === 'pass',
-            'resource_fingerprint='.substr($fingerprint, 0, 16).'; deep_status='.$deepStatus,
-        );
-
+        $this->add($checks, 'local_resource_envelope', ($resource['status'] ?? null) === 'pass', 'resource_fingerprint='.substr($fingerprint, 0, 16).'; deep_status='.$deepStatus);
         return $fingerprint;
     }
 
@@ -246,13 +190,7 @@ final class HaReadinessService
     {
         $policy = $this->policyPlane->current(true);
         $fingerprint = (string) ($policy['fingerprint'] ?? '');
-        $this->add(
-            $checks,
-            'local_policy_plane',
-            ($policy['status'] ?? null) === 'pass',
-            'policy_fingerprint='.substr($fingerprint, 0, 16),
-        );
-
+        $this->add($checks, 'local_policy_plane', ($policy['status'] ?? null) === 'pass', 'policy_fingerprint='.substr($fingerprint, 0, 16));
         return $fingerprint;
     }
 
@@ -261,14 +199,8 @@ final class HaReadinessService
     {
         $process = $this->processPlane->current(true);
         $fingerprint = (string) ($process['fingerprint'] ?? '');
-        $this->add(
-            $checks,
-            'local_process_plane',
-            ($process['policy']['status'] ?? null) === 'pass',
-            'process_fingerprint='.substr($fingerprint, 0, 16),
-        );
+        $this->add($checks, 'local_process_plane', ($process['policy']['status'] ?? null) === 'pass', 'process_fingerprint='.substr($fingerprint, 0, 16));
         $this->addProcessQuorumChecks($checks, $process);
-
         return $fingerprint;
     }
 
@@ -279,12 +211,7 @@ final class HaReadinessService
             $required = (int) ($process['required'][$role] ?? 0);
             $live = (int) ($process['live']['counts'][$role] ?? 0);
             $passes = $required === 0 || ($process['checks'][$role.'_liveness'] ?? false) === true;
-            $this->add(
-                $checks,
-                $role.'_process_quorum',
-                $passes,
-                "live={$live}; required={$required}",
-            );
+            $this->add($checks, $role.'_process_quorum', $passes, "live={$live}; required={$required}");
         }
     }
 
@@ -294,31 +221,17 @@ final class HaReadinessService
         try {
             $storage = $this->storageIdentity->current(false);
             $fingerprint = (string) ($storage['fingerprint'] ?? '');
-            $this->add(
-                $checks,
-                'local_storage_data_plane',
-                preg_match('/^[a-f0-9]{64}$/', $fingerprint) === 1,
-                'storage_fingerprint='.substr($fingerprint, 0, 16),
-            );
-
+            $this->add($checks, 'local_storage_data_plane', preg_match('/^[a-f0-9]{64}$/', $fingerprint) === 1, 'storage_fingerprint='.substr($fingerprint, 0, 16));
             $backupShared = (bool) ($storage['roles']['backup']['shared_candidate'] ?? false);
             $this->add(
                 $checks,
                 'shared_backup_storage',
-                ! (bool) config('nexora-storage-runtime.require_backup_shared_for_ha', true)
-                    || $backupShared,
-                'backup_disk='.(string) ($storage['roles']['backup']['disk'] ?? 'unknown')
-                    .'; driver='.(string) ($storage['roles']['backup']['driver'] ?? 'unknown'),
+                ! (bool) config('nexora-storage-runtime.require_backup_shared_for_ha', true) || $backupShared,
+                'backup_disk='.(string) ($storage['roles']['backup']['disk'] ?? 'unknown').'; driver='.(string) ($storage['roles']['backup']['driver'] ?? 'unknown'),
             );
-
             return $fingerprint;
         } catch (Throwable $exception) {
-            $this->add(
-                $checks,
-                'local_storage_data_plane',
-                false,
-                'storage identity unavailable: '.$exception->getMessage(),
-            );
+            $this->add($checks, 'local_storage_data_plane', false, 'storage identity unavailable: '.$exception->getMessage());
             $this->add($checks, 'shared_backup_storage', false, 'storage identity unavailable');
             return '';
         }
@@ -330,14 +243,9 @@ final class HaReadinessService
         if (! Schema::hasTable('nx_runtime_nodes')) {
             return collect();
         }
-
         $freshSeconds = max(30, (int) config('nexora-ha.fresh_node_seconds', 180));
         $threshold = $this->hostClock->databaseNow()->copy()->subSeconds($freshSeconds);
-
-        return RuntimeNode::query()
-            ->where('status', 'active')
-            ->where('last_heartbeat_at', '>=', $threshold)
-            ->get();
+        return RuntimeNode::query()->where('status', 'active')->where('last_heartbeat_at', '>=', $threshold)->get();
     }
 
     /**
@@ -360,31 +268,12 @@ final class HaReadinessService
     ): void {
         $nodeCount = $nodes->count();
         $versions = $nodes->pluck('version')->filter()->unique()->values();
-        $this->add(
-            $checks,
-            'node_version_consistency',
-            $nodeCount > 0 && $versions->count() === 1 && $versions->first() === $version,
-            'versions='.$versions->implode(','),
-        );
+        $this->add($checks, 'node_version_consistency', $nodeCount > 0 && $versions->count() === 1 && $versions->first() === $version, 'versions='.$versions->implode(','));
 
-        $this->fingerprintCheck(
-            $checks,
-            $nodes,
-            'runtime_environment_fingerprint',
-            $this->environment->fingerprintValue(),
-            'runtime_environment_consistency',
-        );
-
+        $this->fingerprintCheck($checks, $nodes, 'runtime_environment_fingerprint', $this->environment->fingerprintValue(), 'runtime_environment_consistency');
         $activation = $this->activation->current();
-        $this->fingerprintCheck(
-            $checks,
-            $nodes,
-            'runtime_activation_fingerprint',
-            (string) $activation['activation_fingerprint'],
-            'runtime_activation_consistency',
-        );
+        $this->fingerprintCheck($checks, $nodes, 'runtime_activation_fingerprint', (string) $activation['activation_fingerprint'], 'runtime_activation_consistency');
         $this->activationEpochCheck($checks, $nodes, (string) $activation['activation_epoch']);
-
         $this->fingerprintCheck($checks, $nodes, 'runtime_engine_fingerprint', $this->engine->fingerprintValue(), 'runtime_engine_consistency');
         $this->fingerprintCheck($checks, $nodes, 'runtime_database_fingerprint', $databaseFingerprint, 'runtime_database_data_plane_consistency');
         $this->fingerprintCheck($checks, $nodes, 'runtime_storage_fingerprint', $storageFingerprint, 'runtime_storage_data_plane_consistency');
@@ -394,7 +283,6 @@ final class HaReadinessService
         $this->fingerprintCheck($checks, $nodes, 'runtime_policy_fingerprint', $policyFingerprint, 'runtime_policy_plane_consistency');
         $this->fingerprintCheck($checks, $nodes, 'runtime_process_fingerprint', $processFingerprint, 'runtime_process_policy_consistency');
         $this->fingerprintCheck($checks, $nodes, 'runtime_dependency_fingerprint', $dependencyFingerprint, 'runtime_dependency_fingerprint_consistency');
-
         $this->frameworkVersionCheck($checks, $nodes, $frameworkVersion);
         $this->metadataStatusCheck($checks, $nodes, 'dependency_review_status', 'dependency_review_status_pass');
         $this->metadataStatusCheck($checks, $nodes, 'runtime_policy_status', 'runtime_policy_status_pass');
@@ -404,59 +292,27 @@ final class HaReadinessService
     /** @param array<int,array{name:string,status:string,detail:string}> $checks @param Collection<int,RuntimeNode> $nodes */
     private function activationEpochCheck(array &$checks, Collection $nodes, string $localEpoch): void
     {
-        $epochs = $nodes
-            ->map(fn (RuntimeNode $node): string => $this->metadataValue($node, 'activation_epoch'))
-            ->filter()
-            ->unique()
-            ->values();
-
-        $this->add(
-            $checks,
-            'runtime_activation_epoch_consistency',
-            $nodes->count() > 0 && $epochs->count() === 1 && $epochs->first() === $localEpoch,
-            'epochs='.$epochs->implode(','),
-        );
+        $epochs = $nodes->map(fn (RuntimeNode $node): string => $this->metadataValue($node, 'activation_epoch'))->filter()->unique()->values();
+        $this->add($checks, 'runtime_activation_epoch_consistency', $nodes->count() > 0 && $epochs->count() === 1 && $epochs->first() === $localEpoch, 'epochs='.$epochs->implode(','));
     }
 
     /** @param array<int,array{name:string,status:string,detail:string}> $checks @param Collection<int,RuntimeNode> $nodes */
     private function frameworkVersionCheck(array &$checks, Collection $nodes, string $localVersion): void
     {
-        $versions = $nodes
-            ->map(fn (RuntimeNode $node): string => $this->metadataValue($node, 'laravel_framework_version'))
-            ->filter()
-            ->unique()
-            ->values();
-
+        $versions = $nodes->map(fn (RuntimeNode $node): string => $this->metadataValue($node, 'laravel_framework_version'))->filter()->unique()->values();
         $this->add(
             $checks,
             'laravel_framework_version_consistency',
-            $nodes->count() > 0
-                && $localVersion !== ''
-                && $versions->count() === 1
-                && version_compare((string) $versions->first(), $localVersion, '=='),
+            $nodes->count() > 0 && $localVersion !== '' && $versions->count() === 1 && version_compare((string) $versions->first(), $localVersion, '=='),
             'laravel_versions='.$versions->implode(','),
         );
     }
 
     /** @param array<int,array{name:string,status:string,detail:string}> $checks @param Collection<int,RuntimeNode> $nodes */
-    private function metadataStatusCheck(
-        array &$checks,
-        Collection $nodes,
-        string $metadataKey,
-        string $checkName,
-    ): void {
-        $statuses = $nodes
-            ->map(fn (RuntimeNode $node): string => strtolower($this->metadataValue($node, $metadataKey)))
-            ->filter()
-            ->unique()
-            ->values();
-
-        $this->add(
-            $checks,
-            $checkName,
-            $nodes->count() > 0 && $statuses->count() === 1 && $statuses->first() === 'pass',
-            $metadataKey.'='.$statuses->implode(','),
-        );
+    private function metadataStatusCheck(array &$checks, Collection $nodes, string $metadataKey, string $checkName): void
+    {
+        $statuses = $nodes->map(fn (RuntimeNode $node): string => strtolower($this->metadataValue($node, $metadataKey)))->filter()->unique()->values();
+        $this->add($checks, $checkName, $nodes->count() > 0 && $statuses->count() === 1 && $statuses->first() === 'pass', $metadataKey.'='.$statuses->implode(','));
     }
 
     /** @param array<int,array{name:string,status:string,detail:string}> $checks */
@@ -490,43 +346,45 @@ final class HaReadinessService
     private function schedulerLeaderCheck(array &$checks): void
     {
         $leaseOk = false;
-        if (Schema::hasTable('nx_runtime_leases')) {
+        $detail = 'no active scheduler leader lease';
+
+        if (! Schema::hasTable('nx_runtime_leases')) {
+            $detail = 'runtime lease table unavailable';
+        } elseif (! Schema::hasTable('nx_runtime_nodes')) {
+            $detail = 'runtime node table unavailable';
+        } else {
+            $now = $this->hostClock->databaseNow();
+            $freshSeconds = max(30, (int) config('nexora-ha.fresh_node_seconds', 180));
             $lease = RuntimeLease::query()->where('name', 'scheduler-leader')->first();
-            $leaseOk = $lease !== null
+
+            if ($lease !== null
                 && $lease->owner_node_key !== null
                 && $lease->expires_at !== null
-                && $lease->expires_at->gt($this->hostClock->databaseNow());
+                && $lease->expires_at->gt($now)) {
+                $owner = RuntimeNode::query()
+                    ->where('node_key', $lease->owner_node_key)
+                    ->where('status', 'active')
+                    ->where('last_heartbeat_at', '>=', $now->copy()->subSeconds($freshSeconds))
+                    ->first();
+
+                $leaseOk = $owner !== null;
+                $detail = $leaseOk
+                    ? 'active scheduler lease is bound to a fresh active runtime node'
+                    : 'scheduler lease owner is missing, stale, or inactive';
+            }
         }
 
-        $this->add(
-            $checks,
-            'scheduler_leader',
-            $leaseOk,
-            $leaseOk ? 'active scheduler lease found' : 'no active scheduler leader lease',
-        );
+        $this->add($checks, 'scheduler_leader', $leaseOk, $detail);
     }
 
     /** @param array<int,array{name:string,status:string,detail:string}> $checks @param Collection<int,RuntimeNode> $nodes */
-    private function fingerprintCheck(
-        array &$checks,
-        Collection $nodes,
-        string $metadataKey,
-        string $local,
-        string $name,
-    ): void {
-        $values = $nodes
-            ->map(fn (RuntimeNode $node): string => $this->metadataValue($node, $metadataKey))
-            ->filter()
-            ->unique()
-            ->values();
-
+    private function fingerprintCheck(array &$checks, Collection $nodes, string $metadataKey, string $local, string $name): void
+    {
+        $values = $nodes->map(fn (RuntimeNode $node): string => $this->metadataValue($node, $metadataKey))->filter()->unique()->values();
         $this->add(
             $checks,
             $name,
-            $nodes->count() > 0
-                && $local !== ''
-                && $values->count() === 1
-                && $values->first() === $local,
+            $nodes->count() > 0 && $local !== '' && $values->count() === 1 && $values->first() === $local,
             $metadataKey.'='.$values->implode(','),
         );
     }
@@ -534,17 +392,12 @@ final class HaReadinessService
     private function metadataValue(RuntimeNode $node, string $key): string
     {
         $metadata = is_array($node->metadata) ? $node->metadata : [];
-
         return strtolower(trim((string) ($metadata[$key] ?? '')));
     }
 
     /** @param array<int,array{name:string,status:string,detail:string}> $checks */
     private function add(array &$checks, string $name, bool $ok, string $detail): void
     {
-        $checks[] = [
-            'name' => $name,
-            'status' => $ok ? 'pass' : 'fail',
-            'detail' => $detail,
-        ];
+        $checks[] = ['name' => $name, 'status' => $ok ? 'pass' : 'fail', 'detail' => $detail];
     }
 }
