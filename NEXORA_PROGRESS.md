@@ -2,7 +2,7 @@
 
 > **MANDATORY UPDATE FILE** — Update this dashboard after every meaningful implementation, fix, audit closure, CI correction, target verification, issue closure, or release/certification apply.
 >
-> `NEXORA_AI_PROJECT_STATE.md` remains the canonical append-only history. `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` is the mandatory UI/accessibility operator + AI plan. **SOURCE DONE != TARGET VERIFIED.**
+> `NEXORA_AI_PROJECT_STATE.md` is preserved as append-only historical/cross-session history. This dashboard's **Current checkpoint** is authoritative for current branch head, runner policy, active evidence and `NEXT ACTION`. `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` is the mandatory UI/accessibility operator + AI plan. **SOURCE DONE != TARGET VERIFIED.**
 
 ---
 
@@ -11,14 +11,15 @@
 - Date: `2026-08-22`
 - Branch: `dev/n1-0b-core-functional-qa`
 - PR #1: **DRAFT + OPEN + MERGEABLE**; do not mark Ready or merge until required real target/release gates pass.
-- Current W3C/WAVE code-bearing head before this dashboard-only commit: **`b171d928358aeb62866b70cb0898d02c3b3b25f3`**.
+- Current code/governance head before this dashboard-only commit: **`7d38bdf8236630ff105b4666a6fcb06013462b21`**.
 - Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for this workflow.
 - GitHub-hosted development QA is development-checkout/source-functional evidence only. It does not prove the installed rc.93 Laragon recovery target, real browser behavior, W3C/WAVE target results, provider integrations, five-engine DB matrix, HA, recovery rehearsal, or final release certification.
 - Latest completed development QA before this standards batch: run #49 `32565782921` on `ff9a0444…` reached **229 PHPUnit PASS** before Data Connections fail-fast; Vitest 6/6, TypeScript, Vite build and production asset budgets were PASS.
 - Data Connections validation root was fixed in `b43f15bd…`: unsupported optional connector fields now use semantic `prohibited` rules instead of `prohibited + string` false failures on converted null values.
 - Issue #2: **OPEN**. Existing rc.93 target still needs compatibility + post-install readiness + `/login` + `/admin` evidence.
 - Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
-- W3C HTML + W3C CSS + WAVE C5 source tooling is implemented and mandatory for final target accessibility closure.
+- W3C Nu HTML + W3C CSS Validation Service + WAVE C5 source tooling is implemented and mandatory for final target accessibility closure.
+- N1.26 Development Readiness now also `php -l` syntax-checks the live C5 PHP runner/verifier scripts so remote-target tooling cannot carry an undetected PHP parse error merely because live WAVE/W3C calls are intentionally not executed in PR QA.
 
 ---
 
@@ -65,6 +66,8 @@ GitHub-hosted Ubuntu
   -> composer install
   -> npm install
   -> php scripts/development-readiness.php --full --tests --evidence
+  -> all product/source contracts including N1.26
+  -> php -l live C5 standards/evidence runners
   -> PHPUnit fail-fast
   -> Vitest
   -> TypeScript
@@ -98,9 +101,9 @@ Canonical plan: `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md`.
 - `scripts/n1-c5-browser-performance-certify.php` live C5 integration
 - `scripts/n1-c5-evidence-verify.php` final evidence hash binding/checks
 - `scripts/lib/n1-c5-contracts.php` source guard
-- `scripts/performance-accessibility-release-product-contract-verify.php` N1.26 product guard
+- `scripts/performance-accessibility-release-product-contract-verify.php` N1.26 product guard + PHP syntax checks
 - `package.json` commands `certify:web-standards` and `verify:web-standards-evidence`
-- `AGENTS.md` mandatory AI accessibility rules
+- `AGENTS.md` mandatory AI accessibility + current-policy precedence rules
 - C5 operator kit/runbook updated with W3C/WAVE prerequisites.
 
 ### Required real target routes
@@ -251,16 +254,17 @@ Issue #2 may close only after those real target checks pass. GitHub-hosted Ubunt
 Every AI/agent must:
 
 1. Read `AGENTS.md`, `NEXORA_AI_PROJECT_STATE.md`, this file, and `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` before relevant work.
-2. Use GitHub-hosted development QA only; do not silently substitute a local/self-hosted runner.
-3. Never promote source/static/jsdom evidence to real browser/target evidence.
-4. Never call WAVE output an accessibility approval.
-5. Never remove a failing W3C/WAVE required route just to make C5 green.
-6. Preserve both W3C HTML and W3C CSS zero-error gates.
-7. Never commit WAVE/API credentials.
-8. Fix root causes and rerun the exact failing gate.
-9. Keep issue #2 and C5 accessibility evidence as separate target boundaries.
-10. Keep PR #1 DRAFT until all required target/release evidence is genuinely final.
-11. Do not raise Target/Release Power from hosted source/development CI alone.
+2. Treat this file's Current checkpoint as authoritative over stale historical policy text in older ledger entries.
+3. Use GitHub-hosted development QA only; do not silently substitute a local/self-hosted runner.
+4. Never promote source/static/jsdom evidence to real browser/target evidence.
+5. Never call WAVE output an accessibility approval.
+6. Never remove a failing W3C/WAVE required route just to make C5 green.
+7. Preserve both W3C HTML and W3C CSS zero-error gates.
+8. Never commit WAVE/API credentials.
+9. Fix root causes and rerun the exact failing gate.
+10. Keep issue #2 and C5 accessibility evidence as separate target boundaries.
+11. Keep PR #1 DRAFT until all required target/release evidence is genuinely final.
+12. Do not raise Target/Release Power from hosted source/development CI alone.
 
 ---
 
@@ -273,6 +277,8 @@ Every AI/agent must:
 | 047 | 2026-08-22 | `b43f15bd…` | Data Connections validator corrected for unsupported nullable fields | pending integrated hosted confirmation; Power unchanged |
 | 048 | 2026-08-22 | `97f95078…` → `7cf4e1cc…` | W3C Nu HTML + WAVE target runner/verifier, C5 evidence binding, source contracts, AI plan, AGENTS/package/operator-kit wiring | Source candidate strengthened; Target/Release unchanged |
 | 049 | 2026-08-22 | `b8aa616e…` → `b171d928…` | expanded standards gate to W3C CSS SOAP validation, CSS zero-error evidence verification, C5 forwarding/contracts/final manifest/AI plan | Source candidate strengthened; Target/Release unchanged |
+| 050 | 2026-08-22 | `70a15470…` | N1.26 product source gate now parser-checks live C5 PHP executables with `php -l` | Source candidate strengthened; Target/Release unchanged |
+| 051 | 2026-08-22 | `7d38bdf8…` | AI handoff defines live progress checkpoint precedence over preserved historical runner-policy entries | governance corrected; Power unchanged |
 
 ---
 
