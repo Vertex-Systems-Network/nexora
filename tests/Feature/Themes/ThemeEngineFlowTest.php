@@ -10,6 +10,7 @@ use App\Models\SecurityScan;
 use App\Models\Theme;
 use App\Models\ThemeVersion;
 use App\Models\User;
+use App\Nexora\Cloud\Services\RuntimeDeploymentIdentity;
 use App\Nexora\Themes\Contracts\ThemeManagerContract;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -63,6 +64,10 @@ final class ThemeEngineFlowTest extends TestCase
         $version = ThemeVersion::query()->whereHas('theme', fn ($query) => $query->where('identifier', 'nexora.base'))->firstOrFail();
 
         $before = app(ThemeManagerContract::class)->active()?->id;
+        $this->withHeader(
+            'X-Nexora-Deployment-Generation',
+            app(RuntimeDeploymentIdentity::class)->generation(),
+        );
         $response = $this->actingAs($admin)->postJson('/admin/appearance/themes/versions/'.$version->id.'/preview');
         $response->assertOk()->assertJsonStructure(['url', 'expires_in_minutes']);
         self::assertSame($before, app(ThemeManagerContract::class)->active()?->id);
@@ -92,6 +97,10 @@ final class ThemeEngineFlowTest extends TestCase
             ]);
 
             $before = app(ThemeManagerContract::class)->active()?->id;
+            $this->withHeader(
+                'X-Nexora-Deployment-Generation',
+                app(RuntimeDeploymentIdentity::class)->generation(),
+            );
             $preview = $this->actingAs($admin)->postJson('/admin/appearance/themes/versions/'.$version->id.'/preview');
             $preview->assertOk()->assertJsonStructure(['url', 'expires_in_minutes']);
             self::assertSame($before, app(ThemeManagerContract::class)->active()?->id);
