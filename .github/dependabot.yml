@@ -14,17 +14,16 @@ updates:
       timezone: "Asia/Karachi"
 
     # Give newly released versions some time to stabilize.
-    # Security updates are NOT delayed by cooldown.
+    # Security updates are not delayed by cooldown.
     cooldown:
       semver-major-days: 14
       semver-minor-days: 7
       semver-patch-days: 3
 
-    # Applies to version-update PRs.
     open-pull-requests-limit: 5
 
     groups:
-      # Low-risk dev dependency updates can safely travel together.
+      # Low-risk development updates can travel together.
       development-minor-patch:
         applies-to: "version-updates"
         dependency-type: "development"
@@ -32,16 +31,12 @@ updates:
           - "minor"
           - "patch"
 
-      # Production patches are normally low-risk enough to group.
+      # Production patches are grouped; production minor and all major updates stay separate.
       production-patches:
         applies-to: "version-updates"
         dependency-type: "production"
         update-types:
           - "patch"
-
-    # Production minor updates remain separate.
-    # All major updates remain separate.
-    # Security updates remain separate.
 
     commit-message:
       prefix: "chore"
@@ -49,9 +44,9 @@ updates:
 
 
   # =========================================================
-  # Docker
+  # Composer / PHP
   # =========================================================
-  - package-ecosystem: "docker"
+  - package-ecosystem: "composer"
     directory: "/"
 
     schedule:
@@ -60,6 +55,7 @@ updates:
       time: "09:00"
       timezone: "Asia/Karachi"
 
+    # Backend dependency changes remain separate for focused review.
     cooldown:
       default-days: 7
 
