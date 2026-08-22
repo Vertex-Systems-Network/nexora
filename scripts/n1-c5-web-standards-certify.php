@@ -14,6 +14,7 @@ $w3cUrl = 'https://validator.w3.org/nu/';
 $w3cCssUrl = 'https://jigsaw.w3.org/css-validator/validator';
 $waveUrl = 'https://wave.webaim.org/api/request';
 $waveKeyEnv = 'WAVE_API_KEY';
+$waveNoKey = false;
 $alertsReviewed = false;
 
 foreach ($argv as $arg) {
@@ -23,6 +24,7 @@ foreach ($argv as $arg) {
     elseif (str_starts_with($arg, '--w3c-css-validator-url=')) $w3cCssUrl = trim(substr($arg, 24));
     elseif (str_starts_with($arg, '--wave-api-url=')) $waveUrl = trim(substr($arg, 15));
     elseif (str_starts_with($arg, '--wave-key-env=')) $waveKeyEnv = trim(substr($arg, 15));
+    elseif ($arg === '--wave-no-key') $waveNoKey = true;
     elseif ($arg === '--wave-alerts-reviewed') $alertsReviewed = true;
 }
 
@@ -39,9 +41,16 @@ if (! filter_var($w3cCssUrl, FILTER_VALIDATE_URL)) $fail('Invalid W3C CSS valida
 if (! filter_var($waveUrl, FILTER_VALIDATE_URL)) $fail('Invalid WAVE API URL.');
 if (! preg_match('/^[A-Z][A-Z0-9_]{2,80}$/', $waveKeyEnv)) $fail('Invalid WAVE key environment variable name.');
 
+$waveHost = strtolower((string) parse_url($waveUrl, PHP_URL_HOST));
+$wavePath = rtrim((string) parse_url($waveUrl, PHP_URL_PATH), '/');
+$sharedWave = $waveHost === 'wave.webaim.org' && $wavePath === '/api/request';
+if ($waveNoKey && $sharedWave) {
+    $fail('Shared wave.webaim.org API always requires an API key; --wave-no-key is allowed only with an explicit custom stand-alone endpoint.');
+}
+
 $waveKey = trim((string) getenv($waveKeyEnv));
-if ($waveKey === '') {
-    $fail("WAVE credential missing from environment [{$waveKeyEnv}]. Shared WAVE API requires a key; use a licensed stand-alone API endpoint if the target is private.");
+if (! $waveNoKey && $waveKey === '') {
+    $fail("WAVE credential missing from environment [{$waveKeyEnv}]. Shared WAVE API requires a key; for a licensed custom stand-alone endpoint use its required authentication or explicitly opt into --wave-no-key when that endpoint does not require a request key.");
 }
 if (! $alertsReviewed) {
     $fail('WAVE alerts require explicit human review. Re-run only after review with --wave-alerts-reviewed.');
@@ -64,7 +73,7 @@ $request = static function (string $url, string $accept, int $timeout = 45): arr
     $body = @file_get_contents($url, false, $context);
     $status = 0;
     foreach ((array) ($http_response_header ?? []) as $header) {
-        if (preg_match('#^HTTP/\S+\s+(\d{3})#i', (string) $header, $m) === 1) $status = (int) $m[1];
+        if (preg_match('#^HTTP/\\S+\\s+(\\d{3})#i', (string) $header, $m) === 1) $status = (int) $m[1];
     }
     if ($body === false) throw new RuntimeException('HTTP request failed.');
     return [$status, $body];
@@ -137,7 +146,7 @@ foreach ($routes as $route) {
         ]);
         [$cssHttpStatus, $cssBody] = $request($cssRequest, 'application/soap+xml, application/xml, text/xml', 60);
         $extract = static function (string $xml, string $localName): ?string {
-            if (preg_match('#<(?:[A-Za-z0-9_.-]+:)?'.preg_quote($localName, '#').'\b[^>]*>\s*([^<]*)\s*</(?:[A-Za-z0-9_.-]+:)?'.preg_quote($localName, '#').'>#i', $xml, $m) !== 1) return null;
+            if (preg_match('#<(?:[A-Za-z0-9_.-]+:)?'.preg_quote($localName, '#').'\\b[^>]*>\\s*([^<]*)\\s*</(?:[A-Za-z0-9_.-]+:)?'.preg_quote($localName, '#').'>#i', $xml, $m) !== 1) return null;
             return html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_XML1, 'UTF-8');
         };
         $validityRaw = strtolower((string) ($extract($cssBody, 'validity') ?? ''));
@@ -170,12 +179,13 @@ foreach ($routes as $route) {
         'items' => [],
     ];
     try {
-        [$httpStatus, $payload] = $requestJson(rtrim($waveUrl, '?&').'?'.http_build_query([
-            'key' => $waveKey,
+        $waveQuery = [
             'url' => $target,
             'format' => 'json',
             'reporttype' => 2,
-        ]), 60);
+        ];
+        if (! $waveNoKey) $waveQuery = ['key' => $waveKey] + $waveQuery;
+        [$httpStatus, $payload] = $requestJson(rtrim($waveUrl, '?&').'?'.http_build_query($waveQuery), 60);
         $success = (bool) ($payload['status']['success'] ?? false);
         $hostStatus = (int) ($payload['status']['httpstatuscode'] ?? 0);
         $errors = (int) ($payload['categories']['error']['count'] ?? -1);
@@ -240,6 +250,8 @@ $evidence = [
         'tool' => 'WAVE',
         'api_url' => $waveUrl,
         'report_type' => 2,
+        'authentication' => $waveNoKey ? 'standalone-no-key' : 'environment-key',
+        'key_environment' => $waveNoKey ? null : $waveKeyEnv,
         'project_gate' => 'zero WAVE errors and zero contrast errors; all alerts human-reviewed',
         'not_an_accessibility_approval' => true,
     ],
