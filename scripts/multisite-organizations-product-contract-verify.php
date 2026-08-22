@@ -127,12 +127,14 @@ foreach ([
         $errors[] = "AI governance contract missing: {$label}.";
     }
 }
-foreach ([
-    '## 2. Weighted Project Power Score' => 'weighted project power dashboard',
-    'After **every meaningful apply**' => 'progress-update protocol',
-] as $needle => $label) {
-    if ($progress !== '' && ! str_contains($progress, $needle)) {
-        $errors[] = "Progress dashboard contract missing: {$label}.";
+if ($progress !== '') {
+    if (! str_contains($progress, '## 2. Weighted Project Power Score')) {
+        $errors[] = 'Progress dashboard contract missing: weighted project power dashboard.';
+    }
+
+    $normalizedProgress = preg_replace('/[`*_#]+/', '', $progress) ?? $progress;
+    if (! str_contains($normalizedProgress, 'Update this dashboard after every meaningful')) {
+        $errors[] = 'Progress dashboard contract missing: mandatory progress-update protocol.';
     }
 }
 if ($progress !== '' && preg_match('/^##\s+\d+\.\s+Apply Log\s*$/m', $progress) !== 1) {
