@@ -107,15 +107,39 @@ foreach (['browser_evidence_sha256', 'web_vitals_evidence_sha256', 'web_standard
 
 // Standards tooling must be real, fail-closed, secret-safe and explicit that WAVE is
 // an evaluation aid rather than an accessibility approval.
-foreach (['validator.w3.org/nu/', 'jigsaw.w3.org/css-validator/validator', "'output' => 'soap12'", "'profile' => 'css3'", 'wave.webaim.org/api/request', 'WAVE_API_KEY', '--wave-alerts-reviewed', 'web-standards-evidence.json', 'not_an_accessibility_approval'] as $needle) {
+foreach ([
+    'validator.w3.org/nu/',
+    'jigsaw.w3.org/css-validator/validator',
+    "'output' => 'soap12'",
+    "'profile' => 'css3'",
+    'wave.webaim.org/api/request',
+    'WAVE_API_KEY',
+    '--wave-alerts-reviewed',
+    '--wave-no-key',
+    'Shared wave.webaim.org API always requires an API key',
+    "'authentication' => $waveNoKey ? 'standalone-no-key' : 'environment-key'",
+    'web-standards-evidence.json',
+    'not_an_accessibility_approval',
+] as $needle) {
     $require($standardsRunner, $needle, 'W3C/WAVE target runner missing required marker: '.$needle);
 }
-foreach (['zero conformance errors', 'zero validation errors', 'zero errors', 'zero contrast errors', 'alerts must be human-reviewed', 'not_an_accessibility_approval'] as $needle) {
+foreach ([
+    'zero conformance errors',
+    'zero validation errors',
+    'zero errors',
+    'zero contrast errors',
+    'alerts must be human-reviewed',
+    'authentication must be environment-key or standalone-no-key',
+    'Shared wave.webaim.org evidence cannot use standalone-no-key authentication',
+    'not_an_accessibility_approval',
+] as $needle) {
     $require($standardsVerifier, $needle, 'W3C/WAVE evidence verifier missing fail-closed marker: '.$needle);
 }
-foreach (['W3C Nu', 'W3C CSS', 'WAVE', 'WCAG 2.2', 'Never weaken a W3C/WAVE/browser gate'] as $needle) {
+foreach (['W3C Nu', 'W3C CSS', 'WAVE', 'WCAG 2.2', 'Never weaken a W3C/WAVE/browser gate', '--wave-no-key', 'Never use `--wave-no-key` with the shared WAVE API'] as $needle) {
     $require($accessibilityPlan, $needle, 'Accessibility certification plan missing AI/operator rule: '.$needle);
 }
+$require($c5Runner, "if ($waveNoKey) $standards[] = '--wave-no-key';", 'C5 parent runner must forward explicit WAVE stand-alone no-key mode.');
+
 $standardsConfig = (array) ($browserConfig['standards'] ?? []);
 foreach (['/', '/login'] as $route) {
     if (! in_array($route, (array) ($standardsConfig['routes'] ?? []), true)) $failures[] = "W3C/WAVE required route [{$route}] must remain configured.";
@@ -155,5 +179,6 @@ fwrite(STDOUT, "Nexora Performance + Accessibility + Release Product Contract: P
 fwrite(STDOUT, " - Admin pages remain lazy-route split and first-load JS is separately budgeted\n");
 fwrite(STDOUT, " - shared dialog focus containment is source-guarded and regression-tested\n");
 fwrite(STDOUT, " - live C5 PHP runners are syntax-checked without faking target execution\n");
+fwrite(STDOUT, " - shared WAVE keeps API-key auth; explicit custom stand-alone endpoints may opt into no-key mode\n");
 fwrite(STDOUT, " - development target QA executes Vitest plus production asset-budget verification\n");
 fwrite(STDOUT, " - final C5 requires W3C HTML+CSS zero-error validation, WAVE zero-error/contrast review, real browser/AT, HTTP and Web Vitals target evidence\n");
