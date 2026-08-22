@@ -6,7 +6,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use RuntimeException;
 
 return new class extends Migration {
     private const CRM_PIPELINES = 'nx_crm_pipelines';
@@ -40,7 +39,7 @@ return new class extends Migration {
         foreach (DB::table(self::CRM_COMMERCE_LINKS)->get(['id', 'commerce_customer_id', 'contact_id', 'organization_id']) as $link) {
             $customerTenant = DB::table('nx_commerce_customers')->where('id', $link->commerce_customer_id)->value('tenant_id');
             if (! is_string($customerTenant) || $customerTenant === '') {
-                throw new RuntimeException("CRM Commerce link {$link->id} has no valid Commerce customer tenant.");
+                throw new \RuntimeException("CRM Commerce link {$link->id} has no valid Commerce customer tenant.");
             }
 
             foreach ([
@@ -53,7 +52,7 @@ return new class extends Migration {
 
                 $subjectTenant = DB::table($subject['table'])->where('id', $subject['id'])->value('tenant_id');
                 if (! is_string($subjectTenant) || $subjectTenant === '' || $subjectTenant !== $customerTenant) {
-                    throw new RuntimeException("CRM Commerce link {$link->id} has a cross-tenant {$label} relationship.");
+                    throw new \RuntimeException("CRM Commerce link {$link->id} has a cross-tenant {$label} relationship.");
                 }
             }
 
