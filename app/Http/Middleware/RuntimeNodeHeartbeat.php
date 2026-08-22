@@ -45,10 +45,11 @@ final class RuntimeNodeHeartbeat
 
     public function handle(Request $request, Closure $next): Response
     {
-        // Liveness answers only whether the PHP/Laravel process can serve a
-        // bounded response. Deep runtime identity, storage and cluster checks
-        // belong to /health/ready and must not inflate or block /health/live.
-        if ($request->is('health/live')) {
+        // Health endpoints own their response semantics. Liveness is deliberately
+        // minimal, while readiness runs the bounded node/runtime/database/cache
+        // probes in HealthProbeService and must be allowed to return structured
+        // JSON even when the current node is draining or otherwise not ready.
+        if ($request->is('health/live') || $request->is('health/ready')) {
             return $next($request);
         }
 
