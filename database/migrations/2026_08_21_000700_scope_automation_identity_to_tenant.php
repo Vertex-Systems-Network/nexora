@@ -7,7 +7,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use RuntimeException;
 
 return new class extends Migration {
     private const WORKFLOWS = 'nx_workflows';
@@ -88,7 +87,7 @@ return new class extends Migration {
                 foreach ($steps as $step) {
                     $tenantId = $runTenants->get($step->workflow_run_id);
                     if (! is_string($tenantId) || $tenantId === '') {
-                        throw new RuntimeException("Workflow step {$step->id} has no trustworthy parent-run tenant identity.");
+                        throw new \RuntimeException("Workflow step {$step->id} has no trustworthy parent-run tenant identity.");
                     }
 
                     DB::table(self::STEPS)
