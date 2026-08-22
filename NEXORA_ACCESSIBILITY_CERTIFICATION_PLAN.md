@@ -1,6 +1,6 @@
 # Nexora Accessibility Certification Plan
 
-> AI/agent execution contract for W3C, WAVE, WCAG and real browser accessibility closure.
+> AI/agent execution contract for W3C HTML/CSS, WAVE, WCAG and real browser accessibility closure.
 >
 > Read this file together with `AGENTS.md`, `NEXORA_AI_PROJECT_STATE.md` and `NEXORA_PROGRESS.md`. This plan does not replace SOURCE DONE vs TARGET VERIFIED semantics.
 
@@ -12,13 +12,14 @@ Final C5 accessibility evidence requires all of the following:
 
 1. Existing executable source a11y regressions remain green.
 2. W3C Nu HTML conformance validation reports **zero errors** on every required target route.
-3. WAVE reports **zero Errors** and **zero Contrast Errors** on every required target route.
-4. Every WAVE Alert is reviewed by a human auditor and either confirmed harmless/informational or fixed before certification.
-5. Chrome, Edge and Firefox browser matrix is directly observed at mobile/tablet/desktop widths, LTR/RTL and light/dark.
-6. Keyboard-only, visible focus, skip link, dialogs/focus containment, reduced motion, 200% zoom, forced-colors and screen-reader labels are directly observed.
-7. A real assistive-technology/browser/OS combination is recorded.
-8. Required Web Vitals and HTTP/security evidence remain within C5 ceilings.
-9. Evidence is current, exact-source bound and certification-session bound.
+3. W3C CSS Validation Service reports **zero CSS errors** on every required target route; warnings are recorded for review.
+4. WAVE reports **zero Errors** and **zero Contrast Errors** on every required target route.
+5. Every WAVE Alert is reviewed by a human auditor and either confirmed harmless/informational or fixed before certification.
+6. Chrome, Edge and Firefox browser matrix is directly observed at mobile/tablet/desktop widths, LTR/RTL and light/dark.
+7. Keyboard-only, visible focus, skip link, dialogs/focus containment, reduced motion, 200% zoom, forced-colors and screen-reader labels are directly observed.
+8. A real assistive-technology/browser/OS combination is recorded.
+9. Required Web Vitals and HTTP/security evidence remain within C5 ceilings.
+10. Evidence is current, exact-source bound and certification-session bound.
 
 ## 2. Required routes
 
@@ -29,7 +30,7 @@ The initial required standards matrix is configured in `config/nexora-browser-ce
 
 Add high-value public/admin routes as authenticated target tooling becomes available. Do not silently remove a failing route to make certification green.
 
-## 3. W3C Nu validation
+## 3. W3C HTML + CSS validation
 
 Canonical runner:
 
@@ -40,18 +41,29 @@ php scripts/n1-c5-web-standards-certify.php \
   --wave-alerts-reviewed
 ```
 
-The runner uses the Nu Html Checker endpoint by default and supports a custom/local Nu service with:
+The runner uses W3C Nu Html Checker and W3C CSS Validation Service by default. Custom/local validators may be supplied with:
 
 ```text
 --w3c-validator-url=https://YOUR-VALIDATOR/nu/
+--w3c-css-validator-url=https://YOUR-CSS-VALIDATOR/validator
 ```
 
-Project gate:
+HTML project gate:
 
 - HTTP request succeeds.
 - Required route is reachable by the checker.
 - Nu Html Checker `error` count is exactly `0`.
-- Warnings are recorded for review but do not automatically become a false accessibility certification.
+- HTML warnings are recorded for review.
+
+CSS project gate:
+
+- CSS validator request succeeds.
+- W3C CSS validity is `true`.
+- CSS error count is exactly `0`.
+- CSS warning count is recorded for review.
+- The current configured validator profile is `css3`.
+
+Warnings are evidence for review; they must never be silently discarded or misrepresented as accessibility certification.
 
 ## 4. WAVE evaluation
 
@@ -81,7 +93,7 @@ Important: project gate PASS is **not** a WAVE approval/certification and must n
 
 ## 5. Real browser / WCAG review
 
-W3C and WAVE supplement but do not replace the existing C5 manual matrix. The operator kit remains fail-closed until all browser/accessibility checks are directly observed. At minimum review against WCAG 2.2-relevant behavior for:
+W3C HTML/CSS and WAVE supplement but do not replace the existing C5 manual matrix. The operator kit remains fail-closed until all browser/accessibility checks are directly observed. At minimum review against WCAG 2.2-relevant behavior for:
 
 - semantic structure and headings;
 - text alternatives;
@@ -115,9 +127,9 @@ The final C5 evidence manifest must hash-bind the web-standards evidence alongsi
 
 ## 7. CI / target boundary
 
-GitHub-hosted PR QA is development-checkout evidence only. It must source-guard that W3C/WAVE runners and evidence bindings exist, but it must not claim WAVE target success because the shared WAVE API requires a reachable target and credential.
+GitHub-hosted PR QA is development-checkout evidence only. It must source-guard that W3C HTML/CSS and WAVE runners/evidence bindings exist, but it must not claim live W3C/WAVE target success because those checks require a reachable exact-source target and WAVE additionally requires an API credential or licensed private endpoint.
 
-Real W3C/WAVE execution belongs to C5 target certification on a reachable target URL or licensed private/stand-alone evaluator. If the required target, API credential, browser observation or assistive-technology evidence is unavailable, C5 remains **BLOCKED**, not skipped and not assumed PASS.
+Real W3C/WAVE execution belongs to C5 target certification on a reachable target URL or approved private/stand-alone evaluators. If the required target, API credential, browser observation or assistive-technology evidence is unavailable, C5 remains **BLOCKED**, not skipped and not assumed PASS.
 
 ## 8. AI rules
 
@@ -131,3 +143,4 @@ Any AI/agent working on accessibility must:
 6. Keep PRs draft while required C5 target evidence is missing.
 7. Update `NEXORA_PROGRESS.md` and `NEXORA_AI_PROJECT_STATE.md` after meaningful accessibility applies/evidence changes.
 8. Keep Issue #2/runtime recovery evidence separate from C5 accessibility evidence.
+9. Preserve both W3C HTML and W3C CSS zero-error gates; never drop one to make C5 green.
