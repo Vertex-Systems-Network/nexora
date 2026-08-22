@@ -52,15 +52,17 @@ final class AuthenticatedSessionController extends Controller
         if ($user !== null && $user->status !== 'active') {
             $audit->record('auth.login_blocked', $user, ['reason' => 'inactive-account']);
             Auth::logout();
-            $this->rotateRejectedLoginSession($request);
 
+            // Auth::attempt() already rotates the session identifier before the
+            // policy check reaches this branch. Do not invalidate/migrate the
+            // session again here: Laravel's exception handler still needs the
+            // active guest session in order to flash the validation error.
             throw ValidationException::withMessages(['email' => 'This account is not available for sign in.']);
         }
 
         if ($user !== null && $ssoPolicy->requiresSso($user)) {
             $audit->record('auth.login_blocked', $user, ['reason' => 'enterprise-sso-required']);
             Auth::logout();
-            $this->rotateRejectedLoginSession($request);
 
             throw ValidationException::withMessages([
                 'email' => 'This organization requires SSO sign-in. Use an organization SSO option below.',
@@ -101,15 +103,5 @@ final class AuthenticatedSessionController extends Controller
         $sessions->invalidateCurrentSession($request);
 
         return redirect()->route('login');
-    }
-
-    private function rotateRejectedLoginSession(Request $request): void
-    {
-        // Auth::attempt() may have written an authenticated identity into the
-        // guest session before account/SSO policy rejects it. Destroy the old
-        // session identifier and rotate CSRF state without flushing the session
-        // store so Laravel can still flash the intended validation error.
-        $request->session()->migrate(true);
-        $request->session()->regenerateToken();
     }
 }
