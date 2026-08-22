@@ -53,20 +53,16 @@ final class AuthenticatedSessionController extends Controller
             $audit->record('auth.login_blocked', $user, ['reason' => 'inactive-account']);
             Auth::logout();
 
-            return redirect()->back()
-                ->withErrors(['email' => 'This account is not available for sign in.'])
-                ->withInput($request->only('email'));
+            throw ValidationException::withMessages(['email' => 'This account is not available for sign in.']);
         }
 
         if ($user !== null && $ssoPolicy->requiresSso($user)) {
             $audit->record('auth.login_blocked', $user, ['reason' => 'enterprise-sso-required']);
             Auth::logout();
 
-            return redirect()->back()
-                ->withErrors([
-                    'email' => 'This organization requires SSO sign-in. Use an organization SSO option below.',
-                ])
-                ->withInput($request->only('email'));
+            throw ValidationException::withMessages([
+                'email' => 'This organization requires SSO sign-in. Use an organization SSO option below.',
+            ]);
         }
 
         $sessions->rotateAuthenticatedSession($request);

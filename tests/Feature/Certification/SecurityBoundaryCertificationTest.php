@@ -33,22 +33,9 @@ final class SecurityBoundaryCertificationTest extends TestCase
     public function test_suspended_user_cannot_sign_in(): void
     {
         $user = User::factory()->create(['password' => 'Password!123', 'status' => 'suspended']);
-        $response = $this->post('/login', ['email' => $user->email, 'password' => 'Password!123']);
-
-        $this->assertTrue(
-            session()->has('errors'),
-            sprintf(
-                'login diagnostic status=%d location=%s cutover=%s mismatch=%s session_schema=%s retry_after=%s session_keys=%s',
-                $response->getStatusCode(),
-                (string) $response->headers->get('Location', ''),
-                (string) $response->headers->get('X-Nexora-Cutover-Barrier', ''),
-                (string) $response->headers->get('X-Nexora-Compatibility-Mismatch', ''),
-                (string) $response->headers->get('X-Nexora-Session-Schema', ''),
-                (string) $response->headers->get('Retry-After', ''),
-                implode(',', array_keys(session()->all())),
-            ),
-        );
-        $response->assertSessionHasErrors('email');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.77'])
+            ->post('/login', ['email' => $user->email, 'password' => 'Password!123'])
+            ->assertSessionHasErrors('email');
         $this->assertGuest();
     }
 
