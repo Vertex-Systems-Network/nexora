@@ -124,7 +124,7 @@ foreach ([
     "private const EVENT_TENANT_IDEMPOTENCY = 'nx_automation_event_tenant_idempotency_uq'" => 'tenant event idempotency identity',
     'PortableNullableUnique::createScoped(' => 'SQL Server-safe nullable tenant idempotency uniqueness',
     '$this->backfillStepTenants()' => 'step-run tenant backfill',
-    "throw new RuntimeException(\"Workflow step {\$step->id} has no trustworthy parent-run tenant identity.\")" => 'fail-closed step tenant backfill',
+    "throw new \\RuntimeException(\"Workflow step {\$step->id} has no trustworthy parent-run tenant identity.\")" => 'fail-closed step tenant backfill',
 ] as $needle => $label) {
     if ($migration !== '' && ! str_contains($migration, $needle)) {
         $errors[] = "Automation tenant migration contract missing: {$label}.";
