@@ -16,7 +16,7 @@ final class N100Rc4LaravelRuntimeArchitectureTest extends TestCase
 
         self::assertTrue($result['ok'], implode("\n", $result['errors']));
         self::assertGreaterThanOrEqual(8, $result['checks']['middleware_entries']);
-        self::assertSame(2, $result['checks']['route_middleware_aliases']);
+        self::assertSame(4, $result['checks']['route_middleware_aliases']);
         self::assertGreaterThanOrEqual(10, $result['checks']['scheduled_commands']);
         self::assertSame(2, $result['checks']['scheduled_callbacks']);
         self::assertSame(5, $result['checks']['queue_jobs']);
