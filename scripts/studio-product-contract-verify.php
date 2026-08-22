@@ -55,7 +55,7 @@ foreach([
     'private const MAX_NODES = 500'=>'canvas node budget',
     'private const MAX_DEPTH = 20'=>'canvas nesting budget',
     "preg_match('/^[a-zA-Z0-9_-]{8,80}$/', \$id)"=>'safe stable node id validation',
-    "preg_match('#^(https?://|/|#)#i', \$href)"=>'safe button URL allow-list',
+    "preg_match('~^(https?://|/|#)~i', \$href)"=>'safe button URL allow-list',
     "in_array(\$value, ['_self', '_blank'], true)"=>'button target normalization',
     'sanitizeStyles'=>'style allow-list sanitization',
     'sanitizeBindings'=>'binding registry validation',
