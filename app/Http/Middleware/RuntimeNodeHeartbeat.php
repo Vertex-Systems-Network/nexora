@@ -83,7 +83,7 @@ final class RuntimeNodeHeartbeat
 
         $this->recordHeartbeatWhenDue();
 
-        $readiness = $this->readinessResponse($runtime);
+        $readiness = $this->readinessResponse($request, $runtime);
         if ($readiness !== null) {
             return $readiness;
         }
@@ -140,10 +140,18 @@ final class RuntimeNodeHeartbeat
     }
 
     /** @param array<string, string> $runtime */
-    private function readinessResponse(array $runtime): ?Response
+    private function readinessResponse(Request $request, array $runtime): ?Response
     {
         try {
-            if (! $this->nodes->isReady()) {
+            // A drained/maintenance node must still expose its authenticated,
+            // permission-guarded status control so an operator can return it to
+            // service. Only the node-state fence is skipped here; runtime
+            // compatibility, client/session generation and activity barriers
+            // below remain enforced before the controller is reached.
+            $nodeStatusRecovery = $request->isMethod('POST')
+                && $request->is('admin/cloud/node/status');
+
+            if (! $nodeStatusRecovery && ! $this->nodes->isReady()) {
                 return response(
                     'This Nexora runtime node is draining or in maintenance mode.',
                     503,
