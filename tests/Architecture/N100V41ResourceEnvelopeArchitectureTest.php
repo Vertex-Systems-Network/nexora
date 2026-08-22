@@ -16,7 +16,7 @@ final class N100V41ResourceEnvelopeArchitectureTest extends TestCase
         $result = nexoraAnalyzeResourceEnvelopeContracts($root);
 
         self::assertSame([], $result['errors'], implode("\n", $result['errors']));
-        self::assertSame(11, $result['metrics']['queue_payload_schema']);
+        self::assertSame(13, $result['metrics']['queue_payload_schema']);
         self::assertSame(0, $result['metrics']['automatic_resource_mutation']);
     }
 }
