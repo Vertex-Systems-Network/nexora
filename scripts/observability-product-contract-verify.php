@@ -50,6 +50,7 @@ $ui = $read('resources/js/admin/pages/Admin/Audit/Index.tsx');
 $runtimeTracker = $read('app/Nexora/Cloud/Services/RuntimeActivityTracker.php');
 $test = $read('tests/Feature/Observability/ObservabilityProductTest.php');
 $progress = $read('NEXORA_PROGRESS.md');
+$workflow = $read('.github/workflows/development-execution-qa.yml');
 
 $require($migration, [
     "\$table->uuid('tenant_id')->nullable()" => 'nullable tenant identity on legacy audit logs',
@@ -169,15 +170,26 @@ $require($test, [
     'test_retention_prunes_old_audit_and_incident_rows_but_preserves_recent_rows' => 'retention acceptance',
 ], 'observability acceptance');
 
+// Governance is checked semantically against the current PR execution policy.
+// Historical self-hosted/quota transitions remain history; they must never be
+// required as the current truth after the workflow has moved to hosted Ubuntu.
 if ($progress !== '') {
-    if (! str_contains($progress, 'Actions: **DEFERRED BY USER')) {
-        $errors[] = 'progress governance missing historical Actions quota deferral state.';
+    if (! str_contains($progress, 'Historical Actions: **DEFERRED BY USER')) {
+        $errors[] = 'progress governance missing explicitly historical Actions deferral state.';
     }
-    if (! str_contains($progress, 'current certification has resumed through the user-approved self-hosted runner pool')) {
-        $errors[] = 'progress governance missing resumed self-hosted certification state.';
+    if (! str_contains($progress, 'Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**')) {
+        $errors[] = 'progress governance missing current GitHub-hosted development-QA policy.';
     }
-    if (! str_contains($progress, 'TARGET POWER    50.0%')) {
+    if (! str_contains($progress, 'Target Power') || ! str_contains($progress, 'TARGET POWER    50.0%')) {
         $errors[] = 'progress governance missing unchanged Target Power evidence boundary.';
+    }
+}
+if ($workflow !== '') {
+    if (! str_contains($workflow, 'runs-on: ubuntu-latest')) {
+        $errors[] = 'development execution workflow must remain GitHub-hosted ubuntu-latest.';
+    }
+    if (str_contains($workflow, 'runs-on: self-hosted')) {
+        $errors[] = 'development execution workflow must not regress to self-hosted execution.';
     }
 }
 
@@ -186,4 +198,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, '[Nexora Observability Product Contract] PASS — tenant-scoped audit visibility, privacy-minimal 5xx/slow request correlation, scoped tenant service lifetimes, bounded retention, request-ID incident UX and sanitized operational diagnostics are source-guarded.'.PHP_EOL);
+fwrite(STDOUT, '[Nexora Observability Product Contract] PASS — tenant-scoped audit visibility, privacy-minimal 5xx/slow request correlation, scoped tenant service lifetimes, bounded retention, request-ID incident UX, sanitized operational diagnostics and current GitHub-hosted development governance are source-guarded.'.PHP_EOL);
