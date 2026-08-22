@@ -45,6 +45,13 @@ final class RuntimeNodeHeartbeat
 
     public function handle(Request $request, Closure $next): Response
     {
+        // Liveness answers only whether the PHP/Laravel process can serve a
+        // bounded response. Deep runtime identity, storage and cluster checks
+        // belong to /health/ready and must not inflate or block /health/live.
+        if ($request->is('health/live')) {
+            return $next($request);
+        }
+
         // Runtime fencing is meaningful only after Nexora has a sealed installation.
         // The installer/bootstrap path may intentionally have no configured database yet,
         // so probing node readiness here would turn a healthy bootstrap into a false 503.
