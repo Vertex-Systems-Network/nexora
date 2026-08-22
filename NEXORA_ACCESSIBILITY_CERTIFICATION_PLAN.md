@@ -73,12 +73,21 @@ Default shared WAVE API requires the environment variable:
 WAVE_API_KEY
 ```
 
-The secret must never be committed, printed into logs or persisted in evidence. A licensed stand-alone/private WAVE API may be selected with:
+The secret must never be committed, printed into logs or persisted in evidence. A licensed stand-alone/private WAVE API that uses a request key may be selected with:
 
 ```text
 --wave-api-url=https://YOUR-WAVE-ENDPOINT
 --wave-key-env=YOUR_SECRET_ENV_NAME
 ```
+
+If an explicitly configured licensed stand-alone endpoint does not require a per-request API key, use:
+
+```text
+--wave-api-url=https://YOUR-WAVE-ENDPOINT
+--wave-no-key
+```
+
+`--wave-no-key` is **never** valid for the shared `wave.webaim.org/api/request` service; the runner fails closed if that combination is attempted. Evidence records only the authentication mode and, when applicable, the environment-variable name—never the secret value.
 
 Project gate per required route:
 
@@ -127,9 +136,9 @@ The final C5 evidence manifest must hash-bind the web-standards evidence alongsi
 
 ## 7. CI / target boundary
 
-GitHub-hosted PR QA is development-checkout evidence only. It must source-guard that W3C HTML/CSS and WAVE runners/evidence bindings exist, but it must not claim live W3C/WAVE target success because those checks require a reachable exact-source target and WAVE additionally requires an API credential or licensed private endpoint.
+GitHub-hosted PR QA is development-checkout evidence only. It must source-guard that W3C HTML/CSS and WAVE runners/evidence bindings exist, but it must not claim live W3C/WAVE target success because those checks require a reachable exact-source target and WAVE additionally requires either the shared API credential or an explicitly configured licensed stand-alone endpoint.
 
-Real W3C/WAVE execution belongs to C5 target certification on a reachable target URL or approved private/stand-alone evaluators. If the required target, API credential, browser observation or assistive-technology evidence is unavailable, C5 remains **BLOCKED**, not skipped and not assumed PASS.
+Real W3C/WAVE execution belongs to C5 target certification on a reachable target URL or approved private/stand-alone evaluators. If the required target, required authentication, browser observation or assistive-technology evidence is unavailable, C5 remains **BLOCKED**, not skipped and not assumed PASS.
 
 ## 8. AI rules
 
@@ -144,3 +153,4 @@ Any AI/agent working on accessibility must:
 7. Update `NEXORA_PROGRESS.md` and `NEXORA_AI_PROJECT_STATE.md` after meaningful accessibility applies/evidence changes.
 8. Keep Issue #2/runtime recovery evidence separate from C5 accessibility evidence.
 9. Preserve both W3C HTML and W3C CSS zero-error gates; never drop one to make C5 green.
+10. Never use `--wave-no-key` with the shared WAVE API; it is only for an explicitly configured stand-alone endpoint that genuinely does not require a request key.
