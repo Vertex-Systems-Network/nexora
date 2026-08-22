@@ -112,7 +112,11 @@ final class FormSubmissionManager
                 $fieldRules = $required ? ['required', 'accepted'] : ['nullable', 'boolean'];
             } elseif ($type === 'select') {
                 $allowed = collect((array) ($field['options'] ?? []))
-                    ->filter('is_array')
+                    // Collection::filter passes both value and key to callbacks.
+                    // Avoid a direct `is_array` callback because PHP's built-in
+                    // accepts one argument and Laravel 13 therefore raises an
+                    // ArgumentCountError before form validation can run.
+                    ->filter(static fn (mixed $option): bool => is_array($option))
                     ->map(static fn (array $option): string => (string) ($option['value'] ?? ''))
                     ->filter(static fn (string $value): bool => $value !== '')
                     ->values()
