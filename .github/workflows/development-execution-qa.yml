@@ -26,6 +26,7 @@ jobs:
     timeout-minutes: 90
     env:
       APP_ENV: testing
+      APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
       NEXORA_INSTALLER_BYPASS: 'true'
       DB_CONNECTION: mysql
       DB_HOST: 127.0.0.1
@@ -80,14 +81,8 @@ jobs:
           composer --version
           npm --version
 
-      - name: Prepare Laravel environment
-        run: cp .env.example .env
-
       - name: Install backend development dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
-
-      - name: Generate application key
-        run: php artisan key:generate --force
 
       - name: Install frontend development dependencies
         run: npm install --no-audit --no-fund
