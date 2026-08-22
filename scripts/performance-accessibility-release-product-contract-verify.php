@@ -44,6 +44,27 @@ $forbid = static function (string $source, string $needle, string $message) use 
     if (str_contains($source, $needle)) $failures[] = $message;
 };
 
+// The live C5 scripts are not executed by PR QA because they require a reachable
+// target/WAVE credential. They must still parse on the certified PHP runtime.
+foreach ([
+    'scripts/n1-c5-web-standards-certify.php',
+    'scripts/n1-c5-web-standards-evidence-verify.php',
+    'scripts/n1-c5-browser-performance-certify.php',
+    'scripts/n1-c5-evidence-verify.php',
+] as $script) {
+    $file = $root.'/'.$script;
+    if (! is_file($file)) {
+        $failures[] = "C5 executable source missing [{$script}].";
+        continue;
+    }
+    $output = [];
+    $exit = 1;
+    exec(escapeshellarg(PHP_BINARY).' -l '.escapeshellarg($file).' 2>&1', $output, $exit);
+    if ($exit !== 0) {
+        $failures[] = "C5 executable source has PHP syntax errors [{$script}]: ".implode(' ', $output);
+    }
+}
+
 // First-load performance must remain route-split and bounded.
 $require($appEntry, 'path: "./admin/pages"', 'Inertia Admin page root must remain explicit.');
 $require($appEntry, 'lazy: true', 'Inertia Admin pages must remain lazily resolved.');
@@ -133,5 +154,6 @@ if ($failures !== []) {
 fwrite(STDOUT, "Nexora Performance + Accessibility + Release Product Contract: PASS\n");
 fwrite(STDOUT, " - Admin pages remain lazy-route split and first-load JS is separately budgeted\n");
 fwrite(STDOUT, " - shared dialog focus containment is source-guarded and regression-tested\n");
+fwrite(STDOUT, " - live C5 PHP runners are syntax-checked without faking target execution\n");
 fwrite(STDOUT, " - development target QA executes Vitest plus production asset-budget verification\n");
 fwrite(STDOUT, " - final C5 requires W3C HTML+CSS zero-error validation, WAVE zero-error/contrast review, real browser/AT, HTTP and Web Vitals target evidence\n");
