@@ -78,16 +78,16 @@ final class ContentCollectionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedCollection($request);
-        $slug = $this->uniqueSlug((string) ($data['slug'] ?: $data['name']));
+        $slug = $this->uniqueSlug((string) (($data['slug'] ?? null) ?: $data['name']));
         $schema = $this->schemas->normalize((array) ($data['schema'] ?? []));
 
         $collection = ContentCollection::query()->create([
             'uuid' => (string) Str::uuid(),
             'name' => trim((string) $data['name']),
             'slug' => $slug,
-            'description' => $data['description'] ?: null,
+            'description' => ($data['description'] ?? null) ?: null,
             'status' => (string) $data['status'],
-            'document_type' => $data['document_type'] ?: null,
+            'document_type' => ($data['document_type'] ?? null) ?: null,
             'schema' => $schema,
             'metadata' => [],
             'created_by' => $request->user()?->id,
@@ -102,8 +102,8 @@ final class ContentCollectionController extends Controller
     {
         $data = $this->validatedCollection($request, $collection);
         $schema = $this->schemas->normalize((array) ($data['schema'] ?? []));
-        $slug = $this->uniqueSlug((string) ($data['slug'] ?: $data['name']), $collection);
-        $nextType = $data['document_type'] ?: null;
+        $slug = $this->uniqueSlug((string) (($data['slug'] ?? null) ?: $data['name']), $collection);
+        $nextType = ($data['document_type'] ?? null) ?: null;
 
         DB::transaction(function () use ($request, $collection, $data, $schema, $slug, $nextType): void {
             $entries = $collection->documents()->get();
@@ -118,7 +118,7 @@ final class ContentCollectionController extends Controller
             $collection->forceFill([
                 'name' => trim((string) $data['name']),
                 'slug' => $slug,
-                'description' => $data['description'] ?: null,
+                'description' => ($data['description'] ?? null) ?: null,
                 'status' => (string) $data['status'],
                 'document_type' => $nextType,
                 'schema' => $schema,
