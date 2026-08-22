@@ -23,6 +23,19 @@ return [
         'forced_colors',
         'no_page_horizontal_overflow',
     ],
+    'standards' => [
+        'routes' => ['/', '/login'],
+        'w3c' => [
+            'tool' => 'Nu Html Checker',
+            'max_errors' => 0,
+        ],
+        'wave' => [
+            'tool' => 'WAVE',
+            'max_errors' => 0,
+            'max_contrast_errors' => 0,
+            'require_alert_review' => true,
+        ],
+    ],
     'web_vitals' => [
         'routes' => ['/', '/login'],
         'thresholds' => [
