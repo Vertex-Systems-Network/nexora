@@ -55,6 +55,12 @@ foreach ((array) ($data['routes'] ?? []) as $index => $row) {
     if (($w3c['errors'] ?? null) !== 0) $errors[] = "W3C route [{$route}] must have zero conformance errors";
     if (! is_int($w3c['warnings'] ?? null) && ! is_numeric($w3c['warnings'] ?? null)) $errors[] = "W3C route [{$route}] warnings must be recorded";
 
+    $css = (array) ($row['css'] ?? []);
+    if (($css['status'] ?? null) !== 'pass') $errors[] = "W3C CSS route [{$route}] status must be pass";
+    if (($css['validity'] ?? null) !== true) $errors[] = "W3C CSS route [{$route}] validity must be true";
+    if (($css['errors'] ?? null) !== 0) $errors[] = "W3C CSS route [{$route}] must have zero validation errors";
+    if (! is_int($css['warnings'] ?? null) && ! is_numeric($css['warnings'] ?? null)) $errors[] = "W3C CSS route [{$route}] warnings must be recorded";
+
     $wave = (array) ($row['wave'] ?? []);
     if (($wave['status'] ?? null) !== 'reviewed') $errors[] = "WAVE route [{$route}] must be reviewed";
     if (($wave['errors'] ?? null) !== 0) $errors[] = "WAVE route [{$route}] must have zero errors";
@@ -77,4 +83,4 @@ $errors = array_merge($errors, nexoraValidateEvidenceSourceBinding($root, $data,
 $errors = array_merge($errors, nexoraValidateEvidenceSessionBinding($root, $data, 'web-standards evidence'));
 if ($errors !== []) $fail(implode('; ', array_values(array_unique($errors))));
 
-fwrite(STDOUT, "[N1.0-C5 Web Standards Evidence] PASS — exact-source W3C Nu zero-error evidence and WAVE zero-error/zero-contrast human-reviewed evidence are sealed. WAVE is not treated as an accessibility approval.\n");
+fwrite(STDOUT, "[N1.0-C5 Web Standards Evidence] PASS — exact-source W3C Nu + W3C CSS zero-error evidence and WAVE zero-error/zero-contrast human-reviewed evidence are sealed. WAVE is not treated as an accessibility approval.\n");
