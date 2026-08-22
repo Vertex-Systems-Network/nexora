@@ -54,24 +54,6 @@ jobs:
           fetch-depth: 1
           clean: true
 
-      - name: Diagnose critical source manifest seal
-        run: |
-          python3 - <<'PY'
-          import hashlib
-          import json
-          from pathlib import Path
-
-          manifest_path = Path('bootstrap/nexora-source-manifest.json')
-          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
-          for path in manifest['files']:
-              manifest['files'][path] = hashlib.sha256(Path(path).read_bytes()).hexdigest()
-          canonical = json.dumps(manifest, indent=4, ensure_ascii=False) + '\n'
-          run_control = manifest['files']['app/Nexora/Installation/InstallationRunControl.php']
-          print(f'RUNCONTROL_SHA256={run_control}')
-          print(f'MANIFEST_SHA256={hashlib.sha256(canonical.encode("utf-8")).hexdigest()}')
-          PY
-          exit 1
-
       - name: Set up PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
