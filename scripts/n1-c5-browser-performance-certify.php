@@ -12,6 +12,7 @@ $evidenceDir = '';
 $auditor = '';
 $waveAlertsReviewed = false;
 $w3cValidatorUrl = '';
+$w3cCssValidatorUrl = '';
 $waveApiUrl = '';
 $waveKeyEnv = '';
 $statusOnly = in_array('--status-only', $argv, true);
@@ -22,6 +23,7 @@ foreach ($argv as $arg) {
     elseif (str_starts_with($arg, '--auditor=')) $auditor = trim(substr($arg, 10));
     elseif ($arg === '--wave-alerts-reviewed') $waveAlertsReviewed = true;
     elseif (str_starts_with($arg, '--w3c-validator-url=')) $w3cValidatorUrl = trim(substr($arg, 20));
+    elseif (str_starts_with($arg, '--w3c-css-validator-url=')) $w3cCssValidatorUrl = trim(substr($arg, 24));
     elseif (str_starts_with($arg, '--wave-api-url=')) $waveApiUrl = trim(substr($arg, 15));
     elseif (str_starts_with($arg, '--wave-key-env=')) $waveKeyEnv = trim(substr($arg, 15));
 }
@@ -136,9 +138,10 @@ if ($status === 'pass') {
     ];
     if ($waveAlertsReviewed) $standards[] = '--wave-alerts-reviewed';
     if ($w3cValidatorUrl !== '') $standards[] = '--w3c-validator-url='.$w3cValidatorUrl;
+    if ($w3cCssValidatorUrl !== '') $standards[] = '--w3c-css-validator-url='.$w3cCssValidatorUrl;
     if ($waveApiUrl !== '') $standards[] = '--wave-api-url='.$waveApiUrl;
     if ($waveKeyEnv !== '') $standards[] = '--wave-key-env='.$waveKeyEnv;
-    $run('web-standards', 'W3C Nu + WAVE target accessibility evidence', $standards);
+    $run('web-standards', 'W3C Nu + W3C CSS + WAVE target accessibility evidence', $standards);
 }
 
 if ($status === 'pass' && $evidenceDir !== '') {
@@ -154,7 +157,7 @@ $hash = static fn (string $f): ?string => is_file($f) ? (hash_file('sha256', $f)
 $summary = [
     'schema' => 1,
     'chunk' => 'N1.0-C5',
-    'scope' => 'Browser / Accessibility / W3C / WAVE / RTL / Performance',
+    'scope' => 'Browser / Accessibility / W3C HTML+CSS / WAVE / RTL / Performance',
     'platform_version' => $version,
     'source_tree_sha256' => $source['tree_sha256'],
     'run_id' => $runId,
@@ -179,7 +182,7 @@ $summary = [
 $json = json_encode($summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
 file_put_contents($dir.'/summary.json', $json);
 file_put_contents($base.'/latest.json', $json);
-$md = "# Nexora N1.0-C5 Browser / Accessibility / W3C / WAVE / RTL / Performance\n\nStatus: **".strtoupper($status)."**  \nPlatform: `{$version}`  \nSource: `{$source['tree_sha256']}`\n";
+$md = "# Nexora N1.0-C5 Browser / Accessibility / W3C HTML+CSS / WAVE / RTL / Performance\n\nStatus: **".strtoupper($status)."**  \nPlatform: `{$version}`  \nSource: `{$source['tree_sha256']}`\n";
 if ($first) $md .= "First blocker: `{$first['id']}` — {$first['label']}\n";
 $md .= "\n| Gate | Status | Exit |\n|---|---:|---:|\n";
 foreach ($steps as $s) $md .= '| '.$s['label'].' | '.strtoupper($s['status']).' | '.$s['exit_code']." |\n";
