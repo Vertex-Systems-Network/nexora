@@ -10,6 +10,7 @@ use App\Models\EnterpriseOrganizationMember;
 use App\Models\MembershipAccessPolicy;
 use App\Models\Role;
 use App\Models\User;
+use App\Nexora\Cloud\Services\RuntimeDeploymentIdentity;
 use App\Nexora\Enterprise\Services\TenantContext;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -85,7 +86,13 @@ final class SearchProductIsolationTest extends TestCase
         $this->addMember($other, $otherUser);
         app(TenantContext::class)->set($primary);
 
-        $response = $this->actingAs($admin)->getJson('/admin/search?q=Needle');
+        // Admin JSON requests are intentionally fenced to the currently deployed
+        // generation. Exercise the real client protocol instead of bypassing the
+        // runtime guard; a missing/stale generation must remain a 409 in production.
+        $generation = app(RuntimeDeploymentIdentity::class)->generation();
+        $response = $this->actingAs($admin)
+            ->withHeader('X-Nexora-Deployment-Generation', $generation)
+            ->getJson('/admin/search?q=Needle');
 
         $response->assertOk();
         $response->assertJsonFragment(['title' => 'Needle Primary Member']);
