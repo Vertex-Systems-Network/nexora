@@ -52,6 +52,14 @@ final class RuntimeNodeHeartbeat
             return $next($request);
         }
 
+        // The public login form must stay available to establish an identity.
+        // Deep deployment/cluster fencing is retained for the credential POST
+        // and authenticated application requests, but is unnecessary for the
+        // read-only guest form and otherwise causes dozens of database probes.
+        if ($request->isMethod('GET') && $request->is('login')) {
+            return $next($request);
+        }
+
         // Runtime fencing is meaningful only after Nexora has a sealed installation.
         // The installer/bootstrap path may intentionally have no configured database yet,
         // so probing node readiness here would turn a healthy bootstrap into a false 503.
