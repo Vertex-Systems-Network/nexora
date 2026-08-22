@@ -3,6 +3,8 @@ name: Nexora development execution QA
 # Real development-checkout execution evidence. This is intentionally separate from source certification
 # and from the installed rc.93 Laragon recovery target. The workflow never creates/drops/retargets live
 # databases and never upgrades the recovery installation.
+# The single job also publishes the repository ruleset's required `governance` status context, avoiding a
+# second PR runner while keeping the full development QA as the merge-governance boundary.
 on:
   pull_request:
     branches: [main]
@@ -21,7 +23,7 @@ concurrency:
 
 jobs:
   development-execution-qa:
-    name: Development execution QA
+    name: governance
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
