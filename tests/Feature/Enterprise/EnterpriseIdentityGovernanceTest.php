@@ -43,10 +43,15 @@ final class EnterpriseIdentityGovernanceTest extends TestCase
         $this->addMember($organization, $member, 'member');
         $this->createSsoProvider($organization, 'enforced', true);
 
-        $this->post('/login', [
-            'email' => $member->email,
-            'password' => 'member-secret',
-        ])->assertSessionHasErrors('email');
+        // Login is route-throttled across the full feature suite. Give this
+        // security boundary its own documentation-only client identity so a
+        // prior unrelated login test cannot turn the expected SSO validation
+        // response into a 429 and hide the policy assertion.
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.79'])
+            ->post('/login', [
+                'email' => $member->email,
+                'password' => 'member-secret',
+            ])->assertSessionHasErrors('email');
         $this->assertGuest();
 
         $superAdmin = User::factory()->create([
@@ -57,10 +62,11 @@ final class EnterpriseIdentityGovernanceTest extends TestCase
         ]);
         $superAdmin->roles()->attach(Role::query()->where('slug', 'super-admin')->value('id'));
 
-        $this->post('/login', [
-            'email' => $superAdmin->email,
-            'password' => 'super-secret',
-        ])->assertRedirect('/admin');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.80'])
+            ->post('/login', [
+                'email' => $superAdmin->email,
+                'password' => 'super-secret',
+            ])->assertRedirect('/admin');
         $this->assertAuthenticatedAs($superAdmin);
     }
 
