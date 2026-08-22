@@ -49,6 +49,9 @@ final class HaReadinessServiceTest extends TestCase
         ] as $key) {
             config()->set($key, 0);
         }
+        // Keep the strict transfer policy internally consistent with the
+        // intentionally-zero HTTP ceiling used by this isolated HA fixture.
+        config()->set('nexora-transfers.media.max_upload_bytes', 0);
         config()->set('nexora-runtime.queue.max_job_timeout_seconds', 1);
         config()->set('nexora-runtime.queue.retry_after_margin_seconds', 0);
         config()->set('nexora-runtime.queue.worker_timeout_seconds', 1);
