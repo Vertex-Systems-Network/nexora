@@ -54,10 +54,13 @@ final class ResolveEnterpriseOrganization
 
         if(!$organization){
             $organization=EnterpriseOrganization::query()->where('is_default',true)->where('status','active')->first();
-            // Upgrade compatibility: legacy platform administrators had no
-            // tenant membership before N0.33. Attach them to the default tenant
-            // once; ordinary users are never auto-promoted.
-            if($organization&&$user&&($user->hasRole('administrator')||$user->hasRole('super-admin'))&&!EnterpriseOrganizationMember::query()->where('user_id',$user->id)->exists()){
+            // Upgrade compatibility: platform administrators (including
+            // custom roles granted admin.access) existed before enterprise
+            // tenant membership. Attach such users to the default tenant once;
+            // ordinary users without platform Admin access are never promoted.
+            // Effective route access remains the intersection of platform
+            // permissions and tenant authorization.
+            if($organization&&$user&&$user->canAccessAdmin()&&!EnterpriseOrganizationMember::query()->where('user_id',$user->id)->exists()){
                 EnterpriseOrganizationMember::query()->create(['id'=>(string)\Illuminate\Support\Str::uuid(),'organization_id'=>$organization->id,'user_id'=>$user->id,'role'=>$user->hasRole('super-admin')?'owner':'admin','status'=>'active','joined_at'=>now()]);
             }
         }
