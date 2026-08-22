@@ -11,7 +11,8 @@ export function Modal({ open, title, description, children, onClose, footer }: {
    const onKey=(e:KeyboardEvent)=>{
      if(e.key==="Escape"){e.preventDefault();onClose();return}
      if(e.key!=="Tab"||!panel.current)return;
-     const items=(Array.from(panel.current.querySelectorAll(focusableSelector)) as HTMLElement[]).filter(el=>el.offsetParent!==null);
+     const items=(Array.from(panel.current.querySelectorAll(focusableSelector)) as HTMLElement[])
+       .filter(el=>!el.hidden&&el.getAttribute("aria-hidden")!=="true");
      if(items.length===0){e.preventDefault();panel.current.focus();return}
      const first=items[0],last=items[items.length-1];
      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
