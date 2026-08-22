@@ -8,29 +8,42 @@
 
 ## 1. Current checkpoint
 
-- Date: `2026-08-22`
-- Branch: `dev/n1-0b-core-functional-qa`
-- PR #1: **DRAFT + OPEN + MERGEABLE**; do not mark Ready or merge until required real target/release gates pass.
-- Current implementation head before this dashboard-only commit: **`50999b908a23ea9372cb4eb91a2f95ac8b766779`**.
+- Date: `2026-08-23` (Asia/Karachi).
+- Branch: `dev/n1-0b-core-functional-qa`.
+- PR #1: **DRAFT + OPEN + MERGEABLE** after integrating current `main`; do not mark Ready or merge until required real target/release gates pass.
+- Current implementation head before this dashboard-only commit: **`b0094ab214d4ff41f53901dca1596824192d441c`**.
+- Current `main` integrated into this branch: **`eaa42f19c1a6432050b4b33f161f3d1d971fdae9`**, the independently verified Dependabot/governance merge from PR #3.
 - Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for this workflow.
-- User-directed execution order for the current pass: finish deterministic source/static cleanup first; inspect the GitHub-hosted runner only at the end. That source/static pass is complete and final-head hosted fail-fast verification is now active.
-- GitHub-hosted development QA is development-checkout/source-functional evidence only. It does not prove the installed rc.93 Laragon recovery target, real browser behavior, W3C/WAVE target results, provider integrations, five-engine DB matrix, HA, recovery rehearsal, or final release certification.
-- Latest inspected integrated hosted run: #94 `32575740059`, job `97037750050`, exact source `412ee70cd6534bd2a6cfc2295d8cbb4dc86da9d8`. Forms 4/4 passed and PHPUnit advanced to **281 PASS / 1 FAIL / 187 pending**. The single PHPUnit fail-fast root was custom platform role `Auditor` (`admin.access` + `audit.view`) receiving 403 at `/admin/audit` because legacy/default-tenant compatibility auto-attached only the built-in administrator/super-admin roles.
-- Run #94 also exposed two progress-governance string-contract failures only: Content Migration expected the historical Actions quota-deferral marker, and Observability expected that marker to be explicitly historical. Current hosted-runner policy itself remained correct.
-- Run #94 Vitest 6/6, TypeScript, production Vite build, asset budgets/provenance, W3C HTML/CSS/WAVE source wiring, Data Connections, Cloud/HA, Distribution, Search, Enterprise SSO/Multisite and the other reached product/source contracts passed.
-- Run #94 evidence artifact: `9476532018`.
-- Source fixes after run #90 and #94:
-  - `aa04c358df99db7690e9f078f0458c44a5db5c42`: every public Forms POST in `FormWorkflowTest` uses an isolated documentation-only TEST-NET client identity; production `throttle:10,1` is unchanged. Run #94 confirmed Forms 4/4 PASS.
-  - `465176f26c979fee170d8c4872cbe1d2e6746d66`: Customer Portal password-login acceptance uses its own TEST-NET identity so the global `POST /login` `throttle:5,1` cache cannot hide portal routing behavior; production auth/throttle remains unchanged.
-  - `6877c6ff3c967b9de368676d575d3140b377507d`: `N100V41ResourceEnvelopeArchitectureTest` expects queue payload schema `13`, matching the current runtime resource-envelope contract and RuntimeVersionGuard/AppServiceProvider generation.
-  - `50999b908a23ea9372cb4eb91a2f95ac8b766779`: default-tenant upgrade compatibility now attaches any active platform user who genuinely `canAccessAdmin()` and has no enterprise membership, including custom admin roles. Explicit enterprise memberships continue to restrict platform permissions; ordinary users are not promoted; effective route access remains the intersection of platform permission and tenant authorization.
-- PR-wide static review found no second direct Collection built-in callback arity hazard, no old `prohibited + string` validation chain, no remaining changed-test default-IP `POST /login`, and no final-class Mockery pattern in the changed source.
-- Marketplace 2.0, Marketplace lifecycle, Media, Content Migration, Observability, Publishing, Sentinel, SEO, Settings, Studio, Theme and DB round-trip pending blocks were statically reviewed for the known failure classes before final execution.
-- W3C/WAVE stand-alone authentication remains hardened: shared `wave.webaim.org/api/request` always requires an API key; explicit `--wave-no-key` is allowed only for a custom stand-alone endpoint that genuinely requires no request key, and evidence verifies that boundary.
+- The single full Development execution QA job now publishes the repository ruleset's required status context as **`governance`**. This avoids a second PR runner while keeping the full development suite as the required PR governance boundary.
+- Final integrated hosted run #133: run `32603121260`, job `97104286587`, exact source **`b0094ab214d4ff41f53901dca1596824192d441c`**, conclusion **SUCCESS**.
+- Run #133 toolchain: Ubuntu 24.04, PHP `8.3.33`, Composer `2.10.2`, Node `22.23.2`, npm `10.9.8`, MySQL `8.4.11`.
+- Run #133 full Development Readiness: **ready**. All product/source contracts through N1.26 passed; PHPUnit completed with **122 passed / 347 warnings / 4378 assertions**; Vitest **6/6** passed; TypeScript noEmit passed; production Vite build passed; production asset budgets/provenance passed.
+- Run #133 evidence artifact: `9483481268`, `nexora-development-readiness-b0094ab214d4ff41f53901dca1596824192d441c`, digest `sha256:55a79f2eee7a57c8880215bae3067bbe183e3b6f4c84e1c75e26b747aaf5ce76`.
+- Earlier exact-head source closure run #130: run `32602165519`, exact source `52ce08a447d1270b4ef3e6d5ff74076dda194007`, conclusion **SUCCESS**, evidence artifact `9483280452`. Run #133 re-proved the same source closure after integrating the Dependabot/governance `main` change.
+- PR #3 Dependabot setup is **MERGED**. Final head `7c094d9cfa13668b4b5b9be722102c209128e0dc` passed required `governance` + Source certification in run #603; squash merge commit is `eaa42f19c1a6432050b4b33f161f3d1d971fdae9`.
+- Dependabot now monitors the repository's actual dependency ecosystems: npm weekly Monday, Composer weekly Wednesday, GitHub Actions weekly Friday, all at 09:00 Asia/Karachi. The invalid root Docker updater was removed because the repository has no Dockerfile at that configured location.
+- Branch governance nuance: GitHub branch metadata reports `main` as `protected:true`, while classic inline branch-protection/status-check enforcement is not the authoritative active mechanism (`enabled:false` / classic required checks off). A repository ruleset is active and demonstrably required status context `governance`; it blocked PR #3 until that context was emitted and green.
+- GitHub-hosted development QA is development-checkout/source-functional evidence only. It does **not** prove the installed rc.93 Laragon recovery target, real browser behavior, W3C/WAVE target results, provider integrations, five-engine DB matrix, HA, recovery rehearsal, or final release certification.
 - Issue #2: **OPEN** and is the only current open repository issue. Existing rc.93 target still needs compatibility + post-install readiness + `/login` + `/admin` evidence.
 - Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
+- Source `composer.lock` remains intentionally absent. Hosted Composer resolution is development evidence only; Development Readiness explicitly does not promote dependency locks or grant release certification.
 - W3C Nu HTML + W3C CSS Validation Service + WAVE C5 source tooling is implemented and mandatory for final target accessibility closure.
-- N1.26 Development Readiness `php -l` syntax-checks the live C5 PHP runner/verifier scripts so remote-target tooling cannot carry an undetected PHP parse error merely because live WAVE/W3C calls are intentionally not executed in PR QA.
+
+### Closed source fail-fast chain since the prior dashboard checkpoint
+
+The hosted sequence exposed and closed deterministic stale-contract/CI mismatches without weakening runtime safety:
+
+- C6 evidence-binding count aligned to the current analyzer.
+- CI stopped creating a root `.env`; deterministic process `APP_KEY` remains CI-only.
+- Enterprise server-normalized data is separated from outbound router payload typing.
+- rc.3 SSO test aligned to the deliberate shallow secret-safe form boundary.
+- rc.4 queue jobs/providers and middleware alias counts aligned to current source.
+- rc.5 migration/table and portable-nullable-unique counts aligned to current database contracts.
+- V30 distributed-upgrade leadership/drain tests now assert readiness + runtime-version compatibility semantically rather than stale formatting.
+- V35/V39/V40/V42 queue-payload schema assertions aligned to the current fail-closed schema floors.
+- V56 readiness metric key aligned to `readiness_components_minimum`.
+- Runtime synchronizer integration expectation aligned to canonical `nexora.runtime` manifest version `0.5.0`; Discovery remains `0.26.0`.
+- Final post-main integration run #133 re-proved the full suite on the exact merged development tree.
 
 ### Governance compatibility / evidence semantics
 
@@ -51,7 +64,7 @@ TARGET POWER    50.0%  ██████████░░░░░░░░░
 RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
 ```
 
-No score is increased by W3C/WAVE source tooling, static review, or hosted development QA alone. Target/Release Power moves only from real exact-source target evidence.
+No score is increased by W3C/WAVE source tooling, static review, Dependabot/governance configuration, or hosted development QA alone. Target/Release Power moves only from real exact-source target evidence.
 
 ---
 
@@ -59,14 +72,14 @@ No score is increased by W3C/WAVE source tooling, static review, or hosted devel
 
 | Block | Source state | Target / release state |
 |---|---|---|
-| DEV-0–DEV-4 | substantial source closure | live rc.93 recovery + broad product QA pending |
+| DEV-0–DEV-4 | substantial source closure; exact integrated hosted QA green | live rc.93 recovery + broad product QA pending |
 | DEV-5 SQL/Data Services | source/harness substantially closed | real disposable DB matrix + connector evidence pending |
 | N1.9–N1.21 | SOURCE DONE for bounded workflows | target execution pending |
 | N1.22 Sentinel 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | controlled package target evidence pending |
 | N1.23 Marketplace 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | controlled marketplace target evidence pending |
 | N1.24 Cloud / HA | SOURCE DONE FOR CURRENT WORKFLOW | real multi-node evidence pending |
 | N1.25 Backup / DR / Upgrade | SOURCE DONE FOR CURRENT WORKFLOW | real disposable restore/upgrade rehearsal pending |
-| N1.26 Performance + Accessibility + Release | source workflow + W3C HTML/CSS/WAVE C5 tooling implemented; run #94 N1.26 source gate green | real C5/C6 evidence pending |
+| N1.26 Performance + Accessibility + Release | source workflow + W3C HTML/CSS/WAVE C5 tooling implemented; run #133 source gate green | real C5/C6 evidence pending |
 | N2.0 Stable Production | not eligible | BLOCKED BY TARGET + RELEASE EVIDENCE |
 
 ---
@@ -75,7 +88,7 @@ No score is increased by W3C/WAVE source tooling, static review, or hosted devel
 
 Current workflow: `.github/workflows/development-execution-qa.yml`
 
-Required behavior:
+Required PR status context: `governance`.
 
 ```text
 GitHub-hosted Ubuntu
@@ -87,32 +100,26 @@ GitHub-hosted Ubuntu
   -> php scripts/development-readiness.php --full --tests --evidence
   -> all product/source contracts including N1.26
   -> php -l live C5 standards/evidence runners
-  -> PHPUnit fail-fast
+  -> full Laravel/PHPUnit suite
   -> Vitest
   -> TypeScript
   -> production Vite build
   -> production asset budgets/provenance
+  -> evidence artifact upload
 ```
 
-Latest inspected fail-fast chain through run #94:
+Latest exact integrated evidence, run #133:
 
-- Performance critical route budgets: PASS.
-- Suspended-login security boundary: PASS.
-- Cloud Operations recovery flow: PASS.
-- Distributed Runtime Hardening: PASS.
-- Content Collections: PASS.
-- Data Connections: PASS.
-- Distribution: PASS.
-- Search tenant isolation: PASS.
-- Enterprise SSO governance: PASS.
-- Multisite/Organizations: PASS.
-- Forms all four feature tests: PASS.
-- Customer Portal source contract: PASS; dedicated login identity patch is present for its later feature test.
-- Resource Envelope queue schema assertion is aligned to `13`.
-- W3C HTML/CSS/WAVE N1.26 source contract: PASS.
-- Vitest 6/6, TypeScript, production frontend build, asset budgets/provenance: PASS.
-- Content Migration / Observability source gates: run #94 failed only because this dashboard no longer contained their required explicitly historical Actions-deferral marker; the marker is restored above without changing current runner policy.
-- Identity custom-role feature: run #94 failed at `/admin/audit` because the default-tenant legacy bridge did not recognize custom platform admin roles; `50999b90…` broadens the one-time bridge to `canAccessAdmin()` users with no enterprise membership while preserving explicit tenant restrictions.
+- Post-install runtime convergence source contract: PASS.
+- DEV-4, Theme, Extension, Studio, Documents, Collections, Publishing/SEO, Admin UX, Forms/Data/Workflows: PASS.
+- Data Connections + primary SQL portability + installer DB UX + development target-QA source contracts: PASS.
+- Marketplace, Commerce, Customer Portal, CRM/Membership, Search, Collaboration, Automation, AI Platform, Multisite, Enterprise SSO: PASS.
+- Public API/SDK, Content Migration, Observability, Forge, Sentinel 2.0, Marketplace 2.0, Cloud/HA, Backup/DR/Upgrade, Performance/Accessibility/Release: PASS.
+- Full Laravel/PHPUnit suite: 122 passed, 347 warnings, 4378 assertions; no failures.
+- Vitest: 2 files / 6 tests PASS.
+- TypeScript noEmit: PASS.
+- Production frontend build: PASS.
+- Production asset budgets/provenance: PASS — build 1,356,223 bytes; JS 1,251,288 bytes (gzip 394,774; initial gzip 223,822); CSS 65,471 bytes; 94 JS / 1 CSS assets.
 
 The PR workflow intentionally does **not** call the shared WAVE API or claim live W3C/WAVE target success.
 
@@ -144,7 +151,9 @@ Canonical plan: `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md`.
 
 Do not remove a failing required route merely to obtain a green result.
 
-### W3C Nu HTML gate per route
+### Mandatory real-target standards gates
+
+W3C Nu HTML per required route:
 
 ```text
 request succeeds
@@ -152,11 +161,7 @@ HTML conformance errors = 0
 warnings recorded for review
 ```
 
-Default checker: `https://validator.w3.org/nu/`.
-
-Optional approved private/local checker: `--w3c-validator-url=`.
-
-### W3C CSS gate per route
+W3C CSS per required route:
 
 ```text
 request succeeds
@@ -166,11 +171,7 @@ warnings recorded for review
 profile = css3
 ```
 
-Default service: `https://jigsaw.w3.org/css-validator/validator`.
-
-Optional approved private/local service: `--w3c-css-validator-url=`.
-
-### WAVE gate per route
+WAVE per required route:
 
 ```text
 API evaluation succeeds
@@ -180,40 +181,24 @@ Alerts count recorded
 all Alerts human-reviewed
 ```
 
-Shared WAVE API credential: `WAVE_API_KEY`. The secret must stay outside source, logs and evidence.
+Shared WAVE credential is `WAVE_API_KEY`; secrets must stay outside source, logs and evidence. `--wave-no-key` is allowed only for an explicit licensed/custom stand-alone endpoint that genuinely requires no per-request key and is forbidden for shared `wave.webaim.org/api/request`.
 
-Licensed custom stand-alone endpoint modes:
-
-```text
---wave-api-url=https://CUSTOM-ENDPOINT
---wave-key-env=CUSTOM_SECRET_ENV
-```
-
-or, only if that explicit stand-alone endpoint genuinely requires no per-request key:
-
-```text
---wave-api-url=https://CUSTOM-ENDPOINT
---wave-no-key
-```
-
-`--wave-no-key` is forbidden for the shared `wave.webaim.org/api/request` service and fails closed. WAVE output is **never** treated as an accessibility approval or full WCAG certification.
-
-### Canonical C5 invocation
+Canonical C5 invocation:
 
 ```bat
 set WAVE_API_KEY=***
 scripts\n1-c5-browser-performance-certify.bat --base-url=https://YOUR-TARGET --auditor=REAL-AUDITOR --wave-alerts-reviewed --evidence=PATH-TO-C5-EVIDENCE
 ```
 
-C5 still additionally requires Chrome / Edge / Firefox; 360 / 768 / 1440 widths; LTR + RTL; light + dark; keyboard-only navigation; visible focus + correct focus order/restoration; skip link; modal focus containment; screen-reader labels/names/roles/states; reduced motion; 200% zoom/reflow; forced-colors/high-contrast behavior; no horizontal page overflow; HTTP/security/latency evidence; Web Vitals; and current exact-source + certification-session binding.
+C5 additionally requires Chrome / Edge / Firefox; 360 / 768 / 1440 widths; LTR + RTL; light + dark; keyboard-only navigation; visible focus + correct focus order/restoration; skip link; modal focus containment; real screen-reader labels/names/roles/states; reduced motion; 200% zoom/reflow; forced-colors/high-contrast behavior; no horizontal page overflow; HTTP/security/latency evidence; Web Vitals; and current exact-source + certification-session binding. WAVE output is never an accessibility approval or full WCAG certification.
 
 ---
 
 ## 6. Live rc.93 / Issue #2 boundary
 
-Do not replace installed rc.93 with rc.94 merely as a recovery shortcut.
+Issue #2 remains **OPEN**. Do not replace installed rc.93 with rc.94 merely as a recovery shortcut.
 
-Required live commands:
+Required live commands on the existing rc.93 Laragon target:
 
 ```bat
 php artisan nexora:runtime:compatibility-status --deep
@@ -228,17 +213,20 @@ Issue #2 may close only after those real target checks pass. GitHub-hosted Ubunt
 
 ## 7. Remaining target / release sequence
 
+The final-head hosted source fail-fast chain is now green. Continue in this order:
+
 ```text
-1. finish final-head GitHub-hosted development QA fail-fast chain and obtain one green exact-head run
-2. recover and verify existing rc.93 Laragon target
-3. exercise /login + /admin and close issue #2 only on evidence
-4. run separate development target QA across major N1.9–N1.26 product workflows
-5. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix
+1. recover and verify the existing rc.93 Laragon target
+2. obtain compatibility PASS + post-install readiness PASS
+3. directly exercise /login + /admin; close issue #2 only on real evidence
+4. on a separate development target, run full product QA across major N1.9–N1.26 workflows
+5. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix and persist evidence
 6. run controlled provider/connector/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
-7. perform real disposable backup/restore + upgrade rehearsal
-8. complete C5 W3C HTML + W3C CSS + WAVE + browser/AT + HTTP + Web Vitals evidence
-9. complete C6 multi-node/final operations + reviewed dependency locks + provenance/release evidence
-10. only then mark PR #1 Ready and merge automatically
+7. prove real HA/multi-node operational behavior
+8. perform real disposable backup/restore + upgrade rehearsal
+9. complete C5 W3C HTML + W3C CSS + WAVE + browser/AT + HTTP + Web Vitals evidence
+10. complete C6 multi-node/final operations + reviewed dependency locks + provenance/release evidence
+11. only then mark PR #1 Ready and merge automatically
 ```
 
 ---
@@ -249,8 +237,8 @@ Every AI/agent must:
 
 1. Read `AGENTS.md`, `NEXORA_AI_PROJECT_STATE.md`, this file, and `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` before relevant work.
 2. Treat this file's Current checkpoint as authoritative over stale historical policy text in older ledger entries.
-3. Use GitHub-hosted development QA only; do not silently substitute a local/self-hosted runner.
-4. For the current user-directed pass, deterministic source/static review is complete; continue only the final exact-head hosted fail-fast chain until green.
+3. Use GitHub-hosted development QA only for PR source/development evidence; do not silently substitute a local/self-hosted runner.
+4. Do not repeat the completed hosted source fail-fast chain unless regression/new-source evidence requires it.
 5. Never promote source/static/jsdom evidence to real browser/target evidence.
 6. Never call WAVE output an accessibility approval.
 7. Never remove a failing W3C/WAVE required route just to make C5 green.
@@ -260,6 +248,7 @@ Every AI/agent must:
 11. Keep issue #2 and C5 accessibility evidence as separate target boundaries.
 12. Keep PR #1 DRAFT until all required target/release evidence is genuinely final.
 13. Do not raise Target/Release Power from hosted source/development CI alone.
+14. Dependabot update PRs must still be reviewed against Nexora architecture and pass the applicable required governance/source checks before merge; do not blindly auto-merge dependency changes.
 
 ---
 
@@ -269,32 +258,32 @@ Every AI/agent must:
 |---:|---|---|---|---|
 | 001–045 | 2026-08-21/22 | historical ledger + prior CI through `32533537041` | source roadmap through N1.26, prior runner/governance evolution and source closure | current verified Power baseline retained |
 | 046 | 2026-08-22 | hosted run #49 / `32565782921` | GitHub-hosted Ubuntu development QA, HA/performance/auth/content fixes; PHPUnit reached 229 PASS | Target/Release unchanged |
-| 047 | 2026-08-22 | `b43f15bd…` | Data Connections validator corrected for unsupported nullable fields | later hosted runs confirm Data Connections flow PASS; Power unchanged |
-| 048 | 2026-08-22 | `97f95078…` → `7cf4e1cc…` | W3C Nu HTML + WAVE target runner/verifier, C5 evidence binding, source contracts, AI plan, AGENTS/package/operator-kit wiring | Source candidate strengthened; Target/Release unchanged |
-| 049 | 2026-08-22 | `b8aa616e…` → `b171d928…` | expanded standards gate to W3C CSS SOAP validation, CSS zero-error evidence verification, C5 forwarding/contracts/final manifest/AI plan | Source candidate strengthened; Target/Release unchanged |
-| 050 | 2026-08-22 | `70a15470…` | N1.26 product source gate parser-checks live C5 PHP executables with `php -l` | later hosted runs confirm source gate PASS; Target/Release unchanged |
-| 051 | 2026-08-22 | `7d38bdf8…` | AI handoff defines live progress checkpoint precedence over preserved historical runner-policy entries | governance corrected; Power unchanged |
-| 052 | 2026-08-22 | run #82 `32569505463`, artifact `9474981496` | W3C HTML/CSS/WAVE source gate green; PHPUnit 236 PASS before Search 409; frontend/build all green | Target/Release unchanged |
-| 053 | 2026-08-22 | `a1617fa4…` → `572dc958…` | WAVE stand-alone auth boundary + evidence verification + source guard; shared API key remains mandatory | source hardening; Target/Release unchanged |
-| 054 | 2026-08-22 | `5f1a1e63…` onward | Search protocol, governance, Distribution, Forms and Enterprise SSO fail-fast roots closed through hosted runs #83–#90 | Source functional evidence advanced; Target/Release unchanged |
-| 055 | 2026-08-22 | run #90 `32571452424`, artifact `9475533069` | all then-reached source/product gates green; PHPUnit reached 277 PASS with one auth-required Forms throttle-state failure; frontend/build green | Target/Release unchanged |
-| 056 | 2026-08-22 | `aa04c358…` | all public FormWorkflow POSTs isolated from unrelated suite throttle state using TEST-NET identities; production throttle unchanged | run #94 confirms Forms 4/4 PASS; Power unchanged |
-| 057 | 2026-08-22 | `465176f2…` | later Customer Portal login path proactively isolated from shared login throttle state; production auth/throttle unchanged | pending deeper hosted confirmation; Power unchanged |
-| 058 | 2026-08-22 | `6877c6ff…` | stale Resource Envelope architecture expectation updated from queue schema 11 to current contract 13 | deterministic source/test alignment; Power unchanged |
-| 059 | 2026-08-22 | run #94 `32575740059`, artifact `9476532018` | Forms 4/4 PASS; PHPUnit reached 281 PASS; exposed custom-role default-tenant 403 plus two historical progress-marker contract mismatches | Target/Release unchanged |
-| 060 | 2026-08-22 | `50999b90…` | default-tenant upgrade bridge now preserves custom platform roles with `admin.access` while explicit enterprise memberships still restrict effective permissions | pending final hosted confirmation; Power unchanged |
-| 061 | 2026-08-22 | this dashboard apply | restored explicitly historical `Actions: DEFERRED BY USER` compatibility marker while retaining GitHub-hosted-only current policy | source governance contract repair only; Target/Release unchanged |
+| 047 | 2026-08-22 | `b43f15bd…` | Data Connections validator corrected for unsupported nullable fields | Power unchanged |
+| 048–053 | 2026-08-22 | `97f95078…` → `572dc958…` + run #82 | W3C Nu HTML/CSS/WAVE target tooling, evidence binding, stand-alone auth boundary and source guards | Source strengthened; Target/Release unchanged |
+| 054–060 | 2026-08-22 | runs #83–#94 + `50999b90…` | Search, governance, Distribution, Forms, Enterprise SSO, custom-role/default-tenant fail-fast roots closed | Target/Release unchanged |
+| 061 | 2026-08-22 | prior dashboard apply | restored explicitly historical `Actions: DEFERRED BY USER` compatibility marker while retaining hosted-only current policy | governance repair only |
+| 062 | 2026-08-22 | runs #113–#121 | C6/rc14/rc21/rc3/rc4/rc5 stale contract and CI-environment blockers closed against current analyzers/source | Target/Release unchanged |
+| 063 | 2026-08-22 | `f840a00c…` → `a102eb0c…` | V30 distributed leadership/drain semantic guards; V35/V39/V40/V42 payload schema; V56 readiness metric alignment | safety preserved; Target/Release unchanged |
+| 064 | 2026-08-22 | run #129 + `52ce08a4…` | architecture chain reached final integration; RuntimeSynchronizer stale `0.4.0` expectation aligned to canonical runtime manifest `0.5.0` | Target/Release unchanged |
+| 065 | 2026-08-22 | run #130 `32602165519`, artifact `9483280452` | first exact-head full hosted Development QA success after fail-fast closure | Source evidence consolidated; Target/Release unchanged |
+| 066 | 2026-08-23 | Dependabot PR #3, run #603 | removed nonexistent Docker updater, added Composer, retained npm/Actions schedules; repaired required `governance` status production; both governance and Source certification green | repository governance strengthened; Power unchanged |
+| 067 | 2026-08-23 | merge `eaa42f19…` | PR #3 squash-merged to `main` after required checks passed | dependency-maintenance infrastructure only; Target/Release unchanged |
+| 068 | 2026-08-23 | `95a85b42…` + `bc8f5196…` + merge `b0094ab2…` | existing full Development QA job publishes required `governance` context; Dependabot config carried into dev; current `main` integrated as real second parent | PR #1 mergeability restored; Target/Release unchanged |
+| 069 | 2026-08-23 | run #133 `32603121260`, job `97104286587`, artifact `9483481268` | exact post-main-integrated full Development QA/governance PASS: 122 PHPUnit pass, 347 warnings, 4378 assertions; Vitest 6/6; TS/build/assets green | final hosted source checkpoint green; Target/Release unchanged |
+| 070 | 2026-08-23 | this dashboard apply | canonical live state synchronized to run #133 + merged Dependabot/governance evidence; next action moved to real rc.93 target recovery | Power unchanged |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-A. Inspect the auto-triggered GitHub-hosted QA for the exact latest dashboard/code head; do not create no-op commits.
-B. Confirm Content Migration + Observability governance source contracts are green and Identity custom-role acceptance passes.
-C. If red: inspect the exact next fail-fast root, apply the smallest architecture-correct fix, update this dashboard, and repeat final-head hosted QA.
-D. If green: record exact run/job/artifact evidence without promoting it to target evidence.
-E. Then continue the real rc.93 Laragon recovery: compatibility PASS -> post-install readiness PASS -> /login -> /admin -> issue #2 closure only on real target evidence.
-F. Do not execute/claim W3C HTML/CSS/WAVE target PASS until a reachable exact-source target + real auditor + WAVE credential/private licensed endpoint are available.
-G. Continue DB/provider/identity/import/observability/Sentinel/Marketplace/HA/recovery/C5/C6 target-release evidence in the prescribed order; keep PR #1 DRAFT until genuinely final.
+A. Treat run #133 on implementation head b0094ab214d4ff41f53901dca1596824192d441c as the current exact integrated hosted SOURCE/DEVELOPMENT checkpoint.
+B. Do not reopen the completed source fail-fast sequence without new regression evidence.
+C. Recover the EXISTING installed rc.93 Laragon target; do not overwrite it with rc.94 as a shortcut.
+D. Run: php artisan nexora:runtime:compatibility-status --deep
+E. Run: php artisan nexora:runtime:post-install-status --assert-ready
+F. Exercise /login and /admin directly; close issue #2 only if all real target checks pass.
+G. Then continue separate development-target product QA, five-engine DB matrix, provider/identity/API/import/observability/Sentinel/Marketplace/HA/recovery evidence.
+H. Complete real C5 W3C HTML/CSS/WAVE/browser/AT/HTTP/Web-Vitals evidence and C6 reviewed-lock/final release evidence.
+I. Keep PR #1 DRAFT and keep TARGET POWER 50.0% / RELEASE POWER 25.0% until those real boundaries are satisfied.
 ```
