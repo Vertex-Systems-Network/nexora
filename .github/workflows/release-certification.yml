@@ -52,9 +52,6 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-        continue-on-error: true
 
       - name: Certification preflight
         run: php scripts/certification-preflight.php --source-only
@@ -64,3 +61,12 @@ jobs:
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
+
+      - name: Install frontend dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Frontend dependency compatibility
+        run: |
+          npm run typecheck
+          npm run test
+          npm run build:raw
