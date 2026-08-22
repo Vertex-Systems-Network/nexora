@@ -8,7 +8,6 @@ use App\Nexora\Foundation\Contracts\AdminNavigationContract;
 use App\Nexora\Foundation\Contracts\ModuleContract;
 use App\Nexora\Foundation\Runtime\ModuleDependency;
 use App\Nexora\Foundation\Runtime\ModuleManifest;
-use App\Models\Document;
 use App\Nexora\Publishing\Services\ArticlePublishingManager;
 
 final readonly class PublishingModule implements ModuleContract
@@ -45,14 +44,6 @@ final readonly class PublishingModule implements ModuleContract
 
     public function boot(): void
     {
-        $publishing = $this->publishing;
-        Document::saved(static function (Document $document) use ($publishing): void {
-            if (in_array($document->type, ['article', 'blog_post'], true)) {
-                $publishing->ensureSeoDefaults($document);
-                if ($document->status === 'published') {
-                    $document->articleMetadata()->whereNotNull('scheduled_at')->update(['scheduled_at' => null]);
-                }
-            }
-        });
+        $this->publishing->registerDocumentLifecycle();
     }
 }
