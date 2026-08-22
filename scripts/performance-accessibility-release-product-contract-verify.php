@@ -117,7 +117,7 @@ foreach ([
     '--wave-alerts-reviewed',
     '--wave-no-key',
     'Shared wave.webaim.org API always requires an API key',
-    "'authentication' => $waveNoKey ? 'standalone-no-key' : 'environment-key'",
+    "'authentication' => \$waveNoKey ? 'standalone-no-key' : 'environment-key'",
     'web-standards-evidence.json',
     'not_an_accessibility_approval',
 ] as $needle) {
@@ -138,7 +138,7 @@ foreach ([
 foreach (['W3C Nu', 'W3C CSS', 'WAVE', 'WCAG 2.2', 'Never weaken a W3C/WAVE/browser gate', '--wave-no-key', 'Never use `--wave-no-key` with the shared WAVE API'] as $needle) {
     $require($accessibilityPlan, $needle, 'Accessibility certification plan missing AI/operator rule: '.$needle);
 }
-$require($c5Runner, "if ($waveNoKey) $standards[] = '--wave-no-key';", 'C5 parent runner must forward explicit WAVE stand-alone no-key mode.');
+$require($c5Runner, "if (\$waveNoKey) \$standards[] = '--wave-no-key';", 'C5 parent runner must forward explicit WAVE stand-alone no-key mode.');
 
 $standardsConfig = (array) ($browserConfig['standards'] ?? []);
 foreach (['/', '/login'] as $route) {
