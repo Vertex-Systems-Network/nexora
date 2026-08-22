@@ -89,7 +89,7 @@ final readonly class ThemePackageInstaller
                 $this->extractApprovedFiles($zip, $storageRoot, $publicRoot);
                 $this->validateInstalledFiles($storageRoot, $manifest->templates, $manifest->stylesheet);
 
-                return DB::transaction(function () use ($manifest, $storageRoot, $publicRoot, $package, $scan, $userId, $existing): ThemeVersion {
+                return DB::transaction(function () use ($manifest, $storageRoot, $publicRoot, $safeId, $package, $scan, $userId, $existing): ThemeVersion {
                     $theme = $existing ?? Theme::query()->create([
                         'identifier' => $manifest->identifier,
                         'name' => $manifest->name,
