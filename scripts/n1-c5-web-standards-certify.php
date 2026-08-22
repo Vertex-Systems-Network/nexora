@@ -11,6 +11,7 @@ require_once $root.'/app/Nexora/Foundation/Filesystem/AtomicFileWriter.php';
 $baseUrl = '';
 $auditor = '';
 $w3cUrl = 'https://validator.w3.org/nu/';
+$w3cCssUrl = 'https://jigsaw.w3.org/css-validator/validator';
 $waveUrl = 'https://wave.webaim.org/api/request';
 $waveKeyEnv = 'WAVE_API_KEY';
 $alertsReviewed = false;
@@ -19,6 +20,7 @@ foreach ($argv as $arg) {
     if (str_starts_with($arg, '--base-url=')) $baseUrl = trim(substr($arg, 11));
     elseif (str_starts_with($arg, '--auditor=')) $auditor = trim(substr($arg, 10));
     elseif (str_starts_with($arg, '--w3c-validator-url=')) $w3cUrl = trim(substr($arg, 20));
+    elseif (str_starts_with($arg, '--w3c-css-validator-url=')) $w3cCssUrl = trim(substr($arg, 24));
     elseif (str_starts_with($arg, '--wave-api-url=')) $waveUrl = trim(substr($arg, 15));
     elseif (str_starts_with($arg, '--wave-key-env=')) $waveKeyEnv = trim(substr($arg, 15));
     elseif ($arg === '--wave-alerts-reviewed') $alertsReviewed = true;
@@ -32,7 +34,8 @@ $fail = static function (string $message): never {
 $baseUrl = nexoraNormalizeEvidenceBaseUrl($baseUrl);
 if ($baseUrl === null) $fail('A valid target --base-url=http(s)://... is required.');
 if ($auditor === '' || $auditor === 'operator-name') $fail('A real --auditor=<name-or-id> is required.');
-if (! filter_var($w3cUrl, FILTER_VALIDATE_URL)) $fail('Invalid W3C validator URL.');
+if (! filter_var($w3cUrl, FILTER_VALIDATE_URL)) $fail('Invalid W3C Nu validator URL.');
+if (! filter_var($w3cCssUrl, FILTER_VALIDATE_URL)) $fail('Invalid W3C CSS validator URL.');
 if (! filter_var($waveUrl, FILTER_VALIDATE_URL)) $fail('Invalid WAVE API URL.');
 if (! preg_match('/^[A-Z][A-Z0-9_]{2,80}$/', $waveKeyEnv)) $fail('Invalid WAVE key environment variable name.');
 
@@ -48,13 +51,13 @@ $config = require $root.'/config/nexora-browser-certification.php';
 $routes = (array) ($config['standards']['routes'] ?? ['/', '/login']);
 if ($routes === []) $fail('No W3C/WAVE routes are configured.');
 
-$requestJson = static function (string $url, int $timeout = 45): array {
+$request = static function (string $url, string $accept, int $timeout = 45): array {
     $context = stream_context_create([
         'http' => [
             'method' => 'GET',
             'timeout' => $timeout,
             'ignore_errors' => true,
-            'header' => "Accept: application/json\r\nUser-Agent: Nexora-C5-Standards/1.0\r\n",
+            'header' => "Accept: {$accept}\r\nUser-Agent: Nexora-C5-Standards/1.0\r\n",
         ],
         'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
     ]);
@@ -64,6 +67,10 @@ $requestJson = static function (string $url, int $timeout = 45): array {
         if (preg_match('#^HTTP/\S+\s+(\d{3})#i', (string) $header, $m) === 1) $status = (int) $m[1];
     }
     if ($body === false) throw new RuntimeException('HTTP request failed.');
+    return [$status, $body];
+};
+$requestJson = static function (string $url, int $timeout = 45) use ($request): array {
+    [$status, $body] = $request($url, 'application/json', $timeout);
     try {
         $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
     } catch (Throwable $e) {
@@ -120,6 +127,40 @@ foreach ($routes as $route) {
         $blocked[] = "W3C Nu checker could not evaluate {$path}.";
     }
 
+    $css = ['status' => 'fail', 'validity' => null, 'errors' => null, 'warnings' => null];
+    try {
+        $cssRequest = rtrim($w3cCssUrl, '?&').'?'.http_build_query([
+            'uri' => $target,
+            'output' => 'soap12',
+            'profile' => 'css3',
+            'warning' => 2,
+        ]);
+        [$cssHttpStatus, $cssBody] = $request($cssRequest, 'application/soap+xml, application/xml, text/xml', 60);
+        $extract = static function (string $xml, string $localName): ?string {
+            if (preg_match('#<(?:[A-Za-z0-9_.-]+:)?'.preg_quote($localName, '#').'\b[^>]*>\s*([^<]*)\s*</(?:[A-Za-z0-9_.-]+:)?'.preg_quote($localName, '#').'>#i', $xml, $m) !== 1) return null;
+            return html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_XML1, 'UTF-8');
+        };
+        $validityRaw = strtolower((string) ($extract($cssBody, 'validity') ?? ''));
+        $errorRaw = $extract($cssBody, 'errorcount');
+        $warningRaw = $extract($cssBody, 'warningcount');
+        $validity = in_array($validityRaw, ['true', '1'], true);
+        $errors = is_numeric($errorRaw) ? (int) $errorRaw : null;
+        $warnings = is_numeric($warningRaw) ? (int) $warningRaw : null;
+        $gatePass = $cssHttpStatus >= 200 && $cssHttpStatus < 300 && $validity && $errors === 0 && $warnings !== null;
+        $css = [
+            'status' => $gatePass ? 'pass' : 'fail',
+            'http_status' => $cssHttpStatus,
+            'validity' => $validity,
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'profile' => 'css3',
+        ];
+        if (! $gatePass) $blocked[] = "W3C CSS validation failed for {$path} (".($errors === null ? 'unknown' : (string) $errors)." errors).";
+    } catch (Throwable $e) {
+        $css['request_error'] = mb_substr($e->getMessage(), 0, 300);
+        $blocked[] = "W3C CSS validator could not evaluate {$path}.";
+    }
+
     $wave = [
         'status' => 'fail',
         'errors' => null,
@@ -170,13 +211,13 @@ foreach ($routes as $route) {
         $blocked[] = "WAVE could not evaluate {$path}.";
     }
 
-    $rows[] = ['path' => $path, 'url' => $target, 'w3c' => $w3c, 'wave' => $wave];
+    $rows[] = ['path' => $path, 'url' => $target, 'w3c' => $w3c, 'css' => $css, 'wave' => $wave];
 }
 
 $status = $blocked === [] ? 'pass' : 'blocked';
 $evidence = [
     'schema' => 1,
-    'scope' => 'W3C Nu + WAVE accessibility evaluation',
+    'scope' => 'W3C Nu + W3C CSS + WAVE accessibility evaluation',
     'status' => $status,
     'platform_version' => $version,
     'source_tree_sha256' => $source['tree_sha256'],
@@ -188,6 +229,12 @@ $evidence = [
         'tool' => 'Nu Html Checker',
         'validator_url' => $w3cUrl,
         'project_gate' => 'zero HTML conformance errors on every required route',
+    ],
+    'w3c_css' => [
+        'tool' => 'W3C CSS Validation Service',
+        'validator_url' => $w3cCssUrl,
+        'profile' => 'css3',
+        'project_gate' => 'zero CSS validation errors on every required route',
     ],
     'wave' => [
         'tool' => 'WAVE',
@@ -210,4 +257,4 @@ if ($status !== 'pass') {
     exit(1);
 }
 
-fwrite(STDOUT, "[N1.0-C5 Web Standards] PASS — project gate satisfied: W3C Nu has zero errors; WAVE has zero errors/contrast errors and alerts were human-reviewed. This is not a WAVE accessibility approval.\n");
+fwrite(STDOUT, "[N1.0-C5 Web Standards] PASS — project gate satisfied: W3C Nu + W3C CSS have zero errors; WAVE has zero errors/contrast errors and alerts were human-reviewed. This is not a WAVE accessibility approval.\n");
