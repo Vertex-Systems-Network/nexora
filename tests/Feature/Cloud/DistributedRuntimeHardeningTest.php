@@ -8,7 +8,6 @@ use App\Nexora\Cloud\Services\RuntimeHostClockIdentity;
 use App\Nexora\Cloud\Services\RuntimeLeaseManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
-use Mockery;
 use Tests\TestCase;
 
 final class DistributedRuntimeHardeningTest extends TestCase
@@ -22,7 +21,10 @@ final class DistributedRuntimeHardeningTest extends TestCase
             ->with('nx_runtime_leases')
             ->andReturn(false);
 
-        $manager = new RuntimeLeaseManager(Mockery::mock(RuntimeHostClockIdentity::class));
+        // The fail-closed branch returns before consulting the clock. Use the
+        // real container service instead of mocking a final infrastructure
+        // identity class so this test remains compatible with its contract.
+        $manager = new RuntimeLeaseManager(app(RuntimeHostClockIdentity::class));
 
         self::assertFalse($manager->acquireOrRenew('scheduler-leader', 'node-a', 90));
         self::assertFalse($manager->acquireActivityUnlessBarrierActive(
