@@ -26,6 +26,7 @@ return new class extends Migration {
 
     private const CRM_COMMERCE_LINKS = 'nx_crm_commerce_links';
     private const CRM_LINK_GLOBAL_CUSTOMER = 'nx_crm_commerce_links_commerce_customer_id_unique';
+    private const CRM_LINK_CUSTOMER_INDEX = 'nx_crm_commerce_customer_idx';
     private const CRM_LINK_TENANT_CUSTOMER = 'nx_crm_commerce_tenant_customer_uq';
     private const CRM_LINK_TENANT_INDEX = 'nx_crm_commerce_tenant_idx';
     private const CRM_LINK_TENANT_FOREIGN = 'nx_crm_commerce_tenant_fk';
@@ -34,6 +35,10 @@ return new class extends Migration {
     {
         Schema::table(self::CRM_COMMERCE_LINKS, static function (Blueprint $table): void {
             $table->uuid('tenant_id')->nullable()->index(self::CRM_LINK_TENANT_INDEX);
+            // The original unique customer index is also the supporting index for
+            // nx_crm_commerce_customer_fk on MySQL. Keep a dedicated FK-support
+            // index before replacing the global uniqueness rule with tenant scope.
+            $table->index('commerce_customer_id', self::CRM_LINK_CUSTOMER_INDEX);
         });
 
         foreach (DB::table(self::CRM_COMMERCE_LINKS)->get(['id', 'commerce_customer_id', 'contact_id', 'organization_id']) as $link) {
@@ -114,6 +119,7 @@ return new class extends Migration {
         Schema::table(self::CRM_COMMERCE_LINKS, static function (Blueprint $table): void {
             $table->dropUnique(self::CRM_LINK_TENANT_CUSTOMER);
             $table->unique('commerce_customer_id', self::CRM_LINK_GLOBAL_CUSTOMER);
+            $table->dropIndex(self::CRM_LINK_CUSTOMER_INDEX);
             $table->dropForeign(self::CRM_LINK_TENANT_FOREIGN);
             $table->dropIndex(self::CRM_LINK_TENANT_INDEX);
             $table->dropColumn('tenant_id');
