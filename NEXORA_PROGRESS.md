@@ -1,8 +1,8 @@
 # Nexora Progress Dashboard
 
-> **MANDATORY UPDATE FILE** — After **every meaningful apply**, update this file for every implementation, fix, audit closure, CI correction, target verification, issue closure, or release/certification apply.
+> **MANDATORY UPDATE FILE** — Update this dashboard after every meaningful implementation, fix, audit closure, CI correction, target verification, issue closure, or release/certification apply.
 >
-> `NEXORA_AI_PROJECT_STATE.md` remains canonical append-only history. This dashboard is the human-readable Power view. **SOURCE DONE != TARGET VERIFIED.**
+> `NEXORA_AI_PROJECT_STATE.md` remains the canonical append-only history. `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` is the mandatory UI/accessibility operator + AI plan. **SOURCE DONE != TARGET VERIFIED.**
 
 ---
 
@@ -10,26 +10,16 @@
 
 - Date: `2026-08-22`
 - Branch: `dev/n1-0b-core-functional-qa`
-- PR #1: **DRAFT + OPEN + MERGEABLE**, title/body synchronized through N1.26; not ready for merge
-- Consolidated implementation CI: **`32533298397` SUCCESS** on `73deb80bfaeb2e2b416292c15dde1f1abb02c16c`.
-- Latest complete green governance/source CI before this progress commit: **`32533537041` SUCCESS** on `c9f57881a4ef950ee041cda683e4d47829b588b3`.
-- Consolidated certification passed Certification preflight, Source Guard, every product contract through **N1.26 Performance + Accessibility + Release**, and Unified Source Certification.
-- Current runner policy: certification may run on **any idle self-hosted runner** via `runs-on: self-hosted`; there is no runner-name pin and no `LOCAL-WIN-03`-only guard.
-- GitHub-hosted runners remain excluded. The current self-hosted fleet is Windows-based, so repository `run:` steps use `cmd` and verify local PHP/Node/npm before certification.
-- Any-idle dispatch is proven across the pool: runs in this pass were claimed by different local runners including `LOCAL-WIN-01`, `LOCAL-WIN-03` and `LOCAL-WIN-4` depending on availability.
-- Current source head before this progress-only commit: `9a5a32fbcd13c77617893a6d90a719e0e6144019`.
-- Actions: **DEFERRED BY USER** earlier when hosted Actions quota was exhausted; current certification has resumed through the user-approved self-hosted runner pool.
-- Canonical ledger: **revision `2.5`**, synchronized through N1.26 / pooled self-hosted certification in commit `9a5a32fbcd13c77617893a6d90a719e0e6144019`.
-- Issue #2: **OPEN**; latest live rc.93 evidence still reports only `environment`, `activation`, `service`, `process` mismatches.
-- **N1.18 Public APIs / Webhooks / SDK: SOURCE DONE / TARGET PENDING**
-- **N1.19 Import / Export / WordPress migrations: SOURCE DONE / TARGET PENDING**
-- **N1.20 Observability: SOURCE DONE / TARGET PENDING**
-- **N1.21 Forge / Developer Experience: SOURCE DONE / TARGET PENDING**
-- **N1.22 Sentinel 2.0: SOURCE DONE for current trust-hardening workflow / TARGET PENDING**
-- **N1.23 Marketplace 2.0: SOURCE DONE for current hardening workflow / TARGET PENDING**
-- **N1.24 Cloud / HA / Distributed Runtime: SOURCE DONE for current coordination/leadership workflow / TARGET PENDING**
-- **N1.25 Backup / DR / Upgrade Certification: SOURCE DONE for current recovery-identity/restore-planning workflow / TARGET PENDING**
-- **N1.26 Performance + Accessibility + Release: SOURCE DONE for current source workflow / TARGET + RELEASE EVIDENCE PENDING**
+- PR #1: **DRAFT + OPEN + MERGEABLE**; do not mark Ready or merge until required real target/release gates pass.
+- Current code-bearing head: **`7cf4e1cc07994ed94afa6a6dbaad0fb20702215b`**.
+- Current GitHub-hosted development QA: **run #61 / `32567784562` / job `97018843658`**, queued at this checkpoint.
+- Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for this workflow.
+- GitHub-hosted development QA is development-checkout/source-functional evidence only. It does not prove the installed rc.93 Laragon recovery target, real browser behavior, W3C/WAVE target results, provider integrations, five-engine DB matrix, HA, recovery rehearsal, or final release certification.
+- Latest completed development QA before W3C/WAVE wiring: run #49 `32565782921` on `ff9a0444…` reached **229 PHPUnit PASS** before Data Connections fail-fast; Vitest 6/6, TypeScript, Vite build and production asset budgets were PASS.
+- Data Connections validation root was fixed in `b43f15bd…`: unsupported optional connector fields now use semantic `prohibited` rules instead of `prohibited + string` false failures on converted null values.
+- Issue #2: **OPEN**. Existing rc.93 target still needs compatibility + post-install readiness + `/login` + `/admin` evidence.
+- Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
+- W3C/WAVE C5 source tooling is now implemented and mandatory for final target accessibility closure.
 
 ---
 
@@ -42,185 +32,222 @@ TARGET POWER    50.0%  ██████████░░░░░░░░░
 RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
 ```
 
-Verified Power remains unchanged. The consolidated self-hosted run promotes N1.18–N1.26 to SOURCE DONE only. Target Power still requires real target execution; Release Power still requires real C1-C6/final evidence.
+No score is increased by W3C/WAVE source tooling alone. Target/Release Power moves only from real exact-source target evidence.
 
 ---
 
-## 3. Roadmap
+## 3. Current roadmap state
 
-| Block | Source / implementation | Target | State |
-|---|---:|---:|---|
-| N1.9–N1.17 | 100% verified source | target pending | SOURCE DONE |
-| N1.18 Public APIs/Webhooks/SDK | 100% current source contract | target pending | SOURCE DONE |
-| N1.19 Import/Export/WP migrations | 100% current source contract | target pending | SOURCE DONE |
-| N1.20 Observability | 100% current source contract | target pending | SOURCE DONE |
-| N1.21 Forge / Developer Experience | 100% current source contract | target pending | SOURCE DONE |
-| N1.22 Sentinel 2.0 | current trust-hardening workflow source-gated | target pending | SOURCE DONE FOR CURRENT WORKFLOW |
-| N1.23 Marketplace 2.0 | current hardening workflow source-gated | target pending | SOURCE DONE FOR CURRENT WORKFLOW |
-| N1.24 Cloud / HA / Distributed Runtime | current coordination/leadership workflow source-gated | target pending | SOURCE DONE FOR CURRENT WORKFLOW |
-| N1.25 Backup / DR / Upgrade Certification | current recovery-identity/restore-planning workflow source-gated | target pending | SOURCE DONE FOR CURRENT WORKFLOW |
-| N1.26 Performance + Accessibility + Release | current source workflow source-gated | target/release evidence pending | SOURCE DONE FOR CURRENT WORKFLOW |
-| N2.0 Stable Production | source roadmap substantially closed | 0% final release | BLOCKED BY TARGET + C1-C6 EVIDENCE |
+| Block | Source state | Target / release state |
+|---|---|---|
+| DEV-0–DEV-4 | substantial source closure | live rc.93 recovery + broad product QA pending |
+| DEV-5 SQL/Data Services | source/harness substantially closed | real disposable DB matrix + connector evidence pending |
+| N1.9–N1.21 | SOURCE DONE for bounded workflows | target execution pending |
+| N1.22 Sentinel 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | controlled package target evidence pending |
+| N1.23 Marketplace 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | controlled marketplace target evidence pending |
+| N1.24 Cloud / HA | SOURCE DONE FOR CURRENT WORKFLOW | real multi-node evidence pending |
+| N1.25 Backup / DR / Upgrade | SOURCE DONE FOR CURRENT WORKFLOW | real disposable restore/upgrade rehearsal pending |
+| N1.26 Performance + Accessibility + Release | source workflow + W3C/WAVE C5 tooling implemented; latest code QA pending | real C5/C6 evidence pending |
+| N2.0 Stable Production | not eligible | BLOCKED BY TARGET + RELEASE EVIDENCE |
 
 ---
 
-## 4. N1.21 Forge implementation checkpoint
+## 4. Development execution QA checkpoint
 
-- Stable `nexora:make:extension` CLI with `ForgeExtensionScaffolder` service boundary.
-- Deterministic zero-write `--dry-run`.
-- Guarded `--force` only for same-identifier Forge-owned scaffold marker.
-- Portable path + symlink + file/directory collision protections.
-- Authoritative Extension manifest self-validation.
-- Developer files preserved on force refresh; scaffold directory is never deleted.
-- Stable generated source contract for manifest/composer/src/resources/migrations/tests.
-- Forge remains source-only and cannot bypass Sentinel/install/trust/capability lifecycle.
-- Acceptance tests + developer guide + static Forge product contract are present.
-- Forge gate is required by Development Readiness and release workflow.
+Current workflow: `.github/workflows/development-execution-qa.yml`
 
----
+Required behavior:
 
-## 5. Any-idle self-hosted runner policy
-
-Certification may run on whichever self-hosted runner is idle and claims the GitHub Actions job first.
-
-```yaml
-runs-on: self-hosted
+```text
+GitHub-hosted Ubuntu
+  -> PHP 8.3
+  -> Node 22
+  -> disposable MySQL 8.4
+  -> composer install
+  -> npm install
+  -> php scripts/development-readiness.php --full --tests --evidence
+  -> PHPUnit fail-fast
+  -> Vitest
+  -> TypeScript
+  -> production Vite build
+  -> production asset budgets/provenance
 ```
 
-Consequences:
-- No runner name such as `LOCAL-WIN-03`, `LOCAL-WIN-01`, or another local runner is preferred or required.
-- GitHub-hosted runners are not eligible.
-- Current runner fleet is Windows-based; the job reports `%RUNNER_NAME%`, `%RUNNER_OS%`, `%RUNNER_ARCH%` and verifies PHP >= 8.3 plus Node >= 22 before source gates run.
-- Local toolchains are verified rather than mutated by hosted-runner setup actions.
-- Repository `run:` steps use `cmd`, avoiding unsigned temporary PowerShell-script ExecutionPolicy failures on the current Windows fleet.
-- If all self-hosted runners are busy/offline, the job queues until one becomes idle.
+Known current chain:
+
+- Performance critical route budgets: PASS in prior hosted runs.
+- Suspended-login security boundary: PASS after root fix.
+- Cloud Operations recovery flow: PASS.
+- Distributed Runtime Hardening stale final-class test issue: fixed.
+- Content Collection omitted optional-field validation issue: fixed.
+- Data Connections unsupported empty-field validation issue: fixed in `b43f15bd…`; exact latest integrated confirmation is part of run #61.
+- W3C/WAVE source contract is now part of the mandatory N1.26 product contract executed by Development Readiness.
+
+The PR workflow intentionally does **not** call the shared WAVE API or claim live W3C/WAVE target success.
 
 ---
 
-## 6. N1.22 Sentinel 2.0 implementation checkpoint
+## 5. N1.26 W3C / WAVE / WCAG accessibility plan
 
-- Sentinel/package scanner foundation retained: bounded ZIP inspection, static scanners, capability mismatch detection, digest recheck/TOCTOU block and RiskEngine.
-- Quarantine retains internal UUID names, atomic copy, source-size limits, path guard and restrictive file permissions.
-- `SentinelFailureReference` creates opaque `SNT-*` references and a non-secret exception-class fingerprint without embedding raw exception text in durable Admin-facing state.
-- Private server diagnostics log the same opaque reference so operator-visible failures correlate with server logs.
-- Forward migration scrubs legacy persisted raw scan error strings.
-- Finding severity ordering uses portable SQL `CASE`.
-- `SentinelApprovalGuard` binds promotion to completed ALLOW, package ownership, bounded package state and unchanged package/scan SHA-256; newer/ambiguous scans fail closed.
-- Theme and Extension installers invoke the guard server-side.
-- Acceptance + static contract + Development Readiness + self-hosted workflow gate are present.
+Canonical plan: `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md`.
+
+### Source wiring implemented
+
+- `scripts/n1-c5-web-standards-certify.php`
+- `scripts/n1-c5-web-standards-evidence-verify.php`
+- `config/nexora-browser-certification.php` standards routes/gates
+- `scripts/n1-c5-browser-performance-certify.php` live C5 integration
+- `scripts/n1-c5-evidence-verify.php` final evidence hash binding
+- `scripts/lib/n1-c5-contracts.php` source guard
+- `scripts/performance-accessibility-release-product-contract-verify.php` N1.26 product guard
+- `package.json` commands `certify:web-standards` and `verify:web-standards-evidence`
+- `AGENTS.md` mandatory AI accessibility rules
+- C5 operator kit/runbook updated with W3C/WAVE prerequisites.
+
+### Required real target gates
+
+Initial required routes:
+
+```text
+/
+/login
+```
+
+W3C Nu project gate per route:
+
+```text
+request succeeds
+HTML conformance errors = 0
+warnings recorded for review
+```
+
+WAVE project gate per route:
+
+```text
+API evaluation succeeds
+Errors = 0
+Contrast Errors = 0
+Alerts count recorded
+all Alerts human-reviewed
+```
+
+WAVE output is **never** treated as an accessibility approval or full WCAG certification. Automated WAVE evidence supplements, but does not replace, real browser + assistive-technology observation.
+
+Shared WAVE API credential:
+
+```text
+WAVE_API_KEY
+```
+
+The key must stay outside source, logs and evidence. Private/intranet targets may use approved local/licensed stand-alone endpoints with:
+
+```text
+--w3c-validator-url=
+--wave-api-url=
+--wave-key-env=
+```
+
+Canonical C5 invocation:
+
+```bat
+set WAVE_API_KEY=***
+scripts\n1-c5-browser-performance-certify.bat --base-url=https://YOUR-TARGET --auditor=REAL-AUDITOR --wave-alerts-reviewed --evidence=PATH-TO-C5-EVIDENCE
+```
+
+C5 still additionally requires:
+
+- Chrome / Edge / Firefox.
+- 360 / 768 / 1440 widths.
+- LTR + RTL.
+- light + dark.
+- keyboard-only navigation.
+- visible focus + correct focus order/restoration.
+- skip link.
+- modal focus containment.
+- screen-reader labels/names/roles/states.
+- reduced motion.
+- 200% zoom/reflow.
+- forced-colors/high-contrast behavior.
+- no horizontal page overflow.
+- HTTP/security/latency evidence.
+- Web Vitals within configured ceilings.
+- current exact-source + certification-session binding.
 
 ---
 
-## 7. N1.23 Marketplace 2.0 implementation checkpoint
+## 6. Live rc.93 / Issue #2 boundary
 
-- Catalog source/item generation identity is explicit; historical generation-null rows fail closed until fresh sync.
-- Catalog fetch is streamed to temporary storage with explicit 8 MiB budget before JSON decode.
-- Successful sync publishes one UUID generation atomically across retained items + source.
-- Resume clears generation/last-sync/error and forces fresh synchronization.
-- Admin visibility and staging require exact source/item generation equality.
-- Dynamic stage permission remains package-type aware and requires both global RBAC + current-organization tenant authorization.
-- Existing trusted-publisher, digest, transfer budget, quarantine, Sentinel and signature checks remain intact.
-- Acceptance + `marketplace2-product-contract-verify.php` are mandatory in readiness/workflow.
+Do not replace installed rc.93 with rc.94 merely as a recovery shortcut.
 
----
+Required live commands:
 
-## 8. N1.24 Cloud / HA / Distributed Runtime implementation checkpoint
+```bat
+php artisan nexora:runtime:compatibility-status --deep
+php artisan nexora:runtime:post-install-status --assert-ready
+```
 
-- Existing Cloud foundation retained: node identity/heartbeat, runtime topology, health/readiness, distributed lock abstraction, scheduler leadership, database leases, process/runtime fingerprints and HA rehearsal services.
-- `RuntimeLeaseManager::acquireOrRenew()` and barrier-aware acquisition now fail closed when `nx_runtime_leases` is unavailable.
-- Owner-bound `release()` remains bootstrap-safe no-op when lease storage is absent.
-- Lease acquisition uses transaction + `lockForUpdate()` and rejects a live competing owner.
-- `HaReadinessService` requires scheduler leader lease owner to resolve to a fresh active runtime node.
-- Missing lease/node tables, ghost owners, stale owners and inactive owners fail readiness.
-- Product work uses shared `ClusterLeadership`; node/process heartbeats remain independent on every runtime.
-- Acceptance + `cloud-ha-product-contract-verify.php` are mandatory in readiness/workflow.
-- Multi-host HA remains TARGET PENDING.
+Then directly exercise:
+
+```text
+/login
+/admin
+```
+
+Issue #2 may close only after those real target checks pass. GitHub-hosted Ubuntu CI cannot satisfy this boundary.
 
 ---
 
-## 9. N1.25 Backup / DR / Upgrade implementation checkpoint
+## 7. Remaining target / release sequence
 
-- `BackupOrchestrator` now refuses to claim a recovery-ready backup without complete deployment identity.
-- Completed runtime backup manifests seal `platform_version`, `deployment_generation`, `source_tree_sha256`, persisted artifact SHA-256, DB driver and backup storage identity alongside existing data-plane/resource evidence.
-- Stored artifacts are streaming-written and streaming-reverified for byte count + SHA-256; public verification failures remain generic/server-log-backed.
-- New `BackupRecoveryCompatibility` rejects unsupported/legacy/ambiguous/tampered manifest identity, driver mismatch, storage-disk mismatch and record/manifest checksum mismatch.
-- Exact current source version + deployment generation allows direct planning; a different valid source generation does **not** invalidate the backup but requires an isolated recovery runtime matching the sealed source runtime.
-- `RestorePlanner` first verifies the artifact, then recovery identity and storage identity. It records source/current runtime comparison, storage drift, operator steps and always sets `automatic_destructive_restore=false`.
-- Cross-generation recovery plans explicitly require a matching isolated source runtime before applying the backup. Recovery execution remains operator-controlled and disposable-target based.
-- `BackupRestoreRehearsalService` exposes source/current generation comparison without claiming a real restore happened.
-- `tests/Feature/Cloud/BackupRecoveryIdentityTest.php` covers exact identity, cross-generation fencing, legacy identity rejection and manifest checksum mismatch rejection.
-- `scripts/backup-dr-upgrade-product-contract-verify.php` guards backup provenance, compatibility fail-closed semantics, non-destructive planning and the existing real disposable-target final evidence boundary.
-- N1.25 product contract is mandatory in Development Readiness and the self-hosted release workflow.
-- This is source closure only. Real backup/restore rehearsal, upgrade rehearsal and recovery health evidence remain TARGET/RELEASE PENDING.
-
----
-
-## 10. N1.26 Performance + Accessibility + Release implementation checkpoint
-
-- Existing C5 architecture is preserved: source browser/RTL/a11y contracts, production build budgets, real target HTTP checks, browser matrix, assistive-technology evidence and Web Vitals remain separate evidence classes.
-- Admin Inertia page resolution is explicitly source-guarded to remain `lazy: true`; eager page regression fails the performance contract.
-- `config/nexora-performance.php` includes a dedicated first-load static JavaScript graph gzip ceiling, separate from total/per-asset JS ceilings.
-- `scripts/performance-build-verify.php` walks only the app entry's static manifest `imports`, excludes dynamic route chunks from first-load accounting, records the first-load asset set and enforces the gzip ceiling after a real production build.
-- Shared Modal focus trapping has an executable Vitest regression proving Tab wraps from the last dialog control back to the first, and the browser UX source contract guards focus trap + restore semantics.
-- `scripts/development-readiness.php --full --tests` executes the frontend Vitest suite. A successful production Vite build is followed by `performance-build-verify.php`, so asset budgets/provenance are exercised in development target QA.
-- `scripts/performance-accessibility-release-product-contract-verify.php` binds lazy route splitting, first-load budget, modal focus containment, executable frontend/build QA and the real C5 target evidence boundary.
-- N1.26 product contract is mandatory in Development Readiness and the self-hosted release workflow.
-- Source code does **not** claim Lighthouse/Web Vitals/WCAG target success. Chrome/Edge/Firefox responsive/RTL/theme observations, assistive-technology evidence, HTTP latency/security and Web Vitals remain C5 TARGET/RELEASE PENDING.
+```text
+1. finish latest GitHub-hosted development QA to zero fail-fast roots
+2. recover and verify existing rc.93 Laragon target
+3. exercise /login + /admin and close issue #2 only on evidence
+4. run separate development target QA across major N1.9–N1.26 product workflows
+5. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix
+6. run controlled provider/connector/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
+7. perform real disposable backup/restore + upgrade rehearsal
+8. complete C5 W3C Nu + WAVE + browser/AT + HTTP + Web Vitals evidence
+9. complete C6 multi-node/final operations + reviewed dependency locks + provenance/release evidence
+10. only then mark PR #1 Ready and merge automatically
+```
 
 ---
 
-## 11. Main protection / target blockers
+## 8. AI execution rules
 
-`main` remains recorded `protected=false`; current connector exposes no proven branch/ruleset mutation endpoint in this workflow. Desired policy remains PR required + Source certification + stale-review dismissal + review/conversation resolution + no force push/delete + admin enforcement. Issue #2 remains OPEN. Target Power remains 50%.
+Every AI/agent must:
+
+1. Read `AGENTS.md`, `NEXORA_AI_PROJECT_STATE.md`, this file, and `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` before relevant work.
+2. Use GitHub-hosted development QA only; do not silently substitute a local/self-hosted runner.
+3. Never promote source/static/jsdom evidence to real browser/target evidence.
+4. Never call WAVE output an accessibility approval.
+5. Never remove a failing W3C/WAVE required route just to make C5 green.
+6. Never commit WAVE/API credentials.
+7. Fix root causes and rerun the exact failing gate.
+8. Keep issue #2 and C5 accessibility evidence as separate target boundaries.
+9. Keep PR #1 DRAFT until all required target/release evidence is genuinely final.
+10. Do not raise Target/Release Power from hosted source/development CI alone.
 
 ---
 
-## 12. Apply Log
+## 9. Apply Log
 
 | Apply | Date | Evidence | Change | Power impact |
 |---:|---|---|---|---|
-| 001–013 | 2026-08-21 | through `45e527c4…`; CI `32509858655` | N1.16/N1.17 verified closures/governance | Project 76.5%, Source 99%, Target 50% |
-| 014–020 | 2026-08-21 | through `95eb4bd4…`; zero-step hosted Actions | N1.18 API/token/SDK implementation | implementation complete; verified Power held |
-| 021 | 2026-08-22 | user directive | hosted Actions deferred after quota exhaustion | Power unchanged |
-| 022–027 | 2026-08-22 | through `8afd1f36…` | N1.19 import/export/WXR implementation | implementation complete; verified Power held |
-| 028–031 | 2026-08-22 | through `97824bd4…` | N1.20 observability/privacy/correlation/retention + tests/contracts | implementation complete; verified Power held |
-| 032–033 | 2026-08-22 | through Forge contract `39beaac0…` | N1.21 Forge hardening/tests/docs/contract | implementation-complete candidate |
-| 034 | 2026-08-22 | readiness `74ca8c89…`; workflow `8e612c5a…` | self-hosted runner + PR trigger + Forge gate wiring | verified Power unchanged |
-| 035 | 2026-08-22 | earlier local-runner executions | generic self-hosted runner stabilization | verified Power unchanged |
-| 036 | 2026-08-22 | through `d31e8524…`; workflow `e412df46…` | N1.22 Sentinel 2.0 trust/privacy hardening + tests/gate | implementation-complete candidate |
-| 037 | 2026-08-22 | `06750699…` | literal-safe Sentinel contract correction | verified Power unchanged |
-| 038 | 2026-08-22 | through `3c170397…` | N1.23 bounded catalog + generation + tenant authorization hardening | implementation-complete candidate |
-| 039 | 2026-08-22 | `ea7b87a8…` | certification temporarily pinned exclusively to `LOCAL-WIN-03` | superseded by Apply 043; Power unchanged |
-| 040 | 2026-08-22 | lease `780a169a…`; HA `820c65d8…`; tests `44367739…`; contract `19e4336b…`; workflow `9d166d69…`; readiness `4c053ba4…` | N1.24 fail-closed coordination + fresh-active scheduler ownership | implementation-complete candidate |
-| 041 | 2026-08-22 | backup identity `52cb9ca2…`; planner `c86fe3af…`; rehearsal `16caa03d…`; tests `4ed881a4…`; contract `0dc78c11…`; workflow `796b5cb0…`; readiness `e46c97cf…` | N1.25 recovery identity, cross-generation fencing, non-destructive restore planning, tests + mandatory source gate | implementation-complete candidate; verified Power unchanged |
-| 042 | 2026-08-22 | budget `2b116577…`; build verifier `1b65643e…`; perf contract `35dfa8cc…`; modal test `21b85cb7…`; browser contract `c6fe39ab…`; product gate `4a616965…`; workflow `e4bf0547…`; readiness `d728df74…` | N1.26 lazy-route/first-load-budget + modal focus regression + executable frontend/build QA + C5 boundary source hardening | implementation-complete candidate; verified Power unchanged |
-| 043 | 2026-08-22 | runner selector `736ad761…`; API-token shared UI `c263fc52…`; approved migration queue set `b64ca91f…`; RC18/current queue metric alignment `acbd16ea…`; run `32532484673` | changed certification to any idle self-hosted runner; fixed preflight Admin UI + queue contract; Source Guard and gates through AI Platform green; synchronized progress protocol after Multisite governance failure | verified Power unchanged pending fresh consolidated green run |
-| 044 | 2026-08-22 | Enterprise progress gate `084caed8…`; API bootstrap gate `777591b1…`; Observability Actions governance `5ab8c4f9…`; Forge structural conflict gate `73deb80b…`; CI **`32533298397` SUCCESS** | removed stale formatting-only CI assumptions without weakening product invariants; any-idle self-hosted consolidated certification passed every gate through N1.26 + Unified Source Certification | N1.18–N1.26 promoted to SOURCE DONE; Target 50% / Release 25% unchanged |
-| 045 | 2026-08-22 | progress/governance CI **`32533537041` SUCCESS** on `c9f57881…`; ledger revision `2.5` commit `9a5a32fb…`; PR #1 synchronized through N1.26 | closed source-governance handoff after pooled certification; canonical ledger now records N1.18–N1.26 and any-idle runner policy | Source remains 99%; Target 50% / Release 25% unchanged |
+| 001–045 | 2026-08-21/22 | historical ledger + prior CI through `32533537041` | source roadmap through N1.26, prior runner/governance evolution and source closure | current verified Power baseline retained |
+| 046 | 2026-08-22 | hosted runs through #49 / `32565782921` | GitHub-hosted Ubuntu development QA, HA/performance/auth/content fixes; PHPUnit reached 229 PASS | Target/Release unchanged |
+| 047 | 2026-08-22 | `b43f15bd…` | Data Connections validator corrected for unsupported nullable fields | pending integrated hosted confirmation; Power unchanged |
+| 048 | 2026-08-22 | `97f95078…` → `7cf4e1cc…`; run #61 queued | implemented W3C Nu + WAVE live target runner/verifier, final C5 evidence binding, source contracts, AI plan, AGENTS/package/operator-kit wiring | Source candidate strengthened; Target/Release unchanged |
 
 ---
 
-## 13. Exact next action
+## 10. Exact next action
 
 ```text
-LIVE RC.93 RECOVERY / ISSUE #2
-  1. recover the existing D:\laragon\www\nexora rc.93 installation without replacing it with rc.94
-  2. require `php artisan nexora:runtime:compatibility-status --deep` PASS with no mismatches
-  3. require `php artisan nexora:runtime:post-install-status --assert-ready` PASS
-  4. exercise /login and /admin
-  5. only then close issue #2
-
-DEVELOPMENT TARGET / RELEASE CLOSURE
-  1. on a separate development checkout run full development QA with PHP tests + Vitest + TypeScript + Vite + production asset budgets
-  2. obtain real five-engine SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix evidence on disposable `nexora_matrix_*` databases
-  3. exercise major product workflows N1.9-N1.26 on the target; controlled provider/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
-  4. perform real disposable-target backup/restore + upgrade rehearsal
-  5. complete C5 real Chrome/Edge/Firefox + assistive-tech + HTTP + Web Vitals evidence
-  6. complete C6 multi-node/final release evidence and reviewed dependency locks
-  7. only when all required target/release gates are real and exact-source bound: close eligible issues, mark PR Ready and merge automatically
-
-EVIDENCE RULE
-  - self-hosted source CI never raises Target Power by itself
-  - N1.26 source checks never substitute for observed WCAG/browser/Web Vitals evidence
-  - N2.0 remains blocked until all required source + target + release evidence is real and exact-source bound
+A. Wait for authoritative code-bearing run #61 on 7cf4e1cc to execute.
+B. If red: inspect exact fail-fast root, apply smallest architecture-correct fix, rerun GitHub-hosted QA.
+C. If green: record exact run/job/artifact evidence and synchronize canonical append-only ledger.
+D. Do not execute/claim W3C/WAVE target PASS until a reachable exact-source target + real auditor + WAVE credential/private licensed endpoint are available.
+E. Continue live rc.93 recovery and target/release sequence without mixing evidence classes.
 ```
