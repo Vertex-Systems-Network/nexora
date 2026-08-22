@@ -18,7 +18,7 @@ final class PasswordStrengthEvaluatorTest extends TestCase
         self::assertSame('strong', $result['level']);
         self::assertTrue($result['minimum_accepted']);
         self::assertFalse($result['consent_required']);
-        self::assertNotContains(false, $result['requirements'], true);
+        self::assertNotContains(false, $result['requirements']);
     }
 
     #[Test]
