@@ -20,7 +20,7 @@ final class N100Rc5DatabaseArchitectureTest extends TestCase
         self::assertGreaterThanOrEqual(70, $result['metrics']['foreign_targets']);
         self::assertSame(51, $result['metrics']['tenant_tables']);
         self::assertSame(51, $result['metrics']['tenant_models']);
-        self::assertSame(7, $result['metrics']['portable_nullable_unique']);
+        self::assertSame(11, $result['metrics']['portable_nullable_unique']);
 
         $certifier=(string)file_get_contents($root.'/scripts/certify-release.php');
         foreach(['database-contract-verify.php','seed-idempotency','migration-reset','migration-rebuild','seed-rebuild'] as $marker) {
