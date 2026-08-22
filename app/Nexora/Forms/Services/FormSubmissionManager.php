@@ -98,7 +98,11 @@ final class FormSubmissionManager
             $fieldRules = [$required ? 'required' : 'nullable'];
 
             if ($type === 'email') {
-                $fieldRules[] = 'email:rfc';
+                // RFC-only validation accepts local-only mailbox forms such as
+                // "not-an-email". Public form email fields represent practical
+                // Internet addresses, so require both RFC and filter_var shape
+                // without introducing DNS/network dependency into submission.
+                $fieldRules[] = 'email:rfc,filter';
                 $fieldRules[] = 'max:'.(int) ($field['max_length'] ?? 255);
             } elseif ($type === 'number') {
                 $fieldRules[] = 'numeric';
