@@ -4,7 +4,7 @@ Before planning, editing, auditing, packaging, or releasing Nexora:
 
 1. Read `NEXORA_AI_PROJECT_STATE.md` in full.
 2. Read `NEXORA_PROGRESS.md` in full and treat it as the mandatory human-readable live progress dashboard.
-3. Read `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` before any UI/accessibility/browser/release work. W3C Nu, WAVE, WCAG/manual browser/assistive-technology evidence are mandatory C5 boundaries; never claim WAVE approval or infer target accessibility from source tests.
+3. Read `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` before any UI/accessibility/browser/release work. W3C Nu HTML, W3C CSS, WAVE, WCAG/manual browser and assistive-technology evidence are mandatory C5 boundaries; never claim WAVE approval or infer target accessibility from source tests.
 4. Treat `NEXORA_AI_PROJECT_STATE.md` as the canonical cross-session project state and append-only execution ledger.
 5. Preserve Nexora's architecture rules and source-vs-target completion semantics.
 6. Do not repeat completed work unless regression evidence exists.
@@ -16,6 +16,6 @@ Before planning, editing, auditing, packaging, or releasing Nexora:
 12. Inspect open GitHub issues at the start and end of every meaningful pass, and solve applicable defects alongside roadmap work.
 13. A pull request may leave draft state only when its required source CI and real-target gates are satisfied. Once a PR is genuinely final/merge-ready, mark it Ready for review and merge it without waiting for a separate merge confirmation. Never merge a target-unverified or failing PR.
 14. Progress percentages are evidence-based. Never increase Target Power from source CI alone and never inflate Project Power merely because many files changed.
-15. W3C/WAVE target checks are fail-closed: required routes cannot be removed to hide failures, API credentials must never enter source/evidence/logs, W3C requires zero conformance errors, WAVE requires zero errors/contrast errors plus human alert review, and real browser/AT observation remains mandatory.
+15. W3C/WAVE target checks are fail-closed: required routes cannot be removed to hide failures; API credentials must never enter source/evidence/logs; W3C HTML and W3C CSS each require zero validation errors; WAVE requires zero Errors/Contrast Errors plus human Alert review; real browser/AT observation remains mandatory.
 
 When using GitHub, prefer a development branch + pull request for meaningful source changes. Do not push unverified runtime code directly to `main`.
