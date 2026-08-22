@@ -10,7 +10,8 @@ import type { SharedPageProps } from "@admin/types/page";
 type FieldType = "text" | "long-text" | "number" | "boolean" | "date" | "url";
 type CollectionField = { key: string; label: string; type: FieldType; required: boolean };
 type CollectionData = { id: number; uuid: string; name: string; slug: string; description: string | null; status: "active" | "archived"; document_type: string | null; documents_count: number; updated_at: string | null; schema: CollectionField[] };
-type DocumentRow = { id: number; title: string; slug: string | null; type: string; status: string; position: number; data: Record<string, unknown> };
+type ServerEntryData = Record<string, unknown>;
+type DocumentRow = { id: number; title: string; slug: string | null; type: string; status: string; position: number; data: ServerEntryData };
 type AvailableDocument = { id: number; title: string; slug: string | null; type: string; status: string };
 type TypeOption = { key: string; name: string; description: string };
 type EntryValue = string | number | boolean | null;
@@ -22,7 +23,7 @@ const fieldTypes = [
 ];
 const newField = (): CollectionField => ({ key: "", label: "", type: "text", required: false });
 const initialData = (schema: CollectionField[]): EntryData => Object.fromEntries(schema.map((field) => [field.key, field.type === "boolean" ? false : ""])) as EntryData;
-const normalizeEntryData = (data: Record<string, unknown>): EntryData => Object.fromEntries(Object.entries(data).map(([key, value]) => {
+const normalizeEntryData = (data: ServerEntryData): EntryData => Object.fromEntries(Object.entries(data).map(([key, value]) => {
     if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") return [key, value];
     if (value === undefined) return [key, null];
     return [key, String(value)];
