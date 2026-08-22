@@ -7,6 +7,7 @@ namespace Tests\Feature\Media;
 use App\Models\MediaAsset;
 use App\Models\Role;
 use App\Models\User;
+use App\Nexora\Cloud\Services\RuntimeDeploymentIdentity;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -56,6 +57,13 @@ final class MediaLibraryFlowTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $asset=MediaAsset::query()->firstOrFail();
+
+        // The real Admin media picker uses same-origin fetch, which is wrapped
+        // by the deployment fence and carries the active generation header.
+        $this->withHeader(
+            'X-Nexora-Deployment-Generation',
+            app(RuntimeDeploymentIdentity::class)->generation(),
+        );
 
         $this->actingAs($admin)
             ->getJson('/admin/media?picker=1&type=document&limit=12')
