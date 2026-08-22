@@ -19,8 +19,8 @@ final class N100Rc4LaravelRuntimeArchitectureTest extends TestCase
         self::assertSame(2, $result['checks']['route_middleware_aliases']);
         self::assertGreaterThanOrEqual(10, $result['checks']['scheduled_commands']);
         self::assertSame(2, $result['checks']['scheduled_callbacks']);
-        self::assertSame(4, $result['checks']['queue_jobs']);
-        self::assertSame(2, $result['checks']['service_providers']);
+        self::assertSame(5, $result['checks']['queue_jobs']);
+        self::assertSame(10, $result['checks']['service_providers']);
 
         $certifier=(string)file_get_contents($root.'/scripts/certify-release.php');
         self::assertStringContainsString('laravel-runtime-contract-verify.php',$certifier);
