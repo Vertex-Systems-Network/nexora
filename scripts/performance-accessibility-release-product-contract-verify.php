@@ -28,10 +28,14 @@ $accessibilityTest = $read('resources/js/admin/ui/untitled/accessibility.test.ts
 $readiness = $read('scripts/development-readiness.php');
 $c5Runner = $read('scripts/n1-c5-browser-performance-certify.php');
 $c5Contracts = $read('scripts/lib/n1-c5-contracts.php');
+$standardsRunner = $read('scripts/n1-c5-web-standards-certify.php');
+$standardsVerifier = $read('scripts/n1-c5-web-standards-evidence-verify.php');
+$accessibilityPlan = $read('NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md');
 $packageRaw = $read('package.json');
 $package = json_decode($packageRaw, true);
 $config = is_file($root.'/config/nexora-performance.php') ? require $root.'/config/nexora-performance.php' : [];
 $budgets = is_array($config) ? (array) ($config['budgets'] ?? []) : [];
+$browserConfig = is_file($root.'/config/nexora-browser-certification.php') ? require $root.'/config/nexora-browser-certification.php' : [];
 
 $require = static function (string $source, string $needle, string $message) use (&$failures): void {
     if (! str_contains($source, $needle)) $failures[] = $message;
@@ -69,15 +73,35 @@ foreach ([
 }
 
 // N1.26 source closure must retain the real C5 target boundary rather than claiming
-// Lighthouse/Web Vitals/accessibility performance from static analysis alone.
-foreach (['--base-url=', 'http-performance', 'browser-evidence', 'web-vitals', 'build-assets', 'c5-evidence'] as $needle) {
+// browser/WCAG/WAVE/Web Vitals success from static analysis alone.
+foreach (['--base-url=', 'http-performance', 'web-standards', 'web-standards-evidence', 'browser-evidence', 'web-vitals', 'build-assets', 'c5-evidence'] as $needle) {
     $require($c5Runner, $needle, 'C5 target certification runner missing evidence boundary: '.$needle);
 }
 foreach (['browser-source', 'performance-source', 'security-source'] as $needle) {
     $require($c5Runner, $needle, 'C5 runner must retain ordered source gate: '.$needle);
 }
-foreach (['browser_evidence_sha256', 'web_vitals_evidence_sha256', 'http_performance_sha256', 'build_assets_sha256'] as $needle) {
+foreach (['browser_evidence_sha256', 'web_vitals_evidence_sha256', 'web_standards_evidence_sha256', 'http_performance_sha256', 'build_assets_sha256'] as $needle) {
     $require($c5Contracts, $needle, 'C5 contract must bind target evidence artifact: '.$needle);
+}
+
+// Standards tooling must be real, fail-closed, secret-safe and explicit that WAVE is
+// an evaluation aid rather than an accessibility approval.
+foreach (['validator.w3.org/nu/', 'wave.webaim.org/api/request', 'WAVE_API_KEY', '--wave-alerts-reviewed', 'web-standards-evidence.json', 'not_an_accessibility_approval'] as $needle) {
+    $require($standardsRunner, $needle, 'W3C/WAVE target runner missing required marker: '.$needle);
+}
+foreach (['zero conformance errors', 'zero errors', 'zero contrast errors', 'alerts must be human-reviewed', 'not_an_accessibility_approval'] as $needle) {
+    $require($standardsVerifier, $needle, 'W3C/WAVE evidence verifier missing fail-closed marker: '.$needle);
+}
+foreach (['W3C Nu', 'WAVE', 'WCAG 2.2', 'Never weaken a W3C/WAVE/browser gate'] as $needle) {
+    $require($accessibilityPlan, $needle, 'Accessibility certification plan missing AI/operator rule: '.$needle);
+}
+$standardsConfig = (array) ($browserConfig['standards'] ?? []);
+foreach (['/', '/login'] as $route) {
+    if (! in_array($route, (array) ($standardsConfig['routes'] ?? []), true)) $failures[] = "W3C/WAVE required route [{$route}] must remain configured.";
+}
+if ((int) ($standardsConfig['w3c']['max_errors'] ?? -1) !== 0) $failures[] = 'W3C gate must remain zero-error.';
+if ((int) ($standardsConfig['wave']['max_errors'] ?? -1) !== 0 || (int) ($standardsConfig['wave']['max_contrast_errors'] ?? -1) !== 0 || ($standardsConfig['wave']['require_alert_review'] ?? null) !== true) {
+    $failures[] = 'WAVE gate must remain zero errors/contrast errors plus human alert review.';
 }
 
 if (! is_array($package)) {
@@ -86,6 +110,8 @@ if (! is_array($package)) {
     foreach ([
         'verify:build' => 'php scripts/performance-build-verify.php',
         'certify:n1-c5' => 'php scripts/n1-c5-browser-performance-certify.php',
+        'certify:web-standards' => 'php scripts/n1-c5-web-standards-certify.php',
+        'verify:web-standards-evidence' => 'php scripts/n1-c5-web-standards-evidence-verify.php',
     ] as $script => $expected) {
         if (($package['scripts'][$script] ?? null) !== $expected) {
             $failures[] = "package.json script [{$script}] must remain [{$expected}].";
@@ -105,4 +131,4 @@ fwrite(STDOUT, "Nexora Performance + Accessibility + Release Product Contract: P
 fwrite(STDOUT, " - Admin pages remain lazy-route split and first-load JS is separately budgeted\n");
 fwrite(STDOUT, " - shared dialog focus containment is source-guarded and regression-tested\n");
 fwrite(STDOUT, " - development target QA executes Vitest plus production asset-budget verification\n");
-fwrite(STDOUT, " - real browser, assistive-technology, HTTP and Web Vitals evidence remains a target C5 requirement\n");
+fwrite(STDOUT, " - final C5 requires W3C Nu zero-error validation, WAVE zero-error/contrast review, real browser/AT, HTTP and Web Vitals target evidence\n");
