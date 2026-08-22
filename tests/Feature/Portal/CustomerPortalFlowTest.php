@@ -40,10 +40,11 @@ final class CustomerPortalFlowTest extends TestCase
         ]);
         $user->roles()->attach(Role::query()->where('slug', 'user')->value('id'));
 
-        $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'password',
-        ])->assertRedirect('/account');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.86'])
+            ->post('/login', [
+                'email' => $user->email,
+                'password' => 'password',
+            ])->assertRedirect('/account');
 
         $this->assertAuthenticatedAs($user);
         $this->get('/account')->assertOk();
