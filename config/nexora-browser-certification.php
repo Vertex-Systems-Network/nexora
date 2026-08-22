@@ -29,6 +29,11 @@ return [
             'tool' => 'Nu Html Checker',
             'max_errors' => 0,
         ],
+        'w3c_css' => [
+            'tool' => 'W3C CSS Validation Service',
+            'profile' => 'css3',
+            'max_errors' => 0,
+        ],
         'wave' => [
             'tool' => 'WAVE',
             'max_errors' => 0,
