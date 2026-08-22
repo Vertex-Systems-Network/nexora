@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout exact source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: PHP 8.4
         uses: shivammathur/setup-php@v2
@@ -39,7 +39,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout exact source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: PHP 8.4
         uses: shivammathur/setup-php@v2
