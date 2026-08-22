@@ -11,6 +11,7 @@ $baseUrl = '';
 $evidenceDir = '';
 $auditor = '';
 $waveAlertsReviewed = false;
+$waveNoKey = false;
 $w3cValidatorUrl = '';
 $w3cCssValidatorUrl = '';
 $waveApiUrl = '';
@@ -22,6 +23,7 @@ foreach ($argv as $arg) {
     elseif (str_starts_with($arg, '--evidence=')) $evidenceDir = trim(substr($arg, 11));
     elseif (str_starts_with($arg, '--auditor=')) $auditor = trim(substr($arg, 10));
     elseif ($arg === '--wave-alerts-reviewed') $waveAlertsReviewed = true;
+    elseif ($arg === '--wave-no-key') $waveNoKey = true;
     elseif (str_starts_with($arg, '--w3c-validator-url=')) $w3cValidatorUrl = trim(substr($arg, 20));
     elseif (str_starts_with($arg, '--w3c-css-validator-url=')) $w3cCssValidatorUrl = trim(substr($arg, 24));
     elseif (str_starts_with($arg, '--wave-api-url=')) $waveApiUrl = trim(substr($arg, 15));
@@ -137,6 +139,7 @@ if ($status === 'pass') {
         '--auditor='.$auditor,
     ];
     if ($waveAlertsReviewed) $standards[] = '--wave-alerts-reviewed';
+    if ($waveNoKey) $standards[] = '--wave-no-key';
     if ($w3cValidatorUrl !== '') $standards[] = '--w3c-validator-url='.$w3cValidatorUrl;
     if ($w3cCssValidatorUrl !== '') $standards[] = '--w3c-css-validator-url='.$w3cCssValidatorUrl;
     if ($waveApiUrl !== '') $standards[] = '--wave-api-url='.$waveApiUrl;
