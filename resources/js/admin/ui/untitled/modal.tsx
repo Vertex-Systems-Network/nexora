@@ -18,10 +18,8 @@ export function Modal({ open, title, description, children, onClose, footer }: {
      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
    };
    window.addEventListener("keydown",onKey);
-   requestAnimationFrame(()=>{
-     const first=panel.current?.querySelector<HTMLElement>(focusableSelector);
-     if(first) first.focus(); else panel.current?.focus();
-   });
+   const first=panel.current?.querySelector<HTMLElement>(focusableSelector);
+   if(first) first.focus(); else panel.current?.focus();
    return()=>{window.removeEventListener("keydown",onKey);previous?.focus()};
  },[open,onClose]);
  if(!open) return null;
