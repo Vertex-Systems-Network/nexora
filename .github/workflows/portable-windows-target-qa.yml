@@ -1,6 +1,9 @@
 name: Nexora portable Windows target QA
 
 on:
+  push:
+    branches:
+      - ops/rc94-windows-target-qa
   pull_request:
     branches:
       - dev/n1-0b-core-functional-qa
@@ -11,6 +14,7 @@ permissions:
 
 jobs:
   portable-windows-target:
+    if: github.event_name != 'push'
     name: portable-windows-target
     runs-on: [self-hosted, Windows]
     timeout-minutes: 45
