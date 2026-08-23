@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Nexora\Enterprise\Services\OrganizationManager;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -137,6 +138,8 @@ final class MultisiteOrganizationIsolationTest extends TestCase
 
     public function test_impersonation_validation_is_scoped_to_active_organization_members(): void
     {
+        $this->withoutMiddleware(ThrottleRequests::class);
+
         $admin = $this->enterpriseAdmin([
             'enterprise.view',
             'enterprise.impersonate',
