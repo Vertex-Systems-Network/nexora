@@ -71,7 +71,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
           New-Item -ItemType Directory -Force -Path $env:EVIDENCE_DIR | Out-Null
-          $dbNative = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'database/disposable-rc94-recovery.sqlite'))
+          $dbNative = [System.IO.Path]::GetFullPath((Join-Path $env:RUNNER_TEMP 'nexora-disposable-rc94-recovery.sqlite'))
           $db = $dbNative.Replace('\', '/')
           if (Test-Path $dbNative) { Remove-Item -Force $dbNative }
           New-Item -ItemType File -Path $dbNative | Out-Null
@@ -107,6 +107,7 @@ jobs:
             source_generation = $generation
             base_url = $env:BASE_URL
             sqlite_path_style = 'forward-slash-absolute-windows'
+            sqlite_location = 'runner-temp-outside-source-attestation'
           } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'source-binding.json')
 
       - name: Assert installer system requirements
@@ -381,6 +382,7 @@ jobs:
             }
           }
           if (Test-Path '.env') { Remove-Item -Force '.env' }
-          if (Test-Path 'database/disposable-rc94-recovery.sqlite') { Remove-Item -Force 'database/disposable-rc94-recovery.sqlite' }
+          $dbNative = Join-Path $env:RUNNER_TEMP 'nexora-disposable-rc94-recovery.sqlite'
+          if (Test-Path $dbNative) { Remove-Item -Force $dbNative }
           $passwordPath = Join-Path $env:RUNNER_TEMP 'rc94-admin-password.txt'
           if (Test-Path $passwordPath) { Remove-Item -Force $passwordPath }
