@@ -9,6 +9,24 @@ use Tests\TestCase;
 
 final class SourceStatusRedactionCertificationTest extends TestCase
 {
+    private string $installationLockPath;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->installationLockPath = storage_path('framework/source-status-redaction-installed.lock');
+        @unlink($this->installationLockPath);
+        config()->set('installer.bypass', false);
+        config()->set('installer.lock_path', $this->installationLockPath);
+    }
+
+    protected function tearDown(): void
+    {
+        @unlink($this->installationLockPath);
+        parent::tearDown();
+    }
+
     #[Test]
     public function public_source_status_is_redacted_and_cannot_acknowledge_without_a_token(): void
     {
