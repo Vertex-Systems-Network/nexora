@@ -9,30 +9,29 @@
 ## 1. Current checkpoint
 
 - Date: `2026-08-23` (Asia/Karachi).
-- Branch: `dev/n1-0b-core-functional-qa`.
-- PR #1: **DRAFT + OPEN + MERGEABLE**; do not mark Ready or merge until required real target/release gates pass.
-- Current implementation/governance head before this dashboard-only commit: **`eb86afd35ba5d0a82aea4cc3db30cbc517620e21`**.
-- Current certified `main`: **`f854c50c0f7687fc87fdfab01b49562392af4ef4`**; integrated into this development branch as the second parent of merge commit **`e5d41dbda05f36903c3d59b4a5ef5505ae09f674`**.
-- Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for this workflow.
-- The single full Development execution QA job publishes the repository ruleset's required status context as **`governance`** and runs on **every pull-request head**, including Markdown/governance-only commits; no `paths-ignore` exemption remains.
-- Workflow Actions are current: `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-artifact@v7`. The artifact upload was upgraded at `1874e67544c2bfdb5f72927797152a707f1f31ca`; run #138 proved the prior Node 20 action-runtime warning removed.
-- Warning-clean QA hardening head **`eb86afd35ba5d0a82aea4cc3db30cbc517620e21`** creates only an ephemeral `.env.testing` in CI; it does **not** create a root `.env`, preserving the RC14 source-package invariant.
-- Development Readiness now executes the full Laravel/PHPUnit suite with `--display-warnings --fail-on-warning`; `scripts/development-target-qa-contract-verify.php` source-guards that exact warning-hard command so the gate cannot silently regress to warning-tolerant behavior.
-- Exact implementation run #142: run `32611296975`, job `97124711416`, source **`eb86afd35ba5d0a82aea4cc3db30cbc517620e21`**, conclusion **SUCCESS**.
-- Run #142 Development Readiness: **ready**; all source/product contracts through N1.26 PASS; RC14 environment contract PASS; full Laravel/PHPUnit **469 passed / 0 warnings / 4378 assertions**; Vitest **2 files / 6 tests PASS**; TypeScript 7 noEmit PASS; Vite `8.2.2` production build PASS with 3784 modules transformed; production asset budgets/provenance PASS.
-- Run #142 build evidence: total 1,356,563 bytes; JS 1,251,628 bytes (gzip 394,919; initial gzip 223,997); CSS 65,471 bytes; 94 JS / 1 CSS assets.
-- Run #142 evidence artifact: `9485661803`, `nexora-development-readiness-eb86afd35ba5d0a82aea4cc3db30cbc517620e21`; digest `sha256:ba18c01ef92c7b78b1e50907c2a85d835826b778ecaf5f0e9232e92fb8ebd05a`.
-- Warning root cause closed without suppression: PHPUnit 12 surfaced repeated phpdotenv missing-root-`.env` file reads from Laravel test bootstrap. A root `.env` removed the warnings but correctly failed RC14; the final solution uses Laravel's testing environment file selection via ephemeral `.env.testing`, keeping secure test defaults and a clean source root.
-- Source attestation is not polluted by `.env.testing`: attestation hashes explicit runtime/source roots and selected root files; `.env.testing` is outside that root-file set.
-- PR #3 Dependabot setup is merged as `eaa42f19c1a6432050b4b33f161f3d1d971fdae9`; PR #4 setup-node v7 as `d6d008ec57eb7b4257024a4bab4fe217d0618d1f`; PR #5 checkout v7 + dependency-CI hardening as `64e61c969f3617c2a599dbc3be3bfc5cbf299aa1`; PR #10 jest-dom 7 as `b1753ca484a8b9355b5222ffe9af4d4a69c4e7dc`; PR #8 lucide-react 1.33 as `b2a702ea63cab69799a8b7ae39bd8934f8b383b8`; PR #6 TypeScript 7.0.2 as `f854c50c0f7687fc87fdfab01b49562392af4ef4`.
-- Incompatible majors were not blind-merged: `@types/node` 26 and `jsdom` 30 remain intentionally ignored at those major lines.
-- Dependabot monitors npm weekly Monday, Composer weekly Wednesday and GitHub Actions weekly Friday, all at 09:00 Asia/Karachi. The invalid root Docker updater remains removed because no Dockerfile exists at that configured location.
-- GitHub-hosted development QA is development-checkout/source-functional evidence only. It does **not** prove the installed rc.93 Laragon recovery target, real browser behavior, W3C/WAVE target results, provider integrations, five-engine DB matrix, HA, recovery rehearsal, or final release certification.
-- Issue #2: **OPEN** and remains the only current open repository issue. Existing rc.93 target still needs compatibility + post-install readiness + `/login` + `/admin` evidence.
+- Active engineering branch: `fix/portable-runtime-ux`.
+- Active task: PR #13, **`fix: keep runtime activation and target QA server-vendor agnostic`**, targeting `dev/n1-0b-core-functional-qa`.
+- PR #13 state before this state-only reconciliation commit: **OPEN + READY + MERGEABLE**; source acceptance is green, but merge remains gated by exact-head governance on this reconciliation head.
+- PR #14 is a **DRAFT temporary QA carrier only** targeting `main`; it exists solely to make the canonical GitHub-hosted `governance` workflow execute for the exact `fix/portable-runtime-ux` head. **Never merge PR #14.** Close it after final exact-head governance evidence is captured and PR #13 is merged.
+- PR #1 remains **DRAFT + OPEN**; do not mark Ready or merge until required real target/release gates pass.
+- Current portability implementation head before this state-only reconciliation commit: **`e6042c6949098970759cf56f92d78fb2900eb001`**.
+- PR #13 base before merge: `dev/n1-0b-core-functional-qa` at **`a9f1d3871ed4022e7dd1b3463e39701c09e21d7e`**.
+- Current certified `main`: **`f854c50c0f7687fc87fdfab01b49562392af4ef4`**.
+- Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for this PR governance workflow.
+- The full Development execution QA job publishes the required status context as **`governance`** and runs on every pull-request head targeting `main`, including Markdown/governance-only commits; no `paths-ignore` exemption remains.
+- Exact portability source-governance run: run **`32634611400`** / run #149, exact source **`e6042c6949098970759cf56f92d78fb2900eb001`**, conclusion **SUCCESS**.
+- Run #149 Development Readiness: **ready**; Development Target QA source contract PASS with the server-vendor-agnostic boundary; all source/product contracts through N1.26 PASS; full Laravel/PHPUnit **469 passed / 4378 assertions**; Vitest **2 files / 6 tests PASS**; TypeScript noEmit PASS; Vite `8.2.2` production build PASS with 3784 modules transformed; production asset budgets/provenance PASS.
+- Run #149 build evidence: total 1,356,563 bytes; JS 1,251,628 bytes (gzip 394,919; initial gzip 223,997); CSS 65,471 bytes; 94 JS / 1 CSS assets.
+- Run #149 evidence artifact: **`9492014706`**, `nexora-development-readiness-e6042c6949098970759cf56f92d78fb2900eb001`; digest **`sha256:9f5a34ca634b79d5df1731aa77013b271daf7dc313254f8e46a6b9935ea7d3d5`**.
+- PR #13 acceptance boundary is unchanged: generic active PHP/web-service activation guidance; `BASE_URL`-driven Windows/Unix acknowledgement; generic target prerequisite remediation with optional local-server adapters only; portable Windows Composer PATH/shim resolution; explicit Windows/Linux/macOS/local/live-server portability; and a source guard against concrete Laragon project-path coupling.
+- Real pre-change Windows evidence on exact dev source `a9f1d3871ed4022e7dd1b3463e39701c09e21d7e`: run **`32632871203`** passed portable core boundary, Development Readiness, TypeScript/build, Vitest 6/6 and isolated SQLite matrix; artifact `9491536167`, digest `sha256:de35148013a7a8d949e6c2c0b80ca234a4ac2279d32bccbfabce6e4d6f3fcc0b`. This evidence predates the final PR #13 implementation and cannot be attributed to the post-merge hardened dev head.
+- Issue #2 remains **OPEN**, but its live acceptance interpretation is corrected by newer real Windows evidence: the preserved installed `1.0.0-rc.93` target still fails only `environment`, `activation`, `service`, and `process`; a guarded one-time in-place reconcile returned exit 1; follow-up remained failed; and direct source-marker comparison proved preserved rc.93 does **not** contain the permanent rc.94 post-install finalization path.
+- Preserved rc.93 is therefore **legacy failure evidence**, not a target that may be modified to manufacture a PASS. Do not overwrite it, backport rc.94 files into it, manually edit fingerprints/`installed.lock`, or repeatedly rerun the known-failing reconcile as an issue-closing shortcut.
+- Safe target continuation is a **separate disposable current-source / rc.94 recovery-or-upgrade rehearsal**, followed by exact-source Windows target QA. The preserved rc.93 installation remains untouched.
 - Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
 - Source `composer.lock` remains intentionally absent. Hosted Composer resolution is development evidence only; Development Readiness explicitly does not promote dependency locks or grant release certification.
 - W3C Nu HTML + W3C CSS Validation Service + WAVE C5 source tooling is implemented and mandatory for final target accessibility closure.
-- This dashboard-only commit is intentionally subject to the same every-head `governance` workflow. Its hosted result is merge-governance evidence only and does not alter Target/Release scoring.
+- Target and Release scores do **not** move from PR #13 source CI, this reconciliation commit, or preserved rc.93 failure evidence.
 
 ### Closed source fail-fast chain since the earlier checkpoint
 
@@ -51,16 +50,17 @@ The hosted sequence exposed and closed deterministic stale-contract/CI mismatche
 - Run #130 produced the first complete exact-head source green after that fail-fast chain.
 - Dependabot/governance maintenance `main` was integrated as a real merge parent and run #137 re-proved the full application suite after the final maintenance batch.
 - Every-head governance enforcement was corrected at `375bfcb3…`; documentation-only heads are no longer exempt.
-- `actions/upload-artifact` was moved from v4 to v7 and run #138 proved the workflow-runtime deprecation removed.
-- PHPUnit's 347 warning noise was traced to the missing root `.env`, not suppressed; run #142 proves the final `.env.testing` solution with **zero PHPUnit warnings** while RC14 remains green.
+- `actions/upload-artifact` was moved to v7 and run #138 proved the workflow-runtime deprecation removed.
+- PHPUnit warning noise was fixed without suppression via ephemeral `.env.testing`; later exact-head runs retain the warning-hard command.
+- PR #13 removes server-vendor coupling from runtime activation/target QA while preserving vendor-specific local-server behavior only as optional adapters.
 
 ### Governance compatibility / evidence semantics
 
-- Historical Actions: **DEFERRED BY USER** — superseded quota/capacity-era state retained only for source-contract and audit-history compatibility. It is not the current execution policy.
-- Historical Actions/self-hosted policy in the append-only ledger is superseded for this PR workflow. Current Development execution QA is GitHub-hosted `ubuntu-latest` only.
-- **Target Power** is evidence-based and never increases from source CI, source contracts, jsdom, GitHub-hosted development-checkout evidence, Dependabot configuration or branch-governance wiring alone.
+- Historical Actions: **DEFERRED BY USER** — superseded quota/capacity-era state retained only for source-contract and audit-history compatibility. It is not the current PR execution policy.
+- Historical self-hosted policy in the append-only ledger is superseded for this PR workflow. Current Development execution QA is GitHub-hosted `ubuntu-latest` only.
+- Historical ledger/dashboard text that requires preserved rc.93 to obtain in-place compatibility/post-install PASS is superseded by the newer real Windows evidence proving that preserved rc.93 lacks the permanent rc.94 finalization implementation.
+- **Target Power** is evidence-based and never increases from source CI, source contracts, jsdom, GitHub-hosted development-checkout evidence, Dependabot configuration, branch-governance wiring, or legacy failure evidence alone.
 - Current target/release scoring boundary remains: `TARGET POWER    50.0%` and `RELEASE POWER   25.0%` until real exact-source target/release evidence justifies a change.
-- Older ledger text describing self-hosted certification is historical/superseded for this PR development workflow. Never treat it as current runner policy.
 
 ---
 
@@ -73,7 +73,7 @@ TARGET POWER    50.0%  ██████████░░░░░░░░░
 RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
 ```
 
-No score is increased by W3C/WAVE source tooling, static review, Dependabot/governance configuration, warning cleanup or hosted development QA alone. Target/Release Power moves only from real exact-source target evidence.
+No score is increased by W3C/WAVE source tooling, static review, Dependabot/governance configuration, warning cleanup, portability source hardening or hosted development QA alone. Target/Release Power moves only from real exact-source target evidence.
 
 ---
 
@@ -81,14 +81,14 @@ No score is increased by W3C/WAVE source tooling, static review, Dependabot/gove
 
 | Block | Source state | Target / release state |
 |---|---|---|
-| DEV-0–DEV-4 | substantial source closure; exact hosted QA green | live rc.93 recovery + broad product QA pending |
+| DEV-0–DEV-4 | substantial source closure; exact hosted QA green | preserved rc.93 legacy failure evidence + separate current-source recovery/upgrade rehearsal + broad product QA pending |
 | DEV-5 SQL/Data Services | source/harness substantially closed | real disposable DB matrix + connector evidence pending |
 | N1.9–N1.21 | SOURCE DONE for bounded workflows | target execution pending |
 | N1.22 Sentinel 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | controlled package target evidence pending |
 | N1.23 Marketplace 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | controlled marketplace target evidence pending |
 | N1.24 Cloud / HA | SOURCE DONE FOR CURRENT WORKFLOW | real multi-node evidence pending |
 | N1.25 Backup / DR / Upgrade | SOURCE DONE FOR CURRENT WORKFLOW | real disposable restore/upgrade rehearsal pending |
-| N1.26 Performance + Accessibility + Release | source workflow + W3C HTML/CSS/WAVE C5 tooling implemented; warning-clean hosted source gate green | real C5/C6 evidence pending |
+| N1.26 Performance + Accessibility + Release | source workflow + W3C HTML/CSS/WAVE C5 tooling implemented; exact hosted source gate green | real C5/C6 evidence pending |
 | N2.0 Stable Production | not eligible | BLOCKED BY TARGET + RELEASE EVIDENCE |
 
 ---
@@ -115,28 +115,28 @@ GitHub-hosted Ubuntu
   -> all product/source contracts including N1.26
   -> full Laravel/PHPUnit suite with --display-warnings --fail-on-warning
   -> Vitest
-  -> TypeScript 7 noEmit
+  -> TypeScript noEmit
   -> production Vite build
   -> production asset budgets/provenance
   -> upload-artifact@v7 evidence upload
 ```
 
-Latest detailed application evidence, run #142 (`32611296975`), exact implementation head `eb86afd35ba5d0a82aea4cc3db30cbc517620e21`:
+Latest accepted portability implementation evidence, run #149 (`32634611400`), exact implementation head `e6042c6949098970759cf56f92d78fb2900eb001`:
 
 - Post-install runtime convergence source contract: PASS.
 - DEV-4, Theme, Extension, Studio, Documents, Collections, Publishing/SEO, Admin UX, Forms/Data/Workflows: PASS.
-- Data Connections + primary SQL portability + installer DB UX + warning-clean development target-QA source contract: PASS.
+- Data Connections + primary SQL portability + installer DB UX: PASS.
+- Development Target QA source contract: **PASS**, explicitly enforcing server-vendor-agnostic core activation/target behavior with optional adapters only.
 - Marketplace, Commerce, Customer Portal, CRM/Membership, Search, Collaboration, Automation, AI Platform, Multisite, Enterprise SSO: PASS.
 - Public API/SDK, Content Migration, Observability, Forge, Sentinel 2.0, Marketplace 2.0, Cloud/HA, Backup/DR/Upgrade, Performance/Accessibility/Release: PASS.
-- RC14 environment/config-cache architecture: PASS with no root `.env` present.
-- Full Laravel/PHPUnit suite: **469 passed, 0 warnings, 4378 assertions**.
+- Full Laravel/PHPUnit suite: **469 passed, 4378 assertions**.
 - Vitest: **2 files / 6 tests PASS**.
-- TypeScript 7 noEmit: PASS.
+- TypeScript noEmit: PASS.
 - Production frontend build: PASS, Vite `8.2.2`, 3784 modules transformed.
 - Production asset budgets/provenance: PASS — build 1,356,563 bytes; JS 1,251,628 bytes (gzip 394,919; initial gzip 223,997); CSS 65,471 bytes; 94 JS / 1 CSS assets.
-- Evidence artifact: `9485661803`; digest `sha256:ba18c01ef92c7b78b1e50907c2a85d835826b778ecaf5f0e9232e92fb8ebd05a`.
+- Evidence artifact: `9492014706`; digest `sha256:9f5a34ca634b79d5df1731aa77013b271daf7dc313254f8e46a6b9935ea7d3d5`.
 
-The PR workflow intentionally does **not** call the shared WAVE API or claim live W3C/WAVE target success.
+The PR workflow intentionally does **not** call the shared WAVE API or claim live W3C/WAVE target success. It also does not replace the required post-merge real Windows target rerun.
 
 ---
 
@@ -209,40 +209,60 @@ C5 additionally requires Chrome / Edge / Firefox; 360 / 768 / 1440 widths; LTR +
 
 ---
 
-## 6. Live rc.93 / Issue #2 boundary
+## 6. Preserved rc.93 / Issue #2 boundary
 
-Issue #2 remains **OPEN**. Do not replace installed rc.93 with rc.94 merely as a recovery shortcut.
+Issue #2 remains **OPEN** as a real legacy-target blocker.
 
-Required live commands on the existing rc.93 Laragon target:
+Verified real Windows evidence on the preserved `1.0.0-rc.93` installation:
 
-```bat
-php artisan nexora:runtime:compatibility-status --deep
-php artisan nexora:runtime:post-install-status --assert-ready
+- run `32631834245`: read-only probe confirmed exact rc.93; compatibility still fails only `environment`, `activation`, `service`, `process`; `nexora:runtime:post-install-reconcile` exists; post-install status remains FAIL.
+- run `32631900595`: guarded one-time reconcile was attempted only after exact rc.93 + four-plane + command-presence preconditions passed; command exited `1`; no force/bypass/manual metadata edit was used.
+- run `32631967773`: read-only follow-up confirmed the same failed state; activation epoch/fingerprint did not converge for the current process.
+- run `32632077872`: read-only source-marker comparison proved preserved rc.93 has the `/install/runtime-handoff` route and `runtimeHandoff` method but lacks the permanent rc.94 finalization implementation: no `postInstallHandoff->verifyAndRecord()` call, no `finalizeCommittedRuntimeIdentity()`, no `post_install_identity_finalized` flag, and no explicit four-plane finalization allow-list.
+
+Conclusion: preserved rc.93 cannot satisfy the later rc.94 four-plane convergence acceptance through the available in-place rc.93 source path. This is evidence of a legacy limitation, not permission to redefine acceptance or mutate the preserved installation.
+
+Forbidden issue-closing shortcuts:
+
+```text
+- overwrite preserved rc.93 with rc.94
+- backport rc.94 files into the preserved target
+- manually edit fingerprints or installed.lock
+- force/bypass runtime checks
+- repeatedly rerun the known-failing reconcile and call that progress
 ```
 
-Then directly exercise `/login` and `/admin`.
+Safe continuation:
 
-Issue #2 may close only after those real target checks pass. GitHub-hosted Ubuntu CI cannot satisfy this boundary.
+```text
+1. keep preserved rc.93 untouched as failure evidence
+2. merge accepted portability hardening only after exact reconciliation-head governance passes
+3. use a separate disposable current-source / rc.94 target for recovery-or-upgrade rehearsal
+4. rerun exact-source Windows target QA on the post-merge dev head
+5. close issue #2 only when the issue's legacy evidence and the approved replacement recovery/upgrade acceptance are explicitly reconciled; never manufacture an rc.93 PASS
+```
 
 ---
 
 ## 7. Remaining target / release sequence
 
-The exact implementation-head hosted source/governance chain is warning-clean and green. Continue in this order:
+The portability implementation head has accepted source evidence, but this state reconciliation changes the branch head and must itself pass governance before merge. Continue in this order:
 
 ```text
-1. certify this dashboard-only current PR head under the mandatory every-head governance rule
-2. recover and verify the existing rc.93 Laragon target
-3. obtain compatibility PASS + post-install readiness PASS
-4. directly exercise /login + /admin; close issue #2 only on real evidence
-5. on a separate development target, run full product QA across major N1.9–N1.26 workflows
-6. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix and persist evidence
-7. run controlled provider/connector/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
-8. prove real HA/multi-node operational behavior
-9. perform real disposable backup/restore + upgrade rehearsal
-10. complete C5 W3C HTML + W3C CSS + WAVE + browser/AT + HTTP + Web Vitals evidence
-11. complete C6 multi-node/final operations + reviewed dependency locks + provenance/release evidence
-12. only then mark PR #1 Ready and merge automatically
+1. obtain exact-head hosted governance PASS for this state-only reconciliation commit through temporary PR #14
+2. verify PR #13 remains mergeable with no unresolved review blocker and merge it into dev/n1-0b-core-functional-qa using the exact expected head
+3. close temporary PR #14 without merging it
+4. record the resulting exact dev implementation head; do not call PR #13 fully target-accepted yet
+5. on a separate disposable current-source Windows target, rerun the portability/development target QA required by PR #13 against that exact post-merge dev head
+6. preserve the rc.93 installation and Issue #2 legacy-failure evidence unchanged
+7. continue broad product QA across major N1.9–N1.26 workflows
+8. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix and persist evidence
+9. run controlled provider/connector/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
+10. prove real HA/multi-node operational behavior
+11. perform real disposable backup/restore + upgrade rehearsal
+12. complete C5 W3C HTML + W3C CSS + WAVE + browser/AT + HTTP + Web Vitals evidence
+13. complete C6 multi-node/final operations + reviewed dependency locks + provenance/release evidence
+14. only then mark PR #1 Ready and merge automatically
 ```
 
 ---
@@ -253,7 +273,7 @@ Every AI/agent must:
 
 1. Read `AGENTS.md`, `NEXORA_AI_PROJECT_STATE.md`, this file, and `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` before relevant work.
 2. Treat this file's Current checkpoint as authoritative over stale historical policy text in older ledger entries.
-3. Use GitHub-hosted development QA only for PR source/development evidence; do not silently substitute a local/self-hosted runner.
+3. Use GitHub-hosted development QA only for PR source/development evidence; do not silently substitute a local/self-hosted runner for that workflow.
 4. Every PR head targeting `main`, including documentation/governance-only heads, must emit the required `governance` context.
 5. Never promote source/static/jsdom evidence to real browser/target evidence.
 6. Never call WAVE output an accessibility approval.
@@ -261,11 +281,13 @@ Every AI/agent must:
 8. Preserve both W3C HTML and W3C CSS zero-error gates.
 9. Never commit WAVE/API credentials.
 10. Fix root causes and rerun the exact failing gate.
-11. Keep issue #2 and C5 accessibility evidence as separate target boundaries.
-12. Keep PR #1 DRAFT until all required target/release evidence is genuinely final.
-13. Do not raise Target/Release Power from hosted source/development CI alone.
-14. Dependabot update PRs must be reviewed against Nexora architecture and pass the applicable required governance/source checks before merge; do not blindly auto-merge dependency changes.
-15. Full development PHPUnit is warning-hard; do not remove or bypass `--fail-on-warning` to obtain a green run.
+11. Keep Issue #2 legacy-target evidence and C5 accessibility evidence as separate target boundaries.
+12. Preserve rc.93 unchanged; do not require an impossible in-place rc.93 PASS after evidence has proved the required later finalization implementation is absent.
+13. Keep PR #1 DRAFT until all required target/release evidence is genuinely final.
+14. Do not raise Target/Release Power from hosted source/development CI alone.
+15. Dependabot update PRs must be reviewed against Nexora architecture and pass the applicable required governance/source checks before merge; do not blindly auto-merge dependency changes.
+16. Full development PHPUnit is warning-hard; do not remove or bypass `--fail-on-warning` to obtain a green run.
+17. Do not silently broaden portability hardening into future roadmap feature work.
 
 ---
 
@@ -292,23 +314,23 @@ Every AI/agent must:
 | 072 | 2026-08-23 | `375bfcb3…`, run #135 `32603527701`, artifact `9483576591` | removed all PR path ignores so every head emits `governance`; complete Development QA passed on corrected workflow | governance closure; Target/Release unchanged |
 | 073 | 2026-08-23 | maintenance merges through `f854c50c…`, integration `e5d41dbd…`, run #137 | final Dependabot batch + TypeScript 7 integrated and full Development QA re-certified | Source maintenance strengthened; Target/Release unchanged |
 | 074 | 2026-08-23 | `1874e675…`, run #138 `32610019558` | moved development evidence upload to `actions/upload-artifact@v7`; full QA green and Node 20 action-runtime warning removed | governance/tooling only; Target/Release unchanged |
-| 075 | 2026-08-23 | diagnostic runs #139–#141 | traced 347 PHPUnit warnings to missing root `.env`; rejected root `.env` workaround because RC14 correctly forbids it | root cause isolated without weakening contract; Power unchanged |
+| 075 | 2026-08-23 | diagnostic runs #139–#141 | traced PHPUnit warnings to missing root `.env`; rejected root `.env` workaround because RC14 correctly forbids it | root cause isolated without weakening contract; Power unchanged |
 | 076 | 2026-08-23 | `eb86afd3…`, run #142 `32611296975`, artifact `9485661803` | switched CI bootstrap to ephemeral `.env.testing`, made full PHPUnit warning-hard, source-guarded the flag; **469 passed / 0 warnings / 4378 assertions** | Source/governance quality strengthened; Target/Release unchanged |
-| 077 | 2026-08-23 | this dashboard apply | authoritative checkpoint synchronized to final warning-clean implementation evidence; this Markdown head remains subject to required `governance` | Power unchanged |
+| 077 | 2026-08-23 | prior dashboard apply | authoritative checkpoint synchronized to warning-clean implementation evidence | Power unchanged |
+| 078 | 2026-08-23 | Windows runs `32631834245`, `32631900595`, `32631967773`, `32632077872`; PR #13 exact-head governance run #149 `32634611400`, artifact `9492014706` | reconciled stale rc.93 in-place continuation with real evidence; recorded preserved rc.93 as legacy failure evidence, active PR #13 portability acceptance, and separate disposable current-source target continuation | Power unchanged |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-A. Require the automatic full governance result on this dashboard-only current PR head; do not create another dashboard commit merely to record that result.
-B. If that exact-head run is green, update PR #1 body metadata with the final run/artifact evidence without changing source SHA.
-C. Do not reopen the completed source warning/fail-fast sequence without new regression evidence.
-D. Recover the EXISTING installed rc.93 Laragon target; do not overwrite it with rc.94 as a shortcut.
-E. Run: php artisan nexora:runtime:compatibility-status --deep
-F. Run: php artisan nexora:runtime:post-install-status --assert-ready
-G. Exercise /login and /admin directly; close issue #2 only if all real target checks pass.
-H. Then continue separate development-target product QA, five-engine DB matrix, provider/identity/API/import/observability/Sentinel/Marketplace/HA/recovery evidence.
-I. Complete real C5 W3C HTML/CSS/WAVE/browser/AT/HTTP/Web-Vitals evidence and C6 reviewed-lock/final release evidence.
-J. Keep PR #1 DRAFT and keep TARGET POWER 50.0% / RELEASE POWER 25.0% until those real boundaries are satisfied.
+A. Require the automatic full governance result on this state-only reconciliation head through temporary PR #14.
+B. If and only if that exact-head result is green, re-check PR #13 head/base/mergeability/review threads and merge PR #13 into dev/n1-0b-core-functional-qa using the exact expected head.
+C. Close PR #14 without merging it.
+D. Record the resulting exact dev implementation head and keep PR #13 target acceptance OPEN until the required post-merge Windows rerun is produced.
+E. On a SEPARATE disposable current-source / rc.94 Windows target, rerun the portability/development target QA against that exact dev head; do not touch preserved rc.93.
+F. Keep Issue #2 OPEN as legacy-target evidence until its closure semantics are explicitly satisfied by approved recovery/upgrade evidence; never manufacture an rc.93 PASS.
+G. Then continue separate development-target product QA, five-engine DB matrix, provider/identity/API/import/observability/Sentinel/Marketplace/HA/recovery evidence.
+H. Complete real C5 W3C HTML/CSS/WAVE/browser/AT/HTTP/Web-Vitals evidence and C6 reviewed-lock/final release evidence.
+I. Keep PR #1 DRAFT and keep TARGET POWER 50.0% / RELEASE POWER 25.0% until those real boundaries are satisfied.
 ```
