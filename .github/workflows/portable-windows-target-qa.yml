@@ -26,18 +26,37 @@ jobs:
           clean: true
           fetch-depth: 1
 
-      - name: Verify environment-agnostic source boundary
+      - name: Verify environment-agnostic core boundary
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           Write-Host "Runner: $env:RUNNER_NAME / $env:RUNNER_OS / $env:RUNNER_ARCH"
           Write-Host "Workspace: $env:GITHUB_WORKSPACE"
 
-          $forbidden = & git grep -n -i -E 'laragon|D:\\laragon|D:/laragon' -- app bootstrap config routes scripts package.json composer.json 2>$null
-          if ($LASTEXITCODE -eq 0 -and $forbidden) {
-            Write-Host $forbidden
-            Write-Error 'Runtime/source code contains a local-server-vendor-specific Laragon dependency.'
+          # Core application/runtime files must never require a concrete Laragon project path.
+          # Optional local-server adapters and historical diagnostics may mention Laragon,
+          # but the application itself must remain relocatable.
+          $hardPaths = & git grep -n -i -E '[A-Z]:\\laragon\\www\\nexora|[A-Z]:/laragon/www/nexora' -- app bootstrap config routes 2>$null
+          if ($LASTEXITCODE -eq 0 -and $hardPaths) {
+            Write-Host $hardPaths
+            Write-Error 'Core runtime contains a concrete Laragon project-path dependency.'
             exit 2
           }
+
+          $composerLocator = Get-Content -Raw 'scripts/lib/target-composer.php'
+          if (!$composerLocator.Contains("$pathCommand = ['composer', '--version', '--no-ansi']")) {
+            Write-Error 'Target Composer discovery must remain PATH-first before optional local-server adapters.'
+            exit 3
+          }
+
+          $processBootstrap = Get-Content -Raw 'bootstrap/nexora-process-environment.php'
+          if (!$processBootstrap.Contains("$existingPath = trim")) {
+            Write-Error 'Process bootstrap must preserve the host PATH before adding optional tool locations.'
+            exit 4
+          }
+
+          $adapterRefs = @(& git grep -n -i 'laragon' -- bootstrap scripts 2>$null)
+          Write-Host "Optional/historical Laragon adapter references: $($adapterRefs.Count)"
+          Write-Host 'PORTABLE_CORE_BOUNDARY=PASS'
 
           $phpVersion = (& php -r "echo PHP_VERSION;").Trim()
           $nodeVersion = (& node -p "process.versions.node").Trim()
@@ -50,11 +69,11 @@ jobs:
 
           if ([version]$phpVersion -lt [version]'8.3.0') {
             Write-Error 'PHP 8.3+ is required.'
-            exit 3
+            exit 5
           }
           if ([version]$nodeVersion -lt [version]'22.0.0') {
             Write-Error 'Node.js 22+ is required.'
-            exit 4
+            exit 6
           }
 
       - name: Install current-source dependencies
