@@ -93,7 +93,7 @@ jobs:
 
       - name: Upload development QA evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nexora-development-readiness-${{ github.event.pull_request.head.sha || github.sha }}
           path: storage/app/nexora/qa/development-readiness.json
