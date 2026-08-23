@@ -169,6 +169,8 @@ final class MultisiteOrganizationIsolationTest extends TestCase
 
     public function test_nested_resource_from_another_organization_fails_before_mutation(): void
     {
+        $this->withoutMiddleware(ThrottleRequests::class);
+
         $admin = $this->enterpriseAdmin([
             'enterprise.view',
             'enterprise.domains.manage',
