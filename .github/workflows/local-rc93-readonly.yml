@@ -1,4 +1,4 @@
-name: Nexora rc93 local readonly probe
+name: Nexora rc93 guarded recovery
 
 on:
   push:
@@ -13,12 +13,12 @@ permissions:
   contents: read
 
 jobs:
-  rc93-readonly-probe:
-    name: rc93-readonly-probe
+  rc93-guarded-recovery:
+    name: rc93-guarded-recovery
     runs-on: [self-hosted, Windows]
     timeout-minutes: 10
     steps:
-      - name: Inspect preserved rc93 target without mutation
+      - name: Reconcile preserved rc93 target only behind exact fail-closed preconditions
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $target = 'D:\laragon\www\nexora'
@@ -28,30 +28,65 @@ jobs:
           }
 
           Set-Location $target
-
           Write-Host "Runner: $env:RUNNER_NAME / $env:RUNNER_OS / $env:RUNNER_ARCH"
 
-          $compat = & php artisan nexora:runtime:compatibility-status --deep 2>&1 | Out-String
-          $compatExit = $LASTEXITCODE
-          $reconcile = & php artisan list --raw 2>&1 | Select-String 'nexora:runtime:post-install-reconcile'
-          $post = & php artisan nexora:runtime:post-install-status 2>&1 | Out-String
-          $postExit = $LASTEXITCODE
+          $compatBefore = & php artisan nexora:runtime:compatibility-status --deep 2>&1 | Out-String
+          $version = if ($compatBefore -match '"current_version"\s*:\s*"([^"]+)"') { $Matches[1] } else { 'unknown' }
+          $mismatchBlock = if ($compatBefore -match '(?s)"mismatches"\s*:\s*\[(.*?)\]') { $Matches[1] } else { '' }
+          $mismatches = @([regex]::Matches($mismatchBlock, '"([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+          $allowed = @('environment','activation','service','process')
+          $unexpected = @($mismatches | Where-Object { $_ -notin $allowed })
+          $reconcilePresent = [bool](& php artisan list --raw 2>&1 | Select-String 'nexora:runtime:post-install-reconcile')
 
-          $version = if ($compat -match '"current_version"\s*:\s*"([^"]+)"') { $Matches[1] } else { 'unknown' }
-          $mismatchBlock = if ($compat -match '(?s)"mismatches"\s*:\s*\[(.*?)\]') { $Matches[1] } else { '' }
-          $mismatches = [regex]::Matches($mismatchBlock, '"([^"]+)"') | ForEach-Object { $_.Groups[1].Value }
-          $postStatus = if ($post -match '"status"\s*:\s*"([^"]+)"') { $Matches[1] } elseif ($post -match 'Nexora.*:\s*(PASS|FAIL)') { $Matches[1].ToLower() } else { 'unknown' }
-
-          Write-Host "Target version: $version"
-          Write-Host "Compatibility exit: $compatExit"
-          Write-Host "Mismatches: $($mismatches -join ',')"
-          Write-Host "Reconcile command present: $([bool]$reconcile)"
-          Write-Host "Post-install status: $postStatus"
-          Write-Host "Post-install exit: $postExit"
+          Write-Host "Before version: $version"
+          Write-Host "Before mismatches: $($mismatches -join ',')"
+          Write-Host "Reconcile command present: $reconcilePresent"
 
           if ($version -ne '1.0.0-rc.93') {
-            Write-Error "Target is not the preserved rc.93 installation."
+            Write-Error "Refusing recovery because target is not preserved rc.93."
             exit 2
           }
+          if (!$reconcilePresent) {
+            Write-Error "Refusing recovery because guarded reconcile command is absent."
+            exit 3
+          }
+          if ($mismatches.Count -eq 0 -or $unexpected.Count -gt 0) {
+            Write-Error "Refusing recovery because mismatch set is not limited to the four post-install mutable planes."
+            exit 4
+          }
+          foreach ($required in $allowed) {
+            if ($required -notin $mismatches) {
+              Write-Error "Refusing recovery because expected rc.93 four-plane signature is incomplete."
+              exit 5
+            }
+          }
 
+          $null = & php artisan nexora:runtime:post-install-reconcile --confirm=RECONCILE 2>&1 | Out-String
+          $reconcileExit = $LASTEXITCODE
+          Write-Host "Reconcile exit: $reconcileExit"
+          if ($reconcileExit -ne 0) {
+            Write-Error "Guarded reconcile command refused or failed. No bypass attempted."
+            exit $reconcileExit
+          }
+
+          $compatAfter = & php artisan nexora:runtime:compatibility-status --deep 2>&1 | Out-String
+          $compatExit = $LASTEXITCODE
+          $afterMismatchBlock = if ($compatAfter -match '(?s)"mismatches"\s*:\s*\[(.*?)\]') { $Matches[1] } else { '' }
+          $afterMismatches = @([regex]::Matches($afterMismatchBlock, '"([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+
+          $postAfter = & php artisan nexora:runtime:post-install-status --assert-ready 2>&1 | Out-String
+          $postExit = $LASTEXITCODE
+          $postStatus = if ($postAfter -match '"status"\s*:\s*"([^"]+)"') { $Matches[1] } elseif ($postAfter -match 'Nexora.*:\s*(PASS|FAIL)') { $Matches[1].ToLower() } else { 'unknown' }
+
+          Write-Host "After compatibility exit: $compatExit"
+          Write-Host "After mismatches: $($afterMismatches -join ',')"
+          Write-Host "After post-install status: $postStatus"
+          Write-Host "After post-install exit: $postExit"
+
+          if ($compatExit -ne 0 -or $afterMismatches.Count -ne 0 -or $postExit -ne 0) {
+            Write-Error "Recovery did not fully converge; preserved target remains unverified."
+            exit 6
+          }
+
+          Write-Host "RC93_RUNTIME_RECOVERY=PASS"
           exit 0
