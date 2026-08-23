@@ -1,12 +1,6 @@
 name: Nexora rc93 source marker diagnosis
 
 on:
-  push:
-    branches:
-      - ops/rc93-local-readonly-probe
-  pull_request:
-    branches:
-      - dev/n1-0b-core-functional-qa
   workflow_dispatch:
 
 permissions:
