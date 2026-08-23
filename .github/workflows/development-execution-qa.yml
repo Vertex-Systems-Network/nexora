@@ -56,7 +56,12 @@ jobs:
           clean: true
 
       - name: Prepare ephemeral CI environment file
-        run: ': > .env'
+        run: |
+          cat > .env <<'EOF'
+          APP_ENV=testing
+          APP_DEBUG=false
+          APP_URL=https://nexora.test
+          EOF
 
       - name: Set up PHP 8.3
         uses: shivammathur/setup-php@v2
