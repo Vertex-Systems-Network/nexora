@@ -336,6 +336,7 @@ jobs:
           if (($post.ready -eq $true) -or ($post.runtime_ready -eq $true)) {
             throw 'Pre-recovery handoff unexpectedly reports ready.'
           }
+          $global:LASTEXITCODE = 0
           Write-Host 'RC94_PRE_RECOVERY_MUTABLE_BOUNDARY=PASS'
 
       - name: Run guarded recovery and verify fresh-process convergence
