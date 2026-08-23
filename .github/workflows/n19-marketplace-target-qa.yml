@@ -301,6 +301,7 @@ jobs:
                       'id'=>$artifact->id,
                       'identifier'=>$artifact->package_identifier,
                       'version'=>$artifact->package_version,
+                      'artifact_sha256'=>$artifact->artifact_sha256,
                       'content_sha256'=>$artifact->content_sha256,
                       'scan_id'=>$artifact->scan_id,
                       'scan_status'=>$artifact->scan?->status,
@@ -434,7 +435,7 @@ jobs:
             if ([string]::IsNullOrWhiteSpace([string]$state.source.catalog_generation)) { throw 'Marketplace source has no catalog generation after sync.' }
             if ($state.item.sync_generation -ne $state.source.catalog_generation) { throw 'Marketplace item/source generations do not match.' }
             if ($state.item.artifact_sha256 -ne '7427989ebd42fa43098bb067569e73d48257e5bc15c96f1d09c8abd3fb298f33') { throw 'Catalog checksum evidence does not match fixture.' }
-            if ($state.artifact.content_sha256 -ne '7427989ebd42fa43098bb067569e73d48257e5bc15c96f1d09c8abd3fb298f33') { throw 'Downloaded/quarantined artifact checksum does not match fixture.' }
+            if ($state.artifact.artifact_sha256 -ne '7427989ebd42fa43098bb067569e73d48257e5bc15c96f1d09c8abd3fb298f33') { throw 'Downloaded/quarantined artifact checksum does not match fixture.' }
             if ($state.artifact.scan_status -ne 'completed' -or $state.artifact.scan_decision -ne 'allow') { throw 'Sentinel did not complete with ALLOW.' }
             if (-not $state.artifact.quarantine_exists) { throw 'Quarantined Marketplace package bytes are not present.' }
             if ($state.extension.status -ne 'installed') { throw "Extension final state is not installed: $($state.extension.status)." }
