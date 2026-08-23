@@ -39,7 +39,7 @@ jobs:
           node-version: '22'
           package-manager-cache: false
 
-      - name: Guard exact source and install disposable dependencies
+      - name: Guard exact source and prepare disposable target
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         env:
           COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
@@ -47,11 +47,11 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $source = (& git rev-parse HEAD).Trim()
           $expected = '${{ github.event.pull_request.base.sha }}'
-          Write-Host "Exact development source: $source"
-          Write-Host "Expected PR base source: $expected"
           if ($source -ne $expected) {
-            throw "Recovery rehearsal checkout is not bound to the exact PR base SHA."
+            throw 'Recovery rehearsal checkout is not bound to the exact PR base SHA.'
           }
+
+          Write-Host "Exact development source: $source"
           Write-Host "Runner: $env:RUNNER_NAME / $env:RUNNER_OS / $env:RUNNER_ARCH"
           & php -r "echo PHP_VERSION, PHP_EOL;"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -69,14 +69,11 @@ jobs:
           & npm.cmd run build
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Prepare isolated production-like SQLite target
-        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
-        run: |
-          $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Force -Path $env:EVIDENCE_DIR | Out-Null
-          $db = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'database/disposable-rc94-recovery.sqlite'))
-          if (Test-Path $db) { Remove-Item -Force $db }
-          New-Item -ItemType File -Path $db | Out-Null
+          $dbNative = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'database/disposable-rc94-recovery.sqlite'))
+          $db = $dbNative.Replace('\', '/')
+          if (Test-Path $dbNative) { Remove-Item -Force $dbNative }
+          New-Item -ItemType File -Path $dbNative | Out-Null
           $key = (& php -r "echo 'base64:'.base64_encode(random_bytes(32));").Trim()
           @"
           APP_NAME="Nexora Recovery Rehearsal"
@@ -95,19 +92,20 @@ jobs:
           NEXORA_INSTALLER_BYPASS=false
           "@ | Set-Content -Encoding UTF8 .env
           $db | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'database-path.txt')
-          $source = (& git rev-parse HEAD).Trim()
+
           $protocol = (& php -r "require 'vendor/autoload.php'; echo App\Nexora\Installation\Installer::PROTOCOL;").Trim()
           $generation = (& php -r "require 'vendor/autoload.php'; echo App\Nexora\Installation\Installer::SOURCE_GENERATION;").Trim()
           @{
             schema = 1
             evidence_kind = 'disposable-rc94-post-install-recovery'
             source_sha = $source
-            expected_source_sha = '${{ github.event.pull_request.base.sha }}'
+            expected_source_sha = $expected
             runner_os = $env:RUNNER_OS
             runner_arch = $env:RUNNER_ARCH
             installer_protocol = $protocol
             source_generation = $generation
             base_url = $env:BASE_URL
+            sqlite_path_style = 'forward-slash-absolute-windows'
           } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'source-binding.json')
 
       - name: Commit a real fresh install without following handoff
@@ -121,13 +119,13 @@ jobs:
           try {
             $ready = $false
             for ($i = 0; $i -lt 60; $i++) {
-              & curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/install" | Out-Null
-              if ($LASTEXITCODE -eq 0) { $ready = $true; break }
+              $probe = (& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/install").Trim()
+              if (($LASTEXITCODE -eq 0) -and ($probe -eq '200')) { $ready = $true; break }
               Start-Sleep -Seconds 1
             }
-            if (-not $ready) { throw 'Disposable installer HTTP target did not start.' }
+            if (-not $ready) { throw 'Disposable installer HTTP target did not serve /install with HTTP 200.' }
 
-            $cookies = Join-Path $env:RUNNER_TEMP 'rc94-cookies.txt'
+            $cookies = Join-Path $env:RUNNER_TEMP 'rc94-install-cookies.txt'
             $installHtml = Join-Path $env:RUNNER_TEMP 'rc94-install.html'
             & curl.exe -sS -c $cookies "$env:BASE_URL/install" -o $installHtml
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -137,6 +135,8 @@ jobs:
             $csrf = $csrfMatch.Groups[1].Value
             $db = (Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'database-path.txt')).Trim()
             $password = 'Nx!'+[guid]::NewGuid().ToString('N')+'Aa1'
+            $password | Set-Content -Encoding UTF8 (Join-Path $env:RUNNER_TEMP 'rc94-admin-password.txt')
+
             $headers = Join-Path $env:EVIDENCE_DIR 'install-commit.headers.txt'
             $body = Join-Path $env:EVIDENCE_DIR 'install-commit.body.html'
             $status = (& curl.exe -sS -b $cookies -c $cookies -D $headers -o $body -w '%{http_code}' -X POST "$env:BASE_URL/install" `
@@ -161,21 +161,22 @@ jobs:
             if (-not (Test-Path 'storage/app/nexora/installed.lock')) {
               throw 'Production installer did not create the sealed installed.lock commit point.'
             }
+            Write-Host 'RC94_REAL_INSTALL_COMMIT=PASS'
           }
           finally {
-            & taskkill.exe /PID $server.Id /T /F 2>$null | Out-Null
+            & cmd.exe /d /c "taskkill /PID $($server.Id) /T /F >NUL 2>&1 || exit /b 0" | Out-Null
             Copy-Item -Force $serverOut (Join-Path $env:EVIDENCE_DIR 'install-server.out.log') -ErrorAction SilentlyContinue
             Copy-Item -Force $serverErr (Join-Path $env:EVIDENCE_DIR 'install-server.err.log') -ErrorAction SilentlyContinue
           }
 
-      - name: Prove committed target needs only the expected four-plane recovery
+      - name: Prove exact pre-recovery four-plane boundary
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $ErrorActionPreference = 'Stop'
           $compatPath = Join-Path $env:EVIDENCE_DIR 'pre-recovery-compatibility.json'
           & php artisan nexora:runtime:compatibility-status --deep --json 2>&1 | Tee-Object -FilePath $compatPath
           $compatExit = $LASTEXITCODE
-          if ($compatExit -eq 0) { throw 'Expected committed-but-unfinalized target to require post-install recovery, but compatibility already passed.' }
+          if ($compatExit -eq 0) { throw 'Committed-but-unfinalized target unexpectedly passed compatibility.' }
           $compat = Get-Content -Raw $compatPath | ConvertFrom-Json
           $actual = @($compat.mismatches | ForEach-Object { [string]$_ } | Sort-Object)
           $expected = @('activation','environment','process','service')
@@ -186,14 +187,14 @@ jobs:
           $postPath = Join-Path $env:EVIDENCE_DIR 'pre-recovery-post-install.json'
           & php artisan nexora:runtime:post-install-status --assert-ready 2>&1 | Tee-Object -FilePath $postPath
           $postExit = $LASTEXITCODE
-          if ($postExit -eq 0) { throw 'Expected post-install status to be pending before guarded recovery.' }
+          if ($postExit -eq 0) { throw 'Post-install status unexpectedly reported ready before guarded recovery.' }
           $post = Get-Content -Raw $postPath | ConvertFrom-Json
           if (($post.ready -eq $true) -or ($post.runtime_ready -eq $true)) {
             throw 'Pre-recovery handoff unexpectedly reports ready.'
           }
           Write-Host 'RC94_PRE_RECOVERY_FOUR_PLANE_BOUNDARY=PASS'
 
-      - name: Run guarded post-install recovery and verify fresh-process convergence
+      - name: Run guarded recovery and verify fresh-process convergence
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -220,10 +221,13 @@ jobs:
           }
           Write-Host 'RC94_POST_INSTALL_RECOVERY_CONVERGENCE=PASS'
 
-      - name: Exercise real login and admin HTTP routes after recovery
+      - name: Exercise real login and authenticated admin routes after recovery
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $ErrorActionPreference = 'Stop'
+          $passwordPath = Join-Path $env:RUNNER_TEMP 'rc94-admin-password.txt'
+          if (-not (Test-Path $passwordPath)) { throw 'Disposable installer admin credential handoff is missing.' }
+          $password = (Get-Content -Raw $passwordPath).Trim()
           $serverOut = Join-Path $env:RUNNER_TEMP 'rc94-recovered-server.out.log'
           $serverErr = Join-Path $env:RUNNER_TEMP 'rc94-recovered-server.err.log'
           $server = Start-Process -FilePath 'php' -ArgumentList @('artisan','serve','--host=127.0.0.1','--port=8000') -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
@@ -236,21 +240,36 @@ jobs:
             }
             if (-not $ready) { throw 'Recovered target did not serve /login successfully.' }
 
+            $cookies = Join-Path $env:RUNNER_TEMP 'rc94-auth-cookies.txt'
+            $loginBody = Join-Path $env:EVIDENCE_DIR 'login.body.html'
             $loginHeaders = Join-Path $env:EVIDENCE_DIR 'login.headers.txt'
-            $loginStatus = (& curl.exe -sS -D $loginHeaders -o (Join-Path $env:EVIDENCE_DIR 'login.body.html') -w '%{http_code}' "$env:BASE_URL/login").Trim()
+            $loginStatus = (& curl.exe -sS -c $cookies -D $loginHeaders -o $loginBody -w '%{http_code}' "$env:BASE_URL/login").Trim()
             if ($loginStatus -ne '200') { throw "Recovered /login returned HTTP $loginStatus instead of 200." }
+            $html = Get-Content -Raw $loginBody
+            $csrfMatch = [regex]::Match($html, 'name="_token"\s+value="([^"]+)"')
+            if (-not $csrfMatch.Success) { throw 'Unable to extract login CSRF token.' }
+            $csrf = $csrfMatch.Groups[1].Value
+
+            $authHeaders = Join-Path $env:EVIDENCE_DIR 'login-auth.headers.txt'
+            $authBody = Join-Path $env:EVIDENCE_DIR 'login-auth.body.html'
+            $authStatus = (& curl.exe -sS -b $cookies -c $cookies -D $authHeaders -o $authBody -w '%{http_code}' -X POST "$env:BASE_URL/login" `
+              --data-urlencode "_token=$csrf" `
+              --data-urlencode 'email=recovery-operator@example.test' `
+              --data-urlencode "password=$password").Trim()
+            if ($authStatus -ne '302') { throw "Super Admin login returned HTTP $authStatus instead of 302." }
+            $authHeaderText = Get-Content -Raw $authHeaders
+            if ($authHeaderText -notmatch '(?im)^Location:\s*.*?/admin/?\s*$') {
+              throw 'Super Admin login did not redirect to the admin dashboard.'
+            }
 
             $adminHeaders = Join-Path $env:EVIDENCE_DIR 'admin.headers.txt'
-            $adminStatus = (& curl.exe -sS -D $adminHeaders -o (Join-Path $env:EVIDENCE_DIR 'admin.body.html') -w '%{http_code}' "$env:BASE_URL/admin").Trim()
-            if ($adminStatus -ne '302') { throw "Unauthenticated /admin returned HTTP $adminStatus instead of the expected auth redirect." }
-            $adminHeaderText = Get-Content -Raw $adminHeaders
-            if ($adminHeaderText -notmatch '(?im)^Location:\s*.*?/login\s*$') {
-              throw 'Unauthenticated /admin did not redirect to /login.'
-            }
+            $adminBody = Join-Path $env:EVIDENCE_DIR 'admin.body.html'
+            $adminStatus = (& curl.exe -sS -b $cookies -D $adminHeaders -o $adminBody -w '%{http_code}' "$env:BASE_URL/admin").Trim()
+            if ($adminStatus -ne '200') { throw "Authenticated /admin returned HTTP $adminStatus instead of 200." }
 
             $handoffHeaders = Join-Path $env:EVIDENCE_DIR 'runtime-handoff.headers.txt'
             $handoffStatus = (& curl.exe -sS -D $handoffHeaders -o (Join-Path $env:EVIDENCE_DIR 'runtime-handoff.body.html') -w '%{http_code}' "$env:BASE_URL/install/runtime-handoff").Trim()
-            if ($handoffStatus -ne '302') { throw "Ready runtime-handoff route returned HTTP $handoffStatus instead of redirecting to login." }
+            if ($handoffStatus -ne '302') { throw "Ready runtime-handoff route returned HTTP $handoffStatus instead of 302." }
             $handoffHeaderText = Get-Content -Raw $handoffHeaders
             if ($handoffHeaderText -notmatch '(?im)^Location:\s*.*?/login\s*$') {
               throw 'Ready runtime-handoff route did not redirect to /login.'
@@ -259,14 +278,15 @@ jobs:
             @{
               schema = 1
               source_sha = (& git rev-parse HEAD).Trim()
-              login = @{ status = [int]$loginStatus; expected = 200 }
-              admin = @{ status = [int]$adminStatus; expected = 302; redirect = '/login' }
+              login_page = @{ status = [int]$loginStatus; expected = 200 }
+              super_admin_login = @{ status = [int]$authStatus; expected = 302; redirect = '/admin' }
+              authenticated_admin = @{ status = [int]$adminStatus; expected = 200 }
               runtime_handoff = @{ status = [int]$handoffStatus; expected = 302; redirect = '/login' }
             } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'http-routes.json')
-            Write-Host 'RC94_RECOVERED_HTTP_ROUTES=PASS'
+            Write-Host 'RC94_RECOVERED_AUTHENTICATED_HTTP_ROUTES=PASS'
           }
           finally {
-            & taskkill.exe /PID $server.Id /T /F 2>$null | Out-Null
+            & cmd.exe /d /c "taskkill /PID $($server.Id) /T /F >NUL 2>&1 || exit /b 0" | Out-Null
             Copy-Item -Force $serverOut (Join-Path $env:EVIDENCE_DIR 'recovered-server.out.log') -ErrorAction SilentlyContinue
             Copy-Item -Force $serverErr (Join-Path $env:EVIDENCE_DIR 'recovered-server.err.log') -ErrorAction SilentlyContinue
           }
@@ -295,6 +315,7 @@ jobs:
             post_recovery_compatibility = $postCompat.status
             post_recovery_handoff = $postInstall.status
             receipt_current = $postInstall.receipt_current
+            reviewed_dependency_status = $postCompat.reviewed_dependencies.status
             http_routes = $routes
             installation_lock_sha256 = $lockSha
             run_id = '${{ github.run_id }}'
@@ -316,9 +337,14 @@ jobs:
         if: always()
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
-          if (Test-Path (Join-Path $env:RUNNER_TEMP 'rc94-server.pid')) {
-            $pidValue = (Get-Content -Raw (Join-Path $env:RUNNER_TEMP 'rc94-server.pid')).Trim()
-            if ($pidValue -match '^\d+$') { & taskkill.exe /PID $pidValue /T /F 2>$null | Out-Null }
+          $pidPath = Join-Path $env:RUNNER_TEMP 'rc94-server.pid'
+          if (Test-Path $pidPath) {
+            $pidValue = (Get-Content -Raw $pidPath).Trim()
+            if ($pidValue -match '^\d+$') {
+              & cmd.exe /d /c "taskkill /PID $pidValue /T /F >NUL 2>&1 || exit /b 0" | Out-Null
+            }
           }
           if (Test-Path '.env') { Remove-Item -Force '.env' }
           if (Test-Path 'database/disposable-rc94-recovery.sqlite') { Remove-Item -Force 'database/disposable-rc94-recovery.sqlite' }
+          $passwordPath = Join-Path $env:RUNNER_TEMP 'rc94-admin-password.txt'
+          if (Test-Path $passwordPath) { Remove-Item -Force $passwordPath }
