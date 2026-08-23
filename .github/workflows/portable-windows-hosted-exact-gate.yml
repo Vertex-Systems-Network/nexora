@@ -1,0 +1,161 @@
+name: Nexora portable hosted Windows exact gate
+
+# Temporary DO-NOT-MERGE QA carrier. The workflow definition lives on this
+# branch, but every substantive command executes the literal PR base SHA so
+# the evidence is attributable to the unchanged development source.
+on:
+  pull_request:
+    branches: [dev/n1-0b-core-functional-qa]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexora-portable-hosted-windows-exact-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portable-hosted-windows-exact:
+    name: portable-hosted-windows-exact
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      APP_ENV: testing
+      APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+      APP_DEBUG: 'false'
+      APP_URL: 'https://nexora.test'
+      NEXORA_INSTALLER_BYPASS: 'true'
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+
+    steps:
+      - name: Checkout literal development base SHA
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha || '21724569daba8e38e581ec603ebd08c2f4d58cad' }}
+          fetch-depth: 1
+          clean: true
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: fileinfo, mbstring, openssl, pdo, pdo_sqlite, sqlite3, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Verify exact Windows source and portable core boundary
+        shell: powershell
+        run: |
+          $expected = '${{ github.event.pull_request.base.sha || '21724569daba8e38e581ec603ebd08c2f4d58cad' }}'
+          $source = (& git rev-parse HEAD).Trim()
+          Write-Host "Runner: $env:RUNNER_NAME / $env:RUNNER_OS / $env:RUNNER_ARCH"
+          Write-Host "Exact development source: $source"
+          if ($source -ne $expected) {
+            Write-Error "Expected exact development SHA [$expected], got [$source]."
+            exit 2
+          }
+
+          $hardPaths = @(& git grep -n -i -E '[A-Z]:\\laragon\\www\\nexora|[A-Z]:/laragon/www/nexora' -- app bootstrap config routes 2>$null)
+          if ($LASTEXITCODE -eq 0 -and $hardPaths.Count -gt 0) {
+            $hardPaths | ForEach-Object { Write-Host $_ }
+            Write-Error 'Core runtime contains a concrete Laragon project-path dependency.'
+            exit 3
+          }
+
+          & php scripts/development-target-qa-contract-verify.php
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host 'PORTABLE_CORE_BOUNDARY=PASS'
+
+          $phpVersion = (& php -r "echo PHP_VERSION;").Trim()
+          $nodeVersion = (& node -p "process.versions.node").Trim()
+          Write-Host "PHP: $phpVersion"
+          Write-Host "Node: $nodeVersion"
+          & composer --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ([version]$phpVersion -lt [version]'8.3.0') { exit 4 }
+          if ([version]$nodeVersion -lt [version]'22.0.0') { exit 5 }
+
+      - name: Install exact-source development dependencies
+        shell: powershell
+        run: |
+          & composer install --no-interaction --prefer-dist --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd install --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Prepare isolated testing environment
+        shell: powershell
+        run: |
+          @"
+          APP_NAME=Nexora
+          APP_ENV=testing
+          APP_DEBUG=false
+          APP_URL=https://nexora.test
+          CACHE_STORE=array
+          SESSION_DRIVER=array
+          QUEUE_CONNECTION=sync
+          MAIL_MAILER=array
+          NEXORA_INSTALLER_BYPASS=true
+          "@ | Set-Content -Encoding UTF8 .env.testing
+
+      - name: Run exact historical Windows readiness gate
+        shell: powershell
+        run: |
+          & php scripts/development-readiness.php --full --evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd run test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run isolated SQLite target matrix
+        shell: powershell
+        run: |
+          & php scripts/database-target-matrix.php --drivers=sqlite --evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Summarize exact Windows target evidence
+        shell: powershell
+        run: |
+          $readiness = Get-Content -Raw 'storage/app/nexora/qa/development-readiness.json' | ConvertFrom-Json
+          $matrix = Get-Content -Raw 'storage/app/nexora/qa/database-target-matrix.json' | ConvertFrom-Json
+          $source = (& git rev-parse HEAD).Trim()
+          $expected = '${{ github.event.pull_request.base.sha || '21724569daba8e38e581ec603ebd08c2f4d58cad' }}'
+          Write-Host "Source head: $source"
+          Write-Host "Expected dev head: $expected"
+          Write-Host "Development readiness: $($readiness.status)"
+          Write-Host "Platform version: $($readiness.platform_version)"
+          Write-Host "OS family: $($readiness.os_family)"
+          Write-Host "SQLite matrix: $($matrix.status)"
+          if ($source -ne $expected) { exit 6 }
+          if ($readiness.status -ne 'ready') { exit 7 }
+          if ($readiness.os_family -ne 'Windows') { exit 8 }
+          if ($matrix.status -ne 'passed') { exit 9 }
+          Write-Host 'PORTABLE_WINDOWS_TARGET_QA=PASS'
+
+      - name: Upload exact Windows target evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-portable-hosted-windows-exact-${{ github.event.pull_request.base.sha || github.sha }}
+          path: |
+            storage/app/nexora/qa/development-readiness.json
+            storage/app/nexora/qa/database-target-matrix.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Remove ephemeral environment file
+        if: always()
+        shell: powershell
+        run: |
+          if (Test-Path '.env.testing') { Remove-Item -Force '.env.testing' }
