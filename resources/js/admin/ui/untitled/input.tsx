@@ -14,8 +14,8 @@ export function UntitledInput({ label, hint, error, leadingIcon, className, id, 
     const messageId = `${inputId}-message`;
 
     return (
-        <label htmlFor={inputId} className="grid gap-1.5 text-sm font-medium text-[var(--nx-text-secondary)]">
-            {label && <span>{label}</span>}
+        <div className="grid gap-1.5 text-sm font-medium text-[var(--nx-text-secondary)]">
+            {label && <label htmlFor={inputId}>{label}</label>}
             <span className="relative block">
                 {leadingIcon && <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-[var(--nx-text-muted)]">{leadingIcon}</span>}
                 <input
@@ -33,6 +33,6 @@ export function UntitledInput({ label, hint, error, leadingIcon, className, id, 
                 />
             </span>
             {error ? <span id={messageId} role="alert" className="text-xs font-medium text-[var(--nx-danger)]">{error}</span> : hint ? <span id={messageId} className="text-xs font-normal text-[var(--nx-text-muted)]">{hint}</span> : null}
-        </label>
+        </div>
     );
 }
