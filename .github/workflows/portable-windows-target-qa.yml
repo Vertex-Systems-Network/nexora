@@ -1,9 +1,6 @@
 name: Nexora portable Windows target QA
 
 on:
-  push:
-    branches:
-      - ops/rc94-windows-target-qa
   pull_request:
     branches:
       - dev/n1-0b-core-functional-qa
@@ -22,7 +19,7 @@ jobs:
       - name: Checkout exact current development source
         uses: actions/checkout@v7
         with:
-          ref: dev/n1-0b-core-functional-qa
+          ref: ${{ github.event.pull_request.base.sha || 'dev/n1-0b-core-functional-qa' }}
           clean: true
           fetch-depth: 1
 
@@ -78,6 +75,8 @@ jobs:
 
       - name: Install current-source dependencies
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
         run: |
           & composer install --no-interaction --prefer-dist --optimize-autoloader
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
