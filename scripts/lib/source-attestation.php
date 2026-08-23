@@ -30,6 +30,7 @@ function nexoraSourceAttestationExcluded(string $relative): bool
     foreach([
         'bootstrap/cache/',
         'public/build/',
+        'public/nexora-themes/',
         'storage/',
         'dist/',
         'vendor/',
