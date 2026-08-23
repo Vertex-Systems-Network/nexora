@@ -55,9 +55,9 @@ jobs:
           fetch-depth: 1
           clean: true
 
-      - name: Prepare ephemeral CI environment file
+      - name: Prepare ephemeral CI testing environment file
         run: |
-          cat > .env <<'EOF'
+          cat > .env.testing <<'EOF'
           APP_ENV=testing
           APP_DEBUG=false
           APP_URL=https://nexora.test
