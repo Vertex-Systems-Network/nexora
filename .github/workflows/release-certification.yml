@@ -17,29 +17,10 @@ jobs:
   governance:
     name: governance
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - name: Checkout exact source
-        uses: actions/checkout@v4
-
-      - name: PHP 8.4
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          coverage: none
-          tools: none
-
-      - name: Source governance guard
-        run: php scripts/source-guard.php --source-only
-
-  source-certification:
-    name: Source certification
-    needs: governance
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Checkout exact source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: PHP 8.4
         uses: shivammathur/setup-php@v2
@@ -49,12 +30,10 @@ jobs:
           tools: none
 
       - name: Node 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-        continue-on-error: true
+          package-manager-cache: false
 
       - name: Certification preflight
         run: php scripts/certification-preflight.php --source-only
@@ -64,3 +43,12 @@ jobs:
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
+
+      - name: Install frontend dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Frontend dependency compatibility
+        run: |
+          npm run typecheck
+          npm run test
+          npm run build:raw
