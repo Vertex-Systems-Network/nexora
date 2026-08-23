@@ -141,7 +141,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $serverOut = Join-Path $env:RUNNER_TEMP 'rc94-install-server.out.log'
           $serverErr = Join-Path $env:RUNNER_TEMP 'rc94-install-server.err.log'
-          $server = Start-Process -FilePath 'php' -ArgumentList @('artisan','serve','--host=127.0.0.1','--port=8000') -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t','public','vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php') -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
           $server.Id | Set-Content -Encoding ASCII (Join-Path $env:RUNNER_TEMP 'rc94-server.pid')
           try {
             $ready = $false
@@ -257,7 +257,7 @@ jobs:
           $password = (Get-Content -Raw $passwordPath).Trim()
           $serverOut = Join-Path $env:RUNNER_TEMP 'rc94-recovered-server.out.log'
           $serverErr = Join-Path $env:RUNNER_TEMP 'rc94-recovered-server.err.log'
-          $server = Start-Process -FilePath 'php' -ArgumentList @('artisan','serve','--host=127.0.0.1','--port=8000') -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t','public','vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php') -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
           try {
             $ready = $false
             for ($i = 0; $i -lt 60; $i++) {
