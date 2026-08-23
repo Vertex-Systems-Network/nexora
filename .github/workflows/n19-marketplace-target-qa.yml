@@ -1,0 +1,483 @@
+name: Nexora N1.9 Marketplace target QA
+
+on:
+  pull_request:
+    branches:
+      - dev/n1-0b-core-functional-qa
+
+permissions:
+  contents: read
+
+jobs:
+  n19-marketplace-target:
+    name: n19-marketplace-target
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      BASE_URL: http://127.0.0.1:8000
+      EVIDENCE_DIR: storage/app/nexora/qa/n19-marketplace-target
+      FIXTURE_BASE: https://raw.githubusercontent.com/Vertex-Systems-Network/nexora/ops-n19-marketplace-target-qa/.github/fixtures/n19-marketplace
+
+    steps:
+      - name: Checkout exact current development source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, dom, fileinfo, intl, mbstring, openssl, pdo, pdo_sqlite, sqlite3, tokenizer, xml, zip
+          ini-values: memory_limit=512M, post_max_size=64M, upload_max_filesize=64M, max_execution_time=120, max_input_time=60, max_input_vars=3000, max_file_uploads=20
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Guard source and prepare disposable target
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $source = (& git rev-parse HEAD).Trim()
+          $expected = '${{ github.event.pull_request.base.sha }}'
+          if ($source -ne $expected) { throw 'N1.9 target checkout is not bound to the exact PR base SHA.' }
+
+          New-Item -ItemType Directory -Force -Path $env:EVIDENCE_DIR | Out-Null
+          Write-Host "Exact development source: $source"
+          Write-Host "Carrier head: ${{ github.event.pull_request.head.sha }}"
+          Write-Host "Runner: $env:RUNNER_NAME / $env:RUNNER_OS / $env:RUNNER_ARCH"
+          & php -r "echo PHP_VERSION, PHP_EOL;"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & composer --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & node -p "process.versions.node"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          & composer install --no-interaction --prefer-dist --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd install --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $dbNative = [System.IO.Path]::GetFullPath((Join-Path $env:RUNNER_TEMP 'nexora-n19-marketplace.sqlite'))
+          $db = $dbNative.Replace('\', '/')
+          if (Test-Path $dbNative) { Remove-Item -Force $dbNative }
+          New-Item -ItemType File -Path $dbNative | Out-Null
+          $key = (& php -r "echo 'base64:'.base64_encode(random_bytes(32));").Trim()
+          @"
+          APP_NAME="Nexora N1.9 Marketplace QA"
+          APP_ENV=production
+          APP_KEY=$key
+          APP_DEBUG=false
+          APP_URL=$env:BASE_URL
+          APP_LOCALE=en
+          LOG_CHANNEL=stderr
+          DB_CONNECTION=sqlite
+          DB_DATABASE=$db
+          SESSION_DRIVER=file
+          CACHE_STORE=file
+          QUEUE_CONNECTION=sync
+          MAIL_MAILER=array
+          NEXORA_INSTALLER_BYPASS=false
+          "@ | Set-Content -Encoding UTF8 .env
+          $db | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'database-path.txt')
+
+          @{
+            schema = 1
+            evidence_kind = 'n1.9-marketplace-real-target'
+            source_sha = $source
+            expected_source_sha = $expected
+            carrier_sha = '${{ github.event.pull_request.head.sha }}'
+            runner_os = $env:RUNNER_OS
+            runner_arch = $env:RUNNER_ARCH
+            fixture_base = $env:FIXTURE_BASE
+            fixture_sha256 = '7427989ebd42fa43098bb067569e73d48257e5bc15c96f1d09c8abd3fb298f33'
+            base_url = $env:BASE_URL
+          } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'source-binding.json')
+
+      - name: Commit real disposable install and reconcile runtime
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $serverOut = Join-Path $env:RUNNER_TEMP 'n19-install-server.out.log'
+          $serverErr = Join-Path $env:RUNNER_TEMP 'n19-install-server.err.log'
+          $docroot = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'public'))
+          $router = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php'))
+          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t',$docroot,$router) -WorkingDirectory $docroot -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+          try {
+            $ready = $false
+            for ($i = 0; $i -lt 60; $i++) {
+              if ($server.HasExited) { throw "Installer server exited early with code $($server.ExitCode)." }
+              $probe = (& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/install").Trim()
+              if (($LASTEXITCODE -eq 0) -and ($probe -eq '200')) { $ready = $true; break }
+              Start-Sleep -Seconds 1
+            }
+            if (-not $ready) { throw 'Disposable installer did not serve /install with HTTP 200.' }
+
+            $cookies = Join-Path $env:RUNNER_TEMP 'n19-install-cookies.txt'
+            $htmlPath = Join-Path $env:RUNNER_TEMP 'n19-install.html'
+            & curl.exe -sS -c $cookies "$env:BASE_URL/install" -o $htmlPath
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $html = Get-Content -Raw $htmlPath
+            $csrfMatch = [regex]::Match($html, 'name="_token"\s+value="([^"]+)"')
+            if (-not $csrfMatch.Success) { throw 'Unable to extract installer CSRF token.' }
+            $csrf = $csrfMatch.Groups[1].Value
+            $db = (Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'database-path.txt')).Trim()
+            $password = 'Nx!'+[guid]::NewGuid().ToString('N')+'Aa1'
+            $password | Set-Content -Encoding UTF8 (Join-Path $env:RUNNER_TEMP 'n19-admin-password.txt')
+
+            $headers = Join-Path $env:EVIDENCE_DIR 'install.headers.txt'
+            $body = Join-Path $env:EVIDENCE_DIR 'install.body.html'
+            $status = (& curl.exe -sS -b $cookies -c $cookies -D $headers -o $body -w '%{http_code}' -X POST "$env:BASE_URL/install" `
+              --data-urlencode "_token=$csrf" `
+              --data-urlencode 'app_name=Nexora N1.9 Marketplace QA' `
+              --data-urlencode "app_url=$env:BASE_URL" `
+              --data-urlencode 'language=en' `
+              --data-urlencode 'db_driver=sqlite' `
+              --data-urlencode "db_database=$db" `
+              --data-urlencode 'db_create=1' `
+              --data-urlencode 'admin_name=N1.9 QA Administrator' `
+              --data-urlencode 'admin_email=n19-admin@example.test' `
+              --data-urlencode "admin_password=$password" `
+              --data-urlencode "admin_password_confirmation=$password" `
+              --data-urlencode 'terms=1').Trim()
+            if ($status -ne '302') { throw "Installer commit failed; HTTP $status." }
+            if ((Get-Content -Raw $headers) -notmatch '(?im)^Location:\s*.*?/install/runtime-handoff\s*$') {
+              throw 'Installer did not redirect to runtime-handoff.'
+            }
+            if (-not (Test-Path 'storage/app/nexora/installed.lock')) { throw 'Installer did not seal installed.lock.' }
+            Write-Host 'N19_REAL_INSTALL=PASS'
+          }
+          finally {
+            & cmd.exe /d /c "taskkill /PID $($server.Id) /T /F >NUL 2>&1 || exit /b 0" | Out-Null
+            Copy-Item -Force $serverOut (Join-Path $env:EVIDENCE_DIR 'install-server.out.log') -ErrorAction SilentlyContinue
+            Copy-Item -Force $serverErr (Join-Path $env:EVIDENCE_DIR 'install-server.err.log') -ErrorAction SilentlyContinue
+          }
+
+          & php artisan nexora:runtime:post-install-reconcile --confirm=RECONCILE
+          if ($LASTEXITCODE -ne 0) { throw 'Accepted rc.94 guarded post-install reconcile failed on disposable N1.9 target.' }
+          & php artisan optimize:clear
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host 'N19_RUNTIME_RECONCILE=PASS'
+
+      - name: Prepare restricted Marketplace principal
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $password = 'Nx!'+[guid]::NewGuid().ToString('N')+'Bb2'
+          $password | Set-Content -Encoding UTF8 (Join-Path $env:RUNNER_TEMP 'n19-restricted-password.txt')
+          $helper = Join-Path $env:RUNNER_TEMP 'n19-principal.php'
+          @'
+          <?php
+          declare(strict_types=1);
+          use App\Models\Permission;
+          use App\Models\Role;
+          use App\Models\User;
+          use Illuminate\Contracts\Console\Kernel;
+          use Illuminate\Support\Facades\Hash;
+          $root = (string) $argv[1];
+          require $root.'/vendor/autoload.php';
+          $app = require $root.'/bootstrap/app.php';
+          $app->make(Kernel::class)->bootstrap();
+          $password = (string) $argv[2];
+          $role = Role::query()->create([
+              'name' => 'N1.9 Restricted Marketplace Admin',
+              'slug' => 'n19-restricted-marketplace-admin',
+              'description' => 'Admin-access principal intentionally missing marketplace.manage.',
+              'is_system' => false,
+          ]);
+          $role->permissions()->sync(Permission::query()->whereIn('slug', ['admin.access'])->pluck('id'));
+          $user = User::query()->create([
+              'name' => 'N1.9 Restricted Operator',
+              'email' => 'n19-restricted@example.test',
+              'password' => Hash::make($password),
+              'status' => 'active',
+              'timezone' => 'UTC',
+              'locale' => 'en',
+          ]);
+          $user->forceFill(['email_verified_at' => now()])->save();
+          $user->roles()->attach($role->id);
+          echo $user->id, PHP_EOL;
+          '@ | Set-Content -Encoding ASCII $helper
+          & php $helper $env:GITHUB_WORKSPACE $password
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to create the N1.9 restricted principal.' }
+
+      - name: Exercise N1.9 Marketplace over real HTTP
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $serverOut = Join-Path $env:EVIDENCE_DIR 'marketplace-server.out.log'
+          $serverErr = Join-Path $env:EVIDENCE_DIR 'marketplace-server.err.log'
+          $docroot = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'public'))
+          $router = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php'))
+          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t',$docroot,$router) -WorkingDirectory $docroot -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+
+          function Get-Csrf([string]$Url, [string]$Cookies, [string]$BodyPath) {
+            & curl.exe -sS -b $Cookies -c $Cookies $Url -o $BodyPath
+            if ($LASTEXITCODE -ne 0) { throw "GET failed while obtaining CSRF from $Url." }
+            $body = Get-Content -Raw $BodyPath
+            $m = [regex]::Match($body, '(?:name="_token"\s+value="|name="csrf-token"\s+content=")([^"]+)')
+            if (-not $m.Success) { throw "Unable to extract CSRF token from $Url." }
+            return $m.Groups[1].Value
+          }
+
+          function Assert-Redirect([string]$Headers, [string]$Pattern, [string]$Label) {
+            $text = Get-Content -Raw $Headers
+            if ($text -notmatch $Pattern) { throw "$Label redirect did not match expected Location." }
+          }
+
+          $query = Join-Path $env:RUNNER_TEMP 'n19-query.php'
+          @'
+          <?php
+          declare(strict_types=1);
+          use App\Models\AuditLog;
+          use App\Models\Extension;
+          use App\Models\MarketplaceCatalogItem;
+          use App\Models\MarketplaceSource;
+          use App\Models\SupplyChainArtifact;
+          use Illuminate\Contracts\Console\Kernel;
+          $root = (string) $argv[1];
+          require $root.'/vendor/autoload.php';
+          $app = require $root.'/bootstrap/app.php';
+          $app->make(Kernel::class)->bootstrap();
+          $mode = (string) ($argv[2] ?? '');
+          if ($mode === 'source') {
+              echo MarketplaceSource::query()->where('name', 'N1.9 QA Source')->value('id') ?: '';
+              exit;
+          }
+          if ($mode === 'item') {
+              echo MarketplaceCatalogItem::query()->where('package_identifier', 'nexora.qa.marketplace-n19')->value('id') ?: '';
+              exit;
+          }
+          if ($mode === 'artifact') {
+              echo SupplyChainArtifact::query()->where('package_identifier', 'nexora.qa.marketplace-n19')->latest('created_at')->value('id') ?: '';
+              exit;
+          }
+          if ($mode === 'extension') {
+              echo Extension::query()->where('identifier', 'nexora.qa.marketplace-n19')->value('id') ?: '';
+              exit;
+          }
+          if ($mode === 'final') {
+              $source = MarketplaceSource::query()->where('name', 'N1.9 QA Source')->first();
+              $item = MarketplaceCatalogItem::query()->where('package_identifier', 'nexora.qa.marketplace-n19')->first();
+              $artifact = SupplyChainArtifact::query()->with(['scan.quarantinePackage'])->where('package_identifier', 'nexora.qa.marketplace-n19')->latest('created_at')->first();
+              $extension = Extension::query()->where('identifier', 'nexora.qa.marketplace-n19')->first();
+              $events = AuditLog::query()->whereIn('event', [
+                  'marketplace.source.created',
+                  'marketplace.source.synced',
+                  'marketplace.package.staged',
+                  'extension.installed',
+                  'authorization.denied',
+              ])->orderBy('created_at')->get(['event','metadata'])->map(fn($e) => ['event'=>$e->event,'metadata'=>$e->metadata])->all();
+              $payload = [
+                  'source' => $source ? [
+                      'id'=>$source->id,
+                      'status'=>$source->status,
+                      'catalog_generation'=>$source->catalog_generation,
+                      'last_synced_at'=>optional($source->last_synced_at)->toIso8601String(),
+                      'last_error'=>$source->last_error,
+                  ] : null,
+                  'item' => $item ? [
+                      'id'=>$item->id,
+                      'identifier'=>$item->package_identifier,
+                      'type'=>$item->type,
+                      'version'=>$item->latest_version,
+                      'sync_generation'=>$item->sync_generation,
+                      'artifact_sha256'=>$item->artifact_sha256,
+                  ] : null,
+                  'artifact' => $artifact ? [
+                      'id'=>$artifact->id,
+                      'identifier'=>$artifact->package_identifier,
+                      'version'=>$artifact->package_version,
+                      'content_sha256'=>$artifact->content_sha256,
+                      'scan_id'=>$artifact->scan_id,
+                      'scan_status'=>$artifact->scan?->status,
+                      'scan_decision'=>$artifact->scan?->decision,
+                      'quarantine_path'=>$artifact->scan?->quarantinePackage?->path,
+                      'quarantine_exists'=>$artifact->scan?->quarantinePackage?->path ? is_file($artifact->scan->quarantinePackage->path) : false,
+                  ] : null,
+                  'extension' => $extension ? [
+                      'id'=>$extension->id,
+                      'identifier'=>$extension->identifier,
+                      'status'=>$extension->status,
+                      'current_version'=>$extension->current_version,
+                  ] : null,
+                  'audit_events'=>$events,
+              ];
+              echo json_encode($payload, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR), PHP_EOL;
+              exit;
+          }
+          fwrite(STDERR, "Unknown query mode\n");
+          exit(2);
+          '@ | Set-Content -Encoding ASCII $query
+
+          try {
+            $ready = $false
+            for ($i = 0; $i -lt 60; $i++) {
+              if ($server.HasExited) { throw "Marketplace server exited early with code $($server.ExitCode)." }
+              $probe = (& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/login").Trim()
+              if (($LASTEXITCODE -eq 0) -and ($probe -eq '200')) { $ready = $true; break }
+              Start-Sleep -Seconds 1
+            }
+            if (-not $ready) { throw 'Marketplace target did not serve /login with HTTP 200.' }
+
+            $restrictedCookies = Join-Path $env:RUNNER_TEMP 'n19-restricted-cookies.txt'
+            $restrictedLoginBody = Join-Path $env:RUNNER_TEMP 'n19-restricted-login.html'
+            $restrictedCsrf = Get-Csrf "$env:BASE_URL/login" $restrictedCookies $restrictedLoginBody
+            $restrictedPassword = (Get-Content -Raw (Join-Path $env:RUNNER_TEMP 'n19-restricted-password.txt')).Trim()
+            $restrictedHeaders = Join-Path $env:EVIDENCE_DIR 'restricted-login.headers.txt'
+            $restrictedStatus = (& curl.exe -sS -b $restrictedCookies -c $restrictedCookies -D $restrictedHeaders -o NUL -w '%{http_code}' -X POST "$env:BASE_URL/login" `
+              --data-urlencode "_token=$restrictedCsrf" `
+              --data-urlencode 'email=n19-restricted@example.test' `
+              --data-urlencode "password=$restrictedPassword").Trim()
+            if ($restrictedStatus -ne '302') { throw "Restricted principal login failed; HTTP $restrictedStatus." }
+            $restrictedAdminBody = Join-Path $env:RUNNER_TEMP 'n19-restricted-admin.html'
+            $restrictedCsrf = Get-Csrf "$env:BASE_URL/admin" $restrictedCookies $restrictedAdminBody
+            $deniedHeaders = Join-Path $env:EVIDENCE_DIR 'restricted-marketplace.headers.txt'
+            $deniedBody = Join-Path $env:EVIDENCE_DIR 'restricted-marketplace.body.html'
+            $denied = (& curl.exe -sS -b $restrictedCookies -c $restrictedCookies -D $deniedHeaders -o $deniedBody -w '%{http_code}' -X POST "$env:BASE_URL/admin/extensions/marketplace/sources" `
+              --data-urlencode "_token=$restrictedCsrf" `
+              --data-urlencode 'name=Forbidden N1.9 Source' `
+              --data-urlencode "base_url=$env:FIXTURE_BASE" `
+              --data-urlencode 'trusted_publishers_only=0').Trim()
+            if ($denied -ne '403') { throw "marketplace.manage boundary was not enforced; expected 403, got $denied." }
+            Write-Host 'N19_MARKETPLACE_PERMISSION_BOUNDARY=PASS'
+
+            $adminCookies = Join-Path $env:RUNNER_TEMP 'n19-admin-cookies.txt'
+            $adminLoginBody = Join-Path $env:RUNNER_TEMP 'n19-admin-login.html'
+            $adminCsrf = Get-Csrf "$env:BASE_URL/login" $adminCookies $adminLoginBody
+            $adminPassword = (Get-Content -Raw (Join-Path $env:RUNNER_TEMP 'n19-admin-password.txt')).Trim()
+            $loginHeaders = Join-Path $env:EVIDENCE_DIR 'admin-login.headers.txt'
+            $loginStatus = (& curl.exe -sS -b $adminCookies -c $adminCookies -D $loginHeaders -o NUL -w '%{http_code}' -X POST "$env:BASE_URL/login" `
+              --data-urlencode "_token=$adminCsrf" `
+              --data-urlencode 'email=n19-admin@example.test' `
+              --data-urlencode "password=$adminPassword").Trim()
+            if ($loginStatus -ne '302') { throw "Administrator login failed; HTTP $loginStatus." }
+            Assert-Redirect $loginHeaders '(?im)^Location:\s*.*?/admin\s*$' 'Administrator login'
+
+            $workspaceHeaders = Join-Path $env:EVIDENCE_DIR 'workspace.headers.txt'
+            $workspaceBody = Join-Path $env:EVIDENCE_DIR 'workspace-before.html'
+            $workspaceStatus = (& curl.exe -sS -b $adminCookies -c $adminCookies -D $workspaceHeaders -o $workspaceBody -w '%{http_code}' "$env:BASE_URL/admin/extensions").Trim()
+            if ($workspaceStatus -ne '200') { throw "Extensions workspace failed; HTTP $workspaceStatus." }
+            $adminCsrf = Get-Csrf "$env:BASE_URL/admin/extensions" $adminCookies (Join-Path $env:RUNNER_TEMP 'n19-workspace-csrf.html')
+            Write-Host 'N19_EXTENSIONS_WORKSPACE=PASS'
+
+            $sourceHeaders = Join-Path $env:EVIDENCE_DIR 'source-create.headers.txt'
+            $sourceBody = Join-Path $env:EVIDENCE_DIR 'source-create.body.html'
+            $sourceStatus = (& curl.exe -sS -b $adminCookies -c $adminCookies -D $sourceHeaders -o $sourceBody -w '%{http_code}' -X POST "$env:BASE_URL/admin/extensions/marketplace/sources" `
+              --data-urlencode "_token=$adminCsrf" `
+              --data-urlencode 'name=N1.9 QA Source' `
+              --data-urlencode "base_url=$env:FIXTURE_BASE" `
+              --data-urlencode 'trusted_publishers_only=0').Trim()
+            if ($sourceStatus -ne '302') { throw "Marketplace source creation failed; HTTP $sourceStatus." }
+            $sourceId = (& php $query $env:GITHUB_WORKSPACE source).Trim()
+            if ($sourceId -eq '') { throw 'Marketplace source was not persisted.' }
+            Write-Host "N19_SOURCE_CREATE=PASS id=$sourceId"
+
+            $adminCsrf = Get-Csrf "$env:BASE_URL/admin/extensions" $adminCookies (Join-Path $env:RUNNER_TEMP 'n19-pre-sync.html')
+            $syncHeaders = Join-Path $env:EVIDENCE_DIR 'source-sync.headers.txt'
+            $syncBody = Join-Path $env:EVIDENCE_DIR 'source-sync.body.html'
+            $syncStatus = (& curl.exe -sS -b $adminCookies -c $adminCookies -D $syncHeaders -o $syncBody -w '%{http_code}' -X POST "$env:BASE_URL/admin/extensions/marketplace/sources/$sourceId/sync" `
+              --data-urlencode "_token=$adminCsrf").Trim()
+            if ($syncStatus -ne '302') { throw "Marketplace source synchronization failed; HTTP $syncStatus." }
+            $itemId = (& php $query $env:GITHUB_WORKSPACE item).Trim()
+            if ($itemId -eq '') { throw 'Marketplace catalog item was not persisted after sync.' }
+
+            $catalogBody = Join-Path $env:EVIDENCE_DIR 'workspace-after-sync.html'
+            $catalogStatus = (& curl.exe -sS -b $adminCookies -c $adminCookies -o $catalogBody -w '%{http_code}' "$env:BASE_URL/admin/extensions").Trim()
+            if ($catalogStatus -ne '200') { throw "Extensions workspace after sync failed; HTTP $catalogStatus." }
+            if ((Get-Content -Raw $catalogBody) -notmatch 'nexora\.qa\.marketplace-n19') { throw 'Synchronized Marketplace package is not observable in the Extensions workspace payload.' }
+            Write-Host "N19_SOURCE_SYNC=PASS item=$itemId"
+
+            $adminCsrf = Get-Csrf "$env:BASE_URL/admin/extensions" $adminCookies (Join-Path $env:RUNNER_TEMP 'n19-pre-stage.html')
+            $stageHeaders = Join-Path $env:EVIDENCE_DIR 'package-stage.headers.txt'
+            $stageBody = Join-Path $env:EVIDENCE_DIR 'package-stage.body.html'
+            $stageStatus = (& curl.exe -sS -b $adminCookies -c $adminCookies -D $stageHeaders -o $stageBody -w '%{http_code}' -X POST "$env:BASE_URL/admin/extensions/marketplace/items/$itemId/stage" `
+              --data-urlencode "_token=$adminCsrf").Trim()
+            if ($stageStatus -ne '302') { throw "Marketplace package staging failed; HTTP $stageStatus." }
+            Assert-Redirect $stageHeaders '(?im)^Location:\s*.*?/admin/security/sentinel/' 'Marketplace staging'
+            $artifactId = (& php $query $env:GITHUB_WORKSPACE artifact).Trim()
+            if ($artifactId -eq '') { throw 'Sentinel-approved supply-chain artifact was not persisted after staging.' }
+            Write-Host "N19_PACKAGE_STAGE=PASS artifact=$artifactId"
+
+            $adminCsrf = Get-Csrf "$env:BASE_URL/admin/extensions" $adminCookies (Join-Path $env:RUNNER_TEMP 'n19-pre-install.html')
+            $installHeaders = Join-Path $env:EVIDENCE_DIR 'extension-install.headers.txt'
+            $installBody = Join-Path $env:EVIDENCE_DIR 'extension-install.body.html'
+            $installStatus = (& curl.exe -sS -b $adminCookies -c $adminCookies -D $installHeaders -o $installBody -w '%{http_code}' -X POST "$env:BASE_URL/admin/extensions/install/$artifactId" `
+              --data-urlencode "_token=$adminCsrf").Trim()
+            if ($installStatus -ne '302') { throw "Extension promotion/install failed; HTTP $installStatus." }
+            $extensionId = (& php $query $env:GITHUB_WORKSPACE extension).Trim()
+            if ($extensionId -eq '') { throw 'Owning Extension engine did not persist the staged Marketplace package.' }
+
+            $showHeaders = Join-Path $env:EVIDENCE_DIR 'extension-show.headers.txt'
+            $showBody = Join-Path $env:EVIDENCE_DIR 'extension-show.html'
+            $showStatus = (& curl.exe -sS -b $adminCookies -c $adminCookies -D $showHeaders -o $showBody -w '%{http_code}' "$env:BASE_URL/admin/extensions/$extensionId").Trim()
+            if ($showStatus -ne '200') { throw "Installed extension is not observable through the owning engine UI; HTTP $showStatus." }
+
+            $finalEvidence = Join-Path $env:EVIDENCE_DIR 'marketplace-state.json'
+            & php $query $env:GITHUB_WORKSPACE final | Set-Content -Encoding UTF8 $finalEvidence
+            if ($LASTEXITCODE -ne 0) { throw 'Unable to capture final Marketplace evidence.' }
+            $state = Get-Content -Raw $finalEvidence | ConvertFrom-Json
+            if ($state.source.status -ne 'active') { throw 'Marketplace source is not active in final state.' }
+            if ([string]::IsNullOrWhiteSpace([string]$state.source.catalog_generation)) { throw 'Marketplace source has no catalog generation after sync.' }
+            if ($state.item.sync_generation -ne $state.source.catalog_generation) { throw 'Marketplace item/source generations do not match.' }
+            if ($state.item.artifact_sha256 -ne '7427989ebd42fa43098bb067569e73d48257e5bc15c96f1d09c8abd3fb298f33') { throw 'Catalog checksum evidence does not match fixture.' }
+            if ($state.artifact.content_sha256 -ne '7427989ebd42fa43098bb067569e73d48257e5bc15c96f1d09c8abd3fb298f33') { throw 'Downloaded/quarantined artifact checksum does not match fixture.' }
+            if ($state.artifact.scan_status -ne 'completed' -or $state.artifact.scan_decision -ne 'allow') { throw 'Sentinel did not complete with ALLOW.' }
+            if (-not $state.artifact.quarantine_exists) { throw 'Quarantined Marketplace package bytes are not present.' }
+            if ($state.extension.status -ne 'installed') { throw "Extension final state is not installed: $($state.extension.status)." }
+
+            $auditNames = @($state.audit_events | ForEach-Object { $_.event })
+            foreach ($requiredAudit in @('marketplace.source.created','marketplace.source.synced','marketplace.package.staged','extension.installed','authorization.denied')) {
+              if ($auditNames -notcontains $requiredAudit) { throw "Required audit event missing: $requiredAudit." }
+            }
+            $permissionDenial = @($state.audit_events | Where-Object { $_.event -eq 'authorization.denied' -and $_.metadata.permission -eq 'marketplace.manage' })
+            if ($permissionDenial.Count -lt 1) { throw 'authorization.denied did not prove marketplace.manage-specific denial.' }
+
+            @{
+              schema = 1
+              status = 'pass'
+              source_sha = (& git rev-parse HEAD).Trim()
+              expected_source_sha = '${{ github.event.pull_request.base.sha }}'
+              carrier_sha = '${{ github.event.pull_request.head.sha }}'
+              workspace_http = 200
+              restricted_marketplace_http = 403
+              source_create_http = [int]$sourceStatus
+              source_sync_http = [int]$syncStatus
+              stage_http = [int]$stageStatus
+              install_http = [int]$installStatus
+              extension_show_http = [int]$showStatus
+              package_identifier = 'nexora.qa.marketplace-n19'
+              package_sha256 = '7427989ebd42fa43098bb067569e73d48257e5bc15c96f1d09c8abd3fb298f33'
+              sentinel_decision = [string]$state.artifact.scan_decision
+              extension_status = [string]$state.extension.status
+              catalog_generation_current = ($state.item.sync_generation -eq $state.source.catalog_generation)
+              required_audits_present = $true
+              n123_hardening_claimed = $false
+            } | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'summary.json')
+            Write-Host 'N19_MARKETPLACE_REAL_TARGET=PASS'
+          }
+          finally {
+            & cmd.exe /d /c "taskkill /PID $($server.Id) /T /F >NUL 2>&1 || exit /b 0" | Out-Null
+          }
+
+      - name: Upload N1.9 Marketplace evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-n19-marketplace-${{ github.event.pull_request.base.sha }}-${{ github.run_id }}
+          path: |
+            storage/app/nexora/qa/n19-marketplace-target/**
+          if-no-files-found: warn

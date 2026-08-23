@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "packages": [
+    {
+      "id": "nexora.qa.marketplace-n19",
+      "name": "Nexora N1.9 Marketplace QA Extension",
+      "type": "extension",
+      "version": "1.0.0",
+      "description": "Deterministic N1.9 Marketplace real-target acceptance fixture.",
+      "artifact_url": "https://raw.githubusercontent.com/Vertex-Systems-Network/nexora/ops-n19-marketplace-target-qa/.github/fixtures/n19-marketplace/n19-marketplace-extension.zip",
+      "sha256": "7427989ebd42fa43098bb067569e73d48257e5bc15c96f1d09c8abd3fb298f33",
+      "metadata": {
+        "acceptance": "N1.9",
+        "fixture": "deterministic"
+      }
+    }
+  ]
+}
