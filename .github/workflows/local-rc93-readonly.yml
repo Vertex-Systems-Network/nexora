@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Inspect preserved rc93 target without mutation
-        shell: powershell
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $target = 'D:\laragon\www\nexora'
           if (!(Test-Path "$target\artisan")) {
