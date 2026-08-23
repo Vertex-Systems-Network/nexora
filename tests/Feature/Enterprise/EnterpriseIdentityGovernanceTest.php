@@ -16,6 +16,7 @@ use App\Nexora\Enterprise\Services\SsoProviderRegistry;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -252,6 +253,8 @@ final class EnterpriseIdentityGovernanceTest extends TestCase
 
     public function test_nested_impersonation_is_rejected_before_identity_switch(): void
     {
+        $this->withoutMiddleware(ThrottleRequests::class);
+
         $organization = $this->defaultOrganization();
         $actor = $this->superAdmin();
         $target = User::factory()->create(['status' => 'active']);
