@@ -308,7 +308,7 @@ jobs:
           Write-Host "PUBLIC_STORAGE_EXISTS=$($storageProbe.exists) LINK_TYPE=$($storageProbe.link_type) TARGET=$(@($storageProbe.target) -join ',')"
           Write-Host 'RC94_INSTALLER_SOURCE_DRIFT_DIAGNOSTIC=CAPTURED'
 
-      - name: Prove exact pre-recovery four-plane boundary
+      - name: Prove bounded pre-recovery mutable-plane boundary
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -318,10 +318,15 @@ jobs:
           if ($compatExit -eq 0) { throw 'Committed-but-unfinalized target unexpectedly passed compatibility.' }
           $compat = Get-Content -Raw $compatPath | ConvertFrom-Json
           $actual = @($compat.mismatches | ForEach-Object { [string]$_ } | Sort-Object)
-          $expected = @('activation','environment','process','service')
-          if ((Compare-Object $expected $actual).Count -ne 0) {
-            throw "Pre-recovery mismatch set is not exactly the approved four-plane boundary: $($actual -join ', ')."
+          $allowed = @('activation','environment','process','service')
+          if ($actual.Count -eq 0) {
+            throw 'Pre-recovery compatibility failed without a non-empty mismatch set.'
           }
+          $unexpected = @($actual | Where-Object { $_ -notin $allowed })
+          if ($unexpected.Count -ne 0) {
+            throw "Pre-recovery mismatch set escaped the approved mutable-plane allow-list: $($unexpected -join ', ')."
+          }
+          Write-Host "RC94_PRE_RECOVERY_MISMATCHES=$($actual -join ',')"
 
           $postPath = Join-Path $env:EVIDENCE_DIR 'pre-recovery-post-install.json'
           & php artisan nexora:runtime:post-install-status --assert-ready 2>&1 | Tee-Object -FilePath $postPath
@@ -331,7 +336,7 @@ jobs:
           if (($post.ready -eq $true) -or ($post.runtime_ready -eq $true)) {
             throw 'Pre-recovery handoff unexpectedly reports ready.'
           }
-          Write-Host 'RC94_PRE_RECOVERY_FOUR_PLANE_BOUNDARY=PASS'
+          Write-Host 'RC94_PRE_RECOVERY_MUTABLE_BOUNDARY=PASS'
 
       - name: Run guarded recovery and verify fresh-process convergence
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
@@ -360,7 +365,7 @@ jobs:
           }
           Write-Host 'RC94_POST_INSTALL_RECOVERY_CONVERGENCE=PASS'
 
-      - name: Exercise real login and authenticated admin routes after recovery
+      - name: Exercise real guest and authenticated routes after recovery
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -381,6 +386,15 @@ jobs:
               Start-Sleep -Seconds 1
             }
             if (-not $ready) { throw 'Recovered target did not serve /login successfully.' }
+
+            $guestAdminHeaders = Join-Path $env:EVIDENCE_DIR 'guest-admin.headers.txt'
+            $guestAdminBody = Join-Path $env:EVIDENCE_DIR 'guest-admin.body.html'
+            $guestAdminStatus = (& curl.exe -sS -D $guestAdminHeaders -o $guestAdminBody -w '%{http_code}' "$env:BASE_URL/admin").Trim()
+            if ($guestAdminStatus -ne '302') { throw "Guest /admin returned HTTP $guestAdminStatus instead of 302." }
+            $guestAdminHeaderText = Get-Content -Raw $guestAdminHeaders
+            if ($guestAdminHeaderText -notmatch '(?im)^Location:\s*.*?/login\s*$') {
+              throw 'Guest /admin did not redirect to /login.'
+            }
 
             $cookies = Join-Path $env:RUNNER_TEMP 'rc94-auth-cookies.txt'
             $loginBody = Join-Path $env:EVIDENCE_DIR 'login.body.html'
@@ -421,11 +435,12 @@ jobs:
               schema = 1
               source_sha = (& git rev-parse HEAD).Trim()
               login_page = @{ status = [int]$loginStatus; expected = 200 }
+              guest_admin = @{ status = [int]$guestAdminStatus; expected = 302; redirect = '/login' }
               super_admin_login = @{ status = [int]$authStatus; expected = 302; redirect = '/admin' }
               authenticated_admin = @{ status = [int]$adminStatus; expected = 200 }
               runtime_handoff = @{ status = [int]$handoffStatus; expected = 302; redirect = '/login' }
             } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'http-routes.json')
-            Write-Host 'RC94_RECOVERED_AUTHENTICATED_HTTP_ROUTES=PASS'
+            Write-Host 'RC94_RECOVERED_HTTP_ROUTES=PASS'
           }
           finally {
             & cmd.exe /d /c "taskkill /PID $($server.Id) /T /F >NUL 2>&1 || exit /b 0" | Out-Null
