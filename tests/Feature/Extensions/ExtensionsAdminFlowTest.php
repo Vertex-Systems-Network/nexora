@@ -12,6 +12,7 @@ use App\Models\User;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 use ZipArchive;
@@ -47,6 +48,8 @@ final class ExtensionsAdminFlowTest extends TestCase
 
     public function test_declarative_extension_moves_from_sentinel_to_install_enable_disable_and_uninstall(): void
     {
+        $this->withoutMiddleware(ThrottleRequests::class);
+
         $admin=User::factory()->create(['email_verified_at'=>now()]);
         $admin->roles()->attach(Role::query()->where('slug','administrator')->value('id'));
         $zipPath=$this->extensionZip();
