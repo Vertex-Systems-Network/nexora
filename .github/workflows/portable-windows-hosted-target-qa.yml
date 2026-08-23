@@ -14,6 +14,18 @@ jobs:
     name: portable-hosted-windows-target
     runs-on: windows-latest
     timeout-minutes: 60
+    env:
+      APP_ENV: testing
+      APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+      APP_DEBUG: 'false'
+      APP_URL: 'http://127.0.0.1'
+      NEXORA_INSTALLER_BYPASS: 'true'
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
 
     steps:
       - name: Checkout exact current development source
@@ -52,6 +64,8 @@ jobs:
           $nodeVersion = (& node -p "process.versions.node").Trim()
           Write-Host "PHP: $phpVersion"
           Write-Host "Node: $nodeVersion"
+          Write-Host "APP_ENV: $env:APP_ENV"
+          Write-Host "DB_CONNECTION: $env:DB_CONNECTION"
           & composer --version
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & npm.cmd --version
@@ -75,28 +89,26 @@ jobs:
           & npm.cmd install --no-audit --no-fund
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Prepare isolated testing environment
+      - name: Prepare ephemeral testing environment file
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
-          $bytes = New-Object byte[] 32
-          $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-          $rng.GetBytes($bytes)
-          $rng.Dispose()
-          $key = 'base64:' + [Convert]::ToBase64String($bytes)
           @"
-          APP_NAME=Nexora
           APP_ENV=testing
-          APP_KEY=$key
           APP_DEBUG=false
           APP_URL=http://127.0.0.1
-          CACHE_STORE=array
-          SESSION_DRIVER=array
-          QUEUE_CONNECTION=sync
-          MAIL_MAILER=array
-          NEXORA_INSTALLER_BYPASS=true
-          DB_CONNECTION=sqlite
-          DB_DATABASE=:memory:
           "@ | Set-Content -Encoding UTF8 .env.testing
+
+      - name: Verify warning-clean Windows test bootstrap
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $reported = (& php artisan about --only=environment | Out-String)
+          Write-Host $reported
+          if ($reported -notmatch 'testing') {
+            Write-Error 'Laravel did not boot the testing environment.'
+            exit 5
+          }
+          & php artisan test tests/Unit/AtomicFileWriterTest.php --colors=never --display-warnings --fail-on-warning
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Run canonical full development target QA
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
@@ -123,11 +135,11 @@ jobs:
           Write-Host "SQLite matrix: $($matrix.status)"
           if ($readiness.status -ne 'ready') {
             Write-Error 'Development readiness evidence is not ready.'
-            exit 5
+            exit 6
           }
           if ($matrix.status -ne 'pass') {
             Write-Error 'SQLite target matrix evidence is not pass.'
-            exit 6
+            exit 7
           }
           Write-Host 'PORTABLE_HOSTED_WINDOWS_TARGET_QA=PASS'
 
