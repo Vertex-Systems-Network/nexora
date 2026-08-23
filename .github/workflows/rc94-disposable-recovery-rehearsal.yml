@@ -403,7 +403,7 @@ jobs:
             $loginStatus = (& curl.exe -sS -c $cookies -D $loginHeaders -o $loginBody -w '%{http_code}' "$env:BASE_URL/login").Trim()
             if ($loginStatus -ne '200') { throw "Recovered /login returned HTTP $loginStatus instead of 200." }
             $html = Get-Content -Raw $loginBody
-            $csrfMatch = [regex]::Match($html, 'name="_token"\s+value="([^"]+)"')
+            $csrfMatch = [regex]::Match($html, '(?:name="_token"\s+value="|name="csrf-token"\s+content=")([^"]+)"')
             if (-not $csrfMatch.Success) { throw 'Unable to extract login CSRF token.' }
             $csrf = $csrfMatch.Groups[1].Value
 
