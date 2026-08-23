@@ -129,8 +129,7 @@ jobs:
           exit(($result['ready'] ?? false) === true ? 0 : 2);
           '@ | Set-Content -Encoding ASCII $probeScript
           & php $probeScript $env:GITHUB_WORKSPACE $evidencePath
-          $probeExit = $LASTEXITCODE
-          if ($probeExit -ne 0) {
+          if ($LASTEXITCODE -ne 0) {
             throw 'Disposable Windows target does not satisfy the canonical installer system requirements.'
           }
           Write-Host 'RC94_INSTALLER_SYSTEM_REQUIREMENTS=PASS'
@@ -141,11 +140,16 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $serverOut = Join-Path $env:RUNNER_TEMP 'rc94-install-server.out.log'
           $serverErr = Join-Path $env:RUNNER_TEMP 'rc94-install-server.err.log'
-          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t','public','vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php') -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+          $docroot = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'public'))
+          $router = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php'))
+          if (-not (Test-Path (Join-Path $docroot 'index.php'))) { throw 'Laravel public/index.php is missing.' }
+          if (-not (Test-Path $router)) { throw 'Laravel built-in server router is missing.' }
+          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t',$docroot,$router) -WorkingDirectory $docroot -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
           $server.Id | Set-Content -Encoding ASCII (Join-Path $env:RUNNER_TEMP 'rc94-server.pid')
           try {
             $ready = $false
             for ($i = 0; $i -lt 60; $i++) {
+              if ($server.HasExited) { throw "Disposable installer server exited early with code $($server.ExitCode)." }
               $probe = (& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/install").Trim()
               if (($LASTEXITCODE -eq 0) -and ($probe -eq '200')) { $ready = $true; break }
               Start-Sleep -Seconds 1
@@ -257,10 +261,13 @@ jobs:
           $password = (Get-Content -Raw $passwordPath).Trim()
           $serverOut = Join-Path $env:RUNNER_TEMP 'rc94-recovered-server.out.log'
           $serverErr = Join-Path $env:RUNNER_TEMP 'rc94-recovered-server.err.log'
-          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t','public','vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php') -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+          $docroot = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'public'))
+          $router = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php'))
+          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t',$docroot,$router) -WorkingDirectory $docroot -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
           try {
             $ready = $false
             for ($i = 0; $i -lt 60; $i++) {
+              if ($server.HasExited) { throw "Recovered HTTP server exited early with code $($server.ExitCode)." }
               $probe = (& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/login").Trim()
               if (($LASTEXITCODE -eq 0) -and ($probe -eq '200')) { $ready = $true; break }
               Start-Sleep -Seconds 1
