@@ -1,0 +1,131 @@
+name: Nexora portable Windows target QA
+
+on:
+  push:
+    branches:
+      - ops/rc94-windows-target-qa
+  pull_request:
+    branches:
+      - dev/n1-0b-core-functional-qa
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-windows-target:
+    name: portable-windows-target
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout exact current development source
+        uses: actions/checkout@v7
+        with:
+          ref: dev/n1-0b-core-functional-qa
+          clean: true
+          fetch-depth: 1
+
+      - name: Verify environment-agnostic source boundary
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          Write-Host "Runner: $env:RUNNER_NAME / $env:RUNNER_OS / $env:RUNNER_ARCH"
+          Write-Host "Workspace: $env:GITHUB_WORKSPACE"
+
+          $forbidden = & git grep -n -i -E 'laragon|D:\\laragon|D:/laragon' -- app bootstrap config routes scripts package.json composer.json 2>$null
+          if ($LASTEXITCODE -eq 0 -and $forbidden) {
+            Write-Host $forbidden
+            Write-Error 'Runtime/source code contains a local-server-vendor-specific Laragon dependency.'
+            exit 2
+          }
+
+          $phpVersion = (& php -r "echo PHP_VERSION;").Trim()
+          $nodeVersion = (& node -p "process.versions.node").Trim()
+          Write-Host "PHP: $phpVersion"
+          Write-Host "Node: $nodeVersion"
+          & composer --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          if ([version]$phpVersion -lt [version]'8.3.0') {
+            Write-Error 'PHP 8.3+ is required.'
+            exit 3
+          }
+          if ([version]$nodeVersion -lt [version]'22.0.0') {
+            Write-Error 'Node.js 22+ is required.'
+            exit 4
+          }
+
+      - name: Install current-source dependencies
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          & composer install --no-interaction --prefer-dist --optimize-autoloader
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm install --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Prepare isolated testing environment
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $bytes = New-Object byte[] 32
+          $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+          $rng.GetBytes($bytes)
+          $rng.Dispose()
+          $key = 'base64:' + [Convert]::ToBase64String($bytes)
+          @"
+          APP_NAME=Nexora
+          APP_ENV=testing
+          APP_KEY=$key
+          APP_DEBUG=false
+          APP_URL=http://127.0.0.1
+          CACHE_STORE=array
+          SESSION_DRIVER=array
+          QUEUE_CONNECTION=sync
+          MAIL_MAILER=array
+          NEXORA_INSTALLER_BYPASS=true
+          "@ | Set-Content -Encoding UTF8 .env.testing
+
+      - name: Run portable full runtime and frontend readiness
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          & php scripts/development-readiness.php --full --evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm run test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run isolated SQLite target matrix
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          & php scripts/database-target-matrix.php --drivers=sqlite --evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Summarize portable target evidence
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $readiness = Get-Content -Raw 'storage/app/nexora/qa/development-readiness.json' | ConvertFrom-Json
+          $matrix = Get-Content -Raw 'storage/app/nexora/qa/database-target-matrix.json' | ConvertFrom-Json
+          $source = (& git rev-parse HEAD).Trim()
+          Write-Host "Source head: $source"
+          Write-Host "Development readiness: $($readiness.status)"
+          Write-Host "Platform version: $($readiness.platform_version)"
+          Write-Host "OS family: $($readiness.os_family)"
+          Write-Host "SQLite matrix: $($matrix.status)"
+          Write-Host 'PORTABLE_WINDOWS_TARGET_QA=PASS'
+
+      - name: Upload portable target evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-portable-windows-target-${{ github.run_id }}
+          path: |
+            storage/app/nexora/qa/development-readiness.json
+            storage/app/nexora/qa/database-target-matrix.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Remove ephemeral environment file
+        if: always()
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          if (Test-Path '.env.testing') { Remove-Item -Force '.env.testing' }
