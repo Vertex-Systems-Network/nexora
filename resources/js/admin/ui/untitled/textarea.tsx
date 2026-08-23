@@ -8,8 +8,8 @@ export function UntitledTextarea({ label, hint, error, className, id, ...props }
     const controlId = id ?? props.name ?? generatedId;
     const messageId = `${controlId}-message`;
     return (
-        <label htmlFor={controlId} className="grid gap-1.5 text-sm font-medium text-[var(--nx-text-secondary)]">
-            {label && <span>{label}</span>}
+        <div className="grid gap-1.5 text-sm font-medium text-[var(--nx-text-secondary)]">
+            {label && <label htmlFor={controlId}>{label}</label>}
             <textarea
                 {...props}
                 id={controlId}
@@ -23,6 +23,6 @@ export function UntitledTextarea({ label, hint, error, className, id, ...props }
                 )}
             />
             {error ? <span id={messageId} role="alert" className="text-xs font-medium text-[var(--nx-danger)]">{error}</span> : hint ? <span id={messageId} className="text-xs font-normal text-[var(--nx-text-muted)]">{hint}</span> : null}
-        </label>
+        </div>
     );
 }
