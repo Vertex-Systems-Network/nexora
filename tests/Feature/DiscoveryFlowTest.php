@@ -12,6 +12,7 @@ use App\Models\SearchQueryLog;
 use App\Models\User;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
@@ -44,6 +45,7 @@ final class DiscoveryFlowTest extends TestCase
 
     public function test_administrator_can_manage_discovery_and_queue_same_host_crawl(): void
     {
+        $this->withoutMiddleware(ThrottleRequests::class);
         Queue::fake();
         $admin = User::factory()->create(['email_verified_at'=>now()]);
         $admin->roles()->attach(Role::query()->where('slug','administrator')->value('id'));
