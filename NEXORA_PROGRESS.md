@@ -9,29 +9,34 @@
 ## 1. Current checkpoint
 
 - Date: `2026-08-23` (Asia/Karachi).
-- Active engineering branch: `fix/portable-runtime-ux`.
-- Active task: PR #13, **`fix: keep runtime activation and target QA server-vendor agnostic`**, targeting `dev/n1-0b-core-functional-qa`.
-- PR #13 state before this state-only reconciliation commit: **OPEN + READY + MERGEABLE**; source acceptance is green, but merge remains gated by exact-head governance on this reconciliation head.
-- PR #14 is a **DRAFT temporary QA carrier only** targeting `main`; it exists solely to make the canonical GitHub-hosted `governance` workflow execute for the exact `fix/portable-runtime-ux` head. **Never merge PR #14.** Close it after final exact-head governance evidence is captured and PR #13 is merged.
-- PR #1 remains **DRAFT + OPEN**; do not mark Ready or merge until required real target/release gates pass.
-- Current portability implementation head before this state-only reconciliation commit: **`e6042c6949098970759cf56f92d78fb2900eb001`**.
-- PR #13 base before merge: `dev/n1-0b-core-functional-qa` at **`a9f1d3871ed4022e7dd1b3463e39701c09e21d7e`**.
+- Active engineering branch: `dev/n1-0b-core-functional-qa` (PR #1 head; this dashboard update is state-only and does not change accepted runtime/product implementation bytes).
+- Completed active portability task: PR #13, **`fix: keep runtime activation and target QA server-vendor agnostic`**.
+- PR #13 is **MERGED** into `dev/n1-0b-core-functional-qa`; merge commit / accepted post-merge implementation head: **`21724569daba8e38e581ec603ebd08c2f4d58cad`**.
+- PR #14 exact-head governance carrier is **CLOSED + UNMERGED** as required.
+- Diagnostic PR #15 is **CLOSED + UNMERGED**. Its temporary test-isolation patches and broadened full-suite-on-SQLite experiment were diagnostic only and are not part of dev.
+- PR #16 clean Windows exact-gate carrier is **CLOSED + UNMERGED** as required. Its workflow checked out the literal PR base SHA, so substantive evidence is bound to unchanged dev source `21724569daba8e38e581ec603ebd08c2f4d58cad`, not to carrier code.
+- PR #1 remains **DRAFT + OPEN + MERGEABLE**; do not mark Ready or merge until required real target/release gates pass.
 - Current certified `main`: **`f854c50c0f7687fc87fdfab01b49562392af4ef4`**.
-- Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for this PR governance workflow.
-- The full Development execution QA job publishes the required status context as **`governance`** and runs on every pull-request head targeting `main`, including Markdown/governance-only commits; no `paths-ignore` exemption remains.
-- Exact portability source-governance run: run **`32634611400`** / run #149, exact source **`e6042c6949098970759cf56f92d78fb2900eb001`**, conclusion **SUCCESS**.
+- Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for the PR governance workflow.
+- The full Development execution QA job publishes required status context **`governance`** and runs on every pull-request head targeting `main`, including Markdown/governance-only commits; no `paths-ignore` exemption remains.
+- Exact portability implementation governance: run **`32634611400`** / run #149 on implementation head **`e6042c6949098970759cf56f92d78fb2900eb001`**, conclusion **SUCCESS**.
+- Final reconciliation-head governance before merge: run **`32635512854`** / run #150 on exact PR #13 head **`7b2f7fab0b13f352bd13b2c9b58d78382c125423`**, job `97184531395`, conclusion **SUCCESS**; artifact `9492242122`, digest **`sha256:972c8a7f8fede167a6e9bcd7c86f2091c246c3d0b7a3737adf8cf8cb6632f506`**.
 - Run #149 Development Readiness: **ready**; Development Target QA source contract PASS with the server-vendor-agnostic boundary; all source/product contracts through N1.26 PASS; full Laravel/PHPUnit **469 passed / 4378 assertions**; Vitest **2 files / 6 tests PASS**; TypeScript noEmit PASS; Vite `8.2.2` production build PASS with 3784 modules transformed; production asset budgets/provenance PASS.
 - Run #149 build evidence: total 1,356,563 bytes; JS 1,251,628 bytes (gzip 394,919; initial gzip 223,997); CSS 65,471 bytes; 94 JS / 1 CSS assets.
 - Run #149 evidence artifact: **`9492014706`**, `nexora-development-readiness-e6042c6949098970759cf56f92d78fb2900eb001`; digest **`sha256:9f5a34ca634b79d5df1731aa77013b271daf7dc313254f8e46a6b9935ea7d3d5`**.
-- PR #13 acceptance boundary is unchanged: generic active PHP/web-service activation guidance; `BASE_URL`-driven Windows/Unix acknowledgement; generic target prerequisite remediation with optional local-server adapters only; portable Windows Composer PATH/shim resolution; explicit Windows/Linux/macOS/local/live-server portability; and a source guard against concrete Laragon project-path coupling.
-- Real pre-change Windows evidence on exact dev source `a9f1d3871ed4022e7dd1b3463e39701c09e21d7e`: run **`32632871203`** passed portable core boundary, Development Readiness, TypeScript/build, Vitest 6/6 and isolated SQLite matrix; artifact `9491536167`, digest `sha256:de35148013a7a8d949e6c2c0b80ca234a4ac2279d32bccbfabce6e4d6f3fcc0b`. This evidence predates the final PR #13 implementation and cannot be attributed to the post-merge hardened dev head.
+- PR #13 acceptance boundary remained unchanged through merge: generic active PHP/web-service activation guidance; `BASE_URL`-driven Windows/Unix acknowledgement; generic target prerequisite remediation with optional local-server adapters only; portable Windows Composer PATH/shim resolution; explicit Windows/Linux/macOS/local/live-server portability; and a source guard against concrete Laragon project-path coupling.
+- Real pre-change Windows evidence on exact dev source `a9f1d3871ed4022e7dd1b3463e39701c09e21d7e`: run **`32632871203`** passed portable core boundary, Development Readiness, TypeScript/build, Vitest 6/6 and isolated SQLite matrix; artifact `9491536167`, digest `sha256:de35148013a7a8d949e6c2c0b80ca234a4ac2279d32bccbfabce6e4d6f3fcc0b`. This remains pre-change evidence only.
+- Required post-merge Windows portability evidence is now complete: clean GitHub-hosted Windows run **`32638775552`** / job `97192491753` checked out literal dev SHA **`21724569daba8e38e581ec603ebd08c2f4d58cad`** on Windows Server 2025 and concluded **SUCCESS**.
+- Post-merge Windows acceptance details: exact-SHA guard PASS; Development Target QA contract PASS; `PORTABLE_CORE_BOUNDARY=PASS`; PHP `8.3.33`; Composer `2.10.2`; Node `22.23.2`; npm `10.9.8`; `php scripts/development-readiness.php --full --evidence` reported **ready**; TypeScript noEmit PASS; Vite `8.2.2` production build PASS; Vitest **2 files / 6 tests PASS**; isolated SQLite matrix **PASSED** with **3 tests / 215 assertions**; final marker **`PORTABLE_WINDOWS_TARGET_QA=PASS`**.
+- Post-merge Windows evidence artifact: **`9493045237`**, `nexora-portable-hosted-windows-exact-21724569daba8e38e581ec603ebd08c2f4d58cad`; digest **`sha256:4e897e55069615b8a524f1039f381974c9450d2df930ad6192d70a468d10fec5`**.
+- PR #13 portability acceptance is therefore **PASS / CLOSED**. This is a bounded portability acceptance slice; it does not certify the remaining database/provider/HA/recovery/browser/accessibility/release roadmap or promote PR #1.
 - Issue #2 remains **OPEN**, but its live acceptance interpretation is corrected by newer real Windows evidence: the preserved installed `1.0.0-rc.93` target still fails only `environment`, `activation`, `service`, and `process`; a guarded one-time in-place reconcile returned exit 1; follow-up remained failed; and direct source-marker comparison proved preserved rc.93 does **not** contain the permanent rc.94 post-install finalization path.
 - Preserved rc.93 is therefore **legacy failure evidence**, not a target that may be modified to manufacture a PASS. Do not overwrite it, backport rc.94 files into it, manually edit fingerprints/`installed.lock`, or repeatedly rerun the known-failing reconcile as an issue-closing shortcut.
-- Safe target continuation is a **separate disposable current-source / rc.94 recovery-or-upgrade rehearsal**, followed by exact-source Windows target QA. The preserved rc.93 installation remains untouched.
+- Active target continuation is now the already-approved **separate disposable current-source / rc.94 recovery-or-upgrade rehearsal** for Issue #2 semantics, with preserved rc.93 left untouched.
 - Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
 - Source `composer.lock` remains intentionally absent. Hosted Composer resolution is development evidence only; Development Readiness explicitly does not promote dependency locks or grant release certification.
 - W3C Nu HTML + W3C CSS Validation Service + WAVE C5 source tooling is implemented and mandatory for final target accessibility closure.
-- Target and Release scores do **not** move from PR #13 source CI, this reconciliation commit, or preserved rc.93 failure evidence.
+- Target and Release scores do **not** move from PR #13's bounded portability acceptance, this state-only reconciliation, or preserved rc.93 failure evidence.
 
 ### Closed source fail-fast chain since the earlier checkpoint
 
@@ -52,15 +57,17 @@ The hosted sequence exposed and closed deterministic stale-contract/CI mismatche
 - Every-head governance enforcement was corrected at `375bfcb3…`; documentation-only heads are no longer exempt.
 - `actions/upload-artifact` was moved to v7 and run #138 proved the workflow-runtime deprecation removed.
 - PHPUnit warning noise was fixed without suppression via ephemeral `.env.testing`; later exact-head runs retain the warning-hard command.
-- PR #13 removes server-vendor coupling from runtime activation/target QA while preserving vendor-specific local-server behavior only as optional adapters.
+- PR #13 removed server-vendor coupling from runtime activation/target QA while preserving vendor-specific local-server behavior only as optional adapters.
+- The post-merge Windows rerun proved the hardened source on exact dev SHA `21724569…`; the temporary over-broadened SQLite full-suite diagnostics were discarded instead of being misclassified as product defects.
 
 ### Governance compatibility / evidence semantics
 
 - Historical Actions: **DEFERRED BY USER** — superseded quota/capacity-era state retained only for source-contract and audit-history compatibility. It is not the current PR execution policy.
-- Historical self-hosted policy in the append-only ledger is superseded for this PR workflow. Current Development execution QA is GitHub-hosted `ubuntu-latest` only.
-- Historical ledger/dashboard text that requires preserved rc.93 to obtain in-place compatibility/post-install PASS is superseded by the newer real Windows evidence proving that preserved rc.93 lacks the permanent rc.94 finalization implementation.
-- **Target Power** is evidence-based and never increases from source CI, source contracts, jsdom, GitHub-hosted development-checkout evidence, Dependabot configuration, branch-governance wiring, or legacy failure evidence alone.
-- Current target/release scoring boundary remains: `TARGET POWER    50.0%` and `RELEASE POWER   25.0%` until real exact-source target/release evidence justifies a change.
+- Historical self-hosted policy in the append-only ledger is superseded for the PR governance workflow. Current Development execution QA is GitHub-hosted `ubuntu-latest` only.
+- Historical ledger/dashboard text that requires preserved rc.93 to obtain in-place compatibility/post-install PASS is superseded by newer real Windows evidence proving that preserved rc.93 lacks the permanent rc.94 finalization implementation.
+- The clean post-merge Windows hosted run is accepted evidence for the bounded PR #13 portability contract because it checked out the literal dev SHA and reproduced the established Windows acceptance shape. It is not a substitute for later real provider/HA/browser/recovery/release evidence.
+- **Target Power** is evidence-based and does not increase from source CI, source contracts, jsdom, bounded portability evidence, Dependabot configuration, branch-governance wiring, or legacy failure evidence alone.
+- Current target/release scoring boundary remains: `TARGET POWER    50.0%` and `RELEASE POWER   25.0%` until broader real exact-source target/release evidence justifies a change.
 
 ---
 
@@ -73,7 +80,7 @@ TARGET POWER    50.0%  ██████████░░░░░░░░░
 RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
 ```
 
-No score is increased by W3C/WAVE source tooling, static review, Dependabot/governance configuration, warning cleanup, portability source hardening or hosted development QA alone. Target/Release Power moves only from real exact-source target evidence.
+No score is increased by W3C/WAVE source tooling, static review, Dependabot/governance configuration, warning cleanup, portability source hardening or bounded hosted Windows portability QA alone. Target/Release Power moves only from the remaining real exact-source target evidence.
 
 ---
 
@@ -81,7 +88,7 @@ No score is increased by W3C/WAVE source tooling, static review, Dependabot/gove
 
 | Block | Source state | Target / release state |
 |---|---|---|
-| DEV-0–DEV-4 | substantial source closure; exact hosted QA green | preserved rc.93 legacy failure evidence + separate current-source recovery/upgrade rehearsal + broad product QA pending |
+| DEV-0–DEV-4 | substantial source closure; PR #13 portability hardening merged and exact post-merge Windows portability gate PASS | preserved rc.93 legacy failure evidence + separate current-source recovery/upgrade rehearsal + broad product QA pending |
 | DEV-5 SQL/Data Services | source/harness substantially closed | real disposable DB matrix + connector evidence pending |
 | N1.9–N1.21 | SOURCE DONE for bounded workflows | target execution pending |
 | N1.22 Sentinel 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | controlled package target evidence pending |
@@ -121,9 +128,11 @@ GitHub-hosted Ubuntu
   -> upload-artifact@v7 evidence upload
 ```
 
-Latest accepted portability implementation evidence, run #149 (`32634611400`), exact implementation head `e6042c6949098970759cf56f92d78fb2900eb001`:
+Accepted portability source evidence:
 
-- Post-install runtime convergence source contract: PASS.
+- Implementation run #149 (`32634611400`) on exact implementation head `e6042c6949098970759cf56f92d78fb2900eb001`: SUCCESS.
+- Final pre-merge exact-head run #150 (`32635512854`) on exact PR #13 head `7b2f7fab0b13f352bd13b2c9b58d78382c125423`: governance SUCCESS; artifact `9492242122`; digest `sha256:972c8a7f8fede167a6e9bcd7c86f2091c246c3d0b7a3737adf8cf8cb6632f506`.
+- Run #149 Post-install runtime convergence source contract: PASS.
 - DEV-4, Theme, Extension, Studio, Documents, Collections, Publishing/SEO, Admin UX, Forms/Data/Workflows: PASS.
 - Data Connections + primary SQL portability + installer DB UX: PASS.
 - Development Target QA source contract: **PASS**, explicitly enforcing server-vendor-agnostic core activation/target behavior with optional adapters only.
@@ -134,9 +143,28 @@ Latest accepted portability implementation evidence, run #149 (`32634611400`), e
 - TypeScript noEmit: PASS.
 - Production frontend build: PASS, Vite `8.2.2`, 3784 modules transformed.
 - Production asset budgets/provenance: PASS — build 1,356,563 bytes; JS 1,251,628 bytes (gzip 394,919; initial gzip 223,997); CSS 65,471 bytes; 94 JS / 1 CSS assets.
-- Evidence artifact: `9492014706`; digest `sha256:9f5a34ca634b79d5df1731aa77013b271daf7dc313254f8e46a6b9935ea7d3d5`.
+- Run #149 evidence artifact: `9492014706`; digest `sha256:9f5a34ca634b79d5df1731aa77013b271daf7dc313254f8e46a6b9935ea7d3d5`.
 
-The PR workflow intentionally does **not** call the shared WAVE API or claim live W3C/WAVE target success. It also does not replace the required post-merge real Windows target rerun.
+Accepted post-merge Windows portability evidence:
+
+```text
+Run: 32638775552
+Job: 97192491753
+Exact dev source: 21724569daba8e38e581ec603ebd08c2f4d58cad
+OS: Windows Server 2025 / X64
+Development Target QA Contract: PASS
+PORTABLE_CORE_BOUNDARY=PASS
+Development Readiness: ready
+TypeScript noEmit: PASS
+Production Vite build: PASS
+Vitest: 6/6 PASS
+SQLite target matrix: PASSED (3 tests / 215 assertions)
+PORTABLE_WINDOWS_TARGET_QA=PASS
+Artifact: 9493045237
+Digest: sha256:4e897e55069615b8a524f1039f381974c9450d2df930ad6192d70a468d10fec5
+```
+
+The canonical Ubuntu PR workflow intentionally does **not** call the shared WAVE API or claim live W3C/WAVE target success. The Windows portability gate is likewise bounded to PR #13 acceptance and does not replace the remaining target/release gates.
 
 ---
 
@@ -222,6 +250,8 @@ Verified real Windows evidence on the preserved `1.0.0-rc.93` installation:
 
 Conclusion: preserved rc.93 cannot satisfy the later rc.94 four-plane convergence acceptance through the available in-place rc.93 source path. This is evidence of a legacy limitation, not permission to redefine acceptance or mutate the preserved installation.
 
+PR #13 portability closure adds a separate fact, not a rewrite of that history: exact post-merge dev source `21724569…` passed the clean Windows portability gate. That proves the current hardened source is portable under the bounded PR #13 contract; it does not turn preserved rc.93 into a PASS.
+
 Forbidden issue-closing shortcuts:
 
 ```text
@@ -236,33 +266,30 @@ Safe continuation:
 
 ```text
 1. keep preserved rc.93 untouched as failure evidence
-2. merge accepted portability hardening only after exact reconciliation-head governance passes
-3. use a separate disposable current-source / rc.94 target for recovery-or-upgrade rehearsal
-4. rerun exact-source Windows target QA on the post-merge dev head
-5. close issue #2 only when the issue's legacy evidence and the approved replacement recovery/upgrade acceptance are explicitly reconciled; never manufacture an rc.93 PASS
+2. retain PR #13 as accepted/merged with exact post-merge Windows PASS evidence
+3. use a separate disposable current-source / rc.94 target for the approved recovery-or-upgrade rehearsal
+4. bind that rehearsal to the exact current dev source and persist evidence
+5. close issue #2 only when the issue's legacy evidence and approved replacement recovery/upgrade acceptance are explicitly reconciled; never manufacture an rc.93 PASS
 ```
 
 ---
 
 ## 7. Remaining target / release sequence
 
-The portability implementation head has accepted source evidence, but this state reconciliation changes the branch head and must itself pass governance before merge. Continue in this order:
+PR #13 portability hardening is now merged and its bounded post-merge Windows acceptance is PASS. Continue in the existing roadmap order without reopening that completed task:
 
 ```text
-1. obtain exact-head hosted governance PASS for this state-only reconciliation commit through temporary PR #14
-2. verify PR #13 remains mergeable with no unresolved review blocker and merge it into dev/n1-0b-core-functional-qa using the exact expected head
-3. close temporary PR #14 without merging it
-4. record the resulting exact dev implementation head; do not call PR #13 fully target-accepted yet
-5. on a separate disposable current-source Windows target, rerun the portability/development target QA required by PR #13 against that exact post-merge dev head
-6. preserve the rc.93 installation and Issue #2 legacy-failure evidence unchanged
-7. continue broad product QA across major N1.9–N1.26 workflows
-8. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix and persist evidence
-9. run controlled provider/connector/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
-10. prove real HA/multi-node operational behavior
-11. perform real disposable backup/restore + upgrade rehearsal
-12. complete C5 W3C HTML + W3C CSS + WAVE + browser/AT + HTTP + Web Vitals evidence
-13. complete C6 multi-node/final operations + reviewed dependency locks + provenance/release evidence
-14. only then mark PR #1 Ready and merge automatically
+1. preserve the rc.93 installation and Issue #2 legacy-failure evidence unchanged
+2. on a separate disposable current-source / rc.94 target, perform the approved controlled recovery-or-upgrade rehearsal and persist exact-source evidence
+3. reconcile Issue #2 only against that approved replacement acceptance; never manufacture an rc.93 PASS
+4. continue broad product QA across major N1.9–N1.26 workflows
+5. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix and persist evidence
+6. run controlled provider/connector/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
+7. prove real HA/multi-node operational behavior
+8. perform real disposable backup/restore + upgrade rehearsal and retain recovery evidence
+9. complete C5 W3C HTML + W3C CSS + WAVE + browser/AT + HTTP + Web Vitals evidence
+10. complete C6 multi-node/final operations + reviewed dependency locks + provenance/release evidence
+11. only then mark PR #1 Ready and merge automatically
 ```
 
 ---
@@ -274,7 +301,7 @@ Every AI/agent must:
 1. Read `AGENTS.md`, `NEXORA_AI_PROJECT_STATE.md`, this file, and `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` before relevant work.
 2. Treat this file's Current checkpoint as authoritative over stale historical policy text in older ledger entries.
 3. Use GitHub-hosted development QA only for PR source/development evidence; do not silently substitute a local/self-hosted runner for that workflow.
-4. Every PR head targeting `main`, including documentation/governance-only heads, must emit the required `governance` context.
+4. Every PR head targeting `main`, including documentation/governance-only heads, must emit required `governance` context.
 5. Never promote source/static/jsdom evidence to real browser/target evidence.
 6. Never call WAVE output an accessibility approval.
 7. Never remove a failing W3C/WAVE required route just to make C5 green.
@@ -284,10 +311,11 @@ Every AI/agent must:
 11. Keep Issue #2 legacy-target evidence and C5 accessibility evidence as separate target boundaries.
 12. Preserve rc.93 unchanged; do not require an impossible in-place rc.93 PASS after evidence has proved the required later finalization implementation is absent.
 13. Keep PR #1 DRAFT until all required target/release evidence is genuinely final.
-14. Do not raise Target/Release Power from hosted source/development CI alone.
+14. Do not raise Target/Release Power from hosted source/development CI or the bounded PR #13 portability gate alone.
 15. Dependabot update PRs must be reviewed against Nexora architecture and pass the applicable required governance/source checks before merge; do not blindly auto-merge dependency changes.
 16. Full development PHPUnit is warning-hard; do not remove or bypass `--fail-on-warning` to obtain a green run.
-17. Do not silently broaden portability hardening into future roadmap feature work.
+17. Do not silently broaden a bounded task into future roadmap feature work.
+18. Diagnostic carrier test edits that were never merged are not accepted product fixes and must not be treated as roadmap completion evidence.
 
 ---
 
@@ -317,20 +345,22 @@ Every AI/agent must:
 | 075 | 2026-08-23 | diagnostic runs #139–#141 | traced PHPUnit warnings to missing root `.env`; rejected root `.env` workaround because RC14 correctly forbids it | root cause isolated without weakening contract; Power unchanged |
 | 076 | 2026-08-23 | `eb86afd3…`, run #142 `32611296975`, artifact `9485661803` | switched CI bootstrap to ephemeral `.env.testing`, made full PHPUnit warning-hard, source-guarded the flag; **469 passed / 0 warnings / 4378 assertions** | Source/governance quality strengthened; Target/Release unchanged |
 | 077 | 2026-08-23 | prior dashboard apply | authoritative checkpoint synchronized to warning-clean implementation evidence | Power unchanged |
-| 078 | 2026-08-23 | Windows runs `32631834245`, `32631900595`, `32631967773`, `32632077872`; PR #13 exact-head governance run #149 `32634611400`, artifact `9492014706` | reconciled stale rc.93 in-place continuation with real evidence; recorded preserved rc.93 as legacy failure evidence, active PR #13 portability acceptance, and separate disposable current-source target continuation | Power unchanged |
+| 078 | 2026-08-23 | Windows runs `32631834245`, `32631900595`, `32631967773`, `32632077872`; PR #13 run #149 `32634611400`, artifact `9492014706` | reconciled stale rc.93 in-place continuation with real evidence; recorded preserved rc.93 as legacy failure evidence and PR #13 portability source acceptance | Power unchanged |
+| 079 | 2026-08-23 | exact final PR #13 head `7b2f7fab…`; governance run #150 `32635512854`, artifact `9492242122`; merge `21724569…`; PR #14 closed unmerged | final exact-head governance passed and PR #13 portability hardening merged to dev without changing roadmap semantics | Target/Release unchanged |
+| 080 | 2026-08-23 | diagnostic PR #15 runs through hosted Windows investigation; PR #15 closed unmerged | identified that forcing the entire PHPUnit suite onto SQLite `:memory:` broadened the historical Windows acceptance gate and generated unrelated rate-limiter/order artifacts; diagnostic test patches were discarded | Power unchanged |
+| 081 | 2026-08-23 | clean PR #16 run `32638775552`, job `97192491753`, artifact `9493045237`, digest `sha256:4e897e55069615b8a524f1039f381974c9450d2df930ad6192d70a468d10fec5`; PR #16 closed unmerged | exact post-merge Windows portability gate PASS on literal dev SHA `21724569…`; PR #13 bounded acceptance closed with real evidence | Target/Release scores unchanged |
+| 082 | 2026-08-23 | this state-only dashboard reconciliation | canonical checkpoint advanced from the completed PR #13 sequence to the already-approved separate disposable current-source rc.94 recovery/upgrade rehearsal; no product/runtime code changed | Power unchanged |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-A. Require the automatic full governance result on this state-only reconciliation head through temporary PR #14.
-B. If and only if that exact-head result is green, re-check PR #13 head/base/mergeability/review threads and merge PR #13 into dev/n1-0b-core-functional-qa using the exact expected head.
-C. Close PR #14 without merging it.
-D. Record the resulting exact dev implementation head and keep PR #13 target acceptance OPEN until the required post-merge Windows rerun is produced.
-E. On a SEPARATE disposable current-source / rc.94 Windows target, rerun the portability/development target QA against that exact dev head; do not touch preserved rc.93.
-F. Keep Issue #2 OPEN as legacy-target evidence until its closure semantics are explicitly satisfied by approved recovery/upgrade evidence; never manufacture an rc.93 PASS.
-G. Then continue separate development-target product QA, five-engine DB matrix, provider/identity/API/import/observability/Sentinel/Marketplace/HA/recovery evidence.
-H. Complete real C5 W3C HTML/CSS/WAVE/browser/AT/HTTP/Web-Vitals evidence and C6 reviewed-lock/final release evidence.
-I. Keep PR #1 DRAFT and keep TARGET POWER 50.0% / RELEASE POWER 25.0% until those real boundaries are satisfied.
+A. Require the automatic full `governance` result on this state-only PR #1 head before attributing any later target evidence to that exact current dev HEAD.
+B. Preserve the existing rc.93 installation and Issue #2 evidence unchanged; do not retry destructive/manual/in-place recovery on that target.
+C. After the state-only head is governance-green, create/use a SEPARATE disposable current-source / rc.94 target and perform the approved controlled recovery-or-upgrade rehearsal, binding evidence to the exact current dev HEAD.
+D. Reconcile Issue #2 only if that approved replacement recovery/upgrade acceptance satisfies the issue's current semantics; never manufacture an rc.93 PASS.
+E. Then continue separate development-target product QA, the real five-engine disposable DB matrix, and provider/identity/API/import/observability/Sentinel/Marketplace/HA/recovery evidence in the existing roadmap order.
+F. Complete real C5 W3C HTML/CSS/WAVE/browser/AT/HTTP/Web-Vitals evidence and C6 reviewed-lock/final release evidence.
+G. Keep PR #1 DRAFT and keep TARGET POWER 50.0% / RELEASE POWER 25.0% until those broader real boundaries are satisfied.
 ```
