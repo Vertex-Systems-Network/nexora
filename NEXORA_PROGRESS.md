@@ -10,33 +10,36 @@
 
 - Date: `2026-08-23` (Asia/Karachi).
 - Branch: `dev/n1-0b-core-functional-qa`.
-- PR #1: **DRAFT + OPEN + MERGEABLE** after integrating current `main`; do not mark Ready or merge until required real target/release gates pass.
-- Current implementation/governance head before this dashboard-only commit: **`375bfcb3af73006165c6923399f7e47739463f98`**.
-- Current `main` integrated into this branch: **`eaa42f19c1a6432050b4b33f161f3d1d971fdae9`**, the independently verified Dependabot/governance merge from PR #3.
+- PR #1: **DRAFT + OPEN + MERGEABLE**; do not mark Ready or merge until required real target/release gates pass.
+- Current implementation/governance head before this dashboard-only commit: **`eb86afd35ba5d0a82aea4cc3db30cbc517620e21`**.
+- Current certified `main`: **`f854c50c0f7687fc87fdfab01b49562392af4ef4`**; integrated into this development branch as the second parent of merge commit **`e5d41dbda05f36903c3d59b4a5ef5505ae09f674`**.
 - Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for this workflow.
-- The single full Development execution QA job publishes the repository ruleset's required status context as **`governance`**. It now runs on **every pull-request head**, including Markdown/governance-only commits; no `paths-ignore` exemption remains.
-- Latest implementation/governance run #135: run `32603527701`, job `97105225128`, exact source **`375bfcb3af73006165c6923399f7e47739463f98`**, conclusion **SUCCESS**.
-- Run #135 evidence artifact: `9483576591`, `nexora-development-readiness-375bfcb3af73006165c6923399f7e47739463f98`, digest `sha256:ca486b69df8f5695f38c7e21766531d123792a80b00e828d960a74119d993f67`.
-- Run #133 remains the first exact post-Dependabot-main integrated application checkpoint: run `32603121260`, job `97104286587`, exact source `b0094ab214d4ff41f53901dca1596824192d441c`, **SUCCESS**, artifact `9483481268`, digest `sha256:55a79f2eee7a57c8880215bae3067bbe183e3b6f4c84e1c75e26b747aaf5ce76`.
-- Run #133 toolchain/evidence: Ubuntu 24.04, PHP `8.3.33`, Composer `2.10.2`, Node `22.23.2`, npm `10.9.8`, MySQL `8.4.11`; Development Readiness **ready**; all product/source contracts through N1.26 passed; PHPUnit **122 passed / 347 warnings / 4378 assertions**; Vitest **6/6**; TypeScript noEmit, production Vite build and production asset budgets/provenance all PASS.
-- Earlier exact-head source closure run #130: run `32602165519`, exact source `52ce08a447d1270b4ef3e6d5ff74076dda194007`, **SUCCESS**, artifact `9483280452`.
-- Governance edge case closed: dashboard-only head `cc06df1ade9b061f5993949c204741a79b86622c` had **zero status contexts** because the development workflow ignored Markdown. Since the repository ruleset evaluates the current PR head, that could re-block final merge even after a green prior code SHA. Commit `375bfcb3…` removed all PR path ignores; run #135 proves the required `governance` context and full suite remain green on that corrected workflow.
-- This dashboard-only commit is intentionally subject to the same every-head `governance` workflow. Its hosted result is merge-governance evidence only and does not alter Target/Release scoring.
-- PR #3 Dependabot setup is **MERGED**. Final PR head `7c094d9cfa13668b4b5b9be722102c209128e0dc` passed required `governance` + Source certification in run #603; squash merge commit is `eaa42f19c1a6432050b4b33f161f3d1d971fdae9`.
-- Dependabot monitors the repository's actual dependency ecosystems: npm weekly Monday, Composer weekly Wednesday, GitHub Actions weekly Friday, all at 09:00 Asia/Karachi. The invalid root Docker updater was removed because no Dockerfile exists at that configured location.
-- Branch governance nuance: GitHub branch metadata reports `main` as `protected:true`, while classic inline branch-protection/status-check enforcement is not the authoritative active mechanism (`enabled:false` / classic required checks off). A repository ruleset is active and demonstrably requires status context `governance`; it blocked PR #3 until that context existed and passed.
+- The single full Development execution QA job publishes the repository ruleset's required status context as **`governance`** and runs on **every pull-request head**, including Markdown/governance-only commits; no `paths-ignore` exemption remains.
+- Workflow Actions are current: `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-artifact@v7`. The artifact upload was upgraded at `1874e67544c2bfdb5f72927797152a707f1f31ca`; run #138 proved the prior Node 20 action-runtime warning removed.
+- Warning-clean QA hardening head **`eb86afd35ba5d0a82aea4cc3db30cbc517620e21`** creates only an ephemeral `.env.testing` in CI; it does **not** create a root `.env`, preserving the RC14 source-package invariant.
+- Development Readiness now executes the full Laravel/PHPUnit suite with `--display-warnings --fail-on-warning`; `scripts/development-target-qa-contract-verify.php` source-guards that exact warning-hard command so the gate cannot silently regress to warning-tolerant behavior.
+- Exact implementation run #142: run `32611296975`, job `97124711416`, source **`eb86afd35ba5d0a82aea4cc3db30cbc517620e21`**, conclusion **SUCCESS**.
+- Run #142 Development Readiness: **ready**; all source/product contracts through N1.26 PASS; RC14 environment contract PASS; full Laravel/PHPUnit **469 passed / 0 warnings / 4378 assertions**; Vitest **2 files / 6 tests PASS**; TypeScript 7 noEmit PASS; Vite `8.2.2` production build PASS with 3784 modules transformed; production asset budgets/provenance PASS.
+- Run #142 build evidence: total 1,356,563 bytes; JS 1,251,628 bytes (gzip 394,919; initial gzip 223,997); CSS 65,471 bytes; 94 JS / 1 CSS assets.
+- Run #142 evidence artifact: `9485661803`, `nexora-development-readiness-eb86afd35ba5d0a82aea4cc3db30cbc517620e21`; digest `sha256:ba18c01ef92c7b78b1e50907c2a85d835826b778ecaf5f0e9232e92fb8ebd05a`.
+- Warning root cause closed without suppression: PHPUnit 12 surfaced repeated phpdotenv missing-root-`.env` file reads from Laravel test bootstrap. A root `.env` removed the warnings but correctly failed RC14; the final solution uses Laravel's testing environment file selection via ephemeral `.env.testing`, keeping secure test defaults and a clean source root.
+- Source attestation is not polluted by `.env.testing`: attestation hashes explicit runtime/source roots and selected root files; `.env.testing` is outside that root-file set.
+- PR #3 Dependabot setup is merged as `eaa42f19c1a6432050b4b33f161f3d1d971fdae9`; PR #4 setup-node v7 as `d6d008ec57eb7b4257024a4bab4fe217d0618d1f`; PR #5 checkout v7 + dependency-CI hardening as `64e61c969f3617c2a599dbc3be3bfc5cbf299aa1`; PR #10 jest-dom 7 as `b1753ca484a8b9355b5222ffe9af4d4a69c4e7dc`; PR #8 lucide-react 1.33 as `b2a702ea63cab69799a8b7ae39bd8934f8b383b8`; PR #6 TypeScript 7.0.2 as `f854c50c0f7687fc87fdfab01b49562392af4ef4`.
+- Incompatible majors were not blind-merged: `@types/node` 26 and `jsdom` 30 remain intentionally ignored at those major lines.
+- Dependabot monitors npm weekly Monday, Composer weekly Wednesday and GitHub Actions weekly Friday, all at 09:00 Asia/Karachi. The invalid root Docker updater remains removed because no Dockerfile exists at that configured location.
 - GitHub-hosted development QA is development-checkout/source-functional evidence only. It does **not** prove the installed rc.93 Laragon recovery target, real browser behavior, W3C/WAVE target results, provider integrations, five-engine DB matrix, HA, recovery rehearsal, or final release certification.
-- Issue #2: **OPEN** and is the only current open repository issue. Existing rc.93 target still needs compatibility + post-install readiness + `/login` + `/admin` evidence.
+- Issue #2: **OPEN** and remains the only current open repository issue. Existing rc.93 target still needs compatibility + post-install readiness + `/login` + `/admin` evidence.
 - Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
 - Source `composer.lock` remains intentionally absent. Hosted Composer resolution is development evidence only; Development Readiness explicitly does not promote dependency locks or grant release certification.
 - W3C Nu HTML + W3C CSS Validation Service + WAVE C5 source tooling is implemented and mandatory for final target accessibility closure.
+- This dashboard-only commit is intentionally subject to the same every-head `governance` workflow. Its hosted result is merge-governance evidence only and does not alter Target/Release scoring.
 
 ### Closed source fail-fast chain since the earlier checkpoint
 
 The hosted sequence exposed and closed deterministic stale-contract/CI mismatches without weakening runtime safety:
 
 - C6 evidence-binding count aligned to the current analyzer.
-- CI stopped creating a root `.env`; deterministic process `APP_KEY` remains CI-only.
+- CI does not create or package a root `.env`; deterministic process `APP_KEY` remains CI-only.
 - Enterprise server-normalized data is separated from outbound router payload typing.
 - rc.3 SSO test aligned to the deliberate shallow secret-safe form boundary.
 - rc.4 queue jobs/providers and middleware alias counts aligned to current source.
@@ -46,8 +49,10 @@ The hosted sequence exposed and closed deterministic stale-contract/CI mismatche
 - V56 readiness metric key aligned to `readiness_components_minimum`.
 - Runtime synchronizer integration expectation aligned to canonical `nexora.runtime` manifest version `0.5.0`; Discovery remains `0.26.0`.
 - Run #130 produced the first complete exact-head source green after that fail-fast chain.
-- Dependabot/governance `main` was integrated as a real merge parent and run #133 re-proved the full application suite.
-- Every-head governance enforcement was corrected at `375bfcb3…`; run #135 passed the full suite with the required `governance` context.
+- Dependabot/governance maintenance `main` was integrated as a real merge parent and run #137 re-proved the full application suite after the final maintenance batch.
+- Every-head governance enforcement was corrected at `375bfcb3…`; documentation-only heads are no longer exempt.
+- `actions/upload-artifact` was moved from v4 to v7 and run #138 proved the workflow-runtime deprecation removed.
+- PHPUnit's 347 warning noise was traced to the missing root `.env`, not suppressed; run #142 proves the final `.env.testing` solution with **zero PHPUnit warnings** while RC14 remains green.
 
 ### Governance compatibility / evidence semantics
 
@@ -68,7 +73,7 @@ TARGET POWER    50.0%  ██████████░░░░░░░░░
 RELEASE POWER   25.0%  █████░░░░░░░░░░░░░░░
 ```
 
-No score is increased by W3C/WAVE source tooling, static review, Dependabot/governance configuration, or hosted development QA alone. Target/Release Power moves only from real exact-source target evidence.
+No score is increased by W3C/WAVE source tooling, static review, Dependabot/governance configuration, warning cleanup or hosted development QA alone. Target/Release Power moves only from real exact-source target evidence.
 
 ---
 
@@ -83,7 +88,7 @@ No score is increased by W3C/WAVE source tooling, static review, Dependabot/gove
 | N1.23 Marketplace 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | controlled marketplace target evidence pending |
 | N1.24 Cloud / HA | SOURCE DONE FOR CURRENT WORKFLOW | real multi-node evidence pending |
 | N1.25 Backup / DR / Upgrade | SOURCE DONE FOR CURRENT WORKFLOW | real disposable restore/upgrade rehearsal pending |
-| N1.26 Performance + Accessibility + Release | source workflow + W3C HTML/CSS/WAVE C5 tooling implemented; hosted source gate green | real C5/C6 evidence pending |
+| N1.26 Performance + Accessibility + Release | source workflow + W3C HTML/CSS/WAVE C5 tooling implemented; warning-clean hosted source gate green | real C5/C6 evidence pending |
 | N2.0 Stable Production | not eligible | BLOCKED BY TARGET + RELEASE EVIDENCE |
 
 ---
@@ -98,36 +103,38 @@ Trigger invariant: **every `pull_request` head targeting `main` must run it; doc
 
 ```text
 GitHub-hosted Ubuntu
-  -> PHP 8.3
-  -> Node 22
   -> disposable MySQL 8.4
+  -> checkout@v7
+  -> ephemeral .env.testing only; never root .env
+  -> PHP 8.3 + Composer 2
+  -> Node 22 + npm 10
   -> composer install
   -> npm install
+  -> warning-clean Laravel bootstrap smoke with --fail-on-warning
   -> php scripts/development-readiness.php --full --tests --evidence
   -> all product/source contracts including N1.26
-  -> php -l live C5 standards/evidence runners
-  -> full Laravel/PHPUnit suite
+  -> full Laravel/PHPUnit suite with --display-warnings --fail-on-warning
   -> Vitest
-  -> TypeScript
+  -> TypeScript 7 noEmit
   -> production Vite build
   -> production asset budgets/provenance
-  -> evidence artifact upload
+  -> upload-artifact@v7 evidence upload
 ```
 
-Latest detailed application evidence, run #133:
+Latest detailed application evidence, run #142 (`32611296975`), exact implementation head `eb86afd35ba5d0a82aea4cc3db30cbc517620e21`:
 
 - Post-install runtime convergence source contract: PASS.
 - DEV-4, Theme, Extension, Studio, Documents, Collections, Publishing/SEO, Admin UX, Forms/Data/Workflows: PASS.
-- Data Connections + primary SQL portability + installer DB UX + development target-QA source contracts: PASS.
+- Data Connections + primary SQL portability + installer DB UX + warning-clean development target-QA source contract: PASS.
 - Marketplace, Commerce, Customer Portal, CRM/Membership, Search, Collaboration, Automation, AI Platform, Multisite, Enterprise SSO: PASS.
 - Public API/SDK, Content Migration, Observability, Forge, Sentinel 2.0, Marketplace 2.0, Cloud/HA, Backup/DR/Upgrade, Performance/Accessibility/Release: PASS.
-- Full Laravel/PHPUnit suite: 122 passed, 347 warnings, 4378 assertions; no failures.
-- Vitest: 2 files / 6 tests PASS.
-- TypeScript noEmit: PASS.
-- Production frontend build: PASS.
-- Production asset budgets/provenance: PASS — build 1,356,223 bytes; JS 1,251,288 bytes (gzip 394,774; initial gzip 223,822); CSS 65,471 bytes; 94 JS / 1 CSS assets.
-
-Run #135 re-ran the complete Development QA successfully after the every-head governance trigger correction.
+- RC14 environment/config-cache architecture: PASS with no root `.env` present.
+- Full Laravel/PHPUnit suite: **469 passed, 0 warnings, 4378 assertions**.
+- Vitest: **2 files / 6 tests PASS**.
+- TypeScript 7 noEmit: PASS.
+- Production frontend build: PASS, Vite `8.2.2`, 3784 modules transformed.
+- Production asset budgets/provenance: PASS — build 1,356,563 bytes; JS 1,251,628 bytes (gzip 394,919; initial gzip 223,997); CSS 65,471 bytes; 94 JS / 1 CSS assets.
+- Evidence artifact: `9485661803`; digest `sha256:ba18c01ef92c7b78b1e50907c2a85d835826b778ecaf5f0e9232e92fb8ebd05a`.
 
 The PR workflow intentionally does **not** call the shared WAVE API or claim live W3C/WAVE target success.
 
@@ -221,20 +228,21 @@ Issue #2 may close only after those real target checks pass. GitHub-hosted Ubunt
 
 ## 7. Remaining target / release sequence
 
-The final-head hosted source/governance fail-fast chain is green. Continue in this order:
+The exact implementation-head hosted source/governance chain is warning-clean and green. Continue in this order:
 
 ```text
-1. recover and verify the existing rc.93 Laragon target
-2. obtain compatibility PASS + post-install readiness PASS
-3. directly exercise /login + /admin; close issue #2 only on real evidence
-4. on a separate development target, run full product QA across major N1.9–N1.26 workflows
-5. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix and persist evidence
-6. run controlled provider/connector/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
-7. prove real HA/multi-node operational behavior
-8. perform real disposable backup/restore + upgrade rehearsal
-9. complete C5 W3C HTML + W3C CSS + WAVE + browser/AT + HTTP + Web Vitals evidence
-10. complete C6 multi-node/final operations + reviewed dependency locks + provenance/release evidence
-11. only then mark PR #1 Ready and merge automatically
+1. certify this dashboard-only current PR head under the mandatory every-head governance rule
+2. recover and verify the existing rc.93 Laragon target
+3. obtain compatibility PASS + post-install readiness PASS
+4. directly exercise /login + /admin; close issue #2 only on real evidence
+5. on a separate development target, run full product QA across major N1.9–N1.26 workflows
+6. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix and persist evidence
+7. run controlled provider/connector/identity/API/import/observability/Sentinel/Marketplace evidence where applicable
+8. prove real HA/multi-node operational behavior
+9. perform real disposable backup/restore + upgrade rehearsal
+10. complete C5 W3C HTML + W3C CSS + WAVE + browser/AT + HTTP + Web Vitals evidence
+11. complete C6 multi-node/final operations + reviewed dependency locks + provenance/release evidence
+12. only then mark PR #1 Ready and merge automatically
 ```
 
 ---
@@ -257,6 +265,7 @@ Every AI/agent must:
 12. Keep PR #1 DRAFT until all required target/release evidence is genuinely final.
 13. Do not raise Target/Release Power from hosted source/development CI alone.
 14. Dependabot update PRs must be reviewed against Nexora architecture and pass the applicable required governance/source checks before merge; do not blindly auto-merge dependency changes.
+15. Full development PHPUnit is warning-hard; do not remove or bypass `--fail-on-warning` to obtain a green run.
 
 ---
 
@@ -277,24 +286,29 @@ Every AI/agent must:
 | 066 | 2026-08-23 | Dependabot PR #3, run #603 | removed nonexistent Docker updater, added Composer, retained npm/Actions schedules; repaired required `governance` status production; governance and Source certification green | repository governance strengthened; Power unchanged |
 | 067 | 2026-08-23 | merge `eaa42f19…` | PR #3 squash-merged to `main` after required checks passed | dependency-maintenance infrastructure only; Target/Release unchanged |
 | 068 | 2026-08-23 | `95a85b42…` + `bc8f5196…` + merge `b0094ab2…` | existing full Development QA job publishes required `governance` context; Dependabot config carried into dev; current `main` integrated as real second parent | PR #1 mergeability restored; Target/Release unchanged |
-| 069 | 2026-08-23 | run #133 `32603121260`, job `97104286587`, artifact `9483481268` | exact post-main-integrated full Development QA/governance PASS: 122 PHPUnit pass, 347 warnings, 4378 assertions; Vitest 6/6; TS/build/assets green | final application source checkpoint green; Target/Release unchanged |
+| 069 | 2026-08-23 | run #133 `32603121260`, job `97104286587`, artifact `9483481268` | exact post-main-integrated full Development QA/governance PASS; historical PHPUnit printer reported 122 passed / 347 warnings / 4378 assertions; frontend green | historical application source checkpoint; Target/Release unchanged |
 | 070 | 2026-08-23 | `cc06df1a…` | canonical live state synchronized to run #133 + merged Dependabot/governance evidence | Power unchanged |
 | 071 | 2026-08-23 | current-head status inspection | discovered `cc06df1a…` had zero contexts because Markdown was ignored; identified a real latest-SHA ruleset merge-governance hole | no score change |
-| 072 | 2026-08-23 | `375bfcb3…`, run #135 `32603527701`, job `97105225128`, artifact `9483576591` | removed all PR path ignores so every head emits `governance`; complete Development QA passed on corrected workflow | governance closure; Target/Release unchanged |
-| 073 | 2026-08-23 | this dashboard apply | records every-head governance closure; this Markdown head is itself intentionally subject to required `governance` | Power unchanged |
+| 072 | 2026-08-23 | `375bfcb3…`, run #135 `32603527701`, artifact `9483576591` | removed all PR path ignores so every head emits `governance`; complete Development QA passed on corrected workflow | governance closure; Target/Release unchanged |
+| 073 | 2026-08-23 | maintenance merges through `f854c50c…`, integration `e5d41dbd…`, run #137 | final Dependabot batch + TypeScript 7 integrated and full Development QA re-certified | Source maintenance strengthened; Target/Release unchanged |
+| 074 | 2026-08-23 | `1874e675…`, run #138 `32610019558` | moved development evidence upload to `actions/upload-artifact@v7`; full QA green and Node 20 action-runtime warning removed | governance/tooling only; Target/Release unchanged |
+| 075 | 2026-08-23 | diagnostic runs #139–#141 | traced 347 PHPUnit warnings to missing root `.env`; rejected root `.env` workaround because RC14 correctly forbids it | root cause isolated without weakening contract; Power unchanged |
+| 076 | 2026-08-23 | `eb86afd3…`, run #142 `32611296975`, artifact `9485661803` | switched CI bootstrap to ephemeral `.env.testing`, made full PHPUnit warning-hard, source-guarded the flag; **469 passed / 0 warnings / 4378 assertions** | Source/governance quality strengthened; Target/Release unchanged |
+| 077 | 2026-08-23 | this dashboard apply | authoritative checkpoint synchronized to final warning-clean implementation evidence; this Markdown head remains subject to required `governance` | Power unchanged |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-A. Treat implementation/governance head 375bfcb3af73006165c6923399f7e47739463f98 + run #135 as the latest completed implementation checkpoint; require the automatic governance result on this dashboard-only current PR head as well.
-B. Do not reopen the completed source fail-fast sequence without new regression evidence.
-C. Recover the EXISTING installed rc.93 Laragon target; do not overwrite it with rc.94 as a shortcut.
-D. Run: php artisan nexora:runtime:compatibility-status --deep
-E. Run: php artisan nexora:runtime:post-install-status --assert-ready
-F. Exercise /login and /admin directly; close issue #2 only if all real target checks pass.
-G. Then continue separate development-target product QA, five-engine DB matrix, provider/identity/API/import/observability/Sentinel/Marketplace/HA/recovery evidence.
-H. Complete real C5 W3C HTML/CSS/WAVE/browser/AT/HTTP/Web-Vitals evidence and C6 reviewed-lock/final release evidence.
-I. Keep PR #1 DRAFT and keep TARGET POWER 50.0% / RELEASE POWER 25.0% until those real boundaries are satisfied.
+A. Require the automatic full governance result on this dashboard-only current PR head; do not create another dashboard commit merely to record that result.
+B. If that exact-head run is green, update PR #1 body metadata with the final run/artifact evidence without changing source SHA.
+C. Do not reopen the completed source warning/fail-fast sequence without new regression evidence.
+D. Recover the EXISTING installed rc.93 Laragon target; do not overwrite it with rc.94 as a shortcut.
+E. Run: php artisan nexora:runtime:compatibility-status --deep
+F. Run: php artisan nexora:runtime:post-install-status --assert-ready
+G. Exercise /login and /admin directly; close issue #2 only if all real target checks pass.
+H. Then continue separate development-target product QA, five-engine DB matrix, provider/identity/API/import/observability/Sentinel/Marketplace/HA/recovery evidence.
+I. Complete real C5 W3C HTML/CSS/WAVE/browser/AT/HTTP/Web-Vitals evidence and C6 reviewed-lock/final release evidence.
+J. Keep PR #1 DRAFT and keep TARGET POWER 50.0% / RELEASE POWER 25.0% until those real boundaries are satisfied.
 ```
