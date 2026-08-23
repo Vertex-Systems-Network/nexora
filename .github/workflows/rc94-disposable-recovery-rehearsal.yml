@@ -30,6 +30,7 @@ jobs:
         with:
           php-version: '8.3'
           extensions: bcmath, curl, dom, fileinfo, intl, mbstring, openssl, pdo, pdo_sqlite, sqlite3, tokenizer, xml, zip
+          ini-values: memory_limit=512M, post_max_size=64M, upload_max_filesize=64M, max_execution_time=120, max_input_time=60, max_input_vars=3000, max_file_uploads=20
           coverage: none
           tools: composer:v2
 
@@ -107,6 +108,32 @@ jobs:
             base_url = $env:BASE_URL
             sqlite_path_style = 'forward-slash-absolute-windows'
           } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'source-binding.json')
+
+      - name: Assert installer system requirements
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $probeScript = Join-Path $env:RUNNER_TEMP 'nexora-installer-requirements.php'
+          $evidencePath = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE "$env:EVIDENCE_DIR/installer-system-requirements.json"))
+          @'
+          <?php
+          declare(strict_types=1);
+          $root = rtrim((string) $argv[1], "/\\");
+          require $root.'/vendor/autoload.php';
+          $app = require $root.'/bootstrap/app.php';
+          $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+          $result = $app->make(App\Nexora\Installation\SystemRequirementChecker::class)->check();
+          $json = json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
+          file_put_contents((string) $argv[2], $json);
+          echo $json;
+          exit(($result['ready'] ?? false) === true ? 0 : 2);
+          '@ | Set-Content -Encoding ASCII $probeScript
+          & php $probeScript $env:GITHUB_WORKSPACE $evidencePath
+          $probeExit = $LASTEXITCODE
+          if ($probeExit -ne 0) {
+            throw 'Disposable Windows target does not satisfy the canonical installer system requirements.'
+          }
+          Write-Host 'RC94_INSTALLER_SYSTEM_REQUIREMENTS=PASS'
 
       - name: Commit a real fresh install without following handoff
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
@@ -296,6 +323,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $binding = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'source-binding.json') | ConvertFrom-Json
+          $requirements = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'installer-system-requirements.json') | ConvertFrom-Json
           $pre = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'pre-recovery-compatibility.json') | ConvertFrom-Json
           $postCompat = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'post-recovery-compatibility.json') | ConvertFrom-Json
           $postInstall = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'post-recovery-post-install.json') | ConvertFrom-Json
@@ -309,6 +337,7 @@ jobs:
             expected_source_sha = $binding.expected_source_sha
             installer_protocol = $binding.installer_protocol
             source_generation = $binding.source_generation
+            installer_system_requirements_ready = $requirements.ready
             preserved_rc93_mutated = $false
             pre_recovery_mismatches = @($pre.mismatches)
             guarded_reconcile = 'pass'
