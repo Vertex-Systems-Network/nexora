@@ -1,0 +1,149 @@
+name: Nexora portable hosted Windows target QA
+
+on:
+  pull_request:
+    branches:
+      - dev/n1-0b-core-functional-qa
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-hosted-windows-target:
+    name: portable-hosted-windows-target
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout exact current development source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha || 'dev/n1-0b-core-functional-qa' }}
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: fileinfo, mbstring, openssl, pdo, pdo_sqlite, sqlite3, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Verify Windows target and toolchain
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          Write-Host "Runner: $env:RUNNER_NAME / $env:RUNNER_OS / $env:RUNNER_ARCH"
+          Write-Host "Workspace: $env:GITHUB_WORKSPACE"
+          $source = (& git rev-parse HEAD).Trim()
+          Write-Host "Source head: $source"
+          if ($source -ne '${{ github.event.pull_request.base.sha }}') {
+            Write-Error 'Hosted Windows target did not checkout the exact PR base SHA.'
+            exit 2
+          }
+          $phpVersion = (& php -r "echo PHP_VERSION;").Trim()
+          $nodeVersion = (& node -p "process.versions.node").Trim()
+          Write-Host "PHP: $phpVersion"
+          Write-Host "Node: $nodeVersion"
+          & composer --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ([version]$phpVersion -lt [version]'8.3.0') {
+            Write-Error 'PHP 8.3+ is required.'
+            exit 3
+          }
+          if ([version]$nodeVersion -lt [version]'22.0.0') {
+            Write-Error 'Node.js 22+ is required.'
+            exit 4
+          }
+
+      - name: Install exact-source development dependencies
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
+        run: |
+          & composer install --no-interaction --prefer-dist --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd install --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Prepare isolated testing environment
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $bytes = New-Object byte[] 32
+          $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+          $rng.GetBytes($bytes)
+          $rng.Dispose()
+          $key = 'base64:' + [Convert]::ToBase64String($bytes)
+          @"
+          APP_NAME=Nexora
+          APP_ENV=testing
+          APP_KEY=$key
+          APP_DEBUG=false
+          APP_URL=http://127.0.0.1
+          CACHE_STORE=array
+          SESSION_DRIVER=array
+          QUEUE_CONNECTION=sync
+          MAIL_MAILER=array
+          NEXORA_INSTALLER_BYPASS=true
+          DB_CONNECTION=sqlite
+          DB_DATABASE=:memory:
+          "@ | Set-Content -Encoding UTF8 .env.testing
+
+      - name: Run canonical full development target QA
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          & php scripts/development-readiness.php --full --tests --evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run isolated SQLite target matrix
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          & php scripts/database-target-matrix.php --drivers=sqlite --evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Summarize hosted Windows target evidence
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $readiness = Get-Content -Raw 'storage/app/nexora/qa/development-readiness.json' | ConvertFrom-Json
+          $matrix = Get-Content -Raw 'storage/app/nexora/qa/database-target-matrix.json' | ConvertFrom-Json
+          $source = (& git rev-parse HEAD).Trim()
+          Write-Host "Source head: $source"
+          Write-Host "Development readiness: $($readiness.status)"
+          Write-Host "Platform version: $($readiness.platform_version)"
+          Write-Host "OS family: $($readiness.os_family)"
+          Write-Host "SQLite matrix: $($matrix.status)"
+          if ($readiness.status -ne 'ready') {
+            Write-Error 'Development readiness evidence is not ready.'
+            exit 5
+          }
+          if ($matrix.status -ne 'pass') {
+            Write-Error 'SQLite target matrix evidence is not pass.'
+            exit 6
+          }
+          Write-Host 'PORTABLE_HOSTED_WINDOWS_TARGET_QA=PASS'
+
+      - name: Upload hosted Windows target evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-portable-hosted-windows-target-${{ github.run_id }}
+          path: |
+            storage/app/nexora/qa/development-readiness.json
+            storage/app/nexora/qa/database-target-matrix.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Remove ephemeral environment file
+        if: always()
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          if (Test-Path '.env.testing') { Remove-Item -Force '.env.testing' }
