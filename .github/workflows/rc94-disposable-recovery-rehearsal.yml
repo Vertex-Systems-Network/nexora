@@ -94,6 +94,20 @@ jobs:
           "@ | Set-Content -Encoding UTF8 .env
           $db | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'database-path.txt')
 
+          $attestationScript = Join-Path $env:RUNNER_TEMP 'nexora-source-attestation.php'
+          @'
+          <?php
+          declare(strict_types=1);
+          $root = rtrim((string) $argv[1], "/\\");
+          require $root.'/scripts/lib/source-attestation.php';
+          $result = nexoraComputeSourceAttestation($root);
+          file_put_contents(
+              (string) $argv[2],
+              json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL,
+          );
+          echo $result['tree_sha256'], PHP_EOL;
+          '@ | Set-Content -Encoding ASCII $attestationScript
+
           $protocol = (& php -r "require 'vendor/autoload.php'; echo App\Nexora\Installation\Installer::PROTOCOL;").Trim()
           $generation = (& php -r "require 'vendor/autoload.php'; echo App\Nexora\Installation\Installer::SOURCE_GENERATION;").Trim()
           @{
@@ -136,6 +150,7 @@ jobs:
           Write-Host 'RC94_INSTALLER_SYSTEM_REQUIREMENTS=PASS'
 
       - name: Commit a real fresh install without following handoff
+        id: install_commit
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -169,6 +184,12 @@ jobs:
             $password = 'Nx!'+[guid]::NewGuid().ToString('N')+'Aa1'
             $password | Set-Content -Encoding UTF8 (Join-Path $env:RUNNER_TEMP 'rc94-admin-password.txt')
 
+            $attestationScript = Join-Path $env:RUNNER_TEMP 'nexora-source-attestation.php'
+            $preAttestation = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE "$env:EVIDENCE_DIR/pre-install-source-attestation.json"))
+            & php $attestationScript $env:GITHUB_WORKSPACE $preAttestation
+            if ($LASTEXITCODE -ne 0) { throw 'Unable to capture source attestation immediately before installer POST.' }
+            Write-Host 'RC94_PRE_INSTALL_SOURCE_ATTESTATION=CAPTURED'
+
             $headers = Join-Path $env:EVIDENCE_DIR 'install-commit.headers.txt'
             $body = Join-Path $env:EVIDENCE_DIR 'install-commit.body.html'
             $status = (& curl.exe -sS -b $cookies -c $cookies -D $headers -o $body -w '%{http_code}' -X POST "$env:BASE_URL/install" `
@@ -200,6 +221,92 @@ jobs:
             Copy-Item -Force $serverOut (Join-Path $env:EVIDENCE_DIR 'install-server.out.log') -ErrorAction SilentlyContinue
             Copy-Item -Force $serverErr (Join-Path $env:EVIDENCE_DIR 'install-server.err.log') -ErrorAction SilentlyContinue
           }
+
+      - name: Diagnose installer source-attestation drift
+        if: ${{ failure() && steps.install_commit.outcome == 'failure' }}
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $attestationScript = Join-Path $env:RUNNER_TEMP 'nexora-source-attestation.php'
+          $prePath = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE "$env:EVIDENCE_DIR/pre-install-source-attestation.json"))
+          $postPath = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE "$env:EVIDENCE_DIR/post-install-source-attestation.json"))
+          $diffPath = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE "$env:EVIDENCE_DIR/source-attestation-diff.json"))
+          if (-not (Test-Path $prePath)) { throw 'Pre-install source attestation is missing; drift cannot be classified.' }
+          if (-not (Test-Path $attestationScript)) { throw 'Source-attestation diagnostic helper is missing.' }
+
+          & php $attestationScript $env:GITHUB_WORKSPACE $postPath
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to capture source attestation after failed installer commit.' }
+
+          $before = Get-Content -Raw $prePath | ConvertFrom-Json
+          $after = Get-Content -Raw $postPath | ConvertFrom-Json
+          $beforeByPath = @{}
+          $afterByPath = @{}
+          foreach ($file in @($before.files)) { $beforeByPath[[string]$file.path] = $file }
+          foreach ($file in @($after.files)) { $afterByPath[[string]$file.path] = $file }
+
+          $added = @()
+          $removed = @()
+          $changed = @()
+          foreach ($path in @($afterByPath.Keys | Sort-Object)) {
+            if (-not $beforeByPath.ContainsKey($path)) {
+              $added += [pscustomobject]@{ path = $path; bytes = [int64]$afterByPath[$path].bytes; sha256 = [string]$afterByPath[$path].sha256 }
+              continue
+            }
+            $old = $beforeByPath[$path]
+            $new = $afterByPath[$path]
+            if (([string]$old.sha256 -ne [string]$new.sha256) -or ([int64]$old.bytes -ne [int64]$new.bytes)) {
+              $changed += [pscustomobject]@{
+                path = $path
+                before_bytes = [int64]$old.bytes
+                after_bytes = [int64]$new.bytes
+                before_sha256 = [string]$old.sha256
+                after_sha256 = [string]$new.sha256
+              }
+            }
+          }
+          foreach ($path in @($beforeByPath.Keys | Sort-Object)) {
+            if (-not $afterByPath.ContainsKey($path)) {
+              $removed += [pscustomobject]@{ path = $path; bytes = [int64]$beforeByPath[$path].bytes; sha256 = [string]$beforeByPath[$path].sha256 }
+            }
+          }
+
+          $storagePath = Join-Path $env:GITHUB_WORKSPACE 'public/storage'
+          $storageProbe = [ordered]@{
+            path = $storagePath
+            exists = Test-Path $storagePath
+            link_type = $null
+            target = $null
+            attributes = $null
+          }
+          if (Test-Path $storagePath) {
+            $item = Get-Item -Force $storagePath
+            $storageProbe.link_type = [string]$item.LinkType
+            $storageProbe.target = @($item.Target | ForEach-Object { [string]$_ })
+            $storageProbe.attributes = [string]$item.Attributes
+          }
+
+          @{
+            schema = 1
+            before_tree_sha256 = [string]$before.tree_sha256
+            after_tree_sha256 = [string]$after.tree_sha256
+            tree_changed = ([string]$before.tree_sha256 -ne [string]$after.tree_sha256)
+            before_file_count = [int]$before.file_count
+            after_file_count = [int]$after.file_count
+            added = @($added)
+            removed = @($removed)
+            changed = @($changed)
+            public_storage = $storageProbe
+          } | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 $diffPath
+
+          (& git status --porcelain=v1 --untracked-files=all) | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'git-status-after-install.txt')
+          Write-Host "SOURCE_ATTESTATION_TREE_BEFORE=$($before.tree_sha256)"
+          Write-Host "SOURCE_ATTESTATION_TREE_AFTER=$($after.tree_sha256)"
+          Write-Host "SOURCE_ATTESTATION_DIFF added=$($added.Count) removed=$($removed.Count) changed=$($changed.Count)"
+          foreach ($entry in $added) { Write-Host "SOURCE_ATTESTATION_ADDED=$($entry.path)" }
+          foreach ($entry in $removed) { Write-Host "SOURCE_ATTESTATION_REMOVED=$($entry.path)" }
+          foreach ($entry in $changed) { Write-Host "SOURCE_ATTESTATION_CHANGED=$($entry.path)" }
+          Write-Host "PUBLIC_STORAGE_EXISTS=$($storageProbe.exists) LINK_TYPE=$($storageProbe.link_type) TARGET=$(@($storageProbe.target) -join ',')"
+          Write-Host 'RC94_INSTALLER_SOURCE_DRIFT_DIAGNOSTIC=CAPTURED'
 
       - name: Prove exact pre-recovery four-plane boundary
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
