@@ -17,6 +17,7 @@
 - PR #19 was the temporary exact-head governance carrier for PR #18 and is **CLOSED + UNMERGED** as required.
 - Post-merge exact-dev governance run **`32661923792`** / run #154 on **`e52e67bbd997c13a04ab2a5a2ca3fef7e992b8ca`** concluded **SUCCESS**. Artifact **`9499018803`**, digest **`sha256:a2c57b8fce6207b7ee9f60adcaa702a6bb25a442a7ce3fc2e5354f72180f3b1b`**. Development Readiness remained `ready`; the PR #18 regression was included in the full green suite.
 - State-only head **`048cf684320d992261971c67f90af2f2a302dbb1`** completed required full hosted governance in run **`32662762919`** / run #155. Development Readiness remained ready; warning-hard Laravel/PHPUnit **470 passed / 4385 assertions**, Vitest 6/6, TypeScript noEmit, production build and evidence upload passed. Artifact **`9499326743`**, digest **`sha256:67f3b67d99c6c67665eb3233e03eee859da32dfa1e7b32532452eb7d9355c30e`**.
+- Mutable-plane/HTTP acceptance reconciliation head **`6d3b0f2a8d320927fcd6af980b207e5abb4bb30d`** completed required full hosted governance in run **`32664416766`** / run #157. Exact checkout, warning-hard bootstrap, Development Readiness `ready`, Laravel/PHPUnit **470 passed / 4385 assertions**, Vitest 6/6, TypeScript noEmit, production build and asset budgets/provenance all passed. Artifact **`9499661324`**, digest **`sha256:6f206b1dd49701e10a205dad6f9e7ecf3203f65bd18875d010ce17b4c40ccd8e`**. The evidence is rc.94 development/source evidence only and explicitly does not promote dependency locks or final C1-C6 certification.
 - PR #1 remains **DRAFT + OPEN + MERGEABLE**; do not mark Ready or merge until required real target/release gates pass.
 - Current certified `main`: **`f854c50c0f7687fc87fdfab01b49562392af4ef4`**.
 - Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for the PR governance workflow.
@@ -144,12 +145,22 @@ Conclusion: SUCCESS
 Artifact: 9499018803
 Digest: sha256:a2c57b8fce6207b7ee9f60adcaa702a6bb25a442a7ce3fc2e5354f72180f3b1b
 
-State reconciliation head before this apply: 048cf684320d992261971c67f90af2f2a302dbb1
+State reconciliation head: 048cf684320d992261971c67f90af2f2a302dbb1
 Run: 32662762919 (#155)
 Conclusion: SUCCESS
 Laravel/PHPUnit: 470 passed / 4385 assertions
 Artifact: 9499326743
 Digest: sha256:67f3b67d99c6c67665eb3233e03eee859da32dfa1e7b32532452eb7d9355c30e
+
+Mutable-plane / HTTP acceptance reconciliation head before this apply: 6d3b0f2a8d320927fcd6af980b207e5abb4bb30d
+Run: 32664416766 (#157)
+Conclusion: SUCCESS
+Laravel/PHPUnit: 470 passed / 4385 assertions
+Vitest: 6/6 PASS
+TypeScript noEmit: PASS
+Production Vite build + asset provenance: PASS
+Artifact: 9499661324
+Digest: sha256:6f206b1dd49701e10a205dad6f9e7ecf3203f65bd18875d010ce17b4c40ccd8e
 ```
 
 Accepted portability source evidence:
@@ -296,10 +307,10 @@ Safe continuation:
 1. keep preserved rc.93 untouched as failure evidence
 2. retain PR #13 as accepted/merged with exact post-merge Windows PASS evidence
 3. retain PR #18 as accepted/merged source-attestation prerequisite with exact hosted governance evidence
-4. require this state-only dev head to be governance-green
+4. treat run #157 on `6d3b0f2a…` as accepted governance prerequisite evidence for the reconciled mutable-plane/HTTP gate
 5. correct PR #17's pre-recovery assertion so it requires a non-PASS mismatch set wholly contained in the approved mutable allow-list, with zero source/deployment/immutable-plane mismatches, and records the actual observed subset
 6. preserve both the guest `/admin` redirect gate and the authenticated Super Admin `/admin` 200 exercise in the HTTP evidence
-7. rebind PR #17 to that exact current dev head and use a fresh synchronize event
+7. rebind PR #17 to the exact current dev head and use a fresh synchronize event
 8. on that separate disposable rc.94 Windows target, prove installer commit, bounded mutable-plane pre-recovery mismatch, not-ready handoff, guarded reconcile, fresh-process zero mismatches/post-install readiness, HTTP route exercise and sealed evidence
 9. reconcile Issue #2 only when the issue's legacy evidence and approved replacement recovery acceptance are explicitly reconciled; never manufacture an rc.93 PASS
 ```
@@ -312,7 +323,7 @@ PR #13 portability hardening is merged/PASS and PR #18's narrowly required sourc
 
 ```text
 1. preserve the rc.93 installation and Issue #2 legacy-failure evidence unchanged
-2. require the current state-only dev head to pass automatic full governance
+2. treat run #157 on `6d3b0f2a…` as the accepted exact-head governance prerequisite for the reconciled recovery acceptance
 3. correct/rebind PR #17 and run a fresh Windows disposable current-source / rc.94 recovery rehearsal using the explicit mutable-plane allow-list semantics and preserving the original guest-admin redirect gate
 4. reconcile Issue #2 only against that approved replacement acceptance; never manufacture an rc.93 PASS
 5. continue broad product QA across major N1.9–N1.26 workflows
@@ -390,20 +401,20 @@ Every AI/agent must:
 | 084 | 2026-08-24 | state head `048cf684…`; governance run #155 `32662762919`, artifact `9499326743` | reconciled canonical live state and proved the state-only head under full hosted governance before accepting new recovery evidence | Power unchanged |
 | 085 | 2026-08-24 | eligible PR #17 run #10 `32663450531`, artifact `9499373095`; current rc.94 installer/finalizer/source-contract review | real fresh install commit passed; diagnosed stale exact-four carrier assertion; explicitly reconciled four-plane terminology from required full set to bounded mutable allow-list without weakening immutable fail-closed behavior | Power unchanged; target gate still pending |
 | 086 | 2026-08-24 | PR #17 body/workflow versus prior exact-next-action review | corrected state wording to preserve the original unauthenticated `/admin` 302 → `/login` acceptance while retaining authenticated Super Admin `/admin` 200 as an additive exercise; no product/runtime code changed | Power unchanged; target gate still pending |
+| 087 | 2026-08-24 | exact state head `6d3b0f2a…`; governance run #157 `32664416766`; artifact `9499661324`, digest `sha256:6f206b1dd49701e10a205dad6f9e7ecf3203f65bd18875d010ce17b4c40ccd8e` | accepted full hosted governance prerequisite for the explicitly reconciled rc.94 mutable-plane + HTTP recovery gate; 470/4385, Vitest, TypeScript and Vite all green | Power unchanged; target rehearsal still pending |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-A. Require automatic full `governance` on this new state-only dev head before attributing any new target evidence to it.
-B. Preserve the existing rc.93 installation and Issue #2 evidence unchanged; do not retry destructive/manual/in-place recovery on that target.
-C. Correct PR #17's diagnostic pre-recovery assertion: compatibility must be non-PASS; the actual mismatch set must be non-empty and wholly contained in `environment`, `activation`, `service`, `process`; no mismatch outside that allow-list is permitted; post-install status must be not-ready. Record the exact observed subset in evidence instead of forcing all four.
-D. After this state-only head is governance-green, verify PR #17 still targets `dev/n1-0b-core-functional-qa`, refresh/rebind it so the new pull_request event's base SHA equals the new exact dev HEAD, and reject all older event-bound runs as stale evidence.
-E. On that fresh Windows run, require the real installer commit to succeed, the bounded mutable-plane pre-recovery condition to pass, the guarded `nexora:runtime:post-install-reconcile --confirm=RECONCILE` to succeed, fresh-process compatibility to have zero mismatches, `post-install-status --assert-ready` to pass with a current receipt, `/login` to return 200, guest `/admin` to return 302 → `/login`, Super Admin login to return 302 → `/admin`, authenticated `/admin` to return 200, and `/install/runtime-handoff` to return 302 → `/login`.
-F. Review the uploaded source binding, before/after compatibility, before/after handoff, reconcile receipt, route evidence and sealed summary before accepting Issue #2's replacement recovery gate.
-G. Reconcile/close Issue #2 only if that approved replacement acceptance is genuinely satisfied; never manufacture an rc.93 PASS and do not raise unrelated roadmap scores from this bounded gate alone.
-H. Then continue separate development-target product QA, the real five-engine disposable DB matrix, and provider/identity/API/import/observability/Sentinel/Marketplace/HA/recovery evidence in the existing roadmap order.
-I. Complete real C5 W3C HTML/CSS/WAVE/browser/AT/HTTP/Web-Vitals evidence and C6 reviewed-lock/final release evidence.
-J. Keep PR #1 DRAFT and keep TARGET POWER 50.0% / RELEASE POWER 25.0% until those broader real boundaries are satisfied.
+A. Preserve the existing rc.93 installation and Issue #2 evidence unchanged; do not retry destructive/manual/in-place recovery on that target.
+B. Correct PR #17's diagnostic pre-recovery assertion: compatibility must be non-PASS; the actual mismatch set must be non-empty and wholly contained in `environment`, `activation`, `service`, `process`; no mismatch outside that allow-list is permitted; post-install status must be not-ready. Record the exact observed subset in evidence instead of forcing all four.
+C. Verify PR #17 still targets `dev/n1-0b-core-functional-qa`, refresh/rebind it so the new pull_request event's base SHA equals the exact current dev HEAD, and reject all older event-bound runs as stale evidence.
+D. On that fresh Windows run, require the real installer commit to succeed, the bounded mutable-plane pre-recovery condition to pass, the guarded `nexora:runtime:post-install-reconcile --confirm=RECONCILE` to succeed, fresh-process compatibility to have zero mismatches, `post-install-status --assert-ready` to pass with a current receipt, `/login` to return 200, guest `/admin` to return 302 → `/login`, Super Admin login to return 302 → `/admin`, authenticated `/admin` to return 200, and `/install/runtime-handoff` to return 302 → `/login`.
+E. Review the uploaded source binding, before/after compatibility, before/after handoff, reconcile receipt, route evidence and sealed summary before accepting Issue #2's replacement recovery gate.
+F. Reconcile/close Issue #2 only if that approved replacement acceptance is genuinely satisfied; never manufacture an rc.93 PASS and do not raise unrelated roadmap scores from this bounded gate alone.
+G. Then continue separate development-target product QA, the real five-engine disposable DB matrix, and provider/identity/API/import/observability/Sentinel/Marketplace/HA/recovery evidence in the existing roadmap order.
+H. Complete real C5 W3C HTML/CSS/WAVE/browser/AT/HTTP/Web-Vitals evidence and C6 reviewed-lock/final release evidence.
+I. Keep PR #1 DRAFT and keep TARGET POWER 50.0% / RELEASE POWER 25.0% until those broader real boundaries are satisfied.
 ```
