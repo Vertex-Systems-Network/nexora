@@ -65,7 +65,7 @@ jobs:
           Write-Host "Node: $nodeVersion"
           & composer --version
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          & npm --version
+          & npm.cmd --version
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
           if ([version]$phpVersion -lt [version]'8.3.0') {
@@ -84,7 +84,7 @@ jobs:
         run: |
           & composer install --no-interaction --prefer-dist --optimize-autoloader
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          & npm install --no-audit --no-fund
+          & npm.cmd install --no-audit --no-fund
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Prepare isolated testing environment
@@ -113,7 +113,7 @@ jobs:
         run: |
           & php scripts/development-readiness.php --full --evidence
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          & npm run test
+          & npm.cmd run test
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Run isolated SQLite target matrix
