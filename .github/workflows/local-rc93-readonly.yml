@@ -1,0 +1,54 @@
+name: Nexora rc93 local readonly probe
+
+on:
+  push:
+    branches:
+      - ops/rc93-local-readonly-probe
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rc93-readonly-probe:
+    name: rc93-readonly-probe
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 10
+    steps:
+      - name: Inspect preserved rc93 target without mutation
+        shell: powershell
+        run: |
+          $target = 'D:\laragon\www\nexora'
+          if (!(Test-Path "$target\artisan")) {
+            Write-Error "Preserved Nexora target was not found at the configured local path."
+            exit 1
+          }
+
+          Set-Location $target
+
+          Write-Host "Runner: $env:RUNNER_NAME / $env:RUNNER_OS / $env:RUNNER_ARCH"
+
+          $compat = & php artisan nexora:runtime:compatibility-status --deep 2>&1 | Out-String
+          $compatExit = $LASTEXITCODE
+          $reconcile = & php artisan list --raw 2>&1 | Select-String 'nexora:runtime:post-install-reconcile'
+          $post = & php artisan nexora:runtime:post-install-status 2>&1 | Out-String
+          $postExit = $LASTEXITCODE
+
+          $version = if ($compat -match '"current_version"\s*:\s*"([^"]+)"') { $Matches[1] } else { 'unknown' }
+          $mismatchBlock = if ($compat -match '(?s)"mismatches"\s*:\s*\[(.*?)\]') { $Matches[1] } else { '' }
+          $mismatches = [regex]::Matches($mismatchBlock, '"([^"]+)"') | ForEach-Object { $_.Groups[1].Value }
+          $postStatus = if ($post -match '"status"\s*:\s*"([^"]+)"') { $Matches[1] } elseif ($post -match 'Nexora.*:\s*(PASS|FAIL)') { $Matches[1].ToLower() } else { 'unknown' }
+
+          Write-Host "Target version: $version"
+          Write-Host "Compatibility exit: $compatExit"
+          Write-Host "Mismatches: $($mismatches -join ',')"
+          Write-Host "Reconcile command present: $([bool]$reconcile)"
+          Write-Host "Post-install status: $postStatus"
+          Write-Host "Post-install exit: $postExit"
+
+          if ($version -ne '1.0.0-rc.93') {
+            Write-Error "Target is not the preserved rc.93 installation."
+            exit 2
+          }
+
+          exit 0
