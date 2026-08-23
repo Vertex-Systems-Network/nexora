@@ -21,7 +21,7 @@
 - PR #1 remains **DRAFT + OPEN + MERGEABLE**; do not mark Ready or merge until required real target/release gates pass.
 - Current certified `main`: **`f854c50c0f7687fc87fdfab01b49562392af4ef4`**.
 - Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**, PHP >= 8.3, Node >= 22, disposable MySQL 8.4. No self-hosted/local/Laragon runner is eligible for the PR governance workflow.
-- The full Development execution QA job publishes required status context **`governance`** and runs on every pull-request head targeting `main`, including Markdown/governance-only heads; no `paths-ignore` exemption remains.
+- The full Development execution QA job publishes required status context **`governance`** and runs on every pull-request head targeting `main`, including Markdown/governance-only commits; no `paths-ignore` exemption remains.
 - Completed portability task PR #13 remains **MERGED/PASS** with accepted post-merge implementation head **`21724569daba8e38e581ec603ebd08c2f4d58cad`** and clean Windows portability evidence run **`32638775552`** / artifact `9493045237`; do not reopen it.
 - Issue #2 preserved `1.0.0-rc.93` evidence remains unchanged: the preserved target fails only `environment`, `activation`, `service`, `process`; its guarded one-time reconcile returned exit 1; source-marker evidence proves rc.93 lacks the permanent rc.94 finalization path. The preserved target must remain untouched.
 - PR #17 is a **DRAFT diagnostic evidence carrier only — DO NOT MERGE**. Its workflow must check out the PR event's exact current dev base SHA and execute the real installer/recovery path on a separate GitHub-hosted Windows disposable SQLite target.
