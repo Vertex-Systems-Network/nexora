@@ -1,231 +1,180 @@
 # Nexora AI Definition of Done
 
-No AI agent may advance the execution cursor merely because code was written or tests were added. A stage/unit is complete only when every applicable gate below is satisfied and evidence is recorded.
+No stage/unit advances because code exists or tests were added. Completion requires every applicable gate and recorded evidence. `NOT_APPLICABLE` is explicit, never inferred from omission.
 
-## Universal preconditions before implementation
+## Universal preconditions before substantial implementation
 
-- Parent stage ID is explicit and matches `.ai/roadmap/stages.md`.
-- Development-unit ID(s) exist in `.ai/registry/development-units.json`.
-- Requested work is inside the registered unit scope.
-- Dependencies are mapped and satisfied or explicitly marked blocking.
-- `.ai/plans/active.md` contains the required plan fields before substantial implementation.
-- New feature/system/package work is not hidden inside unrelated scope.
-- High/critical-risk work has an explicit threat model before implementation.
+- canonical parent stage + registered unit ID(s);
+- dependencies mapped;
+- active plan complete at proportional depth;
+- new/redesigned work has ResearchBrief/problem/VOC/baseline/CTQs where applicable;
+- DMADV or DMAIC method selected where substantial;
+- architecture/DataFlow decisions recorded;
+- high/critical security work has threat model;
+- high/critical/complex material failure modes have FMEA where applicable;
+- runtime-affecting work has performance budget/profile or explicit N/A;
+- critical stateful/provider work has reliability/idempotency/recovery plan;
+- payment work has payment-provider profile and payment security plan before code.
 
 ## Universal completion gates
 
-### 1. Scope / planning integrity
+### 1. Research / scope / outcome integrity
 
-- Stage/unit IDs are named explicitly.
-- Acceptance criteria are objective and testable.
-- Existing downstream code is not used to skip missing prerequisites.
-- AI-discovered optional work is not silently promoted to implementation.
-- Out-of-scope items remain out of scope unless plan/registry/roadmap are updated first.
+- problem is distinguished from a prescribed solution;
+- VOC/market/standards/baseline claims cite real evidence or are labeled assumption/UNKNOWN;
+- CTQs and intended user/product outcome are objective;
+- existing Nexora capability was inspected before adding new architecture;
+- optional AI-discovered work was not silently promoted;
+- out-of-scope remains out-of-scope until plan/registry/roadmap changes first.
 
 ### 2. Architecture
 
-- Public Contracts/Capabilities are used where required.
-- No first- or third-party package reaches private Core through an undocumented shortcut.
-- Architecture/public-contract/tenancy/security/execution-model changes have ADR/review evidence when required.
-- Theme, extension, tenancy, publishing, installer, deployment, API and AI boundaries remain fail-closed.
-- Shared Admin UI primitives are used instead of ad-hoc alternatives where canonical components exist.
-- Persistence/domain boundaries follow the accepted architecture.
-- Data/migrations remain fresh-install safe and portable across supported databases where applicable.
+- public contracts/capabilities used where required;
+- no first/third-party private Core shortcut;
+- ADR/review exists for public-contract, data-authority, tenancy, security, execution, payment or protocol changes;
+- persistence/domain/runtime/package boundaries remain fail-closed;
+- migrations remain additive/portable/fresh-install safe where applicable;
+- backward compatibility/deprecation path is explicit.
 
-### 3. Security / privacy
+### 3. Data architecture / governance
 
-- Development-unit risk class is recorded.
-- Required threat model is complete for `high`/`critical` work.
-- Authorization and tenancy paths are tested, including negative/cross-tenant cases where relevant.
-- Secrets are never logged/committed/exposed to AI context without explicit allowed contract.
-- New network/filesystem/secret/package/AI execution capability is least-privilege and policy-bounded.
-- Privacy/consent/retention/export/delete implications are addressed when personal/behavioral data is affected.
-- Security controls are not disabled merely to make tests pass.
+When material data is affected:
 
-### 4. Functional implementation
+- authoritative source/store identified;
+- data classification recorded;
+- tenant/site/user ownership and access path explicit;
+- transformations and derived stores mapped;
+- cache/search/analytics/vector/export are not silently authoritative;
+- package/API/webhook/AI exposure is least-purpose/minimized;
+- retention/export/delete propagation defined;
+- migration/backfill/backup/restore/recovery behavior verified;
+- logs/telemetry/error reports follow classification/redaction policy.
 
-- Happy path is implemented.
-- Permission/authorization path is implemented.
-- Validation and failure states are implemented.
-- Empty/loading/error/destructive states are implemented where applicable.
-- Upgrade/backward-compatibility impact is considered.
-- Rollback/deactivation/uninstall behavior is considered for installable packages.
-- Release/preview/staging implications are considered for publishable content/design changes.
+### 4. Security / privacy
 
-### 5. Public surfaces
+- risk class recorded;
+- required threat model complete;
+- auth/tenancy negative tests pass;
+- secrets never leak to logs/source/AI;
+- network/filesystem/package/AI powers are least privilege;
+- privacy/consent/retention/export/delete addressed;
+- controls are not weakened to make tests/scores pass;
+- residual high/critical risk has explicit acceptance authority rather than implicit silence.
 
-Every applicable surface is intentionally handled:
+### 5. FMEA / failure control
 
-- Admin UI;
-- public UI;
-- REST/GraphQL/API;
-- webhook/event;
-- SDK/public contract;
-- theme/template/slot;
-- Studio/component/dynamic binding;
-- extension registration;
-- AI read/draft/execute tool surface;
-- import/export/config-as-code.
+For applicable high/critical/complex flows:
 
-`Not applicable` must be explicit in the active plan rather than omitted.
+- important failure modes/effects/causes identified;
+- critical severity receives mitigation even if believed rare;
+- prevention + detection + recovery/reconciliation defined;
+- residual risk recorded;
+- regression/control evidence added after fixes/incidents.
 
-### 6. Verification
+### 6. Functional implementation / UX
 
-- Relevant unit tests pass.
-- Relevant feature/integration tests pass.
-- Architecture/security regression checks pass.
-- Authorization/tenancy regression tests pass where applicable.
-- TypeScript/static analysis/build checks pass where affected.
-- Migration/fresh-install/upgrade tests pass where affected.
-- Browser/E2E tests pass where user workflows are affected.
-- AI evals pass where AI tools/agents are affected.
-- Source-only verification is recorded as `SOURCE_DONE`, never `TARGET_VERIFIED`.
-- Real browser/runtime/DB behavior is exercised on the required target before `TARGET_VERIFIED`.
+- happy path + permissions + validation + failure states;
+- empty/loading/error/destructive states;
+- accessibility/responsive/i18n as applicable;
+- upgrade/backward compatibility;
+- install/enable/disable/update/rollback/uninstall for packages;
+- release/preview/staging implications for publishable work.
 
-### 7. Evidence
+### 7. Public surfaces
 
-The handoff/registry/plan record:
+Applicable Admin/public/API/webhook/SDK/theme/Studio/package/AI/import-export surfaces are intentionally handled and versioned.
 
-- development-unit IDs;
-- files/components changed;
-- commands/tests executed;
-- architecture/security review result;
-- source result;
-- target result;
-- known limitations/residual risk;
-- remaining blocker;
-- exact next action.
+### 8. Code quality / performance
 
-### 8. Documentation / AI state
+- static/type/lint/build checks pass;
+- complexity/duplication/dead-code/bundle regressions handled where in scope;
+- frontend/Admin/backend/query/cache/network/memory/package attribution measured where applicable;
+- budget/profile baseline comparison recorded;
+- performance security/privacy overhead is considered;
+- quality/performance/Sentinel security verdicts remain separate.
 
-- affected registry entries are updated;
-- `.ai/state.json` is updated;
-- `.ai/handoff/current.md` is updated;
-- `.ai/plans/active.md` is updated;
-- system/capability/security docs are updated if behavior/status changed;
-- stage/release-train graph is updated if scope/dependency/order changed;
-- ADR/threat-model docs are updated if required;
-- historical evidence is preserved rather than rewritten to appear cleaner.
+### 9. Reliability
 
-## Additional gates for CMS/content systems
+For critical recurring/stateful/provider flows:
 
-When applicable, verify:
+- timeout/retry/backoff/idempotency/concurrency policy verified;
+- failure isolation/degradation/fallback defined;
+- SLI/SLO/error budget defined where meaningful;
+- provider/partial/ambiguous failure scenarios tested;
+- rollback/recovery/reconciliation exists;
+- non-idempotent financial/destructive mutation is never blindly retried after ambiguous outcome.
 
-- content type definition/registration;
-- fields/validation/field groups;
-- one-to-one/one-to-many/many-to-many relations;
-- taxonomy binding;
-- permissions/capabilities;
-- permalink/routing behavior;
-- archive/query behavior;
-- revisions/editorial flow;
-- theme/template resolution;
-- Studio/dynamic binding integration;
-- SEO/AEO resource/schema integration;
-- API/import/export behavior;
-- extension registration path;
-- locale/release/preview behavior where relevant.
+### 10. Verification & Validation
 
-## Additional gates for Theme systems
+As applicable:
 
-Verify complete lifecycle where supported:
+- unit;
+- integration/contract;
+- architecture;
+- data/migration;
+- authorization/tenancy;
+- security/adversarial;
+- browser/E2E/accessibility;
+- package compatibility;
+- performance/code quality;
+- reliability/fault/recovery;
+- AI evals;
+- real target/provider sandbox.
 
-`upload -> quarantine/Sentinel -> manifest validation -> install -> preview -> activate -> public render -> switch -> rollback -> uninstall/remove`
+Source checks produce `SOURCE_DONE`, not `TARGET_VERIFIED`. Real browser/runtime/DB/provider behavior is executed before target claims.
 
-Also verify template hierarchy/fallback, design tokens, menu locations/slots, SEO/content ownership separation, compatibility policy and failure-safe rendering.
+### 11. Outcome / Control
 
-## Additional gates for Extension/App/Integration/Studio-Pack systems
+For outcome-dependent units:
 
-Verify:
+- observation metric/window/trigger recorded;
+- CTQ/outcome evidence linked when available;
+- future evidence is never fabricated to close a current task;
+- repeated/critical defects use DMAIC Control: regression test/budget/SLO/alert/static rule/process guard;
+- learning feeds Research/quality docs rather than remaining only in incident/chat history.
 
-`upload/stage -> quarantine -> Sentinel/Supply Chain -> manifest compatibility -> requested capabilities -> admin grants -> dependencies -> install -> enable -> runtime behavior -> disable -> version switch -> guarded rollback -> uninstall`
+### 12. Evidence / state
 
-Also verify:
+Record unit IDs, changed files/components, commands/tests, research/architecture/data/security/FMEA review, source/target/provider outcome, residual risk, blocker and exact next action. Update affected registries, state, handoff, active plan and changed governance docs; preserve history.
 
-- package family and stable unit ID;
-- runtime mode (`declarative` preferred; `trusted-php` exceptional);
-- migration policy (`none` or `forward-only` under current contract);
-- network/filesystem/secret access;
-- public contract/slot usage;
-- compatibility matrix;
-- no private Core shortcut even for first-party packages.
+## Package-specific gates
 
-## Additional gates for Site Builder / release systems
+For Extension/App/Integration/Studio-Pack/Theme verify complete supported lifecycle:
 
-Verify:
+`stage/upload → quarantine → Sentinel/Supply Chain → manifest/compatibility → capabilities/grants → dependencies → install → enable → runtime → disable → version/update/rollback → uninstall`
 
-- structured/validated visual AST;
-- responsive behavior and component inheritance/overrides;
-- dynamic bindings/query permissions;
-- undo/history/revisions;
-- preview/staging isolation;
-- branch/merge/conflict behavior;
-- scheduled/selective/group publishing;
-- rollback/release history;
-- accessibility baseline;
-- no arbitrary executable markup trusted merely because AI/user generated it.
+Also verify data purpose, external destinations, runtime/migration mode, network/filesystem/secrets, package attribution, performance/reliability/code-quality budgets and no private Core shortcut.
 
-## Additional gates for SEO/Search/AEO systems
+## Payment-provider gates
 
-Verify:
+Any provider integration/payment-entry surface must additionally prove:
 
-- canonical title/description/URL output;
-- robots/index/follow policy;
-- sitemap inclusion/exclusion;
-- Schema Graph output/stable IDs;
-- extension/resource contribution behavior;
-- public search noindex behavior;
-- internal-link/audit evidence behavior;
-- crawler host/path/network boundaries;
-- AI-readable representations do not expose private/admin data;
-- AEO/citation/visibility output remains evidence-based rather than vanity-score driven.
+1. standard profile does not expose raw PAN/CVV/track/PIN to Nexora/generic package runtime/storage/logs/AI;
+2. allowed flow is provider-hosted redirect/iframe/fields or approved tokenized SDK; generic raw-card collection remains forbidden by default;
+3. package uses `security_profile: payment-provider` and only purpose-specific capabilities;
+4. Core validates order/tenant/amount/currency/state; browser values cannot establish financial truth;
+5. Secret Broker and Network Broker boundaries are enforced;
+6. webhook signature/freshness/tenant binding/replay/deduplication/schema/out-of-order behavior is tested;
+7. idempotency + concurrency prevents duplicate capture/refund/transition;
+8. ambiguous provider timeout reconciles before retry;
+9. browser success/return URL alone cannot mark paid;
+10. 3DS/SCA/action-required/asynchronous states are modeled where supported;
+11. protected payment surface has approved script inventory/slots, strict CSP/origins, tamper detection and session-replay/analytics exclusion;
+12. payment logs/traces/errors/backups/AI are scanned/tested for sensitive-data leakage;
+13. sandbox authorization/capture/refund/webhook/reconciliation tests pass;
+14. test/live credentials are separated and live enablement is explicit;
+15. threat model + FMEA + independent payment security review exist;
+16. package kill switch, credential rotation and in-flight reconciliation are tested/planned;
+17. generic Sentinel/Marketplace status is not presented as automatic PCI/payment compliance.
 
-## Additional gates for AI tools/agents
+## AI-specific gates
 
-Verify:
+AI tools/agents use registered typed tools, normal identity/capabilities, no unrestricted shell/DB/filesystem/secrets/network, prompt/tool-content trust boundaries, approvals, audit, budgets, rollback metadata and independent eval review for critical execution paths.
 
-- tool/action is represented by registered `AIT-*`/`AIA-*` or parent AI unit;
-- no direct unrestricted shell/database/filesystem/secret/network bypass;
-- user/tenant identity propagates to tool authorization;
-- structured tool schema validates inputs/outputs;
-- least-privilege capability scope;
-- prompt-injection/tool-output trust boundaries;
-- dry-run/approval for high-risk actions where designed;
-- output validation before side effects;
-- immutable audit of request/approval/execution;
-- rate/budget/concurrency controls;
-- rollback/recovery metadata;
-- evals for misuse, injection, data leakage and excessive agency;
-- critical AI execution changes receive independent review evidence.
+## Managed/operations gates
 
-## Additional gates for security/runtime systems
-
-- No trust gate is bypassed to make development easier.
-- Quarantined code is not executed before approval/activation.
-- Evidence distinguishes static inspection from real execution isolation.
-- `trusted-php` is never described as OS/container/process isolated unless such isolation exists and is target-verified.
-- Runtime/source identity claims use exact evidence.
-- Incident/disable/quarantine/revoke/recover path is defined for high-risk runtime/package capabilities.
-
-## Additional gates for privacy/experimentation/personalization
-
-- consent requirements are evaluated before collection/assignment;
-- GPC/DNT behavior is preserved where applicable;
-- audience/segment data does not leak across tenants/users;
-- experiment assignment is deterministic and reversible;
-- default/fallback experience exists;
-- analytics/goals respect consent and retention policy;
-- AI-generated variants remain drafts until governed publish flow approves them.
-
-## Additional gates for managed cloud / operations
-
-- self-hostable architecture is not silently broken by managed-only assumptions;
-- tenant/site isolation is explicit;
-- domains/SSL/secrets/backup/restore/deploy operations are auditable;
-- failure/drain/rollback/recovery paths are defined;
-- operator health/diagnostics do not leak secrets;
-- HA claims require multi-node/shared-state evidence.
+Managed/cloud/ops claims require tenant isolation, auditable domain/SSL/secrets/deploy/backup operations, failure/drain/rollback/recovery, secret-safe diagnostics and real HA evidence for HA claims. Cost/resource attribution cannot leak tenant-sensitive data.
 
 ## Cursor advancement rule
 
-The cursor advances only when the active stage's required status is reached. If the next stage requires real-target verification, `SOURCE_DONE` is insufficient. A new feature discovered during closure is registered/planned first; it does not silently pull the cursor into unrelated implementation.
+The cursor advances only when the current stage reaches its required evidence status. Later foundations cannot waive earlier quality/security/data/payment gates. A newly discovered substantial capability is registered/planned first rather than silently pulling implementation outside the current cursor.
