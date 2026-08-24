@@ -11,14 +11,14 @@ Stable semantic stage IDs are canonical. Historical `N0.x`, `N1.x`, `DEV-x` labe
 5. A stage cannot become `SOURCE_DONE` until its Definition of Done and source/static evidence pass.
 6. A target-dependent stage cannot become `TARGET_VERIFIED` without real-target evidence.
 7. Existing downstream code does not allow prerequisite stages to be skipped.
-8. Architecture, security, data/migrations, permissions/tenancy, API/SDK, theme/Studio, AI exposure, observability, tests and rollback are part of feature scope when applicable.
+8. Architecture, security, data/migrations, permissions/tenancy, API/SDK, theme/Studio, AI exposure, observability, performance/code quality, tests and rollback are part of feature scope when applicable.
 9. Security is continuous. `SECURITY-BASELINE-200` is an early mandatory gate; `SENTINEL-200` is later advanced runtime/package hardening.
 10. Historical `N1.x` labels must be resolved through `.ai/roadmap/legacy-aliases.md` before use.
 
 ## Release-train intent
 
-- **Builder Beta** — prove Nexora as a secure extensible CMS/site builder first.
-- **Pro** — add AI-native design/content/development, AEO, migration and optimization.
+- **Builder Beta** — prove Nexora as a secure extensible CMS/site builder first, with performance attribution/budgets built into the platform rather than added after launch.
+- **Pro** — add AI-native design/content/development, AEO, migration, optimization and PageSpeed/GTmetrix-class Performance Intelligence.
 - **Platform** — productize marketplace, commerce, portals, enterprise/cloud and advanced security/operations.
 - **Production** — final performance/accessibility/release certification.
 
@@ -48,7 +48,7 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 | 12 | `SEO-SEARCH-CLOSURE-001` | current SEO Core, Schema Graph, sitemap, internal links, search, analytics and crawler | Builder Beta | PLANNED | MEDIA-DISTRIBUTION-CLOSURE-001 |
 | 13 | `AUTOMATION-CLOSURE-001` | current triggers, conditions, actions, signed inbound/outbound webhooks, retry/evidence | Builder Beta | PLANNED | SEO-SEARCH-CLOSURE-001 |
 
-## Track C — mature CMS/site-builder kernel
+## Track C — mature CMS/site-builder kernel + performance foundation
 
 | # | Stage | Scope | Train | Status | Depends on |
 |---:|---|---|---|---|---|
@@ -65,61 +65,64 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 | 24 | `TEMPLATE-ECOSYSTEM-100` | site/page/section/component/theme/commerce starter kits, dependency-aware one-click install, safe customization/update model | Builder Beta | NEW_REQUIRED / COMMERCIAL | THEME-STUDIO-200, EXT-SDK-200 |
 | 25 | `I18N-200` | site locales, localized static/CMS/component content, localized SEO/hreflang and translation workflow | Builder Beta | LEGACY_PLANNED + EXPANDED | CONTENT-MODEL-200, THEME-STUDIO-200, RELEASE-WORKFLOW-200 |
 | 26 | `FRONTEND-RUNTIME-200` | frontend cache/CDN/image pipeline, render budgets, invalidation and delivery runtime | Builder Beta | LEGACY_PLANNED | THEME-CONTRACT-200, SITE-BUILDER-200 |
-| 27 | `MEDIA-DAM-200` | asset organization/usage graph, transforms, dedupe, metadata/rights and external storage product closure | Builder Beta | LEGACY_PLANNED + EXPANDED | FRONTEND-RUNTIME-200, MEDIA-DISTRIBUTION-CLOSURE-001 |
-| 28 | `SEARCH-200` | facets, provider abstraction and advanced indexing/querying for content/commerce | Builder Beta | LEGACY_PLANNED | CONTENT-MODEL-200, TAXONOMY-200, QUERY-ENGINE-200 |
-| 29 | `FORMS-WORKFLOW-200` | form builder, validation, spam/rate controls, lead capture and visual workflow integration | Builder Beta | LEGACY_PLANNED | SITE-BUILDER-200, EXT-SDK-200, AUTOMATION-CLOSURE-001 |
-| 30 | `PRIVACY-CONSENT-100` | consent manager, cookie categories, analytics/marketing consent, GPC/DNT, retention/export/delete hooks and regional policy integration | Builder Beta | NEW_REQUIRED | SECURITY-BASELINE-200, I18N-200, FORMS-WORKFLOW-200 |
+| 27 | `PERFORMANCE-FOUNDATION-200` | provider-neutral lab/RUM/server profiling primitives, Admin/backend traces, DB/cache/network/memory metrics, Theme/Extension/asset attribution, budgets and regression baselines | Builder Beta | NEW_REQUIRED / EXPANDS LEGACY PERFORMANCE | FRONTEND-RUNTIME-200, THEME-CONTRACT-200, EXT-SDK-200, SECURITY-BASELINE-200 |
+| 28 | `CODE-QUALITY-200` | Core/Theme/Extension/App static/type/lint/complexity/duplication/dead-code/bundle quality with runtime-cost correlation and package quality profiles | Builder Beta | NEW_REQUIRED | ARCH-BOUNDARY-100, EXT-SDK-200, PERFORMANCE-FOUNDATION-200 |
+| 29 | `MEDIA-DAM-200` | asset organization/usage graph, transforms, dedupe, metadata/rights and external storage product closure | Builder Beta | LEGACY_PLANNED + EXPANDED | FRONTEND-RUNTIME-200, MEDIA-DISTRIBUTION-CLOSURE-001 |
+| 30 | `SEARCH-200` | facets, provider abstraction and advanced indexing/querying for content/commerce | Builder Beta | LEGACY_PLANNED | CONTENT-MODEL-200, TAXONOMY-200, QUERY-ENGINE-200 |
+| 31 | `FORMS-WORKFLOW-200` | form builder, validation, spam/rate controls, lead capture and visual workflow integration | Builder Beta | LEGACY_PLANNED | SITE-BUILDER-200, EXT-SDK-200, AUTOMATION-CLOSURE-001 |
+| 32 | `PRIVACY-CONSENT-100` | consent manager, cookie categories, analytics/marketing consent, GPC/DNT, retention/export/delete hooks and regional policy integration including RUM telemetry policy | Builder Beta | NEW_REQUIRED | SECURITY-BASELINE-200, I18N-200, FORMS-WORKFLOW-200, PERFORMANCE-FOUNDATION-200 |
 
-## Track D — AI-native Pro platform and discoverability
+## Track D — AI-native Pro platform, discoverability and Performance Intelligence
 
 | # | Stage | Scope | Train | Status | Depends on |
 |---:|---|---|---|---|---|
-| 31 | `AI-KERNEL-100` | model gateway, agent runtime, Tool Registry, capability gate, context engine, structured executor, approvals, audit, prompt registry, evals and telemetry | Pro | NEW_REQUIRED / LEGACY AI FOUNDATION | CONTENT-MODEL-200, EXT-SDK-200, SECURITY-BASELINE-200 |
-| 32 | `SEO-AI-200` | SEO 2.0 + AEO/AI visibility: expanded resource adapters, entity/schema intelligence, AI-readable representations, crawler/citation visibility workflows | Pro | LEGACY_PLANNED + EXPANDED | ROUTING-200, SEARCH-200, AI-KERNEL-100, SEO-SEARCH-CLOSURE-001 |
-| 33 | `API-PLATFORM-100` | versioned REST/GraphQL, OAuth/scopes, webhook subscriptions, headless delivery and extension APIs | Pro | LEGACY_PLANNED | CONTENT-MODEL-200, TAXONOMY-200, QUERY-ENGINE-200, EXT-SDK-200, SECURITY-BASELINE-200 |
-| 34 | `CONFIG-AS-CODE-100` | import/export, schema/site/config serialization, validate/diff/apply and environment-safe configuration | Pro | LEGACY_PLANNED | API-PLATFORM-100 |
-| 35 | `AGENT-INTEROP-100` | external AI agent gateway with OAuth/scoped identity, capability negotiation, typed tools, read/draft/execute policies and audit; protocol adapters remain replaceable | Pro | NEW_REQUIRED / FUTURE-CRITICAL | AI-KERNEL-100, API-PLATFORM-100, SECURITY-BASELINE-200 |
-| 36 | `AI-CONTENT-100` | governed AI CMS/media/SEO/AEO assistance through typed tools and evidence | Pro | NEW_REQUIRED | AI-KERNEL-100, SEO-AI-200 |
-| 37 | `AI-DESIGN-100` | brief → IA → content model → navigation → tokens → components → visual AST → responsive/a11y validation → draft/publish | Pro | NEW_REQUIRED | AI-KERNEL-100, SITE-BUILDER-200, THEME-STUDIO-200, NAVIGATION-100, RELEASE-WORKFLOW-200 |
-| 38 | `DESIGN-IMPORT-100` | Figma/design-source import into tokens/components/layout AST with responsive inference and validation, never raw trusted HTML | Pro | NEW_REQUIRED | THEME-STUDIO-200, SITE-BUILDER-200 |
-| 39 | `AI-DX-100` | SDK-aware app/extension/theme scaffolding, architecture/security review, tests/evals and package-development assistance | Pro | NEW_REQUIRED | AI-KERNEL-100, EXT-SDK-200, API-PLATFORM-100, AI-GOV-AUTOMATION-100 |
-| 40 | `EXPERIMENTATION-100` | A/B and multivariate tests, goals, safe rollout, variant analytics and AI-assisted variant generation/analysis | Pro | NEW_REQUIRED | RELEASE-WORKFLOW-200, FRONTEND-RUNTIME-200, PRIVACY-CONSENT-100 |
-| 41 | `PERSONALIZATION-100` | audience/segment rules, personalized components/content with privacy-safe evaluation and deterministic fallback | Pro | NEW_REQUIRED / FUTURE | EXPERIMENTATION-100, PRIVACY-CONSENT-100, QUERY-ENGINE-200 |
-| 42 | `APP-RUNTIME-100` | secure low-code/full-stack app functions, jobs, schedules, data actions, integration calls and secrets through capability-bounded runtime rather than arbitrary Core access | Pro | NEW_REQUIRED / FUTURE | EXT-SDK-200, SECURITY-BASELINE-200, API-PLATFORM-100 |
-| 43 | `MIGRATION-CENTER-100` | WordPress/Webflow/Drupal/Shopify adapters, dry-run/loss report, redirects, idempotent retries and SEO-safe migration | Pro | LEGACY_PLANNED + EXPANDED | CONFIG-AS-CODE-100, ROUTING-200, MEDIA-DAM-200 |
-| 44 | `DX-200` | CLI/SDK/docs/local dev, reference apps/themes/extensions, package generators and compatibility tooling | Pro | LEGACY_PLANNED | EXT-SDK-200, API-PLATFORM-100, MIGRATION-CENTER-100 |
+| 33 | `AI-KERNEL-100` | model gateway, agent runtime, Tool Registry, capability gate, context engine, structured executor, approvals, audit, prompt registry, evals and telemetry | Pro | NEW_REQUIRED / LEGACY AI FOUNDATION | CONTENT-MODEL-200, EXT-SDK-200, SECURITY-BASELINE-200 |
+| 34 | `SEO-AI-200` | SEO 2.0 + AEO/AI visibility: expanded resource adapters, entity/schema intelligence, AI-readable representations, crawler/citation visibility workflows | Pro | LEGACY_PLANNED + EXPANDED | ROUTING-200, SEARCH-200, AI-KERNEL-100, SEO-SEARCH-CLOSURE-001 |
+| 35 | `API-PLATFORM-100` | versioned REST/GraphQL, OAuth/scopes, webhook subscriptions, headless delivery and extension APIs | Pro | LEGACY_PLANNED | CONTENT-MODEL-200, TAXONOMY-200, QUERY-ENGINE-200, EXT-SDK-200, SECURITY-BASELINE-200 |
+| 36 | `CONFIG-AS-CODE-100` | import/export, schema/site/config serialization, validate/diff/apply and environment-safe configuration | Pro | LEGACY_PLANNED | API-PLATFORM-100 |
+| 37 | `AGENT-INTEROP-100` | external AI agent gateway with OAuth/scoped identity, capability negotiation, typed tools, read/draft/execute policies and audit; protocol adapters remain replaceable | Pro | NEW_REQUIRED / FUTURE-CRITICAL | AI-KERNEL-100, API-PLATFORM-100, SECURITY-BASELINE-200 |
+| 38 | `AI-CONTENT-100` | governed AI CMS/media/SEO/AEO assistance through typed tools and evidence | Pro | NEW_REQUIRED | AI-KERNEL-100, SEO-AI-200 |
+| 39 | `AI-DESIGN-100` | brief → IA → content model → navigation → tokens → components → visual AST → responsive/a11y validation → draft/publish | Pro | NEW_REQUIRED | AI-KERNEL-100, SITE-BUILDER-200, THEME-STUDIO-200, NAVIGATION-100, RELEASE-WORKFLOW-200 |
+| 40 | `DESIGN-IMPORT-100` | Figma/design-source import into tokens/components/layout AST with responsive inference and validation, never raw trusted HTML | Pro | NEW_REQUIRED | THEME-STUDIO-200, SITE-BUILDER-200 |
+| 41 | `AI-DX-100` | SDK-aware app/extension/theme scaffolding, architecture/security/code-quality review, tests/evals and package-development assistance | Pro | NEW_REQUIRED | AI-KERNEL-100, EXT-SDK-200, API-PLATFORM-100, AI-GOV-AUTOMATION-100, CODE-QUALITY-200 |
+| 42 | `PERFORMANCE-INTELLIGENCE-200` | PageSpeed/GTmetrix-class Performance Center: lab + field Web Vitals, waterfall, filmstrip/video, user-flow profiles, frontend/backend traces, Theme/Extension attribution, code-quality correlation, compare/history/monitoring/alerts and secure external runners | Pro | NEW_REQUIRED / DIFFERENTIATOR | PERFORMANCE-FOUNDATION-200, CODE-QUALITY-200, RELEASE-WORKFLOW-200, API-PLATFORM-100, AI-KERNEL-100 |
+| 43 | `EXPERIMENTATION-100` | A/B and multivariate tests, goals, safe rollout, variant analytics and AI-assisted variant generation/analysis including performance impact | Pro | NEW_REQUIRED | RELEASE-WORKFLOW-200, FRONTEND-RUNTIME-200, PRIVACY-CONSENT-100, PERFORMANCE-INTELLIGENCE-200 |
+| 44 | `PERSONALIZATION-100` | audience/segment rules, personalized components/content with privacy-safe evaluation and deterministic fallback | Pro | NEW_REQUIRED / FUTURE | EXPERIMENTATION-100, PRIVACY-CONSENT-100, QUERY-ENGINE-200 |
+| 45 | `APP-RUNTIME-100` | secure low-code/full-stack app functions, jobs, schedules, data actions, integration calls and secrets through capability-bounded runtime rather than arbitrary Core access | Pro | NEW_REQUIRED / FUTURE | EXT-SDK-200, SECURITY-BASELINE-200, API-PLATFORM-100 |
+| 46 | `MIGRATION-CENTER-100` | WordPress/Webflow/Drupal/Shopify adapters, dry-run/loss report, redirects, idempotent retries and SEO-safe migration | Pro | LEGACY_PLANNED + EXPANDED | CONFIG-AS-CODE-100, ROUTING-200, MEDIA-DAM-200 |
+| 47 | `DX-200` | CLI/SDK/docs/local dev, reference apps/themes/extensions, package generators, compatibility and performance/quality tooling | Pro | LEGACY_PLANNED | EXT-SDK-200, API-PLATFORM-100, MIGRATION-CENTER-100, CODE-QUALITY-200 |
 
 ## Track E — marketplace, commerce and customer platform
 
 | # | Stage | Scope | Train | Status | Depends on |
 |---:|---|---|---|---|---|
-| 45 | `MARKETPLACE-CLOSURE-001` | verify current catalogs, publisher trust and staging → quarantine → Sentinel → install | Platform | PLANNED | EXTENSION-CLOSURE-001, SECURITY-BASELINE-200 |
-| 46 | `MARKETPLACE-200` | publisher economy, discovery, ratings/reviews, compatibility, licensing/subscriptions and safe updates | Platform | LEGACY_PLANNED | EXT-SDK-200, MARKETPLACE-CLOSURE-001 |
-| 47 | `COMMERCE-CLOSURE-001` | verify current product/price/tax/customer/order/invoice/payment/refund/subscription foundation | Platform | PLANNED | SECURITY-BASELINE-200 |
-| 48 | `COMMERCE-200` | variants/inventory/discounts/cart/secure checkout, functions, checkout/account slots, providers and fulfillment | Platform | LEGACY_PLANNED + EXPANDED | EXT-SDK-200, SITE-BUILDER-200, API-PLATFORM-100, COMMERCE-CLOSURE-001 |
-| 49 | `CRM-MEMBERSHIP-HELPDESK-CLOSURE-001` | verify current CRM, entitlement/access and tickets/SLA workflows | Platform | PLANNED | CORE-QA-001, SECURITY-BASELINE-200 |
-| 50 | `PORTAL-200` | authenticated customer/member portal builder across commerce/CRM/membership/helpdesk | Platform | LEGACY_PLANNED | COMMERCE-200, SITE-BUILDER-200, CRM-MEMBERSHIP-HELPDESK-CLOSURE-001 |
-| 51 | `COLLAB-200` | presence, locks, comments, approvals and workflow-aware collaborative editing | Platform | LEGACY_PLANNED | SITE-BUILDER-200, RELEASE-WORKFLOW-200, PORTAL-200 |
+| 48 | `MARKETPLACE-CLOSURE-001` | verify current catalogs, publisher trust and staging → quarantine → Sentinel → install | Platform | PLANNED | EXTENSION-CLOSURE-001, SECURITY-BASELINE-200 |
+| 49 | `MARKETPLACE-200` | publisher economy, discovery, ratings/reviews, compatibility, licensing/subscriptions, safe updates and reproducible package quality/performance profiles | Platform | LEGACY_PLANNED + EXPANDED | EXT-SDK-200, MARKETPLACE-CLOSURE-001, CODE-QUALITY-200, PERFORMANCE-INTELLIGENCE-200 |
+| 50 | `COMMERCE-CLOSURE-001` | verify current product/price/tax/customer/order/invoice/payment/refund/subscription foundation | Platform | PLANNED | SECURITY-BASELINE-200 |
+| 51 | `COMMERCE-200` | variants/inventory/discounts/cart/secure checkout, functions, checkout/account slots, providers and fulfillment | Platform | LEGACY_PLANNED + EXPANDED | EXT-SDK-200, SITE-BUILDER-200, API-PLATFORM-100, COMMERCE-CLOSURE-001 |
+| 52 | `CRM-MEMBERSHIP-HELPDESK-CLOSURE-001` | verify current CRM, entitlement/access and tickets/SLA workflows | Platform | PLANNED | CORE-QA-001, SECURITY-BASELINE-200 |
+| 53 | `PORTAL-200` | authenticated customer/member portal builder across commerce/CRM/membership/helpdesk | Platform | LEGACY_PLANNED | COMMERCE-200, SITE-BUILDER-200, CRM-MEMBERSHIP-HELPDESK-CLOSURE-001 |
+| 54 | `COLLAB-200` | presence, locks, comments, approvals and workflow-aware collaborative editing | Platform | LEGACY_PLANNED | SITE-BUILDER-200, RELEASE-WORKFLOW-200, PORTAL-200 |
 
 ## Track F — managed cloud, enterprise, advanced security and operations
 
 | # | Stage | Scope | Train | Status | Depends on |
 |---:|---|---|---|---|---|
-| 52 | `MANAGED-CLOUD-100` | optional Nexora Managed Cloud: site provisioning, domains/SSL, CDN, backups, staging/deploy history, monitoring, usage/metering and autoscaling policy | Platform | NEW_REQUIRED / COMMERCIAL | FRONTEND-RUNTIME-200, RELEASE-WORKFLOW-200, OBSERVABILITY prerequisites |
-| 53 | `ENTERPRISE-CLOUD-CLOSURE-001` | verify existing organizations/tenancy/SSO/SCIM/governance and distributed runtime/HA foundations | Platform | PLANNED | SECURITY-BASELINE-200, CRM-MEMBERSHIP-HELPDESK-CLOSURE-001 |
-| 54 | `SENTINEL-200` | advisory/vulnerability intelligence, stronger package policy, emergency revocation and true isolated runtime backend strategy | Platform | LEGACY_PLANNED + EXPANDED | EXT-SDK-200, MARKETPLACE-200, APP-RUNTIME-100 |
-| 55 | `ENTERPRISE-GOV-200` | policy center, SSO/SCIM product closure, audit/impersonation controls and tenancy hardening | Platform | LEGACY_PLANNED | ENTERPRISE-CLOUD-CLOSURE-001, SENTINEL-200 |
-| 56 | `OBSERVABILITY-200` | operations center for logs/metrics/traces/jobs/queues/health/AI/package/security evidence | Platform | LEGACY_PLANNED | ENTERPRISE-GOV-200 |
-| 57 | `DR-PLATFORM-100` | application/package updates, atomic rollback, backup/restore, DR rehearsal and evidence | Platform | LEGACY_PLANNED | OBSERVABILITY-200 |
+| 55 | `MANAGED-CLOUD-100` | optional Nexora Managed Cloud: site provisioning, domains/SSL, CDN, backups, staging/deploy history, distributed performance runners, monitoring, usage/metering and autoscaling policy | Platform | NEW_REQUIRED / COMMERCIAL | FRONTEND-RUNTIME-200, RELEASE-WORKFLOW-200, PERFORMANCE-INTELLIGENCE-200, OBSERVABILITY prerequisites |
+| 56 | `ENTERPRISE-CLOUD-CLOSURE-001` | verify existing organizations/tenancy/SSO/SCIM/governance and distributed runtime/HA foundations | Platform | PLANNED | SECURITY-BASELINE-200, CRM-MEMBERSHIP-HELPDESK-CLOSURE-001 |
+| 57 | `SENTINEL-200` | advisory/vulnerability intelligence, stronger package policy, emergency revocation and true isolated runtime backend strategy | Platform | LEGACY_PLANNED + EXPANDED | EXT-SDK-200, MARKETPLACE-200, APP-RUNTIME-100 |
+| 58 | `ENTERPRISE-GOV-200` | policy center, SSO/SCIM product closure, audit/impersonation controls and tenancy hardening | Platform | LEGACY_PLANNED | ENTERPRISE-CLOUD-CLOSURE-001, SENTINEL-200 |
+| 59 | `OBSERVABILITY-200` | operations center for logs/metrics/traces/jobs/queues/health/AI/package/security evidence, consuming shared performance telemetry contracts rather than duplicating them | Platform | LEGACY_PLANNED + EXPANDED | ENTERPRISE-GOV-200, PERFORMANCE-FOUNDATION-200 |
+| 60 | `DR-PLATFORM-100` | application/package updates, atomic rollback, backup/restore, DR rehearsal and evidence | Platform | LEGACY_PLANNED | OBSERVABILITY-200 |
 
 ## Track G — production certification
 
 | # | Stage | Scope | Train | Status | Depends on |
 |---:|---|---|---|---|---|
-| 58 | `PERF-CWV-CERT-100` | performance budgets, Core Web Vitals and render/media/query/cache certification | Production | LEGACY_PLANNED | DR-PLATFORM-100, FRONTEND-RUNTIME-200 |
-| 59 | `A11Y-CERT-100` | accessibility/international certification including keyboard, screen-reader, contrast and RTL | Production | LEGACY_PLANNED | PERF-CWV-CERT-100, I18N-200 |
-| 60 | `RELEASE-CERT-100` | final C1-C6 exact-source dependency/browser/DB/security/backup/restore/HA/package certification | Production | DEFERRED_CERTIFICATION | A11Y-CERT-100, SENTINEL-200, DR-PLATFORM-100 |
-| 61 | `N2-STABLE-100` | stable production platform release | Production | BLOCKED | RELEASE-CERT-100 |
+| 61 | `PERF-CWV-CERT-100` | final performance certification across Core Web Vitals, frontend delivery, backend/query/cache/memory budgets, Theme/Extension impact and release-regression evidence | Production | LEGACY_PLANNED + EXPANDED | DR-PLATFORM-100, FRONTEND-RUNTIME-200, PERFORMANCE-INTELLIGENCE-200, CODE-QUALITY-200 |
+| 62 | `A11Y-CERT-100` | accessibility/international certification including keyboard, screen-reader, contrast and RTL | Production | LEGACY_PLANNED | PERF-CWV-CERT-100, I18N-200 |
+| 63 | `RELEASE-CERT-100` | final C1-C6 exact-source dependency/browser/DB/security/backup/restore/HA/package certification | Production | DEFERRED_CERTIFICATION | A11Y-CERT-100, SENTINEL-200, DR-PLATFORM-100 |
+| 64 | `N2-STABLE-100` | stable production platform release | Production | BLOCKED | RELEASE-CERT-100 |
 
 ## External first-party package track
 
@@ -148,13 +151,15 @@ Before coding any stage/unit, the active plan must identify:
 11. API/webhook/SDK;
 12. theme/Studio/extension surfaces;
 13. AI read/draft/execute/tool policy;
-14. observability/performance;
+14. observability/performance/code-quality/budget impact;
 15. tests/evals;
 16. exact target verification;
 17. rollback/recovery/update compatibility;
 18. docs/handoff;
 19. explicit acceptance criteria;
 20. explicit out-of-scope items.
+
+Performance-affecting work must explicitly state its budget/test profile or state `NOT_APPLICABLE` with reason. Theme/Extension/App work must state how its frontend/backend/runtime cost will be measured or why the unit cannot affect runtime performance.
 
 ## Current cursor
 
