@@ -2,15 +2,15 @@
 
 ## Objective
 
-Deliver Nexora stage by stage without losing work, skipping prerequisites, creating hidden systems/packages, duplicating existing capabilities, optimizing the wrong problem, or declaring source-only work product-complete.
+Deliver Nexora stage by stage without losing work, skipping prerequisites, creating hidden systems/packages, duplicating existing capabilities, optimizing the wrong problem, hiding architecture/data/runtime relationships, or declaring source-only work product-complete.
 
-`.ai/roadmap/stages.md` controls canonical dependencies; main/domain registries control authorized development units; `.ai/quality/engineering-lifecycle.md` controls the closed-loop quality method.
+`.ai/roadmap/stages.md` controls canonical dependencies; main/domain registries control authorized development units; `.ai/quality/engineering-lifecycle.md` controls the closed-loop quality method; `.ai/flow/system-graph.md` controls canonical relationship/evidence planning where material flows change.
 
 ## Zero-skip + zero-hidden-work + evidence rule
 
 The cursor advances only when the active stage satisfies its applicable Definition of Done and evidence is recorded.
 
-Later code does not waive earlier gates. New work cannot be hidden in chat or an unrelated stage. AI assumptions are not measurements, VOC, root cause, compliance or target evidence.
+Later code does not waive earlier gates. New work cannot be hidden in chat or an unrelated stage. AI assumptions are not measurements, VOC, root cause, compliance, System Graph runtime observation or target evidence.
 
 ## Unit lifecycle
 
@@ -25,7 +25,9 @@ Signal / request
 → UX/design/accessibility
 → implementation
 → code quality + QA
-→ performance + reliability
+→ performance
+→ System Graph / relationship evidence
+→ reliability
 → release
 → observe outcome
 → improve/control
@@ -50,7 +52,7 @@ Use proportional **DMAIC**:
 
 `Define → Measure → Analyze → Improve → Control`
 
-Control means regression prevention: test, budget, SLO/alert, static/architecture rule, Sentinel policy, documentation or another durable control.
+Control means regression prevention: test, budget, SLO/alert, static/architecture/System-Graph drift rule, Sentinel policy, documentation or another durable control.
 
 Trivial non-behavioral copy/style/typo changes stay lightweight.
 
@@ -67,14 +69,33 @@ Trivial non-behavioral copy/style/typo changes stay lightweight.
 9. Create FMEA for high/critical/complex material failures where applicable.
 10. Define UI/accessibility/API/theme/Studio/package/AI surfaces.
 11. Define performance/code-quality budget/profile.
-12. Define reliability timeout/retry/idempotency/degradation/SLO/recovery.
-13. Define privacy/compliance/cost/observability.
-14. Define tests/target verification/rollback/post-release control.
-15. Update roadmap/capability docs if scope is new.
-16. Create/update `.ai/plans/active.md`.
-17. Only then implement.
+12. Define System Graph/Flow contribution or explicit N/A: expected nodes/edges, ownership/version, data/network/secret/permission/state/error/retry/deployment relationships, evidence classes and drift checks.
+13. Define reliability timeout/retry/idempotency/degradation/SLO/recovery.
+14. Define privacy/compliance/cost/observability.
+15. Define tests/target verification/rollback/post-release control.
+16. Update roadmap/capability docs if scope is new.
+17. Create/update `.ai/plans/active.md`.
+18. Only then implement.
 
 AI-discovered optional ideas may be `PROPOSED`; they are not silently promoted.
+
+## System Graph / Flow special gate
+
+Material runtime/package/data/security/permission/event/network/state/error/deployment changes follow `.ai/flow/system-graph.md`.
+
+Core invariants:
+
+- **Graph + evidence is truth; diagram is projection.**
+- evidence classes remain distinct: `declared`, `static`, `observed`, `tested`, `production-observed`, `ai-inferred`;
+- AI/static evidence is never silently promoted to runtime observation;
+- one runtime trace does not prove all paths or concurrency safety;
+- missing evidence remains missing/UNKNOWN;
+- Theme/Extension/App/Integration/module paths retain stable package/source/version identity where applicable;
+- expected-vs-observed drift is first-class;
+- Flow Intelligence consumes Data Governance/Security/Sentinel/Performance/Reliability/Payment/Release/Observability evidence rather than duplicating it;
+- sensitive topology is default-deny, tenant scoped, redacted and audited;
+- production tracing is bounded/sampled and collector overhead is measured;
+- a graph database requires measured need + ADR, not fashion.
 
 ## Payment-provider special gate
 
@@ -92,13 +113,14 @@ Standard-profile invariants:
 - payment page restricts scripts/slots with CSP/tamper controls;
 - non-idempotent ambiguous mutations reconcile before retry;
 - threat model + FMEA + independent payment security review + sandbox tests before activation;
+- payment path can be represented in the System Graph only with safe/redacted evidence;
 - generic Sentinel/package PASS is not payment certification.
 
 ## Package-specific planning
 
-Before Extension/App/Integration/Studio Pack/Theme creation define identity/version/compatibility, public contracts, capabilities, runtime/migration mode, data purpose, network/filesystem/secrets, UI slots, Sentinel/Supply Chain, lifecycle, security/performance/reliability/code-quality tests and rollback/uninstall behavior.
+Before Extension/App/Integration/Studio Pack/Theme creation define identity/version/compatibility, public contracts, capabilities, runtime/migration mode, data purpose, network/filesystem/secrets, UI slots, Sentinel/Supply Chain, lifecycle, security/performance/reliability/code-quality tests, expected System Graph/Flow contribution and rollback/uninstall behavior.
 
-First-party status never grants private Core shortcuts.
+First-party status never grants private Core shortcuts. Rich Flow visibility never grants additional privilege.
 
 ## Stage chunking
 
@@ -109,8 +131,8 @@ Large parent stages may use execution chunks (`STAGE-ID-A/B/C`). Chunk suffixes 
 1. Re-read state, active plan and registered units.
 2. Inspect current source; do not trust prose alone.
 3. Implement smallest architecture-correct slice.
-4. Add contracts/migrations/tests/security/data/reliability controls in the same slice where applicable.
-5. Run source/static/unit/integration/security/performance checks available.
+4. Add contracts/migrations/tests/security/data/System-Graph/reliability controls in the same slice where applicable.
+5. Run source/static/unit/integration/security/performance/graph checks available.
 6. Fix regressions/root blocker before proceeding.
 7. Record evidence, changed behavior and residual risk.
 8. Update active plan/unit status.
@@ -134,6 +156,7 @@ Every substantial unit explicitly decides:
 - theme/Studio/package surfaces;
 - AI context/read/draft/execute;
 - performance/code quality;
+- **System Graph/Flow contribution, evidence class/provenance, sensitive access and drift checks;**
 - reliability/SLO/recovery;
 - observability/audit;
 - cost/resource efficiency;
@@ -146,29 +169,29 @@ Every substantial unit explicitly decides:
 
 ## Security gates
 
-Security is continuous. High/critical units require threat modeling. Auth/tenancy/public-write/executable-package/secret/network/payment/destructive/AI-tool units require explicit security review. `SENTINEL-200` later adds advanced isolation/revocation and does not replace earlier controls.
+Security is continuous. High/critical units require threat modeling. Auth/tenancy/public-write/executable-package/secret/network/payment/destructive/AI-tool/Flow-sensitive-topology units require explicit security review. `SENTINEL-200` later adds advanced isolation/revocation and does not replace earlier controls.
 
-AI-generated code is untrusted contributor output until objective evidence passes.
+AI-generated code and AI-generated graph explanations are untrusted contributor outputs until objective evidence passes.
 
 ## Reliability gates
 
 Critical recurring/stateful/provider workflows define bounded timeouts/retries/idempotency/concurrency/failure isolation/degradation/recovery and meaningful SLO/error-budget policy where applicable. Fault tests run in approved safe environments.
 
-Financial/destructive operations are never blindly retried after ambiguous results.
+Financial/destructive operations are never blindly retried after ambiguous results. State/retry/recovery Flow projections cannot substitute for actual fault/reconciliation tests.
 
 ## Independent review
 
-One model/session may perform multiple practical roles, but high-risk architecture/security/payment/AI execution/package-runtime work requires a distinct review pass/context plus automated/target evidence. Self-asserted correctness is never certification.
+One model/session may perform multiple practical roles, but high-risk architecture/security/payment/AI execution/package-runtime/System-Graph trust-boundary/provider/storage work requires a distinct review pass/context plus automated/target evidence. Self-asserted correctness is never certification.
 
 ## Definition of Done levels
 
 ### SOURCE_DONE
 
-Applicable source/contracts/migrations/data/security/backend/frontend/tests/static/performance/reliability/docs are coherent and source evidence passes.
+Applicable source/contracts/migrations/data/security/backend/frontend/tests/static/performance/System-Graph/reliability/docs are coherent and source evidence passes.
 
 ### TARGET_VERIFIED
 
-Required real environment/browser/provider/operator behavior is exercised successfully.
+Required real environment/browser/provider/operator behavior is exercised successfully. A static/AI-generated graph cannot satisfy a runtime target gate.
 
 ### Outcome/control evidence
 
@@ -184,17 +207,19 @@ When blocked:
 4. do not jump to unrelated stages;
 5. fix blocker or obtain explicit roadmap change;
 6. use DMAIC/root-cause evidence for recurrent failures;
-7. add durable Control protection.
+7. add durable Control protection, including graph-drift/path evidence where useful.
 
-## Architecture/data change handling
+## Architecture/data/System-Graph change handling
 
-When implementation conflicts with architecture/data authority:
+When implementation conflicts with architecture/data authority/observed relationships:
 
 - do not choose the easiest side silently;
 - identify intended authority;
-- write/update ADR;
-- update architecture/data tests;
-- preserve compatibility/migration/security impact.
+- compare declared/static/observed/test evidence;
+- write/update ADR when public contract/data authority/System-Graph provider/storage semantics change;
+- update architecture/data/graph tests;
+- preserve compatibility/migration/security impact;
+- do not convert unexpected observed behavior into approved architecture merely because it exists.
 
 ## Roadmap-change handling
 
@@ -204,7 +229,7 @@ request / discovered gap
 → registry search
 → reuse or stable new unit ID
 → stage/release train/dependencies
-→ quality/architecture/data/security/performance/reliability plan
+→ quality/architecture/data/security/performance/System-Graph/reliability plan
 → update roadmap/capability docs
 → active plan
 → implementation
@@ -220,30 +245,33 @@ The development agent must not:
 
 - disable controls to make tests/scores pass;
 - fabricate research/measurements/root cause/target verification;
+- fabricate graph paths, causality or evidence classes;
+- mark AI/static graph evidence as observed runtime truth;
 - edit shipped migrations when additive migration is required;
 - use private Core shortcuts;
 - hide vertical products in Core;
-- create parallel roadmap/state truth;
+- create parallel roadmap/state/graph truth;
 - silently renumber semantic IDs;
 - overwrite targets to hide repair/upgrade issues;
 - implement an unregistered unit;
 - silently promote optional AI ideas;
 - grant product AI unrestricted shell/DB/filesystem/secrets/network;
+- expose restricted Flow topology or sensitive fields to unauthorized AI/users;
 - allow raw payment account data into the standard Nexora/payment-package runtime;
 - mark a payment paid from browser redirect alone;
 - retry an ambiguous non-idempotent financial mutation without reconciliation.
 
 ## Release-train sequencing
 
-1. **Builder Beta** — research/quality-governed secure CMS/site-builder + data/performance/code-quality foundations.
-2. **Pro** — AI-native, Performance Intelligence, Reliability, Product Outcomes and Delivery Excellence.
-3. **Platform** — marketplace, Payment Security + Commerce, portals, managed cloud, enterprise/security/ops/cost.
-4. **Production** — performance/accessibility/payment-enabled/security/reliability/exact-source certification.
+1. **Builder Beta** — research/quality-governed secure CMS/site-builder + data/performance/code-quality/**System Graph** foundations.
+2. **Pro** — AI-native, Performance Intelligence, Reliability, **Flow Intelligence**, Product Outcomes and Delivery Excellence.
+3. **Platform** — marketplace, Payment Security + Commerce, portals, managed cloud, enterprise/security/ops/cost with graph-aware incident/package evidence.
+4. **Production** — performance/accessibility/payment-enabled/security/reliability/Flow/exact-source certification.
 
 ## End-of-pass handoff
 
-Update affected registries, state, handoff, active plan, and changed roadmap/quality/data/security/performance/reliability docs. Record source/target/provider/outcome evidence separately and state the exact next action. Preserve history.
+Update affected registries, state, handoff, active plan, and changed roadmap/quality/data/security/performance/flow/reliability docs. Record source/target/provider/graph/outcome evidence separately and state the exact next action. Preserve history.
 
 ## Final release rule
 
-`N2-STABLE-100` cannot be reached by percentage estimates. It requires preceding production gates and `RELEASE-CERT-100` evidence for the intended source/deployment capabilities. Payment-specific evidence is conditional on payment support being enabled, but cannot be skipped when it is enabled.
+`N2-STABLE-100` cannot be reached by percentage estimates. It requires preceding production gates and `RELEASE-CERT-100` evidence for the intended source/deployment capabilities. Flow evidence must be internally consistent for release-critical paths; payment-specific evidence is conditional on payment support being enabled, but cannot be skipped when it is enabled.
