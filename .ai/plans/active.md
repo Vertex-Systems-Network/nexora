@@ -90,7 +90,9 @@ The underlying defect was stale post-install runtime identity sealing. The first
 
 A second operator-experience/control gap was then observed: after explicit mutation approval, the operator still had to manually chain compatibility, readiness, stale-receipt reconciliation, another readiness check and `/login` validation. The architecture correctly separated trust steps, but deterministic post-approval orchestration was missing.
 
-The durable control improvement is a single Runtime Recovery / Closure Orchestrator that preserves human approval for mutation while automating deterministic verification/reconciliation steps.
+A later adversarial pass found two additional reliability/evidence risks in the new orchestration layer: concurrent apply-mode writers could race the same sealed runtime target, and timestamp-only receipt names could overwrite prior evidence when multiple runs completed within the same second. Both are now part of the required control surface rather than accepted residual risk.
+
+The durable control improvement is a single Runtime Recovery / Closure Orchestrator that preserves human approval for mutation while automating deterministic verification/reconciliation steps, serializing apply-mode writers per target, and preserving every recovery outcome as unique evidence.
 
 ## Runtime Recovery / Closure Orchestrator contract
 
@@ -110,16 +112,17 @@ npm run runtime:recover -- --target="D:\laragon\www\nexora" --apply --confirm=RE
 
 Required behavior:
 
-1. inspect deep target compatibility first;
-2. if already compatible, do not run identity repair;
-3. if target is exactly rc.93 and mismatches are only the four approved planes, delegate to the version-pinned rc.93 adapter;
-4. independently re-run deep compatibility after repair and require both child exit code `0` and the expected PASS payload;
-5. assert post-install readiness and bind PASS to child exit code `0`;
-6. automatically reconcile **only** `receipt-refresh-required` with `runtime_ready=true` and `receipt_current=false`;
-7. re-assert readiness after reconciliation;
-8. resolve only the target application's own bootstrapped `config('app.url')`, then perform verified `GET /login` without disabling TLS verification or following redirects; arbitrary alternate HTTP hosts are forbidden;
-9. write a machine-readable apply-mode recovery outcome receipt under protected target runtime storage;
-10. return PASS only when compatibility, final readiness/current receipt and target-owned `/login` HTTP 200 all pass.
+1. in apply mode acquire a non-blocking exclusive lock bound to the explicit target before recovery/reconcile work; concurrent apply attempts fail closed;
+2. inspect deep target compatibility first;
+3. if already compatible, do not run identity repair;
+4. if target is exactly rc.93 and mismatches are only the four approved planes, delegate to the version-pinned rc.93 adapter;
+5. independently re-run deep compatibility after repair and require both child exit code `0` and the expected PASS payload;
+6. assert post-install readiness and bind PASS to child exit code `0`;
+7. automatically reconcile **only** `receipt-refresh-required` with `runtime_ready=true` and `receipt_current=false`;
+8. re-assert readiness after reconciliation;
+9. resolve only the target application's own bootstrapped `config('app.url')`, then perform verified `GET /login` without disabling TLS verification or following redirects; arbitrary alternate HTTP hosts are forbidden;
+10. write a machine-readable apply-mode recovery outcome receipt under protected target runtime storage using a unique per-run identifier so rapid runs cannot overwrite historical evidence;
+11. return PASS only when compatibility, final readiness/current receipt and target-owned `/login` HTTP 200 all pass.
 
 If target-owned HTTP smoke cannot be certified because of local TLS trust/web-server reachability, return `BLOCKED`, preserve successful runtime/readiness evidence, and do not mislabel target verification as complete. If `/login` returns an explicit non-200/configuration failure, return `FAIL`, not `BLOCKED`.
 
@@ -131,9 +134,11 @@ If target-owned HTTP smoke cannot be certified because of local TLS trust/web-se
 - The rc.93 adapter remains pinned to exactly `1.0.0-rc.93` and only the four allowed identity mismatches.
 - Any unrelated/immutable mismatch fails closed.
 - Apply mode requires an exact confirmation token.
+- Apply mode is single-writer per target; lock contention is FAIL, never an invitation to delete/bypass the lock.
 - A child JSON PASS is never accepted when that child exited non-zero.
 - The rc.93 adapter preserves protected backup + rollback-on-non-convergence behavior.
 - Receipt reconciliation is allowed only after runtime compatibility is PASS and the exact stale-receipt state is observed.
+- Recovery outcome receipts use unique identifiers; prior evidence is never silently replaced by a same-second run.
 - The final HTTP smoke is target-bound to the target application's own bootstrapped `app.url`; arbitrary URL overrides are not supported.
 - TLS verification may not be disabled merely to obtain `/login` PASS.
 - Explicit HTTP non-200 is FAIL; only transport/TLS inability with no HTTP result is BLOCKED.
@@ -148,21 +153,22 @@ DMAIC/control intent:
 
 - **Define:** excessive manual sequencing after approved runtime repair creates operator error/repetition risk.
 - **Measure:** the observed repair required separate repair, compatibility, readiness, reconcile and follow-up readiness/browser actions.
-- **Analyze:** primitives were correctly fail-closed but lacked a post-approval coordinator.
-- **Improve:** add one bounded orchestrator over existing trusted primitives.
-- **Control:** regression contract, exact confirmation, mismatch/version gates, child-exit binding, target-owned HTTP identity, independent re-verification, machine-readable receipts and exact-head CI/review.
+- **Analyze:** primitives were correctly fail-closed but lacked a post-approval coordinator; adversarial review additionally found concurrent-writer and same-second evidence-collision risks.
+- **Improve:** add one bounded orchestrator over existing trusted primitives with per-target apply serialization and unique evidence identities.
+- **Control:** regression contract, exact confirmation, mismatch/version gates, child-exit binding, single-writer lock, unique receipts, target-owned HTTP identity, independent re-verification, machine-readable evidence and exact-head CI/review.
 
 CTQs:
 
 - dry-run before mutation;
 - explicit mutation authorization;
+- one apply writer per target;
 - preserve immutable source/deployment/trust planes;
 - no hidden upgrade/dependency/migration work;
 - automatic reconcile only for the exact stale-receipt state;
 - independent compatibility + readiness verification including process exit status;
 - target-owned HTTP endpoint only;
 - verified TLS for HTTP smoke;
-- deterministic evidence output;
+- unique/non-overwriting evidence output;
 - fail/blocked instead of false PASS.
 
 ## Architecture / data / authorization
@@ -185,6 +191,8 @@ Failure modes and controls:
 - source/deployment drift → existing repair adapter fails closed;
 - unrelated mismatch → no approved adapter, fail closed;
 - accidental mutation → dry-run default + `RECOVER-RUNTIME` confirmation;
+- concurrent apply writers race sealed state/receipts → non-blocking exclusive target lock; second writer fails closed;
+- rapid sequential runs overwrite a timestamp-only evidence file → unique random receipt identifier in every final filename;
 - shell injection → child commands are fixed argument arrays with shell bypass; target path is not interpolated into shell text;
 - child emits PASS JSON but exits non-zero → PASS predicate also requires exit code `0`;
 - hidden dependency/upgrade/migration → explicitly absent and regression-guarded;
@@ -199,7 +207,7 @@ Failure modes and controls:
 
 ## Performance / reliability / cost
 
-No product performance change is intended. Operator orchestration executes a bounded number of local subprocesses and one target-owned HTTP GET. No retry loop is introduced. Reliability is deterministic stop-on-failure plus preservation of existing repair backup/rollback semantics.
+No product performance change is intended. Operator orchestration executes a bounded number of local subprocesses and one target-owned HTTP GET. No retry loop is introduced. Reliability is deterministic stop-on-failure, single-writer apply serialization, non-overwriting evidence, and preservation of existing repair backup/rollback semantics.
 
 ## Execution chunks
 
@@ -224,7 +232,8 @@ No product performance change is intended. Operator orchestration executes a bou
 - [x] Add single `runtime:recover` npm operator entrypoint.
 - [x] Add regression contract + operator documentation.
 - [x] Self-audit closed child-exit/HTTP-status/alternate-host false-green loopholes before merge.
-- [ ] Exact-head source certification PASS.
+- [x] Second adversarial pass closed concurrent apply-writer and same-second receipt-overwrite risks.
+- [ ] Exact-head source certification PASS on the final hardened head.
 - [ ] Independent exact-head review for the critical recovery-control change.
 - [ ] Merge canonical implementation.
 
@@ -252,13 +261,14 @@ No product performance change is intended. Operator orchestration executes a bou
 
 - Existing compatibility/readiness contracts remain authoritative.
 - `Rc93PostInstallIdentityRepairPackTest` remains source regression evidence for the bounded repair adapter.
-- `RuntimeRecoveryOrchestratorTest` guards orchestration confirmation, sequencing, child-exit binding, reconcile conditions, target-owned URL binding, TLS verification, HTTP PASS/FAIL/BLOCKED semantics, forbidden upgrade/dependency/migration behavior and npm entrypoint.
+- `RuntimeRecoveryOrchestratorTest` guards orchestration confirmation, sequencing, child-exit binding, per-target apply serialization, unique receipt identity, reconcile conditions, target-owned URL binding, TLS verification, HTTP PASS/FAIL/BLOCKED semantics, forbidden upgrade/dependency/migration behavior and npm entrypoint.
+- `runtime-recovery-orchestrator-contract-verify.php` is a required exact-head CI gate and independently checks the same fail-closed source invariants without relying on the PHPUnit suite being executed by release certification.
 - Source CI/static tests are not target proof.
 - High/critical change requires exact-head independent review in addition to authoring tests/CI.
 
 ## Rollback / recovery
 
-The rc.93 adapter continues to preserve and restore the exact pre-repair sealed installation lock if its own post-write compatibility does not converge. The orchestrator does not roll back a runtime that is independently compatible merely because later receipt or HTTP evidence is incomplete; those cases remain recoverable/verifiable without reverting valid runtime identity.
+The rc.93 adapter continues to preserve and restore the exact pre-repair sealed installation lock if its own post-write compatibility does not converge. The orchestrator does not roll back a runtime that is independently compatible merely because later receipt or HTTP evidence is incomplete; those cases remain recoverable/verifiable without reverting valid runtime identity. Apply-mode process termination releases the OS file lock; the lock file itself is only a synchronization anchor and must not be interpreted as proof that a process remains active.
 
 ## Definition of Done
 
