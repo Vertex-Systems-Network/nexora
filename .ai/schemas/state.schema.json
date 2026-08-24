@@ -58,6 +58,12 @@
         "dmaic_for_defect_incident_regression_improvement": {"type": "boolean"},
         "fmea_required_for_high_critical_complex_failures_when_applicable": {"type": "boolean"},
         "data_flow_governance_required_for_material_data_changes": {"type": "boolean"},
+        "system_graph_flow_plan_required_for_material_relationship_changes": {"type": "boolean"},
+        "system_graph_evidence_classes_must_remain_distinct": {"type": "boolean"},
+        "ai_inferred_flow_never_runtime_truth": {"type": "boolean"},
+        "flow_intelligence_cannot_duplicate_domain_truth": {"type": "boolean"},
+        "sensitive_flow_topology_default_deny": {"type": "boolean"},
+        "graph_database_requires_measured_need_and_adr": {"type": "boolean"},
         "high_critical_threat_model_required": {"type": "boolean"},
         "first_party_packages_use_public_contracts": {"type": "boolean"},
         "source_and_target_evidence_separate": {"type": "boolean"},
@@ -81,6 +87,7 @@
     "phase_3_scope": {"type": "string"},
     "phase_4_scope": {"type": "string"},
     "phase_5_scope": {"type": "string"},
+    "phase_6_scope": {"type": "string"},
     "updated_at": {"type": "string", "format": "date-time"}
   },
   "$defs": {
