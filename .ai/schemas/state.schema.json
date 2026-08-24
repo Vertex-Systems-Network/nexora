@@ -6,14 +6,17 @@
   "required": [
     "schema_version",
     "project",
+    "control_plane_revision",
     "base_branch",
     "base_sha",
     "source_release",
     "source_status",
     "target_status",
     "current_stage",
+    "active_development_units",
     "next_actions",
     "next_stage",
+    "governance",
     "updated_at"
   ],
   "properties": {
@@ -35,6 +38,12 @@
     "source_status": { "$ref": "#/$defs/status" },
     "target_status": { "$ref": "#/$defs/status" },
     "current_stage": { "$ref": "#/$defs/stage" },
+    "active_development_units": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^(SYS|MOD|FEAT|EXT|APP|INT|SPK|THM|AIT|AIA|MIG|OPS|SEC)-[A-Z0-9-]+$" },
+      "uniqueItems": true
+    },
     "completed_control_stages": {
       "type": "array",
       "items": {
@@ -74,10 +83,39 @@
       },
       "additionalProperties": false
     },
+    "post_core_qa_sequence": { "type": "array", "items": { "type": "string" } },
+    "governance": {
+      "type": "object",
+      "required": [
+        "development_unit_registry_required",
+        "active_plan_required_before_substantial_implementation",
+        "new_feature_must_be_planned_before_implementation",
+        "zero_skip_stage_protocol_required",
+        "zero_hidden_work_protocol_required"
+      ],
+      "properties": {
+        "development_unit_registry_required": { "const": true },
+        "active_plan_required_before_substantial_implementation": { "const": true },
+        "new_feature_must_be_planned_before_implementation": { "const": true },
+        "ai_discovered_optional_work_requires_promotion_or_active_scope": { "type": "boolean" },
+        "high_critical_threat_model_required": { "type": "boolean" },
+        "first_party_packages_use_public_contracts": { "type": "boolean" },
+        "source_and_target_evidence_separate": { "type": "boolean" },
+        "zero_skip_stage_protocol_required": { "const": true },
+        "zero_hidden_work_protocol_required": { "const": true }
+      },
+      "additionalProperties": true
+    },
     "verification_required": { "type": "object" },
+    "release_trains": {
+      "type": "array",
+      "items": { "enum": ["builder-beta", "pro", "platform", "production"] },
+      "uniqueItems": true
+    },
     "roadmap_sources": { "type": "array", "items": { "type": "string" } },
     "phase_1_scope": { "type": "string" },
     "phase_2_scope": { "type": "string" },
+    "phase_3_scope": { "type": "string" },
     "updated_at": { "type": "string", "format": "date-time" }
   },
   "$defs": {
