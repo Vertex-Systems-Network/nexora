@@ -10,11 +10,13 @@
 - Real target: Windows + Laragon, `D:\laragon\www\nexora`
 - Method: bounded existing-problem repair; use DMAIC/control evidence if new root-cause work is required
 
-## Phase 5/6 governance note
+## Phase 5/6/7 governance note
 
-The Research/Quality/Data/Reliability/Payment/System-Graph/Flow planning expansions do **not** change or widen this active runtime repair. Do not pull future stages into this blocker. If this runtime defect requires new source implementation, use evidence-based DMAIC and add a durable Control/regression guard; otherwise execute the already prepared bounded repair path only.
+The Research/Quality/Data/Reliability/Payment/System-Graph/Flow/**AI-development orchestration** planning expansions do **not** change or widen this active runtime repair. Do not pull future stages into this blocker. If this runtime defect requires new source implementation, use evidence-based DMAIC and add a durable Control/regression guard; otherwise execute the already prepared bounded repair path only.
 
-System Graph/Flow product contribution for this already-prepared target repair is `NOT_APPLICABLE`: no new package/runtime/data/security relationship model is being implemented in this stage. Existing runtime identity evidence may later become a graph provider input when `SYSTEM-GRAPH-100` is active, but Phase 6 planning does not retroactively implement that collector here.
+System Graph/Flow product contribution for this already-prepared target repair is `NOT_APPLICABLE`: no new package/runtime/data/security relationship model is being implemented here. Existing runtime identity evidence may later become a graph-provider input when `SYSTEM-GRAPH-100` is active.
+
+Phase 7 also does not pretend its future run-manifest/lease/attestation machinery already exists. Current work must still obey the procedural equivalents: exact target/path/version preflight, bounded mutation scope, no hidden upgrade, no self-authored target PASS, preserve evidence and do not weaken readiness/compatibility controls.
 
 ## Objective
 
@@ -71,9 +73,10 @@ CTQs:
 - Architecture: no redesign expected; preserve runtime identity/trust model.
 - DataFlow: runtime identity evidence only; no new product/customer data flow.
 - System Graph/Flow: `NOT_APPLICABLE` to implementation in this bounded repair; do not add Phase 6 runtime collectors here.
+- AI-development orchestration: future automation is out of scope; current procedural safeguards remain mandatory.
 - Migrations: not a migration stage.
 - Permissions: no auth policy change.
-- Packages/API/AI/payment: out of scope.
+- Packages/API/product-AI/payment: out of scope.
 
 ## Security / FMEA
 
@@ -85,7 +88,8 @@ Failure modes/controls:
 - immutable plane rewrite → forbidden;
 - repair mixed with upgrade → forbidden;
 - partial convergence → rollback permitted mutation and remain blocked;
-- false PASS from source/static evidence → forbidden; real target commands required.
+- false PASS from source/static/AI-authored evidence → forbidden; real target commands required;
+- readiness/compatibility guard relaxed to obtain PASS → forbidden.
 
 If new source behavior is introduced, update threat/FMEA/regression evidence before commit.
 
@@ -128,6 +132,7 @@ No product performance feature change is intended. Reliability requirement is de
 - Existing compatibility/readiness contracts remain required.
 - Any source fix for this blocker class must add a regression/control guard.
 - Static/source checks never imply browser/target PASS.
+- Author-written evidence cannot substitute for the target command/browser evidence.
 
 ## Rollback / recovery
 
@@ -142,7 +147,7 @@ Advance only when:
 3. readiness assertion PASS;
 4. `/login` reachable without current blocker;
 5. state/handoff/registry evidence updated;
-6. no immutable trust plane relaxed/re-written to force PASS;
+6. no immutable trust plane or validation rule relaxed/re-written to force PASS;
 7. any newly discovered recurring source defect has Control/regression protection.
 
 ## Next stage
@@ -153,4 +158,4 @@ After Core QA, canonical governance sequence is:
 
 `AI-GOV-AUTOMATION-100 → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ADMIN-UX-CLOSURE-001 → SECURITY-BASELINE-200 → ARCH-BOUNDARY-100`.
 
-Later Builder Beta reaches `SYSTEM-GRAPH-100` only after its declared dependencies are complete; later Pro reaches `FLOW-INTELLIGENCE-200` only after its own dependency graph is satisfied.
+`AI-GOV-AUTOMATION-100` now includes the pre-planned Phase 7 development-agent orchestration controls. Later Builder Beta reaches `SYSTEM-GRAPH-100` only after its declared dependencies are complete; later Pro reaches `FLOW-INTELLIGENCE-200` only after its own dependency graph is satisfied.
