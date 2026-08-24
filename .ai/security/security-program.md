@@ -4,195 +4,176 @@ Security is a continuous product/development track. `SENTINEL-200` is an advance
 
 ## Security objective
 
-Nexora does not claim to be unhackable. The security objective is:
+Nexora does not claim to be unhackable. The objective is:
 
 ```text
-prevent -> reduce privilege -> contain -> detect -> respond -> recover -> learn
+prevent → reduce privilege → contain → detect → respond → recover → learn
 ```
 
 Assume breach for high-value boundaries and minimize blast radius.
 
-## Security baselines
+## Security evidence frameworks
 
-The security program should map controls/evidence to current versions of:
+Map controls/evidence to current applicable versions of:
 
 - OWASP ASVS;
 - OWASP Top 10;
-- OWASP API Security Top 10 where APIs apply;
-- OWASP guidance for LLM/agentic systems where AI applies;
-- NIST Secure Software Development Framework (SSDF);
-- SLSA/build-provenance principles for supply-chain/release integrity;
-- Nexora-specific architecture, tenancy, extension, installer and AI threat models.
+- OWASP API Security Top 10;
+- OWASP LLM/agentic guidance when AI applies;
+- NIST Secure Software Development Framework;
+- SLSA/build-provenance principles;
+- PCI DSS / PCI Secure Software guidance when payment account data/payment software boundaries apply;
+- Nexora architecture/data/package/payment/AI threat models.
 
-Standards are evidence frameworks, not substitutes for threat modeling.
+Standards guide evidence; they do not replace threat modeling or automatically certify a deployment.
 
-## `SECURITY-BASELINE-200` — early mandatory stage
+## `SECURITY-BASELINE-200`
 
-This stage executes after Core QA and before large platform expansion.
+Executes early before large platform expansion.
 
-### Identity and administrator protection
+### Identity / Admin protection
 
-- passkeys/WebAuthn support plan and implementation;
-- TOTP MFA fallback where appropriate;
-- recovery codes;
-- MFA enforcement policy for Super Admin/high-risk roles;
-- session/device inventory and remote revocation;
+- passkeys/WebAuthn;
+- TOTP MFA/recovery where appropriate;
+- high-risk-role MFA policy;
+- session/device inventory/revocation;
 - sensitive-action re-authentication;
-- rate limiting, lockout/risk controls without account enumeration;
-- secure recovery flows;
-- privilege/session rotation regression tests.
+- rate/lockout/recovery controls without account enumeration;
+- privilege/session rotation tests.
 
 ### Browser/application hardening
 
-- strict Content Security Policy with nonce/hash strategy;
-- minimize/remove `unsafe-inline` and `unsafe-eval` where feasible;
-- Trusted Types strategy for high-risk DOM sinks where supported;
-- `frame-ancestors`, `object-src`, `base-uri`, `form-action`, `connect-src` policies;
-- HSTS and secure-cookie policy;
-- output encoding and active-content isolation;
-- CSRF protection and explicit exceptions only for independently authenticated endpoints;
-- upload/download MIME, filename and content-disposition controls.
+- strict CSP nonce/hash strategy;
+- minimize/remove unsafe inline/eval where feasible;
+- Trusted Types strategy for high-risk DOM sinks;
+- restrictive `frame-ancestors`, `object-src`, `base-uri`, `form-action`, `connect-src`;
+- HSTS/secure cookies;
+- output encoding/content isolation;
+- CSRF protection;
+- upload/download MIME/filename/content-disposition controls.
 
-### Authorization and tenancy
+### Authorization / tenancy
 
-- default-deny authorization;
+- default deny;
 - tenant-scoped route/model assertions;
-- IDOR/cross-tenant relationship injection tests;
+- IDOR/cross-tenant tests;
 - permission/capability matrix tests;
-- no extension/theme/AI ability to elevate human permissions;
-- impersonation and support-access policies with visible/audited sessions.
+- code capabilities never elevate human permissions;
+- audited impersonation/support sessions.
 
-### Secrets and data
+### Secrets / data
 
-- secrets never committed/logged/exposed to AI context by default;
-- encrypted secret storage with key rotation strategy;
-- separate secret references from non-secret provider configuration;
-- sensitive field inventory;
-- retention/deletion/export hooks coordinated with `PRIVACY-CONSENT-100`;
+- no committed/logged/AI-exposed secrets by default;
+- encrypted secret storage and rotation;
+- secret references separate from normal config;
+- sensitive data classification/inventory;
+- retention/export/delete coordinated with Data Governance/Privacy;
 - backup encryption/integrity/recovery evidence.
 
-### Network and SSRF
+### Network / SSRF
 
-- outbound requests through approved brokers/adapters for restricted code;
-- deny private/reserved/metadata endpoints by default;
-- DNS rebinding protections where remote destinations are allowed;
-- redirect policy, timeouts, response-size limits and egress allowlists by capability;
-- signed/idempotent inbound/outbound webhook rules.
+- approved network brokers/adapters for restricted code;
+- private/reserved/metadata denial;
+- DNS-rebinding/redirect revalidation;
+- timeouts/size limits/egress allowlists;
+- signed/idempotent webhook policies.
 
-### Extension/package isolation
+### Package isolation
 
-Execution tiers:
+Preferred execution tiers:
 
-1. `declarative` — preferred, structured and non-arbitrary.
-2. isolated executable runtime — future process/WASM/container backend for untrusted code.
-3. signed/reviewed restricted executable package — exceptional.
-4. first-party trusted runtime — still subject to public contracts and review.
+1. declarative;
+2. genuinely isolated executable runtime when available;
+3. signed/reviewed restricted executable package — exceptional;
+4. first-party trusted runtime — still public-contract/review bounded.
 
-`trusted-php` must not become the default marketplace execution model.
+`trusted-php` is not the default marketplace model and must never be described as process/container isolated unless that is actually implemented/verified.
 
 ### Supply chain
 
-- dependency advisory scanning for Composer/npm and future ecosystems;
-- secret scanning;
-- SAST/CodeQL-equivalent analysis;
-- dependency review on PRs;
-- SBOM generation/verification;
-- package/release signing and provenance;
-- pinned/controlled CI dependencies where feasible;
-- malicious-package corpus tests for Sentinel;
-- emergency publisher/package revocation and kill-switch design;
-- rollback protection and update-channel integrity.
+- Composer/npm advisory scanning;
+- secret/SAST/dependency review;
+- SBOM/provenance/signing;
+- controlled CI dependencies;
+- malicious-package corpus testing;
+- emergency revocation/kill-switch design;
+- rollback/update-channel integrity.
 
-### Security testing pipeline
+### Security testing
 
-Target pipeline includes:
-
-- unit/integration security regression tests;
-- architecture boundary tests;
-- authorization/tenancy matrix tests;
-- SAST;
-- dependency/advisory scan;
-- secret scan;
+- unit/integration security regression;
+- architecture boundary;
+- auth/tenancy matrices;
+- SAST/dependency/secret scanning;
 - DAST on disposable target;
-- API schema/property fuzzing where applicable;
-- parser/archive/input fuzzing for high-risk surfaces;
-- extension/theme malicious corpus tests;
-- restore/DR security verification;
-- independent review for critical changes.
+- API/parser fuzzing where relevant;
+- malicious package corpus;
+- payment-specific adversarial/provider sandbox testing when applicable;
+- restore/DR security;
+- independent review for critical work.
 
-### Repository/release governance
+## Payment / financial boundary
 
-Target GitHub/release controls:
+Payment-provider security has a dedicated mandatory architecture at `.ai/security/payment-security.md` and stage `PAYMENT-SECURITY-200` before payment-enabled Commerce 2.0.
 
-- protected `main` with no direct push;
-- required PRs and required checks;
-- required security/architecture review for owned paths;
-- CODEOWNERS/ownership model;
-- stale review dismissal after material changes;
-- no force push/delete on protected release branches;
-- signed/attested release artifacts/tags where supported;
-- production environment approval gates.
+### Standard-profile invariants
+
+- raw PAN/CVV/CVC/track/PIN data does not enter Nexora Core, generic package runtime, DB/log/cache/queue/analytics/search/backups/observability/AI;
+- prefer provider-hosted redirect/iframe/hosted fields or approved tokenized provider SDK;
+- direct/raw account-data collection is forbidden by default and cannot be enabled by a normal manifest/capability;
+- payment integrations are `critical` and use `security_profile: payment-provider`;
+- generic DB/filesystem/secrets/network power is not a payment-provider capability model;
+- Core authoritatively validates order/tenant/amount/currency/financial state;
+- browser return/success URL is not payment proof;
+- signed/fresh/replay-safe tenant-bound provider webhook/API reconciliation is authoritative;
+- ambiguous non-idempotent capture/refund outcomes reconcile before retry;
+- payment pages restrict arbitrary Theme/Extension/custom scripts and use payment-specific CSP/origin/tamper/session-replay policy;
+- payment activation requires threat model, FMEA, independent payment-security review and real provider sandbox evidence;
+- generic Sentinel/package/Marketplace PASS is not payment/PCI certification.
+
+### Payment secret/network/webhook boundaries
+
+Use scoped Secret Broker and Network Broker contracts, strict origin/SSRF/timeout/redaction rules, provider-specific webhook signature/freshness/event-deduplication/schema/state validation, idempotency/concurrency controls, and explicit test/live credentials.
+
+### Payment incident containment
+
+Compromised/suspect provider/package response prioritizes stopping new payment intents, preserving financial history, quarantining affected package version, credential rotation, in-flight reconciliation and independently verified recovery. Do not delete transaction history to hide/contain an incident.
 
 ## Threat-model requirement
 
-A written threat model is mandatory for `high` and `critical` development units and for any unit that introduces:
+Written threat model mandatory for `high`/`critical` units and changes introducing auth, public write API, executable runtime, secrets/network/filesystem, parsers/uploads, payment/commerce mutation, cross-tenant access, destructive update/restore, AI tools/code execution or external agents.
 
-- authentication/authorization change;
-- public write API;
-- executable package runtime;
-- secret/network/filesystem capability;
-- upload/archive parser;
-- payment/commerce mutation;
-- cross-tenant access;
-- destructive migration/update/restore;
-- AI execution tool;
-- code generation/execution;
-- external agent interoperability.
+Payment-provider work also requires FMEA because financial correctness/reliability failures may exist even when no direct security exploit is involved.
 
-Use `.ai/security/threat-model-template.md`.
+## AI / agent security
 
-## AI/agent security
+AI is never privileged bypass. It uses typed tools and normal identity/authorization/capabilities.
 
-AI is never a privileged bypass. AI must use typed tools and normal platform authorization/capabilities.
+Default restrictions:
 
-Default AI restrictions:
+- no unrestricted shell/raw DB/.env/filesystem/network;
+- no silent package install/permission/tenant change;
+- no destructive migration/restore/publish without policy/approval;
+- no external/tool content treated as trusted instructions;
+- no raw payment account data in AI context;
+- no autonomous payment mutation unless a future explicit narrowly bounded payment policy permits it with required human approval and reconciliation controls.
 
-- no unrestricted shell;
-- no direct raw database mutation;
-- no raw `.env`/secret access;
-- no arbitrary filesystem traversal;
-- no unrestricted outbound HTTP;
-- no silent package installation;
-- no silent permission/tenant changes;
-- no destructive migration/restore/publish action without explicit policy/approval;
-- no treating external content/tool output as trusted instructions.
+Required AI controls include injection-resistant context/tool boundaries, structured schemas, least privilege, tenant/user identity, dry-run, approvals, output validation, rate/budget/concurrency, immutable audit, rollback metadata and misuse/leakage/agency evals.
 
-Required AI controls:
+## Repository/release governance
 
-- prompt-injection resistant tool/context boundaries;
-- structured tool schemas;
-- least-privilege tool scopes;
-- tenant/user identity propagation;
-- dry-run where possible;
-- approval policy based on risk;
-- output validation before side effects;
-- budget/rate/concurrency limits;
-- immutable audit records of requested/approved/executed actions;
-- rollback metadata;
-- eval suites for tool misuse, prompt injection, data leakage and excessive agency.
+Target controls:
+
+- protected main/no direct push;
+- required PR/checks;
+- security/architecture/payment ownership review for governed paths;
+- stale review dismissal;
+- no force push/delete on protected release branches;
+- signed/attested release artifacts/tags where supported;
+- production approval gates.
 
 ## Incident response destination
 
-Nexora must eventually support:
+Support classification, account/session revocation, package/provider emergency disable, credential rotation, forensic export, affected tenant/site scoping, safe maintenance/read-only mode, reconciliation/recovery/restore and post-incident DMAIC/control evidence.
 
-- security event classification;
-- compromised account/session revocation;
-- publisher/package emergency disable/quarantine;
-- key/secret rotation procedures;
-- forensic audit export;
-- affected tenant/site scoping;
-- safe maintenance/read-only mode;
-- recovery/restore workflow;
-- post-incident regression/evidence update.
-
-`OBSERVABILITY-200`, `SENTINEL-200` and `DR-PLATFORM-100` complete the later operational layers.
+`OBSERVABILITY-200`, `SENTINEL-200`, `RELIABILITY-ENGINEERING-200` and `DR-PLATFORM-100` complete later operational layers.
