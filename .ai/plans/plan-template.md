@@ -140,6 +140,84 @@ Required for high/critical or complex material failure modes unless explicitly n
 - Prompt-injection/data-leakage considerations:
 - Evals required:
 
+## System Graph / Flow Intelligence contribution
+
+Fill for material runtime/package/data/security/permission/event/network/state/error/deployment relationships, or explicitly write `NOT_APPLICABLE` with reason.
+
+### Graph identity
+
+- Graph-affecting unit/package/module IDs:
+- Source/build/package/deployment identities required:
+- Owner/publisher/CODEOWNER/support identity:
+
+### Expected nodes
+
+List applicable typed nodes such as:
+
+- actor/entry point/route/middleware;
+- auth/policy/permission/capability/approval;
+- controller/service/contract/registry;
+- Theme/template/component/asset;
+- Extension/App/Integration/Studio Pack/module/package version;
+- hook/event/filter/slot/job/queue/schedule;
+- data/DB/cache/search/file/object store;
+- secret/broker/network/provider;
+- state/transaction/lock/idempotency/retry/reconciliation;
+- error/fallback/circuit/recovery;
+- AI/payment/release/deployment/infrastructure;
+- test/eval/SLO/incident/owner.
+
+### Expected edges / flow
+
+- Calls/reads/writes/transforms:
+- Emits/listens/queues:
+- Auth/authz/permission/capability:
+- Trust-boundary crossings:
+- Network/external-provider edges:
+- Secret/broker edges:
+- State transitions/conditions:
+- Transaction/lock/concurrency/idempotency:
+- Retry/backoff/fallback/reconciliation:
+- Error propagation/recovery:
+- Deployment/config/feature-flag conditional paths:
+
+### Evidence plan
+
+For applicable relationships identify expected provider/evidence class:
+
+- `declared`:
+- `static`:
+- `observed`:
+- `tested`:
+- `production-observed`:
+- `ai-inferred` allowed only as labelled hypothesis:
+
+### Drift / integrity checks
+
+- Expected-vs-static checks:
+- Expected-vs-observed checks:
+- Undeclared package capability/network/data path checks:
+- Architecture/public-contract bypass checks:
+- Critical path test/evidence gaps:
+
+### Flow security / privacy
+
+- Sensitive graph fields:
+- Required `flow.*` permission(s):
+- Tenant/site scope:
+- Redaction:
+- Export/deep-trace approval/re-auth/audit:
+- Retention/cardinality/sampling:
+
+### GUI projection
+
+- Required level: ecosystem / system / feature / execution:
+- Required lenses:
+- Conditions/gateways that need human-readable explanation:
+- Accessibility/non-color-only semantics:
+
+A diagram is not evidence. Static inference is not runtime observation. One observed trace does not prove all possible paths or concurrency safety.
+
 ## Payment-provider profile
 
 Fill when work authorizes/captures/refunds payments, handles payment-method refs/provider webhooks, or affects payment-entry UI; otherwise `NOT_APPLICABLE`.
@@ -160,6 +238,7 @@ Fill when work authorizes/captures/refunds payments, handles payment-method refs
 - Test/live separation:
 - Kill switch / secret rotation / in-flight reconciliation:
 - Payment security independent review:
+- Payment path projected into System Graph without raw account data:
 
 Direct/raw card-data handling is forbidden by default under the standard profile; any proposed exception is a separate architecture/compliance program, not a checkbox override.
 
@@ -174,6 +253,7 @@ Fill or explicit `NOT_APPLICABLE`.
 - Synthetic profiles:
 - RUM/field impact:
 - Baseline/comparison:
+- System Graph IDs/correlation required:
 
 ### Frontend/browser
 
@@ -230,6 +310,7 @@ Fill for critical recurring/stateful/provider workflows or explicit N/A.
 - reconciliation:
 - fault tests:
 - incident/recovery/control evidence:
+- state/retry/error/recovery graph evidence:
 
 ## Cost / resource efficiency
 
@@ -237,6 +318,7 @@ Fill for critical recurring/stateful/provider workflows or explicit N/A.
 - AI/provider/external-service cost:
 - Per-tenant/request/resource attribution needed:
 - Budget/anomaly threshold:
+- Flow overlay/correlation required:
 
 ## Observability and audit
 
@@ -245,6 +327,7 @@ Fill for critical recurring/stateful/provider workflows or explicit N/A.
 - Audit records:
 - Failure diagnostics:
 - Redaction/classification:
+- Canonical System Graph correlation IDs:
 
 ## Implementation chunks
 
@@ -264,6 +347,10 @@ Fill for critical recurring/stateful/provider workflows or explicit N/A.
 - [ ] contract/architecture
 - [ ] authorization/tenancy
 - [ ] data-flow/lineage/migration
+- [ ] System Graph schema/provider/identity if applicable
+- [ ] declared-vs-static/observed drift checks if applicable
+- [ ] path-aware test/evidence coverage if applicable
+- [ ] Flow sensitive access/redaction/export/deep-trace security if applicable
 - [ ] security
 - [ ] FMEA failure scenarios
 - [ ] browser/E2E/accessibility
@@ -281,14 +368,14 @@ Fill for critical recurring/stateful/provider workflows or explicit N/A.
 
 Exact commands/flows/evidence required before target claims.
 
-Performance claims record runner/browser/device/network/CPU/cache/profile identity. Payment claims record provider sandbox/live mode, package/provider version, webhook/reconciliation and no-sensitive-data evidence. Lab/field/backend/security/payment evidence remain distinguishable.
+Flow claims record source/build/package/deployment identity and evidence class/provenance. `observed` requires actual runtime evidence; `production-observed` requires authorized production telemetry; modelled/AI paths stay labelled. Performance claims record runner/browser/device/network/CPU/cache/profile identity. Payment claims record provider sandbox/live mode, package/provider version, webhook/reconciliation and no-sensitive-data evidence. These evidence classes remain distinguishable.
 
 ## Post-release outcome / Control plan
 
 - Observation window/event:
 - CTQ/outcome evidence:
 - Alerts/monitors:
-- Regression tests/static rules/budgets/SLO controls:
+- Regression tests/static rules/budgets/SLO/graph-drift controls:
 - Support/customer feedback signal:
 - DMAIC follow-up trigger:
 
@@ -300,6 +387,7 @@ List objective acceptance criteria. No vague `works`/`complete` statements.
 
 - [ ] affected development-unit registry updated
 - [ ] ResearchBrief/CTQ/FMEA/DataFlow updated where required
+- [ ] System Graph/Flow schema/provider/lens docs updated if relationships changed
 - [ ] `.ai/state.json` updated
 - [ ] `.ai/handoff/current.md` updated
 - [ ] roadmap/status updated if scope changed
