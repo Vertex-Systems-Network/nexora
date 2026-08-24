@@ -5,10 +5,10 @@ mission: >-
   Build a secure, extensible, self-hostable and optionally managed AI-native web platform that
   combines and advances the strongest ideas from WordPress, Webflow, Wix, Shopify, Framer,
   component-driven visual builders and enterprise SaaS while using evidence-driven quality,
-  formal data governance, reliability engineering and strict financial/payment boundaries.
-  Themes, extensions, apps, integrations and AI agents may not bypass Nexora public contracts,
-  capabilities, tenancy, publishing semantics, data policies, planning governance, performance,
-  reliability or security boundaries.
+  formal data governance, reliability engineering, an explainable System Graph and strict
+  financial/payment boundaries. Themes, extensions, apps, integrations and AI agents may not
+  bypass Nexora public contracts, capabilities, tenancy, publishing semantics, data policies,
+  planning governance, performance, reliability, graph evidence or security boundaries.
 
 canonical_control_plane: .ai
 agent_entrypoint: AGENTS.md
@@ -23,6 +23,7 @@ governance:
   domain_registries:
     - .ai/registry/performance-units.json
     - .ai/registry/quality-payment-units.json
+    - .ai/registry/flow-units.json
   active_plan: .ai/plans/active.md
   plan_template: .ai/plans/plan-template.md
   stage_graph: .ai/roadmap/stages.md
@@ -32,6 +33,7 @@ governance:
   fmea_template: .ai/quality/fmea-template.md
   research_template: .ai/research/research-brief-template.md
   data_governance: .ai/data/data-flow-governance.md
+  system_graph: .ai/flow/system-graph.md
   security_program: .ai/security/security-program.md
   threat_model_template: .ai/security/threat-model-template.md
   payment_security: .ai/security/payment-security.md
@@ -78,6 +80,15 @@ special_security_profiles:
   - high-risk-data
   - ai-execution
   - infrastructure
+  - flow-sensitive-topology
+
+system_graph_evidence_classes:
+  - declared
+  - static
+  - observed
+  - tested
+  - production-observed
+  - ai-inferred
 
 non_negotiable_principles:
   - core-remains-generic
@@ -90,6 +101,13 @@ non_negotiable_principles:
   - dmadv-for-new-redesigned-substantial-work
   - dmaic-and-control-for-defects-incidents-regressions
   - data-authority-lineage-and-classification-explicit
+  - graph-plus-evidence-is-truth-diagram-is-projection
+  - declared-static-observed-tested-production-and-ai-inferred-evidence-remain-distinct
+  - ai-inferred-is-never-runtime-truth
+  - expected-vs-observed-drift-is-first-class
+  - flow-intelligence-does-not-duplicate-domain-authority
+  - sensitive-flow-topology-is-default-deny-redacted-and-audited
+  - no-graph-database-without-measured-need-and-adr
   - fail-closed-security
   - continuous-security-not-late-audit
   - threat-model-high-and-critical-work
@@ -105,7 +123,7 @@ non_negotiable_principles:
   - theme-extension-app-cost-attribution-when-applicable
   - reliability-and-recovery-planned-for-critical-stateful-work
   - raw-performance-evidence-before-opaque-score
-  - performance-quality-security-and-payment-verdicts-remain-separate
+  - performance-quality-security-payment-and-flow-verdicts-remain-distinct
   - payment-provider-is-critical-security-profile
   - raw-payment-account-data-forbidden-in-standard-payment-profile
   - payment-browser-return-is-not-financial-truth
@@ -114,5 +132,6 @@ non_negotiable_principles:
   - typed-least-privilege-ai-tools
   - source-done-is-not-target-verified
   - no-fabricated-future-outcome-evidence
+  - no-fabricated-flow-or-causality-evidence
   - real-target-evidence-before-product-completion
   - append-only-history-and-evidence
