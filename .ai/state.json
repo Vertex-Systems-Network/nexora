@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "project": "Nexora",
+  "control_plane_revision": 1,
+  "control_plane_branch": "ai/control-plane-phase-1",
+  "base_branch": "main",
+  "base_sha": "f854c50c0f7687fc87fdfab01b49562392af4ef4",
+  "last_verified_source_sha": null,
+  "source_release": "1.0.0-rc.94",
+  "installer_protocol": "v5.29",
+  "source_generation": "n1-v5.29",
+  "source_status": "PARTIAL",
+  "target_status": "BLOCKED",
+  "current_stage": {
+    "id": "RUNTIME-CLOSURE-001",
+    "name": "Installation + Runtime Closure",
+    "status": "BLOCKED",
+    "legacy_aliases": [
+      "N1.0A",
+      "DEV-3"
+    ]
+  },
+  "completed_control_stages": [
+    {
+      "id": "AI-GOV-001",
+      "status": "SOURCE_DONE",
+      "evidence": "AGENTS.md plus .ai control-plane files on ai/control-plane-phase-1"
+    }
+  ],
+  "current_target": {
+    "environment": "Windows + Laragon real-target development environment",
+    "path": "D:\\laragon\\www\\nexora",
+    "installed_release": "1.0.0-rc.93",
+    "expected_source_release_after_clean_upgrade_or_install": "1.0.0-rc.94"
+  },
+  "blocker": {
+    "category": "runtime",
+    "summary": "The already-installed rc.93 target has four stale post-install runtime identity fingerprints: environment, activation, service and process.",
+    "guardrail": "Do not overwrite rc.93 with rc.94 merely to repair these four fingerprints; that would mix repair with a source/version upgrade."
+  },
+  "next_actions": [
+    "Run the prepared rc.93 Post-Install Identity Repair Pack externally against the installed target.",
+    "Run php artisan nexora:runtime:compatibility-status --deep.",
+    "Require status=pass, mismatches=[], compatible=true and mode=installed-data-plane.",
+    "Run php artisan nexora:runtime:post-install-status --assert-ready.",
+    "If both runtime gates pass, test /login and advance to CORE-QA-001."
+  ],
+  "next_stage": {
+    "id": "CORE-QA-001",
+    "name": "Super Admin + Core Application Functional QA",
+    "advance_when": "RUNTIME-CLOSURE-001 is TARGET_VERIFIED"
+  },
+  "verification_required": {
+    "source_and_target_separate": true,
+    "real_target_required_for_runtime_behavior": true,
+    "architecture_review_required_for_boundary_changes": true,
+    "regression_protection_required_for_fixed_blockers": true
+  },
+  "roadmap_sources": [
+    "NEXORA_AI_PROJECT_STATE.md",
+    "docs/NEXORA_PLAN_STATUS.md",
+    "ARCHITECTURE.md",
+    "SECURITY.md"
+  ],
+  "phase_1_scope": "Import and normalize only systems and plans already documented in the repository. New audit-derived roadmap items are intentionally deferred to the next planning pass.",
+  "updated_at": "2026-08-24T18:11:00+05:00"
+}
