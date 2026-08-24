@@ -2,7 +2,7 @@
 
 This directory is the deterministic execution control plane for AI-assisted Nexora development.
 
-A new AI session must be able to discover what Nexora is, what exists, what is planned, why a capability is needed, which data/security/reliability boundaries apply, what development units are authorized, what stage is active, what must be measured/verified, and exactly what comes next without reconstructing project state from chat history.
+A new AI session must be able to discover what Nexora is, what exists, what is planned, why a capability is needed, which data/security/reliability/flow boundaries apply, what development units are authorized, what stage is active, what must be measured/verified, and exactly what comes next without reconstructing project state from chat history.
 
 ## Authority and precedence
 
@@ -12,7 +12,7 @@ For active development state, use this order:
 2. `.ai/handoff/current.md` — human-readable current handoff.
 3. `.ai/roadmap/stages.md` — canonical stable stage/dependency graph.
 4. `.ai/governance/development-intake.md` — mandatory intake/pre-planning protocol.
-5. `.ai/registry/development-units.json` plus domain child registries such as `performance-units.json` and `quality-payment-units.json` — authorized/pre-planned units.
+5. `.ai/registry/development-units.json` plus domain child registries such as `performance-units.json`, `quality-payment-units.json` and `flow-units.json` — authorized/pre-planned units.
 6. `.ai/plans/active.md` — current executable plan.
 7. `.ai/plans/plan-template.md` — mandatory planning fields.
 8. `.ai/plans/master-execution-plan.md` — zero-skip/zero-hidden-work execution protocol.
@@ -20,20 +20,21 @@ For active development state, use this order:
 10. `.ai/quality/lean-six-sigma.md` — proportional DMADV/DMAIC/VOC/CTQ/FMEA/control model.
 11. `.ai/research/research-brief-template.md` — Research/VOC/baseline/alternatives/CTQ discovery artifact.
 12. `.ai/data/data-flow-governance.md` — data flow/classification/ownership/lineage/retention/AI/package policy.
-13. `.ai/security/security-program.md` — continuous security program.
-14. `.ai/security/payment-security.md` — critical payment-provider security architecture.
-15. `.ai/reliability/reliability-program.md` — SLI/SLO/error-budget/failure/recovery policy.
-16. `.ai/performance/performance-platform.md` — performance/code-quality architecture.
-17. `.ai/performance/performance-budget-template.md` — measurable performance budget template.
-18. `.ai/delivery/delivery-excellence.md` — delivery-flow/stability/rework governance.
-19. `.ai/roadmap/release-trains.md` — Builder Beta / Pro / Platform / Production gates.
-20. `.ai/roadmap/capability-matrix.md` plus accepted addenda — capability/gap registry.
-21. `.ai/roadmap/systems.md` and `.ai/roadmap/future-systems.md` — existing/future system inventory.
-22. `.ai/roadmap/competitive-benchmark.md` — external platform capability benchmark.
-23. `.ai/architecture/ai-platform.md` — product AI architecture contract.
-24. `.ai/design/ai-design-professional.md` — AI Design Professional / Studio contract.
-25. `ARCHITECTURE.md` + `SECURITY.md` — architecture/security constitution.
-26. `docs/NEXORA_PLAN_STATUS.md` and `NEXORA_AI_PROJECT_STATE.md` — historical/master evidence.
+13. `.ai/flow/system-graph.md` — canonical System Graph / Flow Intelligence architecture, evidence classes and GUI lenses.
+14. `.ai/security/security-program.md` — continuous security program.
+15. `.ai/security/payment-security.md` — critical payment-provider security architecture.
+16. `.ai/reliability/reliability-program.md` — SLI/SLO/error-budget/failure/recovery policy.
+17. `.ai/performance/performance-platform.md` — performance/code-quality architecture.
+18. `.ai/performance/performance-budget-template.md` — measurable performance budget template.
+19. `.ai/delivery/delivery-excellence.md` — delivery-flow/stability/rework governance.
+20. `.ai/roadmap/release-trains.md` — Builder Beta / Pro / Platform / Production gates.
+21. `.ai/roadmap/capability-matrix.md` plus accepted addenda — capability/gap registry.
+22. `.ai/roadmap/systems.md` and `.ai/roadmap/future-systems.md` — existing/future system inventory.
+23. `.ai/roadmap/competitive-benchmark.md` — external platform capability benchmark.
+24. `.ai/architecture/ai-platform.md` — product AI architecture contract.
+25. `.ai/design/ai-design-professional.md` — AI Design Professional / Studio contract.
+26. `ARCHITECTURE.md` + `SECURITY.md` — architecture/security constitution.
+27. `docs/NEXORA_PLAN_STATUS.md` and `NEXORA_AI_PROJECT_STATE.md` — historical/master evidence.
 
 Historical `N1.x` labels are never interpreted by guess; resolve them through `.ai/roadmap/legacy-aliases.md` and use stable semantic stage/unit IDs.
 
@@ -63,11 +64,12 @@ Every agent must:
 6. Read `plans/active.md`, `plans/plan-template.md` and `plans/master-execution-plan.md`.
 7. For substantial new/redesigned work read `quality/engineering-lifecycle.md`, `quality/lean-six-sigma.md` and the ResearchBrief requirements.
 8. For material data work read `data/data-flow-governance.md`.
-9. For high/critical work read security/threat-model policy; payment work must also read `security/payment-security.md`.
-10. Read performance/reliability/delivery documents where applicable.
-11. Read relevant capability/system/architecture/AI/design documents.
-12. Inspect current implementation/tests before trusting prose completion claims.
-13. Work only on the active stage unless the user explicitly changes priority.
+9. For work that adds/changes runtime, package, data, security, permissions, events, network, stateful workflows, errors or deployment topology, read `flow/system-graph.md` and plan the expected graph/evidence contribution.
+10. For high/critical work read security/threat-model policy; payment work must also read `security/payment-security.md`.
+11. Read performance/reliability/delivery documents where applicable.
+12. Read relevant capability/system/architecture/AI/design documents.
+13. Inspect current implementation/tests before trusting prose completion claims.
+14. Work only on the active stage unless the user explicitly changes priority.
 
 ## Mandatory pre-planned development rule
 
@@ -80,7 +82,7 @@ If missing:
 3. add registry entry;
 4. map stage/release train/dependencies;
 5. establish problem/research/VOC/baseline/CTQs at proportional depth;
-6. plan architecture/data/security/privacy/design/API/theme/Studio/AI/performance/reliability/observability/cost/testing/rollback;
+6. plan architecture/data/security/privacy/design/API/theme/Studio/AI/performance/**System Graph/Flow**/reliability/observability/cost/testing/rollback;
 7. create/update active plan;
 8. only then implement.
 
@@ -104,9 +106,46 @@ Material data work must identify authoritative source, classification, tenant/si
 
 Use `.ai/data/data-flow-governance.md`.
 
+## System Graph / Flow Intelligence rule
+
+Nexora treats architecture/runtime/data/security/package flow as machine-readable evidence, not manually maintained artwork.
+
+**Graph + evidence is source of truth. Diagram is a projection.**
+
+Any substantial unit that changes material relationships must declare or explicitly mark not applicable:
+
+- expected graph nodes/edges;
+- package/module/source/version ownership;
+- relevant route/service/hook/event/job/data/DB/cache/network/secret/AI/payment/deployment/state relationships;
+- trust-boundary and permission/capability edges;
+- expected conditions/state transitions;
+- sensitive graph fields/redaction;
+- evidence sources/providers;
+- expected-vs-observed drift checks;
+- test/evidence coverage implications.
+
+Evidence classes remain distinct:
+
+- `declared`
+- `static`
+- `observed`
+- `tested`
+- `production-observed`
+- `ai-inferred`
+
+`ai-inferred` is never silently promoted to observed fact.
+
+Stage layering:
+
+`ARCH/DATA/EXT/PERFORMANCE/CODE foundations → SYSTEM-GRAPH-100 → PERFORMANCE-INTELLIGENCE-200 + RELIABILITY-ENGINEERING-200 → FLOW-INTELLIGENCE-200 → OBSERVABILITY-200/release certification enrichment`.
+
+Flow Intelligence consumes authoritative evidence from Data Governance, Security/Sentinel, Performance, Reliability, Payment Security, Release and Observability. It does not create a second competing source of truth.
+
+Use `.ai/flow/system-graph.md` and `.ai/registry/flow-units.json`.
+
 ## Package planning rule
 
-Every Extension/App/Integration/Studio Pack/Theme is planned before package creation with package family, compatibility, public contracts, capabilities, runtime mode, migrations, lifecycle, Sentinel/Supply Chain, data purpose, security, performance/code-quality/reliability budgets and rollback behavior.
+Every Extension/App/Integration/Studio Pack/Theme is planned before package creation with package family, compatibility, public contracts, capabilities, runtime mode, migrations, lifecycle, Sentinel/Supply Chain, data purpose, security, performance/code-quality/reliability budgets, **declared graph/Flow contribution and package-flow visibility**, and rollback behavior.
 
 First-party packages receive no private Core exemption.
 
@@ -125,6 +164,7 @@ Under the standard profile:
 - payment secrets use brokered scoped references/rotation/revocation;
 - protected payment pages restrict scripts/slots and use strict CSP/tamper controls;
 - payment package activation requires payment-specific sandbox/security/replay/idempotency/reconciliation evidence;
+- payment state/security paths must be projectable into the System Graph without exposing account data;
 - generic Sentinel PASS or marketplace rating is not payment certification.
 
 Use `.ai/security/payment-security.md`. A payment-enabled deployment still has environment/provider-specific PCI/compliance responsibilities; architecture minimizes scope/risk but does not declare an installation automatically compliant or unhackable.
@@ -138,21 +178,28 @@ Performance is not postponed to `PERF-CWV-CERT-100`. Runtime-affecting units def
 - Theme/Extension/App attribution;
 - code-quality/build impact;
 - performance budget/test profile/baseline;
+- graph/Flow correlation identity where applicable;
 - regression/override policy.
 
-Layering remains:
+Layering remains conceptually:
 
-`FRONTEND-RUNTIME-200 → PERFORMANCE-FOUNDATION-200 → CODE-QUALITY-200 → PERFORMANCE-INTELLIGENCE-200 → OBSERVABILITY-200 → PERF-CWV-CERT-100`.
+`FRONTEND-RUNTIME-200 → PERFORMANCE-FOUNDATION-200 → CODE-QUALITY-200 → SYSTEM-GRAPH-100 → PERFORMANCE-INTELLIGENCE-200 → FLOW-INTELLIGENCE-200 → OBSERVABILITY-200 → PERF-CWV-CERT-100`.
+
+Performance remains the authority for performance metrics; the System Graph/Flow Center only correlates/projects them.
 
 ## Reliability rule
 
 Critical recurring workflows define meaningful timeout/retry/idempotency/degradation/recovery behavior and, when suitable, SLIs/SLOs/error budgets. Non-idempotent financial/destructive operations are never blindly retried after ambiguous outcomes; reconcile first.
+
+State/transaction/retry/recovery relationships should contribute graph evidence where applicable so Flow Intelligence can explain the failure path without becoming the enforcement engine.
 
 Use `.ai/reliability/reliability-program.md`.
 
 ## Security rule
 
 Security is continuous. Every unit receives a risk class; `high` and `critical` require threat modeling. `SECURITY-BASELINE-200` is early; `SENTINEL-200` later adds advanced package/runtime isolation/revocation.
+
+Flow Intelligence itself is high-value reconnaissance material and follows default-deny `flow.*` permissions, tenant scoping, redaction, sensitive export/deep-trace audit and AI field filtering defined in `.ai/flow/system-graph.md`.
 
 ## Required completion protocol
 
@@ -162,7 +209,7 @@ At every meaningful pass:
 2. keep source vs target evidence separate;
 3. update affected registry status/evidence;
 4. update `state.json`, `handoff/current.md` and `plans/active.md`;
-5. update roadmap/capability/quality/data/security/performance/reliability docs if scope changed;
+5. update roadmap/capability/quality/data/security/performance/**flow**/reliability docs if scope changed;
 6. preserve historical evidence.
 
 ## Control-plane phases
@@ -200,4 +247,25 @@ Added:
 - payment Data Boundary, Secret Broker, Webhook Gateway, Surface Guard and Provider SDK units;
 - payment-specific PCI-scope-minimizing provider-hosted/tokenized architecture.
 
-The canonical graph now contains **73 ordered stages/gates (`0` through `72`)**. Planning work does not bypass the active real-target blocker: current cursor remains `RUNTIME-CLOSURE-001`.
+### Phase 6 — System Graph & Flow Intelligence
+
+Added:
+
+- `SYSTEM-GRAPH-100` in Builder Beta;
+- `FLOW-INTELLIGENCE-200` in Pro;
+- canonical typed nodes/edges and provider-neutral graph storage contract;
+- declared/static/observed/tested/production-observed/AI-inferred evidence separation;
+- Theme/Extension/module lifecycle and runtime flow profiles;
+- data lineage/security/trust/permission/condition/error/state/transaction/concurrency/retry/event/network/DB/cache lenses;
+- deployment/configuration/supply-chain/ownership/test-evidence views;
+- expected-vs-observed architecture/package drift detection;
+- performance/reliability/cost/payment/AI/release overlays using authoritative existing systems;
+- accessible ecosystem→system→feature→execution GUI hierarchy;
+- graph diff/history/time travel and read-only runtime replay;
+- change-impact/blast-radius and incident flow;
+- modelled what-if analysis explicitly separated from verified behavior;
+- governed AI Flow explain/root-cause/security-path/impact tools;
+- default-deny Flow permissions, redaction/export/deep-trace audit and bounded runtime overhead;
+- storage abstraction that does not force a graph database without measured need.
+
+The canonical graph now contains **75 ordered stages/gates (`0` through `74`)**. Planning work does not bypass the active real-target blocker: current cursor remains `RUNTIME-CLOSURE-001`.
