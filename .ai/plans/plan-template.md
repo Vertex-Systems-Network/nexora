@@ -106,11 +106,60 @@ List current code/contracts/migrations/tests/docs that already exist. Do not reb
 - Prompt-injection/data-leakage considerations:
 - Evals required:
 
-## Performance / cache / delivery
+## Performance / code quality / cache / delivery
 
-- Query complexity:
-- Cache/invalidation:
-- Rendering/media/network budgets:
+Every unit must fill this section or explicitly write `NOT_APPLICABLE` with reason.
+
+### Performance identity
+
+- Performance-affecting paths/pages/APIs/user flows:
+- Budget ID(s) or budget creation required:
+- Synthetic test profile(s):
+- RUM/field impact:
+- Baseline/comparison target:
+
+### Frontend/browser impact
+
+- LCP/INP/CLS implications:
+- JS/CSS/image/font/request-size implications:
+- Main-thread/long-task impact:
+- DOM/component impact:
+- Third-party/network impact:
+- Cache/CDN/image/render implications:
+
+### Backend/Admin impact
+
+- Route/controller/service execution impact:
+- Query count/time/N+1 risk:
+- Cache hit/miss/invalidation impact:
+- External HTTP/storage impact:
+- CPU/wall/peak-memory impact:
+- Admin/Studio API/render impact:
+
+### Theme/Extension/App attribution
+
+- Package/runtime spans to attribute:
+- Hook/event/filter/slot cost:
+- Owned asset/chunk cost:
+- Package version/baseline comparison:
+- Marketplace/package profile impact:
+
+### Code quality
+
+- Static/type/lint impact:
+- Complexity/duplication/dead-code risk:
+- Bundle/dependency weight impact:
+- Runtime-to-source correlation required:
+
+### Performance regression policy
+
+- Warn threshold:
+- Fail threshold:
+- Repeated-run/noise policy:
+- Release-blocking dimensions:
+- Authorized override + audit policy:
+
+Use `.ai/performance/performance-budget-template.md` when explicit budgets are required.
 
 ## Observability and audit
 
@@ -141,11 +190,17 @@ List current code/contracts/migrations/tests/docs that already exist. Do not reb
 - [ ] migration/fresh install/upgrade
 - [ ] package compatibility
 - [ ] AI evals if applicable
-- [ ] performance if applicable
+- [ ] frontend performance if applicable
+- [ ] backend/Admin performance if applicable
+- [ ] Theme/Extension/package attribution if applicable
+- [ ] code-quality regression if applicable
+- [ ] budget/baseline comparison if applicable
 
 ## Real-target verification
 
 Exact commands/flows/evidence required before target claims.
+
+Performance claims must record runner/browser/device/network/CPU/cache/profile identity and keep lab/field/backend evidence distinguishable.
 
 ## Definition of Done
 
@@ -158,4 +213,5 @@ List objective acceptance criteria. No vague 'works' or 'complete' statements.
 - [ ] `.ai/handoff/current.md` updated
 - [ ] roadmap/status updated if scope changed
 - [ ] ADR/security docs updated if required
+- [ ] performance budget/profile docs updated if required
 - [ ] user-visible docs/migration notes updated
