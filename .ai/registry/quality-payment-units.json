@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "project": "Nexora",
+  "rule": "Phase 5 quality-engineering and payment-security units are pre-planned here. They are not implementation claims and must enter the canonical active plan before coding.",
+  "units": [
+    {
+      "id": "SYS-RESEARCH-DISCOVERY",
+      "type": "core-system",
+      "name": "Research & Discovery Governance",
+      "summary": "ResearchBrief, VOC, problem validation, competitor/standards evidence, baseline and CTQ system for substantial new work.",
+      "status": "PLANNED",
+      "parent_stage_id": "RESEARCH-DISCOVERY-100",
+      "release_train": "builder-beta",
+      "depends_on": ["AI-GOV-AUTOMATION-100"],
+      "security": {"risk": "moderate", "threat_model_required": false},
+      "acceptance_criteria": ["Substantial new capabilities carry evidence-backed problem/VOC/baseline/CTQ decisions before solution implementation."]
+    },
+    {
+      "id": "SYS-QUALITY-GOVERNANCE",
+      "type": "core-system",
+      "name": "Quality Engineering Operating System",
+      "summary": "Lifecycle quality dimensions, proportional gates, DMADV/DMAIC, FMEA, traceability and control-plan governance.",
+      "status": "PLANNED",
+      "parent_stage_id": "QUALITY-GOVERNANCE-100",
+      "release_train": "builder-beta",
+      "depends_on": ["RESEARCH-DISCOVERY-100", "AI-GOV-AUTOMATION-100"],
+      "security": {"risk": "moderate", "threat_model_required": false},
+      "acceptance_criteria": ["New/redesigned units use proportional DMADV quality evidence; existing regressions use DMAIC/control evidence; high/critical units include FMEA where applicable."]
+    },
+    {
+      "id": "SYS-DATA-GOVERNANCE",
+      "type": "core-system",
+      "name": "Data Architecture & Governance",
+      "summary": "Formal data flows, classification, ownership, lineage, derived-store semantics, retention/export/delete and AI/package exposure policy.",
+      "status": "PLANNED",
+      "parent_stage_id": "DATA-GOVERNANCE-200",
+      "release_train": "builder-beta",
+      "depends_on": ["CONTENT-MODEL-200", "SECURITY-BASELINE-200"],
+      "security": {"risk": "high", "threat_model_required": true},
+      "acceptance_criteria": ["Material data systems have traceable authoritative source, tenant/access scope, lineage, retention/deletion and derived-store/AI/package policies."]
+    },
+    {
+      "id": "SYS-RELIABILITY-ENGINEERING",
+      "type": "core-system",
+      "name": "Reliability Engineering",
+      "summary": "SLI/SLO/error-budget policy, timeout/retry/idempotency, graceful degradation, fault testing and incident/reconciliation controls.",
+      "status": "PLANNED",
+      "parent_stage_id": "RELIABILITY-ENGINEERING-200",
+      "release_train": "pro",
+      "depends_on": ["PERFORMANCE-INTELLIGENCE-200", "RELEASE-WORKFLOW-200"],
+      "security": {"risk": "high", "threat_model_required": true},
+      "acceptance_criteria": ["Critical recurring services have meaningful SLI/SLO/recovery/fault evidence and package/provider failures are isolated and reconcilable."]
+    },
+    {
+      "id": "SYS-PRODUCT-OUTCOMES",
+      "type": "core-system",
+      "name": "Product Outcome Intelligence",
+      "summary": "Privacy-aware adoption/task-success/time-to-value/error/feedback outcome measurement tied back to ResearchBrief CTQs.",
+      "status": "PLANNED",
+      "parent_stage_id": "PRODUCT-OUTCOMES-100",
+      "release_train": "pro",
+      "depends_on": ["PRIVACY-CONSENT-100", "EXPERIMENTATION-100"],
+      "security": {"risk": "high", "threat_model_required": true},
+      "acceptance_criteria": ["Major capabilities can compare intended CTQs/outcomes with privacy-safe post-release evidence without turning analytics into an authoritative data source."]
+    },
+    {
+      "id": "SYS-DELIVERY-EXCELLENCE",
+      "type": "ops-capability",
+      "name": "Delivery Excellence",
+      "summary": "Engineering-flow and DORA-style metrics, CI/review/release controls, rework/rollback visibility and AI-development quality feedback.",
+      "status": "PLANNED",
+      "parent_stage_id": "DELIVERY-EXCELLENCE-100",
+      "release_train": "pro",
+      "depends_on": ["RELEASE-WORKFLOW-200", "AI-GOV-AUTOMATION-100", "RELIABILITY-ENGINEERING-200"],
+      "security": {"risk": "moderate", "threat_model_required": false},
+      "acceptance_criteria": ["Delivery speed and stability are measured without individual-developer ranking/gaming and regressions drive DMAIC control actions."]
+    },
+    {
+      "id": "OPS-EFFICIENCY-FINOPS",
+      "type": "ops-capability",
+      "name": "Cost & Resource Efficiency",
+      "summary": "Provider-neutral cost/resource attribution for requests, tenants, storage, bandwidth, DB, AI, media, search and external providers.",
+      "status": "PLANNED",
+      "parent_stage_id": "EFFICIENCY-FINOPS-100",
+      "release_train": "platform",
+      "depends_on": ["OBSERVABILITY-200", "PERFORMANCE-FOUNDATION-200"],
+      "security": {"risk": "moderate", "threat_model_required": false},
+      "acceptance_criteria": ["Cost/resource regressions are attributable and budgetable without leaking tenant/provider-sensitive information."]
+    },
+    {
+      "id": "SEC-PAYMENT-BOUNDARY",
+      "type": "security-control",
+      "name": "Payment Data & Trust Boundary",
+      "summary": "Critical payment-provider security profile, provider-hosted/tokenized default, raw account-data exclusion and activation/certification policy.",
+      "status": "PLANNED",
+      "parent_stage_id": "PAYMENT-SECURITY-200",
+      "release_train": "platform",
+      "depends_on": ["COMMERCE-CLOSURE-001", "SECURITY-BASELINE-200", "EXT-SDK-200", "DATA-GOVERNANCE-200"],
+      "security": {"risk": "critical", "threat_model_required": true},
+      "acceptance_criteria": ["Standard payment integrations cannot expose raw PAN/CVV to Nexora/generic package runtime and cannot activate without payment-specific security evidence."]
+    },
+    {
+      "id": "SEC-PAYMENT-SECRET-BROKER",
+      "type": "security-control",
+      "name": "Payment Secret Broker",
+      "summary": "Tenant/provider-scoped opaque credential references, encryption, rotation/revocation, masked Admin policy and no AI/log export.",
+      "status": "PLANNED",
+      "parent_stage_id": "PAYMENT-SECURITY-200",
+      "release_train": "platform",
+      "depends_on": ["SEC-PAYMENT-BOUNDARY"],
+      "security": {"risk": "critical", "threat_model_required": true},
+      "acceptance_criteria": ["Payment packages use scoped brokered credentials rather than generic secret/database/filesystem access."]
+    },
+    {
+      "id": "SEC-PAYMENT-WEBHOOK-GATEWAY",
+      "type": "security-control",
+      "name": "Payment Webhook Gateway",
+      "summary": "Provider signature/freshness verification, tenant binding, replay/deduplication, schema/state validation and reconciliation before Commerce mutation.",
+      "status": "PLANNED",
+      "parent_stage_id": "PAYMENT-SECURITY-200",
+      "release_train": "platform",
+      "depends_on": ["SEC-PAYMENT-BOUNDARY", "SEC-PAYMENT-SECRET-BROKER"],
+      "security": {"risk": "critical", "threat_model_required": true},
+      "acceptance_criteria": ["Forged/replayed/duplicate/out-of-order/wrong-tenant webhook events cannot create unauthorized financial transitions."]
+    },
+    {
+      "id": "SEC-PAYMENT-SURFACE-GUARD",
+      "type": "security-control",
+      "name": "Checkout Payment Surface Guard",
+      "summary": "Payment-page script inventory/authorization/integrity/tamper controls, strict CSP, approved slots and session-replay/analytics exclusion.",
+      "status": "PLANNED",
+      "parent_stage_id": "PAYMENT-SECURITY-200",
+      "release_train": "platform",
+      "depends_on": ["SEC-PAYMENT-BOUNDARY", "FRONTEND-RUNTIME-200"],
+      "security": {"risk": "critical", "threat_model_required": true},
+      "acceptance_criteria": ["Arbitrary Theme/Extension/custom scripts cannot execute on protected payment-entry surfaces and unauthorized changes are detectable."]
+    },
+    {
+      "id": "SYS-PAYMENT-PROVIDER-SDK",
+      "type": "core-system",
+      "name": "Payment Provider Security SDK",
+      "summary": "Purpose-specific payment capabilities, provider manifest profile, amount/state/idempotency contracts, network broker and sandbox verification harness.",
+      "status": "PLANNED",
+      "parent_stage_id": "PAYMENT-SECURITY-200",
+      "release_train": "platform",
+      "depends_on": ["SEC-PAYMENT-BOUNDARY", "SEC-PAYMENT-WEBHOOK-GATEWAY", "SEC-PAYMENT-SURFACE-GUARD", "SEC-PAYMENT-SECRET-BROKER", "API-PLATFORM-100"],
+      "security": {"risk": "critical", "threat_model_required": true},
+      "acceptance_criteria": ["A reference sandbox provider can authorize/capture/refund/reconcile safely through typed least-privilege contracts and cannot directly set Core financial truth."]
+    }
+  ]
+}
