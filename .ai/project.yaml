@@ -4,9 +4,11 @@ product_class: advanced extensible web platform / CMS / site builder / applicati
 mission: >-
   Build a secure, extensible, self-hostable and optionally managed AI-native web platform that
   combines and advances the strongest ideas from WordPress, Webflow, Wix, Shopify, Framer,
-  component-driven visual builders and enterprise SaaS without allowing themes, extensions,
-  apps, integrations or AI agents to bypass Nexora public contracts, capabilities, tenancy,
-  publishing semantics, planning governance, performance budgets or security boundaries.
+  component-driven visual builders and enterprise SaaS while using evidence-driven quality,
+  formal data governance, reliability engineering and strict financial/payment boundaries.
+  Themes, extensions, apps, integrations and AI agents may not bypass Nexora public contracts,
+  capabilities, tenancy, publishing semantics, data policies, planning governance, performance,
+  reliability or security boundaries.
 
 canonical_control_plane: .ai
 agent_entrypoint: AGENTS.md
@@ -20,14 +22,23 @@ governance:
   development_unit_registry: .ai/registry/development-units.json
   domain_registries:
     - .ai/registry/performance-units.json
+    - .ai/registry/quality-payment-units.json
   active_plan: .ai/plans/active.md
   plan_template: .ai/plans/plan-template.md
   stage_graph: .ai/roadmap/stages.md
   release_trains: .ai/roadmap/release-trains.md
+  quality_lifecycle: .ai/quality/engineering-lifecycle.md
+  lean_six_sigma: .ai/quality/lean-six-sigma.md
+  fmea_template: .ai/quality/fmea-template.md
+  research_template: .ai/research/research-brief-template.md
+  data_governance: .ai/data/data-flow-governance.md
   security_program: .ai/security/security-program.md
   threat_model_template: .ai/security/threat-model-template.md
+  payment_security: .ai/security/payment-security.md
   performance_platform: .ai/performance/performance-platform.md
   performance_budget_template: .ai/performance/performance-budget-template.md
+  reliability_program: .ai/reliability/reliability-program.md
+  delivery_excellence: .ai/delivery/delivery-excellence.md
 
 current_source_release: 1.0.0-rc.94
 installer_protocol: v5.29
@@ -61,29 +72,47 @@ extension_migration_policies:
   - none
   - forward-only
 
+special_security_profiles:
+  - payment-provider
+  - identity-provider
+  - high-risk-data
+  - ai-execution
+  - infrastructure
+
 non_negotiable_principles:
   - core-remains-generic
   - public-contracts-and-capabilities
   - pre-plan-before-implementation
   - registered-development-unit-before-code
   - no-hidden-work
+  - research-before-substantial-new-solution
+  - evidence-before-assumption
+  - dmadv-for-new-redesigned-substantial-work
+  - dmaic-and-control-for-defects-incidents-regressions
+  - data-authority-lineage-and-classification-explicit
   - fail-closed-security
   - continuous-security-not-late-audit
   - threat-model-high-and-critical-work
+  - fmea-high-critical-complex-failure-modes-when-applicable
   - quarantine-before-execution
   - declarative-extension-runtime-preferred
   - no-private-core-shortcuts-for-first-party-packages
   - deterministic-runtime-registration
-  - shared-admin-design-system
   - portable-migrations
   - builder-kernel-before-deep-business-breadth
   - performance-by-design-not-final-cleanup
   - runtime-affecting-work-needs-budget-or-explicit-not-applicable
   - theme-extension-app-cost-attribution-when-applicable
+  - reliability-and-recovery-planned-for-critical-stateful-work
   - raw-performance-evidence-before-opaque-score
-  - performance-quality-and-security-verdicts-remain-separate
+  - performance-quality-security-and-payment-verdicts-remain-separate
+  - payment-provider-is-critical-security-profile
+  - raw-payment-account-data-forbidden-in-standard-payment-profile
+  - payment-browser-return-is-not-financial-truth
+  - ambiguous-non-idempotent-financial-actions-reconcile-before-retry
   - ai-is-governed-client-not-privileged-bypass
   - typed-least-privilege-ai-tools
   - source-done-is-not-target-verified
+  - no-fabricated-future-outcome-evidence
   - real-target-evidence-before-product-completion
   - append-only-history-and-evidence
