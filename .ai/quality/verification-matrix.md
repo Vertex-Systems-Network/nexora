@@ -1,105 +1,101 @@
 # Nexora Verification Matrix
 
-This matrix defines minimum evidence classes before a stage/unit can advance. It guards against skipped product workflows and source-only completion claims.
+Minimum evidence classes before a stage/unit advances. Source, target, provider and post-release evidence remain distinguishable.
 
-## Core / Builder Beta stages
+## Builder Beta / foundation stages
 
-| System / stage | Source/static evidence | Integration evidence | Real-target/browser evidence | Special evidence |
+| Stage | Source/static evidence | Integration evidence | Target/evidence | Special evidence |
 |---|---|---|---|---|
-| `RUNTIME-CLOSURE-001` | runtime/source guards | compatibility/readiness commands | required | exact identity-plane output |
-| `CORE-QA-001` | tests/typecheck as affected | auth/roles/settings/media CRUD | required | direct URL + session persistence |
-| `AI-GOV-AUTOMATION-100` | schema/registry/stage validators | intentionally broken control-plane fixtures rejected | CI required | unregistered/stale/inconsistent work must fail |
-| `ADMIN-UX-CLOSURE-001` | component/type tests | shared Admin shell flows | required | responsive + appearance + accessibility baseline |
-| `SECURITY-BASELINE-200` | SAST/dependency/secret/security tests | authorization/tenancy/browser-policy integration | required on disposable/real targets as applicable | threat-model evidence, MFA/CSP/security-CI evidence |
-| `ARCH-BOUNDARY-100` | architecture tests | boundary integration | source evidence + target where runtime affected | ADR/exception evidence |
-| `THEME-CLOSURE-001` | manifest/security/tests | full theme lifecycle | required | preview/activation/rollback/public render |
-| `EXTENSION-CLOSURE-001` | manifest/capability/security/tests | full extension lifecycle | required | package family + runtime mode + migration policy |
-| `STUDIO-CLOSURE-001` | visual-tree/schema/tests | document/theme bindings | required | responsive + revision/publish |
-| `CMS-PUBLISHING-CLOSURE-001` | document/editorial/publishing tests | CRUD/revisions/taxonomy/archive | required | permalink/render/SEO integration |
-| `MEDIA-DISTRIBUTION-CLOSURE-001` | media/distribution tests | upload/use/newsletter/RSS | required | public-media policy/delivery |
-| `SEO-SEARCH-CLOSURE-001` | SEO/search/crawler tests | schema/sitemap/index/search | required | rendered metadata + crawler evidence |
-| `AUTOMATION-CLOSURE-001` | trigger/action/webhook tests | retries/idempotency/signatures | target where network/runtime matters | replay/private-network protections |
-| `CONTENT-MODEL-200` | schema/field/relation tests | Admin/API/extension/Studio integration | required | fresh install/upgrade/schema-version evidence |
-| `TAXONOMY-200` | definition/hierarchy tests | content binding + extension registration | required | permission/routing integration |
-| `QUERY-ENGINE-200` | typed query/parser tests | content/taxonomy/relation/archive queries | required | authorization + performance evidence |
-| `ROUTING-200` | resolver/collision/redirect tests | content/taxonomy/archive/canonical routes | required | permalink migration/redirect evidence |
-| `NAVIGATION-100` | menu definition tests | theme/Studio/API/AI bindings | required | nested/conditional/location behavior |
-| `THEME-CONTRACT-200` | manifest/template hierarchy tests | theme/Studio/navigation/content integration | required | deterministic fallback/slot behavior |
-| `EXT-SDK-200` | SDK contract/capability tests | first-party reference package integration | required for full closure | no private Core shortcut, compatibility evidence |
-| `SITE-BUILDER-200` | AST/component/binding tests | theme/query/content/extension integration | required | responsive/interactions/history/accessibility |
-| `THEME-STUDIO-200` | token/component/global-template tests | site-wide visual integration | required | inheritance/override consistency |
-| `RELEASE-WORKFLOW-200` | branch/release state tests | preview/staging/merge/publish/rollback | required | conflict/selective/scheduled publish evidence |
-| `TEMPLATE-ECOSYSTEM-100` | package/dependency/update tests | one-click starter install/customize/update | required | derived customization/upstream update behavior |
-| `I18N-200` | locale/translation tests | CMS/theme/SEO/release integration | required | hreflang/RTL/per-locale publish |
-| `FRONTEND-RUNTIME-200` | cache/image/CDN/invalidation tests | render/delivery integration | required | CWV/cache correctness/security headers |
-| `PERFORMANCE-FOUNDATION-200` | result/profile/budget/attribution contract tests | browser + Admin + server + DB/cache/package correlation | required | intentional frontend/backend/package regressions detected; profiler overhead/redaction evidence |
-| `CODE-QUALITY-200` | analyzer/provider/finding tests | Core/Theme/Extension/App source/build analysis + runtime correlation | representative source/build evidence required | complexity/duplication/dead-code/bundle findings reproducible; security verdict kept separate |
-| `MEDIA-DAM-200` | asset/transform/dedupe tests | content/Studio/storage integration | required | usage graph/rights/delivery evidence |
-| `SEARCH-200` | index/facet/provider tests | content/commerce provider integration | required | ranking/facet/privacy/performance |
-| `FORMS-WORKFLOW-200` | validation/spam/workflow tests | lead/provider/automation integration | required | abuse/rate-limit/consent evidence |
-| `PRIVACY-CONSENT-100` | consent/policy tests | analytics/forms/experiment/RUM integration | required | GPC/DNT/export/delete/retention evidence |
+| `RUNTIME-CLOSURE-001` | runtime/source guards | compatibility/readiness | real target required | exact identity-plane output |
+| `CORE-QA-001` | tests/typecheck | auth/roles/settings/media CRUD | browser/target required | direct URL/session persistence |
+| `AI-GOV-AUTOMATION-100` | schema/registry/stage validators | broken fixtures rejected | CI required | unregistered/stale/inconsistent work fails |
+| `RESEARCH-DISCOVERY-100` | ResearchBrief schema/policy tests | request -> evidence -> unit/CTQ mapping | representative workflow | AI cannot fabricate VOC/baselines/sources |
+| `QUALITY-GOVERNANCE-100` | DMADV/DMAIC/FMEA/control validators | representative new-unit + regression workflow | process evidence | proportionality and traceability |
+| `ADMIN-UX-CLOSURE-001` | component/type tests | Admin shell flows | browser required | responsive/appearance/a11y |
+| `SECURITY-BASELINE-200` | SAST/dependency/secret/security | auth/tenancy/browser-policy | target as applicable | threat model/MFA/CSP/security-CI |
+| `ARCH-BOUNDARY-100` | architecture tests | boundary integration | target if runtime affected | ADR/exception evidence |
+| `THEME-CLOSURE-001` | manifest/security/tests | full theme lifecycle | required | preview/activate/rollback/render |
+| `EXTENSION-CLOSURE-001` | manifest/capability/security | full package lifecycle | required | family/runtime/migration policy |
+| `STUDIO-CLOSURE-001` | visual-tree/schema | document/theme bindings | required | responsive/revision/publish |
+| `CMS-PUBLISHING-CLOSURE-001` | publishing tests | CRUD/revisions/archive | required | permalink/render/SEO |
+| `MEDIA-DISTRIBUTION-CLOSURE-001` | media/distribution | upload/use/RSS/newsletter | required | media delivery policy |
+| `SEO-SEARCH-CLOSURE-001` | SEO/search/crawler | schema/sitemap/search | required | rendered metadata/crawler |
+| `AUTOMATION-CLOSURE-001` | trigger/action/webhook | retry/idempotency/signature | target where network matters | replay/private-network protections |
+| `CONTENT-MODEL-200` | schema/field/relation | Admin/API/package/Studio | required | install/upgrade/schema versions |
+| `DATA-GOVERNANCE-200` | data-flow/classification/lineage policy | source -> derived store -> API/package/AI/delete | representative target | tenant/access/deletion/redaction evidence |
+| `TAXONOMY-200` | definition/hierarchy | content/package registration | required | permission/routing |
+| `QUERY-ENGINE-200` | typed query/parser | content/relation/archive | required | authorization/performance |
+| `ROUTING-200` | resolver/collision/redirect | canonical routes | required | permalink migration/redirect |
+| `NAVIGATION-100` | menu tests | theme/Studio/API/AI | required | nested/conditional/location |
+| `THEME-CONTRACT-200` | manifest/hierarchy | theme/Studio/content | required | deterministic fallback/slots |
+| `EXT-SDK-200` | SDK/capability tests | reference package | required | no private Core shortcut |
+| `SITE-BUILDER-200` | AST/component/binding | theme/query/content/package | required | responsive/a11y/history |
+| `THEME-STUDIO-200` | token/global-template | site-wide visual | required | inheritance/overrides |
+| `RELEASE-WORKFLOW-200` | branch/release state | preview/merge/publish/rollback | required | selective/scheduled publish |
+| `TEMPLATE-ECOSYSTEM-100` | package/dependency/update | starter install/customize/update | required | derived customization |
+| `I18N-200` | locale/translation | CMS/theme/SEO/release | required | hreflang/RTL/locale publish |
+| `FRONTEND-RUNTIME-200` | cache/image/CDN | delivery | required | CWV/cache/security headers |
+| `PERFORMANCE-FOUNDATION-200` | profile/budget/attribution | browser/Admin/server/DB/package | required | profiler overhead/redaction/regression detection |
+| `CODE-QUALITY-200` | analyzers/findings | Core/package source/build + runtime | representative | reproducible quality findings |
+| `MEDIA-DAM-200` | asset/transform/dedupe | content/Studio/storage | required | usage/rights/delivery |
+| `SEARCH-200` | index/facet/provider | content/commerce | required | ranking/privacy/performance |
+| `FORMS-WORKFLOW-200` | validation/abuse | lead/provider/automation | required | rate/consent evidence |
+| `PRIVACY-CONSENT-100` | consent/policy | analytics/forms/RUM | required | GPC/DNT/export/delete/retention |
 
-## Pro / AI-native stages
+## Pro stages
 
-| System / stage | Source/static evidence | Integration evidence | Real-target/browser evidence | Special evidence |
+| Stage | Source/static evidence | Integration evidence | Target/evidence | Special evidence |
 |---|---|---|---|---|
-| `AI-KERNEL-100` | tool schema/policy/eval tests | model/context/tool/approval/audit integration | required for execute paths | prompt injection/data leakage/excessive-agency evals |
-| `SEO-AI-200` | SEO/AEO/entity/representation tests | crawler/search/AI integration | required | AI-readable output must exclude private data; citation/visibility evidence |
-| `API-PLATFORM-100` | schema/auth/rate tests | REST/GraphQL/OAuth/webhooks/headless | required | tenancy/IDOR/fuzzing/versioning evidence |
-| `CONFIG-AS-CODE-100` | serializer/schema/diff tests | export/apply/rollback integration | required | environment-safe/idempotent evidence |
-| `AGENT-INTEROP-100` | protocol/tool/auth tests | external agent -> gateway -> Tool Registry | required | scoped identity, approval, audit, injection/tool-misuse evidence |
-| `AI-CONTENT-100` | prompt/tool/output/eval tests | CMS/media/SEO draft/action integration | required | review/approval/audit/schema validity |
-| `AI-DESIGN-100` | design AST/token/component evals | AI -> Studio/theme/release integration | required | responsive/accessibility/review/rollback evidence |
-| `DESIGN-IMPORT-100` | parser/mapping/security tests | source design -> tokens/components/AST | required | no trusted raw executable markup |
-| `AI-DX-100` | scaffold/review/eval/code-quality tests | generated package -> SDK/Sentinel/quality/performance tests | required for representative package | independent review + no unregistered implementation |
-| `PERFORMANCE-INTELLIGENCE-200` | canonical report/runner/provider/monitor/alert tests | lab + RUM + backend + code-quality + release/package integration | required | mobile/desktop reports, waterfall, filmstrip/video or runner equivalent, scripted flow, history/alert, secure external URL test, AI evidence grounding |
-| `EXPERIMENTATION-100` | assignment/statistics/goal tests | release/analytics/privacy/performance integration | required | deterministic rollout/rollback/consent + performance impact evidence |
-| `PERSONALIZATION-100` | segment/rule/fallback tests | query/content/privacy integration | required | no cross-tenant/segment leakage |
-| `APP-RUNTIME-100` | capability/runtime/broker tests | functions/jobs/schedules/network/secrets | required | isolation/egress/secret/tenant abuse evidence |
-| `MIGRATION-CENTER-100` | adapter/parser/idempotency tests | source -> Nexora dry-run/import | required | loss report/redirect/SEO/retry evidence |
-| `DX-200` | CLI/SDK/reference package/quality tooling tests | clean external developer workflow | required for representative environment | docs/compatibility/reference/performance evidence |
+| `AI-KERNEL-100` | tool schema/policy/evals | model/context/tool/approval/audit | execute paths required | injection/leakage/agency evals |
+| `SEO-AI-200` | SEO/AEO/entity tests | crawler/search/AI | required | no private-data AI representation |
+| `API-PLATFORM-100` | schema/auth/rate | REST/GraphQL/OAuth/webhooks | required | IDOR/fuzz/versioning |
+| `CONFIG-AS-CODE-100` | serializer/diff | export/apply/rollback | required | idempotent/env safe |
+| `AGENT-INTEROP-100` | protocol/auth/tool | external agent -> gateway | required | scoped identity/approval/audit |
+| `AI-CONTENT-100` | prompt/tool/output/evals | CMS/media/SEO | required | schema/review/audit |
+| `AI-DESIGN-100` | AST/token/component evals | AI -> Studio/release | required | responsive/a11y/rollback |
+| `DESIGN-IMPORT-100` | parser/mapping/security | design -> AST/tokens | required | no trusted executable markup |
+| `AI-DX-100` | scaffold/review/quality | generated package -> SDK/Sentinel | representative | independent review |
+| `PERFORMANCE-INTELLIGENCE-200` | report/runner/provider/alert | lab + RUM + backend + package | required | waterfall/flow/history/secure URL runner |
+| `RELIABILITY-ENGINEERING-200` | SLI/SLO/retry/idempotency contracts | fault/provider/degradation/recovery | representative targets | error-budget/fault/reconciliation evidence |
+| `EXPERIMENTATION-100` | assignment/statistics/goals | release/privacy/performance | required | deterministic rollout/rollback |
+| `PRODUCT-OUTCOMES-100` | outcome schema/privacy | CTQ -> adoption/task-success/feedback | observation evidence | no fabricated future outcome; privacy-safe |
+| `PERSONALIZATION-100` | segment/rule/fallback | query/content/privacy | required | no tenant/segment leakage |
+| `APP-RUNTIME-100` | capability/broker | functions/jobs/network/secrets | required | isolation/egress/tenant abuse |
+| `MIGRATION-CENTER-100` | adapter/idempotency | dry-run/import | required | loss/redirect/retry |
+| `DX-200` | CLI/SDK/reference | clean external workflow | representative | docs/compatibility |
+| `DELIVERY-EXCELLENCE-100` | metric definitions/collectors | CI/PR/release events | observed pipeline | change lead/failure/recovery/rework + anti-gaming |
 
-## Platform / operations stages
+## Platform / payments / operations stages
 
-| System / stage | Source/static evidence | Integration evidence | Real-target/browser evidence | Special evidence |
+| Stage | Source/static evidence | Integration evidence | Target/evidence | Special evidence |
 |---|---|---|---|---|
-| `MARKETPLACE-CLOSURE-001` | catalog/stager/security tests | stage -> quarantine -> install | required | publisher/signature/digest evidence |
-| `MARKETPLACE-200` | licensing/compat/update/quality-profile tests | publisher/package lifecycle + performance profile | required | revocation/rollback/transparency + reproducible package quality/performance evidence |
-| `COMMERCE-CLOSURE-001` | domain/payment adapter tests | order/invoice/refund/subscription | required | money/tax/idempotency/provider boundaries |
-| `COMMERCE-200` | catalog/cart/checkout/function tests | storefront/provider/fulfillment integration | required | payment/checkout extension security evidence |
-| `CRM-MEMBERSHIP-HELPDESK-CLOSURE-001` | domain/authorization tests | end-to-end business workflows | required | entitlement/SLA/history evidence |
-| `PORTAL-200` | authorization/account tests | commerce/CRM/membership/helpdesk | required | customer/tenant isolation evidence |
-| `COLLAB-200` | concurrency/lock/permission tests | presence/comments/approval/release | required | conflict/audit evidence |
-| `MANAGED-CLOUD-100` | provisioning/policy/IaC tests | domains/SSL/CDN/backups/deploy/monitoring/distributed performance runners | required in managed environment | isolation, metering, restore, scaling and runner-egress evidence |
-| `ENTERPRISE-CLOUD-CLOSURE-001` | tenancy/HA/source tests | organization/SSO/runtime integration | required | multi-node/shared-state/failover |
-| `SENTINEL-200` | advisory/policy/isolation tests | marketplace/app-runtime integration | required | real isolation + emergency revocation evidence |
-| `ENTERPRISE-GOV-200` | policy/SSO/SCIM/audit tests | org/identity/governance integration | required | privilege/impersonation/tenant evidence |
-| `OBSERVABILITY-200` | log/metric/trace schema tests | app/jobs/AI/security/performance/ops integration | required | no secret leakage + incident diagnostics + no duplicate telemetry source of truth |
-| `DR-PLATFORM-100` | update/backup/restore tests | disposable-target restore/rollback | required | integrity/recovery/rehearsal evidence |
+| `MARKETPLACE-CLOSURE-001` | catalog/stager/security | quarantine/install | required | publisher/signature/digest |
+| `MARKETPLACE-200` | license/compat/update/profile | publisher/package lifecycle | required | revocation + reproducible quality/security/perf |
+| `COMMERCE-CLOSURE-001` | domain/payment-adapter foundation | order/invoice/refund/subscription | required | minor-unit money/idempotency/provider boundary |
+| `PAYMENT-SECURITY-200` | payment manifest/capability/state/data/leak tests | Secret/Network Broker + webhook + surface + sandbox provider | real provider sandbox required | threat model + FMEA + independent review + raw-account-data exclusion + forged/replay/duplicate/out-of-order/tamper/timeout/reconcile/3DS/SCA tests |
+| `COMMERCE-200` | catalog/cart/checkout/functions | payment-secure provider/fulfillment | required | cannot bypass Payment Security gate |
+| `CRM-MEMBERSHIP-HELPDESK-CLOSURE-001` | domain/auth | business workflows | required | entitlement/SLA/history |
+| `PORTAL-200` | account/auth | commerce/CRM/member | required | customer/tenant isolation |
+| `COLLAB-200` | concurrency/locks | presence/comments/approval | required | conflict/audit |
+| `MANAGED-CLOUD-100` | provisioning/policy | domain/SSL/CDN/backup/deploy | managed target | isolation/metering/restore/scaling |
+| `ENTERPRISE-CLOUD-CLOSURE-001` | tenancy/HA | org/SSO/runtime | required | multi-node/failover |
+| `SENTINEL-200` | advisory/isolation/revocation | marketplace/app/payment package | required | real isolation + emergency revoke |
+| `ENTERPRISE-GOV-200` | policy/SSO/SCIM | org/governance | required | privilege/impersonation |
+| `OBSERVABILITY-200` | logs/metrics/traces | platform/AI/security/perf/reliability | required | secret-safe incident diagnostics |
+| `EFFICIENCY-FINOPS-100` | cost/resource schema | telemetry/provider attribution | representative | tenant-safe budgets/anomalies |
+| `DR-PLATFORM-100` | update/backup/restore | rollback/restore rehearsal | required | integrity/recovery |
 
-## Production stages
+## Production
 
 | Stage | Required evidence |
 |---|---|
-| `PERF-CWV-CERT-100` | exact release/test-profile evidence for field/lab CWV, frontend delivery, backend/DB/cache/memory budgets, Theme/Extension impact, code-quality policy and release-regression comparisons |
+| `PERF-CWV-CERT-100` | exact release/profile CWV/frontend/backend/package/code-quality regression evidence |
 | `A11Y-CERT-100` | keyboard/screen-reader/contrast/RTL/international evidence |
-| `RELEASE-CERT-100` | exact-source dependency/browser/database/security/backup/restore/HA/package evidence |
-| `N2-STABLE-100` | prior production gates PASS for intended release source |
+| `RELEASE-CERT-100` | exact-source dependency/browser/DB/security/reliability/backup/restore/HA/package evidence; payment-enabled releases also require current payment-provider evidence |
+| `N2-STABLE-100` | all applicable prior production gates PASS for intended release/deployment capabilities |
 
 ## Evidence naming
 
-Every meaningful handoff should record:
+Use explicit categories: `research_evidence`, `ctq_evidence`, `development_units`, `architecture_checks`, `data_flow_checks`, `source_checks`, `integration_checks`, `target_checks`, `security_checks`, `fmea_checks`, `privacy_checks`, `payment_checks`, `performance_checks`, `code_quality_checks`, `reliability_checks`, `ai_evals`, `outcome_checks`, `known_gaps`.
 
-- `development_units`
-- `source_checks`
-- `integration_checks`
-- `target_checks`
-- `security_checks`
-- `privacy_checks`
-- `performance_checks`
-- `code_quality_checks`
-- `ai_evals`
-- `manual_browser_checks`
-- `known_gaps`
-
-If a class of evidence was not executed, record `NOT_RUN` or `NOT_APPLICABLE`; never omit it in a way that could be mistaken for PASS.
+Unexecuted evidence is `NOT_RUN`, `NOT_APPLICABLE` or `UNKNOWN`, never omitted as if PASS.
