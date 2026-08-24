@@ -1,6 +1,6 @@
 # Nexora Verification Matrix
 
-Minimum evidence classes before a stage/unit advances. Source, target, provider and post-release evidence remain distinguishable.
+Minimum evidence classes before a stage/unit advances. Source, target, provider, graph and post-release evidence remain distinguishable.
 
 ## Builder Beta / foundation stages
 
@@ -37,10 +37,11 @@ Minimum evidence classes before a stage/unit advances. Source, target, provider 
 | `FRONTEND-RUNTIME-200` | cache/image/CDN | delivery | required | CWV/cache/security headers |
 | `PERFORMANCE-FOUNDATION-200` | profile/budget/attribution | browser/Admin/server/DB/package | required | profiler overhead/redaction/regression detection |
 | `CODE-QUALITY-200` | analyzers/findings | Core/package source/build + runtime | representative | reproducible quality findings |
+| `SYSTEM-GRAPH-100` | node/edge/evidence schemas; identity/provider/static/drift tests | registry + static + runtime + data + security + package correlation | representative Core/Theme/Extension real-target paths required | declared/static/observed/tested separation; unexpected edge/drift detection; sensitive access/redaction/export/deep-trace tests; measured collector overhead |
 | `MEDIA-DAM-200` | asset/transform/dedupe | content/Studio/storage | required | usage/rights/delivery |
 | `SEARCH-200` | index/facet/provider | content/commerce | required | ranking/privacy/performance |
 | `FORMS-WORKFLOW-200` | validation/abuse | lead/provider/automation | required | rate/consent evidence |
-| `PRIVACY-CONSENT-100` | consent/policy | analytics/forms/RUM | required | GPC/DNT/export/delete/retention |
+| `PRIVACY-CONSENT-100` | consent/policy | analytics/forms/RUM/System-Graph telemetry | required | GPC/DNT/export/delete/retention |
 
 ## Pro stages
 
@@ -54,36 +55,37 @@ Minimum evidence classes before a stage/unit advances. Source, target, provider 
 | `AI-CONTENT-100` | prompt/tool/output/evals | CMS/media/SEO | required | schema/review/audit |
 | `AI-DESIGN-100` | AST/token/component evals | AI -> Studio/release | required | responsive/a11y/rollback |
 | `DESIGN-IMPORT-100` | parser/mapping/security | design -> AST/tokens | required | no trusted executable markup |
-| `AI-DX-100` | scaffold/review/quality | generated package -> SDK/Sentinel | representative | independent review |
-| `PERFORMANCE-INTELLIGENCE-200` | report/runner/provider/alert | lab + RUM + backend + package | required | waterfall/flow/history/secure URL runner |
-| `RELIABILITY-ENGINEERING-200` | SLI/SLO/retry/idempotency contracts | fault/provider/degradation/recovery | representative targets | error-budget/fault/reconciliation evidence |
+| `AI-DX-100` | scaffold/review/quality/graph identity | generated package -> SDK/Sentinel/System Graph | representative | independent review + package Flow visibility |
+| `PERFORMANCE-INTELLIGENCE-200` | report/runner/provider/alert | lab + RUM + backend + package + System Graph correlation | required | waterfall/user-flow/history/secure URL runner; Flow overlay references authoritative performance evidence |
+| `RELIABILITY-ENGINEERING-200` | SLI/SLO/retry/idempotency contracts | fault/provider/degradation/recovery + graphable state/error paths | representative targets | error-budget/fault/reconciliation evidence |
+| `FLOW-INTELLIGENCE-200` | query/lens/diff/impact/replay/permission/AI-tool tests | System Graph + Performance + Reliability + Data + Security + Release + Payment/AI providers | real GUI/runtime evidence required | accessible zoom; root/cascade; source-to-sink with provenance; path-aware tests; history/diff; read-only replay; impact/blast radius; incident view; modelled what-if labels; AI evidence grounding; no duplicate truth store |
 | `EXPERIMENTATION-100` | assignment/statistics/goals | release/privacy/performance | required | deterministic rollout/rollback |
 | `PRODUCT-OUTCOMES-100` | outcome schema/privacy | CTQ -> adoption/task-success/feedback | observation evidence | no fabricated future outcome; privacy-safe |
 | `PERSONALIZATION-100` | segment/rule/fallback | query/content/privacy | required | no tenant/segment leakage |
-| `APP-RUNTIME-100` | capability/broker | functions/jobs/network/secrets | required | isolation/egress/tenant abuse |
+| `APP-RUNTIME-100` | capability/broker/graph-registration | functions/jobs/network/secrets | required | isolation/egress/tenant abuse + observable allowed paths |
 | `MIGRATION-CENTER-100` | adapter/idempotency | dry-run/import | required | loss/redirect/retry |
-| `DX-200` | CLI/SDK/reference | clean external workflow | representative | docs/compatibility |
-| `DELIVERY-EXCELLENCE-100` | metric definitions/collectors | CI/PR/release events | observed pipeline | change lead/failure/recovery/rework + anti-gaming |
+| `DX-200` | CLI/SDK/reference/Flow tooling | clean external workflow | representative | docs/compatibility/graph inspection |
+| `DELIVERY-EXCELLENCE-100` | metric definitions/collectors | CI/PR/release/Flow impact events | observed pipeline | change lead/failure/recovery/rework + anti-gaming |
 
 ## Platform / payments / operations stages
 
 | Stage | Source/static evidence | Integration evidence | Target/evidence | Special evidence |
 |---|---|---|---|---|
 | `MARKETPLACE-CLOSURE-001` | catalog/stager/security | quarantine/install | required | publisher/signature/digest |
-| `MARKETPLACE-200` | license/compat/update/profile | publisher/package lifecycle | required | revocation + reproducible quality/security/perf |
+| `MARKETPLACE-200` | license/compat/update/profile | publisher/package lifecycle + Flow profile | required | revocation + reproducible quality/security/perf/graph evidence |
 | `COMMERCE-CLOSURE-001` | domain/payment-adapter foundation | order/invoice/refund/subscription | required | minor-unit money/idempotency/provider boundary |
-| `PAYMENT-SECURITY-200` | payment manifest/capability/state/data/leak tests | Secret/Network Broker + webhook + surface + sandbox provider | real provider sandbox required | threat model + FMEA + independent review + raw-account-data exclusion + forged/replay/duplicate/out-of-order/tamper/timeout/reconcile/3DS/SCA tests |
+| `PAYMENT-SECURITY-200` | payment manifest/capability/state/data/leak/graph tests | Secret/Network Broker + webhook + surface + sandbox provider + System Graph projection | real provider sandbox required | threat model + FMEA + independent review + raw-account-data exclusion + forged/replay/duplicate/out-of-order/tamper/timeout/reconcile/3DS/SCA tests; Flow exposes no account data |
 | `COMMERCE-200` | catalog/cart/checkout/functions | payment-secure provider/fulfillment | required | cannot bypass Payment Security gate |
 | `CRM-MEMBERSHIP-HELPDESK-CLOSURE-001` | domain/auth | business workflows | required | entitlement/SLA/history |
 | `PORTAL-200` | account/auth | commerce/CRM/member | required | customer/tenant isolation |
 | `COLLAB-200` | concurrency/locks | presence/comments/approval | required | conflict/audit |
-| `MANAGED-CLOUD-100` | provisioning/policy | domain/SSL/CDN/backup/deploy | managed target | isolation/metering/restore/scaling |
+| `MANAGED-CLOUD-100` | provisioning/policy/graph-provider | domain/SSL/CDN/backup/deploy/topology | managed target | isolation/metering/restore/scaling + restricted deployment Flow |
 | `ENTERPRISE-CLOUD-CLOSURE-001` | tenancy/HA | org/SSO/runtime | required | multi-node/failover |
-| `SENTINEL-200` | advisory/isolation/revocation | marketplace/app/payment package | required | real isolation + emergency revoke |
+| `SENTINEL-200` | advisory/isolation/revocation | marketplace/app/payment package + Flow findings | required | real isolation + emergency revoke |
 | `ENTERPRISE-GOV-200` | policy/SSO/SCIM | org/governance | required | privilege/impersonation |
-| `OBSERVABILITY-200` | logs/metrics/traces | platform/AI/security/perf/reliability | required | secret-safe incident diagnostics |
-| `EFFICIENCY-FINOPS-100` | cost/resource schema | telemetry/provider attribution | representative | tenant-safe budgets/anomalies |
-| `DR-PLATFORM-100` | update/backup/restore | rollback/restore rehearsal | required | integrity/recovery |
+| `OBSERVABILITY-200` | logs/metrics/traces + canonical graph IDs | platform/AI/security/perf/reliability/Flow | required | secret-safe incident diagnostics; no competing topology truth |
+| `EFFICIENCY-FINOPS-100` | cost/resource schema | telemetry/provider/System Graph attribution | representative | tenant-safe budgets/anomalies + Flow overlays |
+| `DR-PLATFORM-100` | update/backup/restore | rollback/restore rehearsal + incident/recovery graph | required | integrity/recovery |
 
 ## Production
 
@@ -91,11 +93,35 @@ Minimum evidence classes before a stage/unit advances. Source, target, provider 
 |---|---|
 | `PERF-CWV-CERT-100` | exact release/profile CWV/frontend/backend/package/code-quality regression evidence |
 | `A11Y-CERT-100` | keyboard/screen-reader/contrast/RTL/international evidence |
-| `RELEASE-CERT-100` | exact-source dependency/browser/DB/security/reliability/backup/restore/HA/package evidence; payment-enabled releases also require current payment-provider evidence |
+| `RELEASE-CERT-100` | exact-source dependency/browser/DB/security/reliability/backup/restore/HA/package evidence; release-critical System Graph identities/drift/test-evidence controls; payment-enabled releases also require current payment-provider/Flow evidence |
 | `N2-STABLE-100` | all applicable prior production gates PASS for intended release/deployment capabilities |
+
+## Required Flow evidence examples
+
+A Flow/System Graph claim records, where applicable:
+
+- canonical node/edge IDs;
+- evidence class;
+- provider/source;
+- source/build/package/deployment identity;
+- environment;
+- first/last seen;
+- confidence;
+- tenant/site scope;
+- redaction/classification;
+- related test/security/performance/reliability evidence.
+
+Examples that must remain distinguishable:
+
+- declared edge with no runtime evidence;
+- static source-to-sink path;
+- observed runtime edge;
+- tested permission denial;
+- production-observed network destination;
+- AI/modelled impact hypothesis.
 
 ## Evidence naming
 
-Use explicit categories: `research_evidence`, `ctq_evidence`, `development_units`, `architecture_checks`, `data_flow_checks`, `source_checks`, `integration_checks`, `target_checks`, `security_checks`, `fmea_checks`, `privacy_checks`, `payment_checks`, `performance_checks`, `code_quality_checks`, `reliability_checks`, `ai_evals`, `outcome_checks`, `known_gaps`.
+Use explicit categories: `research_evidence`, `ctq_evidence`, `development_units`, `architecture_checks`, `data_flow_checks`, `system_graph_checks`, `flow_checks`, `source_checks`, `integration_checks`, `target_checks`, `security_checks`, `fmea_checks`, `privacy_checks`, `payment_checks`, `performance_checks`, `code_quality_checks`, `reliability_checks`, `ai_evals`, `outcome_checks`, `known_gaps`.
 
 Unexecuted evidence is `NOT_RUN`, `NOT_APPLICABLE` or `UNKNOWN`, never omitted as if PASS.
