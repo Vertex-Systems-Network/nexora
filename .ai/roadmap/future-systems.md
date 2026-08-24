@@ -4,10 +4,12 @@ Planning commitments only; not implementation claims. Use the canonical stage gr
 
 ## Governance / Quality Engineering
 
-- `AI-GOV-AUTOMATION-100` — machine-enforced registry/stage/plan/state/DoD consistency.
+- `AI-GOV-AUTOMATION-100` — machine-enforced registry/stage/plan/state/DoD consistency **plus governed AI-development orchestration**: run manifests, instruction trust, scope leases, least-privilege dev tools, scope-delta checks, protected-governance self-modification guard, test/evidence integrity, exact-head review, multi-agent coordination, bounded retries, dependency intake, waivers and promotion/provenance gates.
 - `RESEARCH-DISCOVERY-100` — ResearchBrief/VOC/problem validation/current market/standards/baseline/CTQ inputs.
 - `QUALITY-GOVERNANCE-100` — closed-loop Quality OS, proportional DMADV/DMAIC, FMEA/root-cause/control-plan traceability.
 - `SECURITY-BASELINE-200` — early identity/browser/AppSec/tenancy/secrets/threat-model baseline.
+
+AI-development orchestration details live in `.ai/governance/ai-development-orchestration.md`, `.ai/registry/ai-development-units.json`, `.ai/schemas/ai-development-run.schema.json` and the Phase 7 capability addendum. It intentionally matures `AI-GOV-AUTOMATION-100` rather than adding another top-level roadmap stage.
 
 ## Architecture / Data / website-platform primitives
 
@@ -51,6 +53,8 @@ System Graph architecture and pre-planned units live in `.ai/flow/system-graph.m
 - `DESIGN-IMPORT-100`
 - `AI-DX-100`
 
+Product AI and development AI are separate trust domains. Product AI uses Nexora typed public tools/capabilities; development AI uses repository/run/tool/evidence/review governance. Neither is allowed to infer privilege from natural-language intent.
+
 ## Performance / Reliability / Flow / Product improvement
 
 - `PERFORMANCE-INTELLIGENCE-200` — PageSpeed/GTmetrix-class analysis plus Nexora-native source/package attribution.
@@ -67,20 +71,20 @@ System Graph architecture and pre-planned units live in `.ai/flow/system-graph.m
 ### Flow Intelligence design rules
 
 - graph/evidence is source of truth; diagram is projection only;
-- do not render one giant graph—use ecosystem→system→feature→execution zoom plus filters/lenses;
+- use ecosystem→system→feature→execution zoom, filters and lenses rather than one giant graph;
 - every edge/node exposes evidence class/provenance/identity where authorized;
 - expected-vs-observed drift is first-class;
-- conditions/gateways explain inputs, TRUE/FALSE semantics, permissions/state/source/tests;
+- conditions/gateways explain inputs, branch semantics, permissions/state/source/tests;
 - root/cascade/recovered errors are distinct;
 - data lineage and sensitive classifications are redacted and permission-scoped;
 - Theme/Extension/module lifecycle/permissions/network/data/assets/errors/performance are package-centric views;
 - state machine, transaction/lock/concurrency and retry/reconciliation semantics are first-class;
-- path-aware test/evidence coverage is more important than a single coverage percentage;
+- path-aware test/evidence coverage is more valuable than one aggregate coverage percentage;
 - deployment/config/feature-flag/supply-chain/ownership evidence is graphable;
-- Flow AI can explain/rank/hypothesize but cannot invent runtime truth;
-- modelled what-if results remain labelled predicted until tested/observed;
-- production deep tracing is sampled/bounded and the profiler overhead is measured;
-- do not adopt a graph DB without measured need and an ADR.
+- Flow AI explains/ranks/hypothesizes but cannot invent runtime truth;
+- what-if results stay labelled predicted until tested/observed;
+- production deep tracing is sampled/bounded and profiler overhead measured;
+- specialized graph DB requires measured need + ADR.
 
 ## Marketplace / Payments / Commerce / customer systems
 
@@ -90,7 +94,7 @@ System Graph architecture and pre-planned units live in `.ai/flow/system-graph.m
 - `PORTAL-200`
 - `COLLAB-200`
 
-Payment planning details live in `.ai/security/payment-security.md`, `.ai/registry/quality-payment-units.json` and the Phase 5 capability addendum. Payment Flow views consume that evidence and may never expose raw account data. Generic Sentinel/package success is not payment certification.
+Payment Flow views consume Payment Security evidence and may never expose raw account data or become financial authority.
 
 ## Cloud / enterprise / security / operations / efficiency
 
@@ -107,8 +111,8 @@ Payment planning details live in `.ai/security/payment-security.md`, `.ai/regist
 
 ## Planning rule
 
-Appearing here never authorizes coding by itself. Before implementation every system needs registered unit(s), active plan, research/CTQ evidence at proportional depth, architecture/data/security/privacy/performance/System-Graph/reliability decisions, tests/verification and rollback/control evidence.
+Appearing here never authorizes coding by itself. Before implementation every system needs registered unit(s), active plan, proportional research/CTQ evidence, architecture/data/security/privacy/performance/System-Graph/reliability decisions, AI-development execution/evidence controls where applicable, tests/verification and rollback/control evidence.
 
-Any material runtime/package/data/security/permission/state/network/event/error/deployment change must declare its expected System Graph contribution or an explicit `NOT_APPLICABLE` reason. A generated diagram never substitutes for source/runtime/test evidence.
+Material runtime/package/data/security/permission/state/network/event/error/deployment changes declare expected System Graph contribution or explicit `NOT_APPLICABLE`. Material AI-assisted runs cannot use stale context, self-weaken governance/tests, forge evidence or self-approve critical work.
 
 Payment providers additionally require the critical payment security profile and sandbox/security review. Newly discovered capabilities are planned/registered first; they are never hidden inside another stage.
