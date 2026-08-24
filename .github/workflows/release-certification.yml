@@ -53,6 +53,14 @@ jobs:
       - name: Source Guard
         run: php scripts/source-guard.php --source-only
 
+      - name: Runtime recovery control contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l scripts/runtime-recovery-orchestrator.php
+          php -l scripts/runtime-recovery-orchestrator-contract-verify.php
+          php scripts/runtime-recovery-orchestrator-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
 
