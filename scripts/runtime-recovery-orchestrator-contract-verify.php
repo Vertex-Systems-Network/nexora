@@ -45,6 +45,11 @@ if ($errors === []) {
         "nexoraRuntimeRecoveryAppliedFailure",
         "'target_verification_complete' => \$overallStatus === 'pass'",
         "['bypass_shell' => true]",
+        "LOCK_EX | LOCK_NB",
+        "'.apply.lock'",
+        "'exclusive-nonblocking'",
+        "Another apply-mode runtime recovery is already active for this target.",
+        "bin2hex(random_bytes(6))",
     ];
     foreach ($requiredSource as $needle) {
         if (! str_contains($source, $needle)) {
@@ -54,6 +59,9 @@ if ($errors === []) {
 
     if (substr_count($source, "return \$result['exit_code'] === 0") < 2) {
         $errors[] = 'compatibility and readiness PASS must both bind to child exit code 0';
+    }
+    if (substr_count($source, 'flock(') < 2) {
+        $errors[] = 'apply-mode single-writer lock must be acquired and released explicitly';
     }
 
     $forbiddenSource = [
@@ -88,6 +96,8 @@ if ($errors === []) {
         '--apply --confirm=RECOVER-RUNTIME',
         "target application's own bootstrapped `config('app.url')`",
         'Arbitrary HTTP target overrides are intentionally unsupported',
+        'single-writer',
+        'unique',
         'status=blocked',
         'status=fail',
     ] as $needle) {
@@ -105,4 +115,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, stale-receipt gate, target-owned /login, TLS verification and forbidden mutation boundaries are enforced.\n");
+fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, stale-receipt gate, target-owned /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
