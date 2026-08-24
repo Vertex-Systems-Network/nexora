@@ -332,6 +332,63 @@ function nexoraRuntimeRecoveryLoginSmoke(string $targetAppUrl): array
     ];
 }
 
+/** @return resource */
+function nexoraRuntimeRecoveryAcquireApplyLock(string $target)
+{
+    if (! function_exists('flock')) {
+        nexoraRuntimeRecoveryFail('Apply-mode runtime recovery requires flock for single-writer serialization.');
+    }
+
+    $directory = $target.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'
+        .DIRECTORY_SEPARATOR.'runtime'.DIRECTORY_SEPARATOR.'recovery-orchestrator';
+    if (! is_dir($directory) && ! @mkdir($directory, 0700, true) && ! is_dir($directory)) {
+        nexoraRuntimeRecoveryFail('Unable to create the protected runtime-recovery lock directory.', [
+            'target' => $target,
+            'directory' => $directory,
+        ]);
+    }
+
+    $path = $directory.DIRECTORY_SEPARATOR.'.apply.lock';
+    $handle = @fopen($path, 'c+');
+    if (! is_resource($handle)) {
+        nexoraRuntimeRecoveryFail('Unable to open the apply-mode recovery lock.', [
+            'target' => $target,
+            'lock_path' => $path,
+        ]);
+    }
+
+    if (! @flock($handle, LOCK_EX | LOCK_NB)) {
+        fclose($handle);
+        nexoraRuntimeRecoveryFail('Another apply-mode runtime recovery is already active for this target.', [
+            'target' => $target,
+            'lock_path' => $path,
+        ]);
+    }
+
+    $metadata = json_encode([
+        'pid' => getmypid(),
+        'started_at' => gmdate('c'),
+        'target' => $target,
+    ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
+    if (! @ftruncate($handle, 0) || ! @rewind($handle) || @fwrite($handle, $metadata) === false || ! @fflush($handle)) {
+        @flock($handle, LOCK_UN);
+        fclose($handle);
+        nexoraRuntimeRecoveryFail('Unable to persist apply-mode recovery lock metadata.', [
+            'target' => $target,
+            'lock_path' => $path,
+        ]);
+    }
+
+    register_shutdown_function(static function () use ($handle): void {
+        if (is_resource($handle)) {
+            @flock($handle, LOCK_UN);
+            @fclose($handle);
+        }
+    });
+
+    return $handle;
+}
+
 /** @param array<string,mixed> $payload */
 function nexoraRuntimeRecoveryWriteReceipt(string $target, array $payload): ?string
 {
@@ -348,7 +405,8 @@ function nexoraRuntimeRecoveryWriteReceipt(string $target, array $payload): ?str
         'sha256',
         json_encode($copy, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
     );
-    $path = $directory.DIRECTORY_SEPARATOR.'runtime-recovery-'.gmdate('Ymd\THis\Z').'.json';
+    $receiptId = bin2hex(random_bytes(6));
+    $path = $directory.DIRECTORY_SEPARATOR.'runtime-recovery-'.gmdate('Ymd\THis\Z').'-'.$receiptId.'.json';
     $temporary = $path.'.tmp-'.bin2hex(random_bytes(4));
     $bytes = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
     if (@file_put_contents($temporary, $bytes, LOCK_EX) === false) {
@@ -409,6 +467,9 @@ Authorized recovery + automatic verification/reconcile/login smoke:
 The final HTTP smoke is bound to the target application's own bootstrapped
 config('app.url'). Arbitrary URL overrides are intentionally unsupported.
 
+Apply mode is single-writer serialized for the explicit target. Recovery receipts
+use unique identifiers so repeated runs cannot silently overwrite prior evidence.
+
 The orchestrator never upgrades/copies source, installs dependencies, runs
 migrations, or weakens TLS. Apply mode uses only an approved version-specific
 adapter, independently re-verifies compatibility/readiness, reconciles only the
@@ -456,6 +517,11 @@ foreach (['artisan', 'vendor/autoload.php', 'bootstrap/app.php'] as $relative) {
 
 $steps = [];
 $mutationPerformed = false;
+if ($apply) {
+    nexoraRuntimeRecoveryAcquireApplyLock($target);
+    $steps['apply_lock'] = ['status' => 'pass', 'mode' => 'exclusive-nonblocking'];
+}
+
 $compatibility = nexoraRuntimeRecoveryCompatibility($target);
 $payload = $compatibility['payload'];
 $runtime = is_array($payload['runtime'] ?? null) ? $payload['runtime'] : [];
