@@ -6,25 +6,25 @@
 - Registered development unit: `SYS-RUNTIME-IDENTITY`
 - Release train: `builder-beta`
 - Status: `BLOCKED` pending real-target execution
-- Source baseline reference: `main@f854c50c0f7687fc87fdfab01b49562392af4ef4`
+- Current repair-tooling source base: `main@7abf7a8dfded06b21f1e179c1635146d6a1fcf1b`
+- Repair-tooling branch: `fix/rc93-post-install-identity-repair-pack`
 - Real target: Windows + Laragon, `D:\laragon\www\nexora`
-- Method: bounded existing-problem repair; use DMAIC/control evidence if new root-cause work is required
+- Installed target release: `1.0.0-rc.93`
+- Method: bounded existing-problem repair; DMAIC/control evidence applies to the missing repair-artifact/tooling gap
 
 ## Phase 5/6/7 governance note
 
-The Research/Quality/Data/Reliability/Payment/System-Graph/Flow/**AI-development orchestration** planning expansions do **not** change or widen this active runtime repair. Do not pull future stages into this blocker. If this runtime defect requires new source implementation, use evidence-based DMAIC and add a durable Control/regression guard; otherwise execute the already prepared bounded repair path only.
+The Research/Quality/Data/Reliability/Payment/System-Graph/Flow/**AI-development orchestration** planning expansions do **not** widen this active runtime repair. Do not pull future stages into this blocker.
 
-System Graph/Flow product contribution for this already-prepared target repair is `NOT_APPLICABLE`: no new package/runtime/data/security relationship model is being implemented here. Existing runtime identity evidence may later become a graph-provider input when `SYSTEM-GRAPH-100` is active.
-
-Phase 7 also does not pretend its future run-manifest/lease/attestation machinery already exists. Current work must still obey the procedural equivalents: exact target/path/version preflight, bounded mutation scope, no hidden upgrade, no self-authored target PASS, preserve evidence and do not weaken readiness/compatibility controls.
+System Graph/Flow product contribution remains `NOT_APPLICABLE`: no new package/runtime/data/security relationship model is being introduced. Phase 7 automation is also not treated as implemented. Current procedural safeguards remain mandatory: exact target/path/version preflight, bounded mutation scope, no hidden upgrade, no self-authored target PASS, preserved evidence, exact-head review and no weakening of readiness/compatibility controls.
 
 ## Objective
 
 Close the installed rc.93 post-install runtime identity mismatch without disguising it as an rc.94 upgrade, prove compatibility/readiness on the real target, then advance to `CORE-QA-001`.
 
-## Current evidence imported from legacy handoff
+## Current evidence
 
-Observed matching planes:
+Observed matching planes from the real rc.93 target:
 
 - platform version;
 - source generation;
@@ -44,39 +44,56 @@ Observed stale post-install fingerprints:
 - service;
 - process.
 
-## Guardrail
+### Tooling-gap finding
 
-Do not overwrite the live rc.93 installation with rc.94 merely to repair these fingerprints. Repair and upgrade are separate operations.
+The legacy handoff said a prepared external rc.93 Post-Install Identity Repair Pack existed, but the repository did not contain a discoverable executable artifact. That was a real zero-skip execution gap: the plan required a critical repair mechanism that a future agent/operator could not deterministically recover from source.
+
+The source-side corrective work for that gap is now represented by:
+
+- `scripts/rc93-post-install-identity-repair.php` — self-contained external repair executable;
+- `scripts/rc93-post-install-identity-repair.ps1` — Windows/PowerShell wrapper;
+- `tests/Unit/Certification/Rc93PostInstallIdentityRepairPackTest.php` — regression/control contract;
+- `docs/runtime/RC93_POST_INSTALL_IDENTITY_REPAIR.md` — operator procedure.
+
+This source work does **not** change the target status. `RUNTIME-CLOSURE-001` remains BLOCKED until real-target execution passes.
+
+## Guardrails
+
+- Do not overwrite the live rc.93 installation with rc.94 merely to repair these fingerprints.
+- Repair and upgrade are separate operations.
+- The repair tool is pinned to exactly `1.0.0-rc.93`.
+- It may repair only `environment`, `activation`, `service`, `process` mismatches.
+- Any other mismatch fails closed before mutation.
+- It boots the target's own autoloader/application; it does not copy current source into the target.
+- Apply mode requires an explicit confirmation token, a verified sealed-lock backup and rollback on non-convergence.
+- A repair receipt is not target certification evidence.
 
 ## Research / CTQ
 
-This is an existing known defect, not a new feature. New market/VOC research is `NOT_APPLICABLE` to the bounded repair.
+This is an existing known defect, not a new product feature. Market/VOC research is `NOT_APPLICABLE`.
 
 CTQs:
 
 - repair only the permitted stale identity state;
-- preserve immutable identity/trust planes;
+- preserve immutable source/deployment/trust planes;
+- deterministic dry-run before mutation;
+- verified sealed-lock backup before apply;
+- automatic rollback if convergence fails;
 - compatibility returns zero mismatches;
 - post-install readiness passes;
 - `/login` becomes reachable;
 - no source/version upgrade is hidden inside repair;
-- a repeated root-cause source defect, if found, receives regression/control protection.
-
-## Dependencies / preconditions
-
-- `AI-GOV-001` source control-plane work exists on the AI branch.
-- Confirm target path/version before mutation.
-- Prepared external rc.93 repair pack preserves immutable planes and rolls back permitted mutations on convergence failure.
+- repeated blocker classes receive durable regression/control protection.
 
 ## Architecture / data / authorization
 
-- Architecture: no redesign expected; preserve runtime identity/trust model.
+- Architecture: no product redesign; preserve runtime identity/trust model.
 - DataFlow: runtime identity evidence only; no new product/customer data flow.
-- System Graph/Flow: `NOT_APPLICABLE` to implementation in this bounded repair; do not add Phase 6 runtime collectors here.
-- AI-development orchestration: future automation is out of scope; current procedural safeguards remain mandatory.
-- Migrations: not a migration stage.
-- Permissions: no auth policy change.
+- System Graph/Flow: `NOT_APPLICABLE` to this bounded repair.
+- Migrations: none.
+- Permissions/auth policy: unchanged.
 - Packages/API/product-AI/payment: out of scope.
+- Runtime mutation authority: only target `InstallationState::updateMetadata()` plus target `AtomicFileWriter` backup/rollback semantics.
 
 ## Security / FMEA
 
@@ -84,31 +101,46 @@ Risk: `critical` because installed runtime identity evidence is mutated.
 
 Failure modes/controls:
 
-- wrong target/version → preflight reject;
-- immutable plane rewrite → forbidden;
-- repair mixed with upgrade → forbidden;
-- partial convergence → rollback permitted mutation and remain blocked;
-- false PASS from source/static/AI-authored evidence → forbidden; real target commands required;
+- wrong target/version → exact rc.93 preflight reject;
+- missing/changed rc.93 API contract → method/class preflight reject before mutation;
+- invalid sealed lock → reject;
+- source/deployment drift → reject;
+- immutable/unrelated mismatch → reject;
+- service/process identity unhealthy → reject;
+- accidental apply → default dry-run + exact confirmation token;
+- repair mixed with upgrade → forbidden; no source-copy/update path exists in the pack;
+- partial convergence → atomically restore pre-repair sealed lock and verify original SHA-256;
+- false PASS from source/static/AI-authored evidence → forbidden; real target commands remain required;
 - readiness/compatibility guard relaxed to obtain PASS → forbidden.
-
-If new source behavior is introduced, update threat/FMEA/regression evidence before commit.
 
 ## Performance / reliability / cost
 
-No product performance feature change is intended. Reliability requirement is deterministic repair/rollback and exact target evidence. Any material runtime regression discovered by source changes must be measured before closure.
+No product performance change is intended. Reliability requirement is deterministic repair/rollback and exact target evidence. The deep service probe may perform bounded non-destructive cache/queue/network checks already owned by the target runtime identity provider.
 
 ## Execution chunks
 
-### A — safe rc.93 repair
+### A0 — source repair-tooling closure
+
+- [x] Identify that the previously referenced external repair pack was not committed/discoverable.
+- [x] Add a version-pinned, dry-run-first external repair executable.
+- [x] Add explicit Windows wrapper and operator documentation.
+- [x] Add regression/control coverage for version pin, allowed mismatch set, confirmation, backup/rollback and forbidden upgrade/shell paths.
+- [ ] Require exact-head source certification PASS and merge before using the pack as canonical source tooling.
+
+### A — safe rc.93 repair on the real target
 
 - [ ] Confirm live target path/version.
-- [ ] Run prepared rc.93 Post-Install Identity Repair Pack.
-- [ ] Require immutable-plane prechecks.
-- [ ] Require rollback if convergence fails.
+- [ ] Run dry-run: `php scripts/rc93-post-install-identity-repair.php --target="D:\laragon\www\nexora"` from the canonical source checkout.
+- [ ] Require source/deployment/lock/API prechecks and only the four permitted mismatches.
+- [ ] If dry-run passes, apply with `--apply --confirm=REPAIR-RC93`.
+- [ ] Require verified protected backup before mutation.
+- [ ] Require automatic rollback if convergence fails.
 
 ### B — compatibility evidence
 
-- [ ] Run `php artisan nexora:runtime:compatibility-status --deep`.
+Run from `D:\laragon\www\nexora`:
+
+- [ ] `php artisan nexora:runtime:compatibility-status --deep`
 - [ ] Require `status=pass`.
 - [ ] Require `mismatches=[]`.
 - [ ] Require `compatible=true`.
@@ -116,46 +148,46 @@ No product performance feature change is intended. Reliability requirement is de
 
 ### C — readiness
 
-- [ ] Run `php artisan nexora:runtime:post-install-status --assert-ready`.
-- [ ] Record exact result.
+- [ ] `php artisan nexora:runtime:post-install-status --assert-ready`
+- [ ] Record exact target result.
 
 ### D — product handoff
 
-- [ ] Open `/login` on real target.
+- [ ] Open `/login` on the real target.
 - [ ] Confirm no runtime/tenant/bootstrap failure.
 - [ ] Update `SYS-RUNTIME-IDENTITY` evidence/status.
-- [ ] Update state/handoff.
+- [ ] Update state/handoff/ledger.
 - [ ] Advance only when target evidence passes.
 
 ## Tests / control
 
-- Existing compatibility/readiness contracts remain required.
-- Any source fix for this blocker class must add a regression/control guard.
-- Static/source checks never imply browser/target PASS.
-- Author-written evidence cannot substitute for the target command/browser evidence.
+- Existing compatibility/readiness contracts remain authoritative.
+- `Rc93PostInstallIdentityRepairPackTest` is source regression evidence for the missing repair-artifact class; it is not runtime proof.
+- Static/source CI never implies browser/target PASS.
+- Author-written receipts/evidence cannot substitute for the target command/browser evidence.
 
 ## Rollback / recovery
 
-Repair must roll back permitted fingerprint changes if convergence fails. rc.94 overwrite is not repair or rollback.
+Apply mode must preserve the exact pre-repair sealed installation lock under protected target storage. If post-write compatibility is not `compatible=true`, `mismatches=[]`, `mode=installed-data-plane`, the pack restores the original lock atomically and verifies the original SHA-256. rc.94 overwrite is neither repair nor rollback.
 
 ## Definition of Done
 
 Advance only when:
 
-1. real rc.93 target repaired through approved bounded path;
-2. deep compatibility PASS, zero mismatches, installed-data-plane mode;
-3. readiness assertion PASS;
-4. `/login` reachable without current blocker;
-5. state/handoff/registry evidence updated;
-6. no immutable trust plane or validation rule relaxed/re-written to force PASS;
-7. any newly discovered recurring source defect has Control/regression protection.
+1. repair-tool source has exact-head certification and is canonical/merged;
+2. real rc.93 target is repaired through the approved bounded path;
+3. deep compatibility PASS, zero mismatches, installed-data-plane mode;
+4. readiness assertion PASS;
+5. `/login` is reachable without the current blocker;
+6. state/handoff/registry/ledger evidence is updated;
+7. no immutable trust plane or validation rule was relaxed/re-written to force PASS.
 
 ## Next stage
 
 `CORE-QA-001 — Super Admin + Core Application Functional QA`.
 
-After Core QA, canonical governance sequence is:
+After Core QA:
 
 `AI-GOV-AUTOMATION-100 → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ADMIN-UX-CLOSURE-001 → SECURITY-BASELINE-200 → ARCH-BOUNDARY-100`.
 
-`AI-GOV-AUTOMATION-100` now includes the pre-planned Phase 7 development-agent orchestration controls. Later Builder Beta reaches `SYSTEM-GRAPH-100` only after its declared dependencies are complete; later Pro reaches `FLOW-INTELLIGENCE-200` only after its own dependency graph is satisfied.
+Later Builder Beta reaches `SYSTEM-GRAPH-100` only after declared dependencies are complete; later Pro reaches `FLOW-INTELLIGENCE-200` only after its dependency graph is satisfied.
