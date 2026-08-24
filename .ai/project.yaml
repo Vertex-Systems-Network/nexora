@@ -6,7 +6,7 @@ mission: >-
   combines and advances the strongest ideas from WordPress, Webflow, Wix, Shopify, Framer,
   component-driven visual builders and enterprise SaaS without allowing themes, extensions,
   apps, integrations or AI agents to bypass Nexora public contracts, capabilities, tenancy,
-  publishing semantics, planning governance or security boundaries.
+  publishing semantics, planning governance, performance budgets or security boundaries.
 
 canonical_control_plane: .ai
 agent_entrypoint: AGENTS.md
@@ -18,12 +18,16 @@ legacy_master_plan: docs/NEXORA_PLAN_STATUS.md
 governance:
   development_intake: .ai/governance/development-intake.md
   development_unit_registry: .ai/registry/development-units.json
+  domain_registries:
+    - .ai/registry/performance-units.json
   active_plan: .ai/plans/active.md
   plan_template: .ai/plans/plan-template.md
   stage_graph: .ai/roadmap/stages.md
   release_trains: .ai/roadmap/release-trains.md
   security_program: .ai/security/security-program.md
   threat_model_template: .ai/security/threat-model-template.md
+  performance_platform: .ai/performance/performance-platform.md
+  performance_budget_template: .ai/performance/performance-budget-template.md
 
 current_source_release: 1.0.0-rc.94
 installer_protocol: v5.29
@@ -73,6 +77,11 @@ non_negotiable_principles:
   - shared-admin-design-system
   - portable-migrations
   - builder-kernel-before-deep-business-breadth
+  - performance-by-design-not-final-cleanup
+  - runtime-affecting-work-needs-budget-or-explicit-not-applicable
+  - theme-extension-app-cost-attribution-when-applicable
+  - raw-performance-evidence-before-opaque-score
+  - performance-quality-and-security-verdicts-remain-separate
   - ai-is-governed-client-not-privileged-bypass
   - typed-least-privilege-ai-tools
   - source-done-is-not-target-verified
