@@ -4,213 +4,205 @@ This protocol applies to every new Core system, module, feature, extension, app,
 
 ## Non-negotiable rule
 
-**No implementation begins from an idea alone.**
-
-A requested or discovered change must be represented in the AI control plane before code is written.
-
-The minimum sequence is:
+**No implementation begins from an idea alone.** A requested or discovered change is represented in the AI control plane before code is written.
 
 ```text
-request / discovered gap
-    -> classify development unit
-    -> search registry
-    -> register or reconcile unit
-    -> map parent stage + dependencies
-    -> architecture/data/security/API/AI impact
-    -> performance/code-quality/budget impact
-    -> acceptance criteria + tests + rollback
-    -> active plan
-    -> implementation
-    -> source verification
-    -> real-target verification where applicable
-    -> state/handoff/evidence update
+request / discovered signal
+→ classify development unit
+→ search/reconcile registry
+→ research/problem/VOC/baseline at proportional depth
+→ define CTQs / outcome
+→ map stage + dependencies
+→ architecture + data flow
+→ security/privacy + threat/FMEA
+→ UX/design/accessibility
+→ performance/code quality/reliability/cost
+→ tests/verification/rollback/control plan
+→ active plan
+→ implementation
+→ evidence
+→ release/observe/outcome/improve/control
 ```
 
 ## Development unit types
 
-Every planned unit uses one type:
-
-- `core-system` — platform-wide subsystem such as routing, search or security.
-- `module` — bounded first-party domain module operating through public platform boundaries.
-- `feature` — capability added inside an existing system/module.
-- `extension` — installable `extension` package.
-- `app` — installable `app` package.
-- `integration` — installable `integration` package/provider adapter.
-- `studio-pack` — installable Studio component/template pack.
-- `theme` — installable presentation system managed by Theme Engine.
-- `ai-tool` — typed AI tool callable through the AI Tool Registry.
-- `ai-agent` — bounded planner/assistant/agent using approved AI tools.
-- `migration-adapter` — source-platform import/migration adapter.
-- `ops-capability` — deployment, observability, performance, backup, DR or cloud operational capability.
-- `security-control` — preventive/detective/response security capability.
+- `core-system`
+- `module`
+- `feature`
+- `extension`
+- `app`
+- `integration`
+- `studio-pack`
+- `theme`
+- `ai-tool`
+- `ai-agent`
+- `migration-adapter`
+- `ops-capability`
+- `security-control`
 
 ## Unit lifecycle
 
-Allowed planning lifecycle:
+`IDEA → PROPOSED → PLANNED → ACTIVE → SOURCE_DONE → TARGET_VERIFIED`
 
-`IDEA -> PROPOSED -> PLANNED -> ACTIVE -> SOURCE_DONE -> TARGET_VERIFIED`
-
-Additional terminal/special states:
-
-- `EXTERNAL` — intentionally outside Core and delivered as package.
-- `DEFERRED` — accepted but intentionally delayed.
-- `BLOCKED` — cannot proceed because prerequisite/evidence is missing.
-- `REJECTED` — evaluated and intentionally not accepted.
-- `DEPRECATED` — superseded/retired with migration path when required.
+Special/terminal: `EXTERNAL`, `DEFERRED`, `BLOCKED`, `REJECTED`, `DEPRECATED`.
 
 ## Intake behavior
 
-### When the user explicitly requests a new capability
+### Explicit user request
 
-The AI may plan it immediately. Before implementation it must:
+The AI may plan it immediately without asking the user to repeat the request. Before implementation it must register/reconcile the unit, map stage/dependencies, establish appropriate research/quality evidence, complete architecture/data/security/performance/reliability planning and update the active plan.
 
-1. create or update its registry entry;
-2. assign a stable unit ID;
-3. map it to a canonical stage/release train;
-4. record dependencies;
-5. create/update the active execution plan;
-6. perform mandatory architecture/security/data/API/AI/performance impact review;
-7. define verification and rollback;
-8. only then write implementation code.
+If planning materially changes product scope, trust boundary, destructive data behavior or intended outcome, make that visible rather than silently substituting a different product decision.
 
-The user does not need to repeat the request after the planning gate unless the planned approach materially changes product scope, security/trust boundaries or destructive data behavior.
+### AI-discovered gap/opportunity
 
-### When AI discovers an unrequested opportunity or gap
+AI may register as `PROPOSED`, explain evidence/value and roadmap placement, but may not silently implement it unless required by approved active scope or explicitly promoted.
 
-The AI may register it as `PROPOSED`, explain why it matters and place it in the roadmap, but it must not silently implement it unless:
+## Stable unit IDs
 
-- it is necessary to correctly complete the user-requested active unit; or
-- the user approves/promotes it; or
-- an already-approved parent stage explicitly includes that capability.
+Use semantic immutable IDs:
 
-## Stable unit ID format
+- `SYS-*`, `MOD-*`, `FEAT-*`, `EXT-*`, `APP-*`, `INT-*`, `SPK-*`, `THM-*`, `AIT-*`, `AIA-*`, `MIG-*`, `OPS-*`, `SEC-*`.
 
-Use semantic IDs, not historical milestone numbers:
+## Research / Quality method selection
 
-- `SYS-*` for Core systems.
-- `MOD-*` for first-party modules.
-- `FEAT-*` for features.
-- `EXT-*` for installable extensions.
-- `APP-*` for installable apps.
-- `INT-*` for integrations.
-- `SPK-*` for Studio packs.
-- `THM-*` for themes.
-- `AIT-*` for AI tools.
-- `AIA-*` for AI agents.
-- `MIG-*` for migration adapters.
-- `OPS-*` for operations capabilities.
-- `SEC-*` for security controls.
+### New/materially redesigned substantial capability
 
-IDs are immutable after code or external artifacts reference them. Rename display names, not IDs.
+Use proportional **DMADV / Design for Six Sigma**:
+
+1. Define problem/user/VOC/value/scope.
+2. Measure baseline/CTQs/current alternatives.
+3. Analyze options/trade-offs/architecture/data/security/design/FMEA.
+4. Design contracts/flows/controls/tests/budgets/recovery.
+5. Verify source + target + outcome constraints.
+
+Use `.ai/research/research-brief-template.md` and `.ai/quality/engineering-lifecycle.md`.
+
+### Existing defect/incident/regression/optimization
+
+Use proportional **DMAIC**:
+
+`Define → Measure → Analyze → Improve → Control`
+
+Root-cause and baseline must be evidence, not AI inference. The Control step adds the regression test/budget/SLO/alert/static rule/process control that prevents silent recurrence.
+
+### Proportionality
+
+Trivial copy/style/typo-only changes with no behavior/contract/runtime impact do not require heavyweight research/FMEA. High/critical systems, payments, auth, tenancy, destructive data, executable packages, secrets and AI execution require the full applicable depth.
 
 ## Required planning fields
 
-Every unit must record:
+Every substantial unit records:
 
-1. stable ID and type;
-2. name and problem statement;
-3. intended users/use cases;
-4. parent stage and release train;
-5. dependencies and conflicts;
-6. Core vs external-package decision;
-7. architecture/contracts impacted;
-8. persistence/data/migration impact;
-9. permission/capability/tenancy impact;
-10. security risk class and threat-model requirement;
-11. privacy/compliance impact;
-12. UI/UX and accessibility impact;
-13. API/webhook/SDK surface;
-14. theme/Studio surface;
-15. extension/package surface;
-16. AI read/draft/execute exposure;
-17. observability/audit requirements;
-18. **performance/code-quality impact, budget IDs and reproducible test profiles, or explicit `NOT_APPLICABLE` reason**;
-19. testing/eval strategy;
-20. target verification steps;
-21. rollback/recovery/update compatibility;
-22. documentation/migration notes;
-23. explicit acceptance criteria;
-24. explicit out-of-scope items.
+1. stable ID/type/status;
+2. ResearchBrief/problem/source/confidence or proportional N/A;
+3. intended users/VOC evidence;
+4. baseline or explicit `UNKNOWN`;
+5. CTQs/product outcome/guardrails;
+6. parent stage/release train/dependencies/conflicts;
+7. Core vs package/external decision;
+8. architecture/contracts/ADR;
+9. DataFlow, authoritative source, classification, ownership/tenant/lineage;
+10. persistence/migration/derived-store/retention/export/delete impact;
+11. permissions/runtime capabilities/tenancy;
+12. security risk/threat-model requirement;
+13. FMEA requirement/failure modes;
+14. privacy/compliance;
+15. UI/UX/accessibility;
+16. API/webhook/SDK;
+17. theme/Studio/package surfaces;
+18. AI read/draft/execute/context exposure;
+19. observability/audit;
+20. performance/code-quality budget/test profile or explicit N/A;
+21. reliability timeout/retry/idempotency/degradation/SLO/recovery impact;
+22. cost/resource impact;
+23. testing/evals/target verification;
+24. rollback/recovery/update/deprecation compatibility;
+25. post-release observation/outcome/control plan;
+26. documentation/handoff;
+27. explicit acceptance criteria/out-of-scope.
+
+## Data-flow planning rule
+
+Use `.ai/data/data-flow-governance.md` for material data changes. A DataFlow review is mandatory for new sensitive/financial data, external processors/providers, cross-tenant/shared data, new derived stores, analytics/RUM/AI, public write APIs/webhooks, destructive migrations and payment providers.
+
+Derived caches/search indexes/analytics/vector stores are not silently authoritative. They need invalidation/rebuild/deletion/recovery semantics.
 
 ## Performance planning rule
 
-Performance is a design constraint, not a final release cleanup task.
+Runtime-affecting units plan public/Admin/backend execution, DB/cache/network/memory, frontend assets/main-thread, package attribution, code-quality/build, baseline/budget and reproducible test profile. Use `.ai/performance/performance-budget-template.md`.
 
-For any unit that can affect runtime behavior, the active plan must consider:
+## Reliability planning rule
 
-- public frontend load and Core Web Vitals impact;
-- Admin/Studio browser/API load;
-- backend route/controller/service execution;
-- DB query count/time and N+1/duplication risk;
-- cache/invalidation;
-- external HTTP/storage cost;
-- CPU/wall time/peak memory where relevant;
-- JS/CSS/image/font/request/bundle cost;
-- Theme/Extension/App attribution;
-- code-quality/build regressions;
-- baseline/budget and test profile.
+Critical recurring/stateful/provider flows plan:
 
-Use `.ai/performance/performance-budget-template.md` when a measurable budget applies.
+- timeout;
+- retry/backoff;
+- idempotency;
+- concurrency/locking;
+- failure isolation;
+- graceful degradation;
+- provider outage/ambiguous response;
+- recovery/reconciliation;
+- meaningful SLI/SLO/error budget where applicable;
+- fault test.
 
-The accepted performance architecture lives in `.ai/performance/performance-platform.md` and `.ai/roadmap/capability-matrix-phase4-performance.md`.
+Use `.ai/reliability/reliability-program.md`.
 
 ## Package planning rule
 
-Before AI creates an Extension/App/Integration/Studio Pack/Theme, the plan must additionally define:
+Before Extension/App/Integration/Studio Pack/Theme creation define:
 
-- package family;
-- manifest identity/version policy;
-- minimum/maximum Nexora compatibility;
-- required public contracts;
-- declared runtime capabilities;
+- family, identity/version/compatibility;
+- public contracts/capabilities only;
 - runtime mode (`declarative` preferred; `trusted-php` exceptional);
-- migration policy (`none` or `forward-only` under current contracts);
-- required UI/theme/Studio slots;
+- migration policy;
+- UI/theme/Studio/API slots;
+- data purpose/fields/copies/external transfer;
 - network/filesystem/secret access;
-- Sentinel/Supply Chain expectations;
-- install/activate/deactivate/update/rollback/uninstall behavior;
-- compatibility and regression tests;
-- **frontend asset/request/main-thread budget where applicable**;
-- **backend/query/cache/memory/runtime budget where applicable**;
-- **hook/event/filter/slot attribution expectations**;
-- **code-quality profile and package-version performance comparison policy**.
+- Sentinel/Supply Chain;
+- lifecycle install/enable/disable/update/rollback/uninstall;
+- compatibility/security/performance/reliability/code-quality tests.
 
-No package may rely on private Core shortcuts merely because it is first-party.
+First-party status never grants private Core shortcuts.
 
-A package may not claim a Nexora performance/quality badge without reproducible source/build/package identity, test profile and evidence. Performance/quality status is separate from Sentinel security trust.
+## Payment-provider intake rule
 
-## New feature planning rule
+Any package/module that authorizes, captures, refunds, stores payment-method references, receives payment-provider webhooks or affects payment-entry UI is a **critical payment-provider unit** and must follow `.ai/security/payment-security.md`.
 
-A new feature inside an existing system is still a unit. Do not bypass planning by calling it a 'small change' when it changes behavior, data, permissions, public contracts, package capability, security, performance or UX semantics.
+Required additional decisions:
 
-Trivial typo/copy/style-only fixes may remain inside the active unit without a new registry item when they do not alter behavior, contracts or measurable runtime/build impact.
+- `security_profile: payment-provider`;
+- payment flow class (`redirect`, `hosted-iframe/fields`, approved tokenized provider SDK); direct/raw account-data collection is forbidden by default;
+- account-data access must be `none` or `token-only` under standard profile;
+- provider API/frontend origins;
+- payment Secret Broker slots;
+- purpose-specific payment capabilities;
+- canonical amount/currency/order/state authority;
+- idempotency/concurrency/state-machine contract;
+- webhook signature/freshness/replay/tenant/schema/reconciliation contract;
+- payment-page script/slot/CSP/tamper policy;
+- 3DS/SCA/asynchronous state support where applicable;
+- test/live credential separation;
+- sandbox activation tests;
+- kill-switch/secret rotation/in-flight reconciliation;
+- threat model + FMEA + independent payment security review;
+- compliance/assessment metadata without self-awarding a generic PCI-compliant badge.
 
-## Architecture decision rule
+Generic package installation or Sentinel PASS is not sufficient for payment activation.
 
-Create or update an ADR before implementation when a unit:
+## Architecture decision triggers
 
-- changes a public contract;
-- introduces a new runtime execution model;
-- changes tenancy/security boundaries;
-- introduces a new database/storage architecture;
-- changes extension/theme isolation;
-- introduces a new external protocol/provider abstraction;
-- changes the canonical content/routing/query model;
-- introduces a new performance telemetry/runner/attribution model;
-- gives AI a new execution capability.
+ADR required for public-contract/runtime execution/tenancy/security/storage/isolation/protocol/content-routing/data-authority/performance-telemetry/payment-boundary/new AI-execution changes.
 
 ## Security rule
 
-Security is continuous, not a late stage. Every unit receives a security impact classification. `high` and `critical` units require an explicit threat model before implementation.
-
-Performance tooling must also be threat-modeled when it can inspect sensitive runtime traces, execute browsers, accept external URLs, run package analyzers or access authenticated test flows.
+Security is continuous. `high`/`critical` units require threat models. Performance runners, payment providers, secret/network brokers, external URLs, authenticated traces and executable packages are security-sensitive.
 
 ## AI development rule
 
-An AI agent may plan, implement and test work, but it may not use its own claims as sufficient certification. High-risk/security/architecture work requires independent review evidence or a separate review pass, plus automated checks and real-target evidence where applicable.
-
-AI performance recommendations must be grounded in measured evidence and may not fabricate performance PASS results or silently disable security/features/packages to improve a score.
+AI can plan/implement/test but cannot self-certify critical correctness. Independent review evidence is required for high-risk architecture/security/payment/AI execution/package-runtime work. AI may not invent VOC/baselines/root cause/performance/security/reliability/outcome PASS evidence.
 
 ## Enforcement destination
 
-`AI-GOV-AUTOMATION-100` will add machine validation so CI can reject inconsistent/unplanned work. Until that stage is implemented, `AGENTS.md`, this protocol, the development-unit registries, the active plan and review rules are mandatory procedural controls.
+`AI-GOV-AUTOMATION-100` will machine-enforce registry/stage/plan/evidence consistency. Until implemented, `AGENTS.md`, registries, intake, active plan and review controls are mandatory procedural policy.
