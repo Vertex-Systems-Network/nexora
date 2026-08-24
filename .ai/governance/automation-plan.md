@@ -1,168 +1,183 @@
 # AI-GOV-AUTOMATION-100 — Machine Enforcement Plan
 
-This document pre-plans the future implementation that turns the `.ai` governance model from procedural documentation into CI-enforced repository policy.
+This pre-plans the validator that converts `.ai` governance from procedural policy into CI-enforced repository controls. No validator implementation is claimed here.
 
 ## Objective
 
-Create a deterministic validator, preferably integrated with Nexora's existing PHP certification/governance scripts, that fails CI when AI development control-plane invariants are violated.
+Fail CI on clear control-plane violations while warning rather than inventing certainty when static analysis cannot infer product intent.
 
-No validator implementation is claimed by this document.
-
-## Planned validator responsibilities
-
-### 1. Schema validation
+## 1. Schema / registry validation
 
 Validate:
 
-- `.ai/state.json` against `.ai/schemas/state.schema.json`;
-- `.ai/registry/development-units.json` against `.ai/schemas/development-registry.schema.json`;
-- every unit against `.ai/schemas/development-unit.schema.json`;
-- future machine-readable plan/evidence schemas when introduced.
+- `.ai/state.json` vs state schema;
+- main/domain registries vs registry/unit schemas;
+- unique stable unit IDs across all registries;
+- future ResearchBrief/DataFlow/FMEA/plan/evidence schemas as they become machine-readable.
 
-### 2. Stable ID validation
+Domain registries are one logical unit namespace; duplicate IDs across files fail.
 
-Reject:
+## 2. Stage/dependency/state consistency
 
-- duplicate development-unit IDs;
-- duplicate canonical stage IDs;
-- invalid unit/stage ID formats;
-- renamed/remapped IDs that would break historical references without explicit migration/alias record.
+Reject unknown/duplicate stage IDs, unknown parent stages/dependencies, train mismatch, invalid active-unit/current-stage mapping, invalid current→next-stage relation and untracked semantic-ID changes.
 
-### 3. Registry/stage consistency
+Historical numeric ordering may change when prerequisites are inserted; stable semantic IDs do not silently change.
 
-For every non-external implementable unit:
+## 3. Active-plan consistency
 
-- `parent_stage_id` must exist in canonical stage graph;
-- release train must agree with stage/release-train plan;
-- dependency references must resolve to known stages/units or explicitly approved external prerequisites;
-- active units must belong to current active stage unless explicit parallel-track metadata exists.
+For substantive source/runtime/package changes require:
 
-### 4. Active-state consistency
+- current stage + active unit IDs;
+- required sections from plan template;
+- research/problem/CTQ section or explicit proportional N/A;
+- architecture/DataFlow/security/privacy sections;
+- threat-model evidence for high/critical;
+- FMEA evidence for high/critical/complex failure modes where applicable;
+- performance budget/profile or explicit N/A for runtime-affecting work;
+- reliability/idempotency/recovery for critical stateful/provider work;
+- acceptance/verification/rollback/control plan.
 
-Validate:
+## 4. New-work detection
 
-- `state.current_stage.id` exists;
-- `state.active_development_units` exist in registry;
-- active unit parent stage matches state current stage;
-- `state.next_stage.id` exists;
-- current/next-stage relationship is allowed by dependency graph;
-- source vs target status vocabulary remains valid;
-- state timestamp/revision format is valid.
+Signals requiring registered active scope include:
 
-### 5. Active-plan consistency
+- new Core/module/Theme/Extension/App/Integration/Studio package code;
+- new public contract/API/AI tool;
+- new migration/data store;
+- new permission/runtime capability;
+- new outbound network/secret access;
+- new sensitive/financial data;
+- new payment-provider/payment-entry/webhook behavior;
+- new performance/reliability/ops execution surface.
 
-When product/runtime source changes occur outside governance-only files, require:
+Clear omission fails. Ambiguous mapping emits actionable warning rather than fake semantic certainty.
 
-- `.ai/plans/active.md` exists and names current stage;
-- active plan lists every active development-unit ID;
-- plan contains mandatory sections from `.ai/plans/plan-template.md` or future machine-readable equivalent;
-- high/critical units identify required threat-model evidence;
-- acceptance criteria/verification/rollback are not empty.
+## 5. Research / Quality gates
 
-A future machine-readable plan schema may replace Markdown section parsing when practical.
+For new/materially redesigned high-impact units verify planning metadata indicates `DMADV` and contains ResearchBrief/problem/VOC/baseline/CTQs or explicit reviewed exception.
 
-### 6. New-work detection
+For defect/incident/regression improvement verify `DMAIC`/Control evidence at completion where the unit is classified that way.
 
-The validator should help detect suspicious hidden work, without pretending static filename mapping can fully understand intent.
+High/critical units with `quality.fmea_required=true` cannot reach `SOURCE_DONE` without FMEA reference/evidence.
 
-Planned signals:
+AI-generated documents cannot self-mark unknown VOC/baseline/outcome values as measured PASS.
 
-- changed Core/module/extension/theme/API/AI directories require at least one active registered unit;
-- new installable package manifest requires a registered `EXT/APP/INT/SPK/THM` unit;
-- new AI tool/agent registration requires registered `AIT/AIA` unit or explicitly registered parent unit;
-- new public contract/API surface requires active plan architecture/API section and review marker;
-- new migration requires active plan migration/rollback section;
-- new permission/capability requires active plan authorization/security section.
+## 6. Data governance gates
 
-The validator should fail on clear omissions and warn on ambiguous scope rather than inventing false certainty.
+When unit/data metadata indicates material data impact, require:
 
-### 7. Threat-model/security gates
+- DataFlow reference/decision;
+- authoritative source;
+- classification;
+- tenant/data ownership;
+- migration/derived-store semantics;
+- retention/export/delete policy;
+- package/API/AI exposure decision.
 
-For units marked `high` or `critical`:
+New sensitive/financial/payment/AI data without classification should fail.
 
-- `threat_model_required` must be true unless an explicit reviewed exception exists;
-- active plan must reference the threat-model artifact/evidence before implementation completion;
-- security checks/evidence must not be omitted at `SOURCE_DONE`.
+## 7. Threat/security gates
 
-For AI/package/auth/tenant/payment/destructive-operation units, stronger required sections/checks may be hard-coded as governance policy.
+For high/critical:
 
-### 8. Completion/evidence checks
+- `threat_model_required=true`;
+- threat-model reference before completion;
+- required security evidence not omitted.
 
-Before unit/stage may move to `SOURCE_DONE`:
+Stronger rule sets apply to auth/tenancy/package runtime/secrets/network/destructive/AI/payment units.
 
-- acceptance criteria must exist;
-- required source/security/architecture tests must have evidence references;
-- affected docs/state/handoff must be synchronized.
+## 8. Payment-provider hard gates
 
-Before `TARGET_VERIFIED`:
+Detect payment behavior from registered profile/contracts/capabilities/routes/manifests and require a unit with `security_profile: payment-provider` mapped to `PAYMENT-SECURITY-200` or an explicitly allowed parent closure stage during existing-foundation verification.
 
-- target evidence must be recorded;
-- source-only evidence cannot satisfy the target gate.
+For standard payment-provider profile reject/planning-fail:
 
-### 9. Historical alias protection
+- `account_data_access` outside `none|token-only`;
+- undeclared provider API/frontend origins;
+- generic database/filesystem/secret/network capabilities where purpose-specific payment broker contract is required;
+- missing provider sandbox verification;
+- missing threat model/FMEA/independent-review marker;
+- direct browser-return payment-settlement logic without authoritative provider verification;
+- source patterns/fields attempting to persist raw PAN/CVV/track/PIN data in Nexora schema/config/log fixtures;
+- payment-entry package custom script/slot without approved payment-surface declaration;
+- payment-provider completion relying only on generic Sentinel status.
 
-Reject new roadmap/code/PR metadata that treats bare ambiguous historical `N1.x` labels as canonical execution IDs when a stable semantic ID exists.
+The validator cannot prove PCI compliance and must never emit such a claim.
 
-Historical docs remain readable; new execution metadata must use stable IDs.
+## 9. Performance / reliability gates
 
-### 10. PR/CI integration
+Runtime-affecting units require performance applicability/budget/profile metadata or explicit N/A.
 
-Target CI behavior:
+Critical recurring/provider/stateful units require reliability applicability plus timeout/retry/idempotency/degradation/recovery decisions.
+
+Financial/destructive operations missing ambiguous-outcome reconciliation policy should fail relevant plan validation.
+
+## 10. Completion/evidence gates
+
+Before `SOURCE_DONE` require applicable acceptance, architecture/data/security/FMEA/test/performance/reliability/control evidence and synchronized state/handoff/docs.
+
+Before `TARGET_VERIFIED` require real target/provider evidence. Source-only checks cannot satisfy target/provider gates.
+
+Post-release product outcomes may remain pending/observation-required; validator must not require fabricated future metrics just to close source work.
+
+## 11. Historical alias protection
+
+Reject new execution metadata using ambiguous legacy `N1.x` instead of stable semantic IDs. Historical docs remain untouched evidence.
+
+## 12. PR/CI flow
 
 ```text
 checkout
--> AI governance validator
--> architecture/security/source guards
--> dependency/security pipeline
--> tests/build
--> integration/browser/target workflows as applicable
+→ AI governance validator
+→ research/quality/data/payment plan checks
+→ architecture/security/source guards
+→ dependency/supply-chain checks
+→ tests/build
+→ performance/reliability checks
+→ integration/browser/provider/target workflows where applicable
 ```
 
-A governance failure should be actionable and name:
+Errors name violated rule, file/unit/stage and remediation.
 
-- violated rule;
-- affected file/unit/stage;
-- required remediation.
+## Planned artifacts
 
-## Planned implementation artifacts
+Likely:
 
-Likely future artifacts, exact names subject to active-stage inspection:
+- `scripts/ai-governance-check.php` or integration into existing certification scripts;
+- valid/invalid fixtures for all registries/quality/payment rules;
+- required `ai-governance` CI job;
+- generated non-authoritative active stage/unit/risk/evidence report.
 
-- `scripts/ai-governance-check.php` or equivalent existing certification integration;
-- fixture directory with both valid/invalid control-plane states;
-- CI job `ai-governance`;
-- unit tests for registry/stage/state dependency validation;
-- optional generated report summarizing active stage/unit/risks/evidence.
+No second state database is introduced.
 
-Do not create a second authoritative state database; validator reads the `.ai` source-of-truth files.
+## Required failure fixtures
 
-## Failure cases that must be tested
+At minimum:
 
-- duplicate unit ID;
-- unknown parent stage;
-- active unit in wrong stage;
-- next stage does not exist;
-- high-risk unit without threat-model requirement;
-- new package without registered package unit;
-- new migration with missing migration plan;
-- new AI tool without registered AI unit/parent;
-- `TARGET_VERIFIED` without target evidence;
-- stale active plan naming another stage;
-- unrecognized historical `N1.x` used as new canonical ID;
-- broken JSON/schema;
-- missing handoff/state update when stage/unit status changes.
+- duplicate unit across registries;
+- unknown stage/dependency;
+- active unit wrong stage;
+- stale active plan;
+- new package/migration/API/AI tool without unit;
+- high-risk without threat model;
+- required FMEA missing;
+- new material data without classification/DataFlow;
+- runtime feature without performance decision;
+- critical provider workflow without idempotency/recovery;
+- payment provider without payment profile;
+- payment profile declaring raw account-data access;
+- payment package generic secret/network power;
+- payment provider without sandbox/threat/FMEA evidence;
+- browser-return-as-paid source fixture;
+- raw PAN/CVV-like schema/config/log field fixture;
+- `TARGET_VERIFIED` without target/provider evidence;
+- bare ambiguous historical milestone as canonical ID;
+- broken schema/state/handoff sync.
 
 ## Non-goals
 
-The validator does not:
-
-- prove code correctness;
-- replace human/AI architecture review;
-- replace security tests/threat modeling;
-- infer all product intent from filenames;
-- automatically approve new roadmap scope;
-- treat passing governance checks as production certification.
+Validator does not prove code correctness, architecture quality, security, PCI compliance, user value or production readiness. It ensures required planning/evidence cannot be silently omitted.
 
 ## Exit condition
 
-`AI-GOV-AUTOMATION-100` is complete when the validator is tested, integrated into required CI, blocks representative invalid fixtures/PR states, produces actionable failures and does not create a competing source of truth.
+`AI-GOV-AUTOMATION-100` completes when tested CI enforcement rejects representative invalid governance/quality/data/payment states, gives actionable diagnostics and reads the existing `.ai` sources without creating competing truth.
