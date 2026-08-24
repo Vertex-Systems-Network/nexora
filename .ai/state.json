@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 4,
+  "control_plane_revision": 5,
   "control_plane_branch": "ai/control-plane-phase-1",
   "base_branch": "main",
   "base_sha": "f854c50c0f7687fc87fdfab01b49562392af4ef4",
@@ -11,7 +11,7 @@
   "source_generation": "n1-v5.29",
   "source_status": "PARTIAL",
   "target_status": "BLOCKED",
-  "canonical_stage_count": 65,
+  "canonical_stage_count": 73,
   "current_stage": {
     "id": "RUNTIME-CLOSURE-001",
     "name": "Installation + Runtime Closure",
@@ -23,7 +23,7 @@
     {
       "id": "AI-GOV-001",
       "status": "SOURCE_DONE",
-      "evidence": "AGENTS.md plus .ai control plane, system/capability registries, canonical stage graph, release trains, development intake/schema/registries, security program, performance/code-quality planning, plan template, AI architecture/design contracts and zero-hidden-work execution protocol on ai/control-plane-phase-1"
+      "evidence": "AGENTS.md and .ai control plane now include pre-planned unit governance, research/quality lifecycle, data-flow governance, continuous security, payment-security architecture, performance/code-quality planning, reliability/delivery models, AI architecture/design contracts and deterministic handoff on ai/control-plane-phase-1. These are planning/control-plane claims only, not product implementation claims."
     }
   ],
   "current_target": {
@@ -51,6 +51,8 @@
   },
   "post_core_qa_sequence": [
     "AI-GOV-AUTOMATION-100",
+    "RESEARCH-DISCOVERY-100",
+    "QUALITY-GOVERNANCE-100",
     "ADMIN-UX-CLOSURE-001",
     "SECURITY-BASELINE-200",
     "ARCH-BOUNDARY-100"
@@ -61,6 +63,11 @@
     "active_plan_required_before_substantial_implementation": true,
     "new_feature_must_be_planned_before_implementation": true,
     "ai_discovered_optional_work_requires_promotion_or_active_scope": true,
+    "research_voc_ctq_required_for_substantial_new_work": true,
+    "dmadv_for_new_or_redesigned_substantial_work": true,
+    "dmaic_for_defect_incident_regression_improvement": true,
+    "fmea_required_for_high_critical_complex_failures_when_applicable": true,
+    "data_flow_governance_required_for_material_data_changes": true,
     "high_critical_threat_model_required": true,
     "first_party_packages_use_public_contracts": true,
     "source_and_target_evidence_separate": true,
@@ -68,18 +75,26 @@
     "zero_hidden_work_protocol_required": true,
     "performance_budget_or_not_applicable_required_for_runtime_affecting_units": true,
     "theme_extension_runtime_cost_attribution_required_when_applicable": true,
+    "reliability_plan_required_for_critical_stateful_provider_workflows": true,
+    "payment_provider_profile_required_for_payment_integrations": true,
+    "raw_payment_account_data_forbidden_in_standard_payment_profile": true,
+    "payment_specific_evidence_separate_from_generic_sentinel": true,
     "performance_quality_security_verdicts_separate": true
   },
   "verification_required": {
     "source_and_target_separate": true,
     "real_target_required_for_runtime_behavior": true,
     "architecture_review_required_for_boundary_changes": true,
+    "data_flow_review_required_for_material_data_changes": true,
     "security_review_required_for_high_risk_boundaries": true,
-    "regression_protection_required_for_fixed_blockers": true,
+    "payment_security_review_required_for_payment_integrations": true,
+    "provider_sandbox_required_for_payment_provider_activation": true,
+    "regression_control_required_for_fixed_critical_or_recurrent_failures": true,
     "development_unit_registry_required": true,
     "active_plan_required_before_substantial_stage_implementation": true,
     "performance_evidence_required_for_performance_claims": true,
-    "lab_field_backend_evidence_must_remain_distinguishable": true
+    "lab_field_backend_evidence_must_remain_distinguishable": true,
+    "future_product_outcome_must_not_be_fabricated": true
   },
   "release_trains": ["builder-beta", "pro", "platform", "production"],
   "roadmap_sources": [
@@ -88,18 +103,28 @@
     ".ai/governance/development-intake.md",
     ".ai/registry/development-units.json",
     ".ai/registry/performance-units.json",
+    ".ai/registry/quality-payment-units.json",
     ".ai/roadmap/capability-matrix.md",
     ".ai/roadmap/capability-matrix-phase3.md",
     ".ai/roadmap/capability-matrix-phase4-performance.md",
-    ".ai/roadmap/competitive-benchmark.md",
-    ".ai/roadmap/future-systems.md",
-    ".ai/plans/master-execution-plan.md",
-    ".ai/plans/plan-template.md",
+    ".ai/roadmap/capability-matrix-phase5-quality-payments.md",
+    ".ai/quality/engineering-lifecycle.md",
+    ".ai/quality/lean-six-sigma.md",
+    ".ai/quality/fmea-template.md",
+    ".ai/research/research-brief-template.md",
+    ".ai/data/data-flow-governance.md",
     ".ai/security/security-program.md",
+    ".ai/security/payment-security.md",
     ".ai/performance/performance-platform.md",
     ".ai/performance/performance-budget-template.md",
+    ".ai/reliability/reliability-program.md",
+    ".ai/delivery/delivery-excellence.md",
+    ".ai/plans/master-execution-plan.md",
+    ".ai/plans/plan-template.md",
     ".ai/architecture/ai-platform.md",
     ".ai/design/ai-design-professional.md",
+    ".ai/roadmap/competitive-benchmark.md",
+    ".ai/roadmap/future-systems.md",
     "NEXORA_AI_PROJECT_STATE.md",
     "docs/NEXORA_PLAN_STATUS.md",
     "ARCHITECTURE.md",
@@ -107,7 +132,8 @@
   ],
   "phase_1_scope": "Imported and normalized systems and plans already documented in the repository into a deterministic AI control plane.",
   "phase_2_scope": "Added capability-gap planning for WordPress/Webflow/Wix/Shopify-class extensibility and Nexora AI-native product architecture.",
-  "phase_3_scope": "Established mandatory pre-planned development units, builder-first release trains, early continuous security, release/staging workflow, templates, privacy, external-agent interoperability, AEO/AI-readable web, experimentation/personalization, design import, capability-bounded app runtime and optional Managed Cloud. New features must enter the plan/registry before implementation.",
-  "phase_4_scope": "Integrated a performance-by-design architecture: PERFORMANCE-FOUNDATION-200, CODE-QUALITY-200 and PERFORMANCE-INTELLIGENCE-200; frontend/Admin/backend/code-execution and Theme/Extension attribution; performance budgets/regression baselines; PageSpeed/GTmetrix-class lab/field/waterfall/filmstrip/monitoring capabilities; secure external runners; AI-grounded remediation; Marketplace/release quality evidence; and expanded final PERF-CWV-CERT-100 without claiming implementation.",
-  "updated_at": "2026-08-24T19:10:00+05:00"
+  "phase_3_scope": "Established mandatory pre-planned development units, builder-first release trains, early continuous security, release/staging workflow, templates, privacy, agent interoperability, AEO, experimentation/personalization, design import, bounded app runtime and optional Managed Cloud.",
+  "phase_4_scope": "Integrated performance-by-design: PERFORMANCE-FOUNDATION-200, CODE-QUALITY-200 and PERFORMANCE-INTELLIGENCE-200 with frontend/Admin/backend/package attribution, budgets, PageSpeed/GTmetrix-class analysis and expanded final performance certification.",
+  "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS: RESEARCH-DISCOVERY-100, QUALITY-GOVERNANCE-100, proportional DMADV/DMAIC/VOC/CTQ/FMEA/control plans, DATA-GOVERNANCE-200, RELIABILITY-ENGINEERING-200, PRODUCT-OUTCOMES-100, DELIVERY-EXCELLENCE-100 and EFFICIENCY-FINOPS-100. Added PAYMENT-SECURITY-200 before Commerce 2.0 with a critical payment-provider security profile, raw account-data exclusion, provider-hosted/tokenized default, purpose-specific capabilities, Secret/Network Brokers, hardened webhooks/payment surface, idempotency/reconciliation, sandbox activation, independent review and kill/recovery controls. No runtime/product implementation is claimed by this planning revision.",
+  "updated_at": "2026-08-24T19:37:00+05:00"
 }
