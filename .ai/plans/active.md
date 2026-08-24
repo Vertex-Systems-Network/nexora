@@ -10,9 +10,11 @@
 - Real target: Windows + Laragon, `D:\laragon\www\nexora`
 - Method: bounded existing-problem repair; use DMAIC/control evidence if new root-cause work is required
 
-## Phase 5 governance note
+## Phase 5/6 governance note
 
-The Research/Quality/Data/Reliability/Payment planning expansion does **not** change or widen this active runtime repair. Do not pull future stages into this blocker. If this runtime defect requires new source implementation, use evidence-based DMAIC and add a durable Control/regression guard; otherwise execute the already prepared bounded repair path only.
+The Research/Quality/Data/Reliability/Payment/System-Graph/Flow planning expansions do **not** change or widen this active runtime repair. Do not pull future stages into this blocker. If this runtime defect requires new source implementation, use evidence-based DMAIC and add a durable Control/regression guard; otherwise execute the already prepared bounded repair path only.
+
+System Graph/Flow product contribution for this already-prepared target repair is `NOT_APPLICABLE`: no new package/runtime/data/security relationship model is being implemented in this stage. Existing runtime identity evidence may later become a graph provider input when `SYSTEM-GRAPH-100` is active, but Phase 6 planning does not retroactively implement that collector here.
 
 ## Objective
 
@@ -68,6 +70,7 @@ CTQs:
 
 - Architecture: no redesign expected; preserve runtime identity/trust model.
 - DataFlow: runtime identity evidence only; no new product/customer data flow.
+- System Graph/Flow: `NOT_APPLICABLE` to implementation in this bounded repair; do not add Phase 6 runtime collectors here.
 - Migrations: not a migration stage.
 - Permissions: no auth policy change.
 - Packages/API/AI/payment: out of scope.
@@ -149,3 +152,5 @@ Advance only when:
 After Core QA, canonical governance sequence is:
 
 `AI-GOV-AUTOMATION-100 → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ADMIN-UX-CLOSURE-001 → SECURITY-BASELINE-200 → ARCH-BOUNDARY-100`.
+
+Later Builder Beta reaches `SYSTEM-GRAPH-100` only after its declared dependencies are complete; later Pro reaches `FLOW-INTELLIGENCE-200` only after its own dependency graph is satisfied.
