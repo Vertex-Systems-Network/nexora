@@ -6,7 +6,7 @@ Release trains are product checkpoints layered on the canonical dependency graph
 
 ### Goal
 
-Ship a secure, self-hostable, extensible CMS/site-builder with evidence-driven development governance before deeper business/enterprise breadth.
+Ship a secure, self-hostable, extensible CMS/site-builder with evidence-driven development governance and a queryable platform topology before deeper business/enterprise breadth.
 
 ### Required capability groups
 
@@ -28,8 +28,9 @@ Ship a secure, self-hostable, extensible CMS/site-builder with evidence-driven d
 - frontend cache/CDN/image delivery;
 - Performance Foundation and Theme/Extension/runtime attribution;
 - Code Quality Intelligence;
+- **System Graph Foundation**: canonical node/edge/evidence schemas, declared/static/runtime/test evidence separation, Theme/Extension/module/data/security/error/state paths, package/version identity, drift detection and safe basic Flow Explorer;
 - DAM/search/forms;
-- privacy/consent including RUM/data-governance policy.
+- privacy/consent including RUM/System-Graph telemetry policy.
 
 ### Beta exit condition
 
@@ -37,11 +38,13 @@ A new operator can install Nexora, create/edit structured content, visually buil
 
 For new substantial work, Nexora also has a reproducible path from ResearchBrief/VOC/CTQs through architecture/data/security/design/verification and control evidence. Representative public/Admin/backend flows have measurable performance/code-quality budgets and package attribution.
 
+The platform can query a representative Core, Theme and Extension path through the System Graph and distinguish what is declared, statically inferred, runtime observed and tested. A diagram alone is not accepted as evidence.
+
 ## Train 2 — Nexora Pro
 
 ### Goal
 
-Differentiate Nexora as an AI-native professional web platform with performance, reliability, outcome and delivery intelligence.
+Differentiate Nexora as an AI-native professional web platform with performance, reliability, **Flow**, outcome and delivery intelligence.
 
 ### Required capability groups
 
@@ -53,17 +56,27 @@ Differentiate Nexora as an AI-native professional web platform with performance,
 - design/Figma import into structured AST/tokens/components;
 - Performance Intelligence Center: lab + field, waterfall/filmstrip/user flows, frontend/backend/package/source attribution, comparison/history/monitoring;
 - Reliability Engineering with meaningful SLIs/SLOs/error budgets, failure isolation and fault/recovery evidence;
+- **Nexora Flow Intelligence** with ecosystem→system→feature→execution zoom, architecture/runtime/code/data/security/permission/error/state/transaction/retry/event/network/DB/cache/package/deployment/supply-chain/test/performance/reliability/payment/AI/release lenses;
+- expected-vs-actual architecture/package drift;
+- path-aware test/evidence coverage;
+- graph diff/history/time travel;
+- read-only runtime visual replay;
+- change-impact/blast-radius and incident views;
+- modelled what-if analysis clearly separated from verified behavior;
+- evidence-grounded Flow AI explain/root-cause/security/impact tools;
 - experimentation/A-B testing;
 - Product Outcome Intelligence tied back to ResearchBrief CTQs;
 - privacy-safe personalization;
 - capability-bounded App Runtime;
 - migration center;
-- mature DX/CLI/SDK/docs;
+- mature DX/CLI/SDK/docs including graph/Flow inspection tooling;
 - Delivery Excellence / DORA-style flow/stability/rework metrics without individual-developer ranking.
 
 ### Pro exit condition
 
 AI can plan, draft and safely execute bounded site/content/design/development actions through public contracts with approvals, audit and rollback metadata. Nexora can explain performance/source regressions, operate against defined reliability objectives, measure whether major capabilities achieved intended user outcomes and improve development flow using evidence rather than generated-code volume.
+
+A developer can also inspect a representative Theme/Extension/module/business flow in the GUI and answer **what executed, why, which condition/permission/capability selected the path, where data travelled, where an error originated, which evidence proves each edge, what changed between versions and what could be affected by a change/failure**.
 
 ## Train 3 — Nexora Platform
 
@@ -73,23 +86,24 @@ Expand the mature web platform into a safe commerce/application/ecosystem/manage
 
 ### Required capability groups
 
-- Marketplace closure + Marketplace 2.0 with package security/performance/code-quality evidence;
+- Marketplace closure + Marketplace 2.0 with package security/performance/code-quality/**Flow** evidence;
 - provider-neutral Commerce foundation closure;
 - **Payment Security 2.0 before Commerce 2.0**: hosted/tokenized default, raw account-data exclusion, payment capability/state/idempotency contracts, payment Secret/Network Brokers, hardened webhook gateway, protected payment page, sandbox activation and provider kill/reconciliation controls;
+- payment paths projected into Flow Intelligence without exposing account data;
 - Commerce 2.0 after payment-security gate;
 - CRM/Membership/Helpdesk closure and portals;
 - collaboration;
-- optional Managed Cloud;
+- optional Managed Cloud with deployment/infrastructure graph inputs and remote performance/Flow workers where appropriate;
 - enterprise/cloud foundation verification;
 - Sentinel 2.0 / runtime isolation / package revocation;
 - Enterprise Governance 2.0;
-- Operations/Observability Center;
-- Cost & Resource Efficiency / FinOps intelligence;
-- update/rollback/backup/DR platform.
+- Operations/Observability Center correlated to canonical System Graph IDs rather than a second topology database;
+- Cost & Resource Efficiency / FinOps intelligence as graph overlays where useful;
+- update/rollback/backup/DR platform and incident/blast-radius integration.
 
 ### Platform exit condition
 
-Nexora can operate as an extensible multi-tenant/managed or self-hosted platform with safe publisher ecosystem, payment-secure commerce boundaries, advanced governance, reliability/observability/cost evidence and rehearsed recovery.
+Nexora can operate as an extensible multi-tenant/managed or self-hosted platform with safe publisher ecosystem, payment-secure commerce boundaries, advanced governance, reliability/observability/cost evidence, graph-aware incident/change impact and rehearsed recovery.
 
 ## Train 4 — Stable Production
 
@@ -100,8 +114,9 @@ Nexora can operate as an extensible multi-tenant/managed or self-hosted platform
 - code-quality release policy;
 - accessibility/international certification;
 - exact-source dependency/security/browser/database/backup/restore/HA/package/reliability evidence;
-- when payment capability is enabled: payment threat/FMEA/data-flow, payment-surface/webhook/idempotency/secret/reconciliation and provider-sandbox evidence;
-- no unresolved release-blocking security/reliability findings;
+- System Graph/Flow evidence consistency for release-critical paths: source/build/package/deployment identity, no unresolved critical expected-vs-observed drift, required sensitive-flow access/redaction controls and path-aware critical test evidence;
+- when payment capability is enabled: payment threat/FMEA/data-flow, payment-surface/webhook/idempotency/secret/reconciliation/provider-sandbox and payment-flow evidence;
+- no unresolved release-blocking security/reliability/critical-flow findings;
 - stable upgrade/rollback evidence;
 - documented support/incident/recovery/control procedures.
 
@@ -111,6 +126,8 @@ Nexora can operate as an extensible multi-tenant/managed or self-hosted platform
 
 ## Commercial sequencing rule
 
-Do not block Builder Beta on optional deep CRM/Helpdesk/enterprise/cloud productization. Do not ship later systems through private Core shortcuts. Research/quality/data/security/performance are not postponed to certification; they are foundations that reduce rework and make later AI/business breadth safer.
+Do not block Builder Beta on optional deep CRM/Helpdesk/enterprise/cloud productization. Do not ship later systems through private Core shortcuts. Research/quality/data/security/performance/**System Graph** are foundations that reduce rework and make later AI/business breadth safer.
+
+Flow Intelligence is not allowed to duplicate or overrule authoritative systems: Performance owns performance evidence, Data Governance owns data policy/lineage semantics, Security/Sentinel owns enforcement/findings, Payment Security owns payment controls, Reliability owns SLO/recovery rules, Release owns release state and Observability owns broad production telemetry. The System Graph correlates those facts; the Flow GUI projects them.
 
 Payment support is conditional capability breadth: a deployment with no payment provider does not pretend to be payment-certified; a payment-enabled release must satisfy the payment-specific gates applicable to its chosen provider/flow and deployment environment.
