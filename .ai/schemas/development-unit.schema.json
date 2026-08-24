@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexora.local/.ai/schemas/development-unit.schema.json",
+  "title": "Nexora Planned Development Unit",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "name",
+    "summary",
+    "status",
+    "parent_stage_id",
+    "release_train",
+    "depends_on",
+    "security",
+    "acceptance_criteria"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^(SYS|MOD|FEAT|EXT|APP|INT|SPK|THM|AIT|AIA|MIG|OPS|SEC)-[A-Z0-9-]+$" },
+    "type": {
+      "enum": [
+        "core-system",
+        "module",
+        "feature",
+        "extension",
+        "app",
+        "integration",
+        "studio-pack",
+        "theme",
+        "ai-tool",
+        "ai-agent",
+        "migration-adapter",
+        "ops-capability",
+        "security-control"
+      ]
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "status": {
+      "enum": [
+        "IDEA",
+        "PROPOSED",
+        "PLANNED",
+        "ACTIVE",
+        "SOURCE_DONE",
+        "TARGET_VERIFIED",
+        "EXTERNAL",
+        "DEFERRED",
+        "BLOCKED",
+        "REJECTED",
+        "DEPRECATED"
+      ]
+    },
+    "parent_stage_id": { "type": "string", "pattern": "^[A-Z0-9-]+$" },
+    "release_train": { "enum": ["builder-beta", "pro", "platform", "production", "external"] },
+    "depends_on": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "conflicts_with": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "delivery": { "enum": ["core", "first-party-package", "third-party-compatible-surface", "external"] },
+    "architecture": {
+      "type": "object",
+      "properties": {
+        "contracts_impacted": { "type": "array", "items": { "type": "string" } },
+        "adr_required": { "type": "boolean" },
+        "boundary_notes": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "persistence_impact": { "type": "string" },
+        "migration_required": { "type": "boolean" },
+        "migration_policy": { "type": "string" },
+        "rollback_notes": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "authorization": {
+      "type": "object",
+      "properties": {
+        "permissions": { "type": "array", "items": { "type": "string" } },
+        "runtime_capabilities": { "type": "array", "items": { "type": "string" } },
+        "tenant_impact": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "security": {
+      "type": "object",
+      "required": ["risk", "threat_model_required"],
+      "properties": {
+        "risk": { "enum": ["low", "moderate", "high", "critical"] },
+        "threat_model_required": { "type": "boolean" },
+        "security_notes": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "privacy": {
+      "type": "object",
+      "properties": {
+        "personal_data": { "type": "boolean" },
+        "consent_impact": { "type": "string" },
+        "retention_impact": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "surfaces": {
+      "type": "object",
+      "properties": {
+        "admin_ui": { "type": "boolean" },
+        "public_ui": { "type": "boolean" },
+        "api": { "type": "boolean" },
+        "webhook": { "type": "boolean" },
+        "sdk": { "type": "boolean" },
+        "theme": { "type": "boolean" },
+        "studio": { "type": "boolean" },
+        "extension": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "exposure": { "enum": ["none", "read", "draft", "execute-with-approval", "execute-policy-bounded"] },
+        "tool_ids": { "type": "array", "items": { "type": "string" } },
+        "approval_required": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "package": {
+      "type": ["object", "null"],
+      "properties": {
+        "family": { "enum": ["extension", "app", "integration", "studio-pack", "theme"] },
+        "runtime_mode": { "enum": ["declarative", "trusted-php"] },
+        "migration_policy": { "enum": ["none", "forward-only"] },
+        "compatibility_policy": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "testing": {
+      "type": "object",
+      "properties": {
+        "unit": { "type": "boolean" },
+        "integration": { "type": "boolean" },
+        "architecture": { "type": "boolean" },
+        "security": { "type": "boolean" },
+        "browser": { "type": "boolean" },
+        "ai_evals": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "real_target_required": { "type": "boolean" },
+        "evidence": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "rollback": { "type": "string" },
+    "observability": { "type": "array", "items": { "type": "string" } },
+    "acceptance_criteria": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "out_of_scope": { "type": "array", "items": { "type": "string" } },
+    "source_refs": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}
