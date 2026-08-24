@@ -10,7 +10,7 @@ use Tests\TestCase;
 final class RuntimeRecoveryOrchestratorTest extends TestCase
 {
     #[Test]
-    public function orchestrator_is_dry_run_first_bounded_and_independently_verifies_recovery(): void
+    public function orchestrator_is_dry_run_first_target_bound_and_fail_closed(): void
     {
         $path = base_path('scripts/runtime-recovery-orchestrator.php');
         self::assertFileExists($path);
@@ -33,9 +33,12 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
             "'verify_peer' => true",
             "'verify_peer_name' => true",
             "'follow_location' => 0",
+            "['bypass_shell' => true]",
+            'nexoraRuntimeRecoveryResolveTargetAppUrl($target)',
+            'target-owned /login',
             'recovery-orchestrator',
             'target_verification_complete',
-            "['bypass_shell' => true]",
+            'nexoraRuntimeRecoveryAppliedFailure',
         ] as $required) {
             self::assertStringContainsString($required, $source);
         }
@@ -44,23 +47,28 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
         self::assertStringContainsString("'mutation_performed' => false", $source);
         self::assertStringContainsString('nexoraRuntimeRecoveryCompatibility($target)', $source);
         self::assertStringContainsString('nexoraRuntimeRecoveryPostInstallStatus($target, true)', $source);
-        self::assertStringContainsString('nexoraRuntimeRecoveryNeedsReceiptRefresh($readinessPayload)', $source);
+        self::assertStringContainsString("nexoraRuntimeRecoveryNeedsReceiptRefresh(\$readiness['payload'])", $source);
 
-        // A JSON PASS is not trusted unless the child command itself exited 0.
-        self::assertStringContainsString("return \$result['exit_code'] === 0", $source);
-        self::assertStringContainsString('nexoraRuntimeRecoveryCompatibilityPayloadPass($result[\'payload\'])', $source);
-        self::assertStringContainsString('nexoraRuntimeRecoveryReadyPayload($result[\'payload\'])', $source);
+        // PASS requires both the expected JSON invariants and a zero child exit.
+        self::assertGreaterThanOrEqual(2, substr_count($source, "return \$result['exit_code'] === 0"));
 
-        // Only an observed failed rc.93 compatibility result with a non-empty,
-        // fully allow-listed mismatch set can enter the version-specific adapter.
+        // Only an observed failed rc.93 result with a non-empty, fully allow-listed
+        // mismatch set can enter the version-specific mutation adapter.
         self::assertStringContainsString("\$mismatches !== []", $source);
-        self::assertStringContainsString("(\$compatibilityPayload['status'] ?? null) === 'fail'", $source);
+        self::assertStringContainsString("(\$payload['status'] ?? null) === 'fail'", $source);
 
-        // Explicit HTTP failures stay FAIL; transport/TLS unreachability is BLOCKED.
+        // Explicit HTTP/configuration failure remains FAIL; transport/TLS
+        // unreachability remains BLOCKED and cannot be downgraded/upgraded.
         self::assertStringContainsString("'fail' => 'fail'", $source);
         self::assertStringContainsString("'fail' => 1", $source);
         self::assertStringContainsString("default => 'blocked'", $source);
         self::assertStringContainsString('if ($receipt === null)', $source);
+
+        // The smoke target is derived only from the target application's own
+        // bootstrapped app.url. Arbitrary network target overrides are forbidden.
+        self::assertStringContainsString("config(\"app.url\"", $source);
+        self::assertStringNotContainsString("'base-url:'", $source);
+        self::assertStringNotContainsString('--base-url=', $source);
 
         foreach ([
             'composer install',
