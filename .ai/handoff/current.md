@@ -9,14 +9,15 @@ Read in order:
 3. `.ai/state.json`
 4. `.ai/roadmap/stages.md` + release trains
 5. `.ai/governance/development-intake.md`
-6. main + relevant domain registries (`development-units.json`, `performance-units.json`, `quality-payment-units.json`)
+6. main + relevant domain registries (`development-units.json`, `performance-units.json`, `quality-payment-units.json`, `flow-units.json`)
 7. `.ai/plans/master-execution-plan.md`, plan template and active plan
 8. `.ai/quality/engineering-lifecycle.md` + `.ai/quality/lean-six-sigma.md`
 9. ResearchBrief/DataFlow documents where relevant
-10. security program; payment work also reads `.ai/security/payment-security.md`
-11. performance/reliability/delivery documents where relevant
-12. capability matrices/addenda + system registries
-13. architecture/AI/design constitutions and current source/tests.
+10. `.ai/flow/system-graph.md` for material runtime/package/data/security/permission/event/network/state/error/deployment relationships
+11. security program; payment work also reads `.ai/security/payment-security.md`
+12. performance/reliability/delivery documents where relevant
+13. capability matrices/addenda + system registries
+14. architecture/AI/design constitutions and current source/tests.
 
 ## Current source context
 
@@ -26,8 +27,8 @@ Read in order:
 - Installer protocol: `v5.29`
 - Source generation: `n1-v5.29`
 - Control-plane branch: `ai/control-plane-phase-1`
-- Control-plane revision: `5`
-- Canonical stage count: `73` (`0` through `72`)
+- Control-plane revision: `6`
+- Canonical stage count: `75` (`0` through `74`)
 
 Always inspect current HEAD; baseline SHA is historical reference, not a self-referential requirement.
 
@@ -39,63 +40,110 @@ Substantial new/redesigned work uses proportional Research/VOC/baseline/CTQ + DM
 
 Material data changes use formal DataFlow/classification/ownership/lineage/retention/delete/AI/package exposure policy. Critical stateful/provider flows include reliability/idempotency/recovery policy.
 
-## Phase 5 — Quality Engineering & Payment Security
+Material relationship changes now also require System Graph/Flow planning: expected nodes/edges, ownership/version, sensitive visibility, evidence provider/class and drift checks or explicit `NOT_APPLICABLE`.
 
-New accepted planning layers:
+## Phase 6 — System Graph & Flow Intelligence
 
-- `RESEARCH-DISCOVERY-100` — ResearchBrief, VOC, problem validation, market/standards evidence, baseline and CTQ inputs;
-- `QUALITY-GOVERNANCE-100` — Quality OS, DMADV/DMAIC, FMEA, root cause and control plans;
-- `DATA-GOVERNANCE-200` — formal data flow/classification/lineage/authoritative-vs-derived stores, retention/export/delete and AI/package boundaries;
-- `RELIABILITY-ENGINEERING-200` — SLI/SLO/error budgets, timeout/retry/idempotency/failure isolation/fault/recovery;
-- `PRODUCT-OUTCOMES-100` — privacy-aware CTQ/adoption/task-success/time-to-value/feedback loop;
-- `DELIVERY-EXCELLENCE-100` — engineering-flow/DORA-style stability/rework evidence without developer ranking;
-- `EFFICIENCY-FINOPS-100` — provider-neutral cost/resource attribution/budgets;
-- `PAYMENT-SECURITY-200` — mandatory critical payment boundary before Commerce 2.0.
+Accepted canonical stages:
 
-New documents/registries:
+- `SYSTEM-GRAPH-100` — Builder Beta foundation after architecture/data/Extension SDK/performance/code-quality foundations.
+- `FLOW-INTELLIGENCE-200` — Pro layer after Performance Intelligence + Reliability + API + AI Kernel.
 
-- `.ai/quality/engineering-lifecycle.md`
-- `.ai/quality/lean-six-sigma.md`
-- `.ai/quality/fmea-template.md`
-- `.ai/research/research-brief-template.md`
-- `.ai/data/data-flow-governance.md`
-- `.ai/reliability/reliability-program.md`
-- `.ai/delivery/delivery-excellence.md`
-- `.ai/security/payment-security.md`
-- `.ai/registry/quality-payment-units.json`
-- `.ai/roadmap/capability-matrix-phase5-quality-payments.md`
+### Fundamental invariant
 
-These are planning/control-plane changes only; they do not claim runtime/product implementation.
+**Graph + evidence is source of truth. Diagram is a projection of that truth.**
 
-## Existing payment foundation preserved
+Evidence classes:
 
-N0.30 already established a good provider-neutral base:
+- `declared`
+- `static`
+- `observed`
+- `tested`
+- `production-observed`
+- `ai-inferred`
 
-- Core owns commerce records/state but embeds no gateway vendor;
-- provider packages implement `PaymentProviderContract`/registry adapter;
-- Commerce migration does not own gateway secret/private-key fields;
-- amounts use integer minor units;
-- provider enablement requires registered adapter + health check;
-- idempotency/provider-event identity exist;
-- refund concurrency uses locking/cumulative validation.
+`ai-inferred`/static evidence is never promoted to runtime truth. One runtime trace never proves all possible paths or concurrency safety.
 
-`PAYMENT-SECURITY-200` matures this foundation rather than replacing it.
+### New planning artifacts
 
-## Payment security invariant
+- `.ai/flow/system-graph.md`
+- `.ai/registry/flow-units.json`
+- `.ai/roadmap/capability-matrix-phase6-flow-intelligence.md`
 
-Under the standard Nexora payment profile:
+The Flow registry pre-plans canonical graph, declared/static/runtime/data/security/permission/error/state/package/basic UI providers, advanced Flow Intelligence, deployment/supply-chain/test-evidence/diff-impact/replay-incident/scenario capabilities, and governed AI Flow explain/root-cause/security-path/impact tools.
 
-**raw PAN/CVV/track/PIN data must not enter Nexora Core, generic extension runtime, application DB/log/cache/queue/analytics/search/backups/observability/AI context.**
+### System Graph target
 
-Preferred flows: provider-hosted redirect → provider-hosted iframe/fields → approved tokenized SDK. Generic direct/raw account-data collection is forbidden by default and cannot be enabled by a manifest checkbox.
+Canonical provider-neutral typed nodes/edges/evidence should represent, where applicable:
 
-Payment providers receive `security_profile: payment-provider`, purpose-specific payment capabilities and payment-specific activation evidence. Generic DB/filesystem/secrets/network powers are not the model.
+- actors/routes/middleware/controllers/services/contracts/registries;
+- Theme/templates/components/assets;
+- Extension/App/Integration/Studio/module/package/version identity;
+- hooks/events/filters/slots/jobs/queues/schedules;
+- data/DB/cache/search/files/derived stores;
+- permissions/capabilities/approvals;
+- secrets/brokers/network/external providers;
+- conditions/gateways/state transitions;
+- transactions/locks/idempotency/concurrency/retry/reconciliation;
+- errors/fallbacks/recovery;
+- deployment/config/feature flags;
+- supply-chain/ownership/test/SLO/incident/release identity;
+- AI/payment flows.
 
-Core validates order/tenant/amount/currency/state. Browser `success` return is not proof of payment. Signed/fresh/replay-safe provider webhook/API reconciliation is authoritative. Ambiguous non-idempotent captures/refunds reconcile before retry.
+### Flow Center target
 
-Protected payment surfaces restrict arbitrary Theme/Extension/custom scripts, enforce payment-specific CSP/origins/script inventory/tamper controls and exclude payment fields from session replay/analytics.
+Do not expose one giant unreadable graph. Use progressive zoom:
 
-Payment activation requires threat model + FMEA + independent payment review + provider sandbox authorization/capture/refund/webhook/reconciliation tests. Sentinel PASS alone is not payment certification and Nexora must not self-award a generic PCI-compliant badge.
+`Ecosystem → System → Feature → Execution`
+
+with grouped lenses for Architecture, Runtime, Data, Security, Quality, Operations and Packages. Sub-lenses include code, permissions, errors, events, queues, network, DB/cache, state/transactions/retries, deployment/configuration, supply chain, tests, performance/reliability/cost, payments, AI, release and incident/change-impact.
+
+Flowchart notation is a projection aid: oval start/end/event, rectangle process, diamond condition/gateway, cylinder store, component/package shapes, external provider/cloud, queue, shield/key and trust/deployment/transaction boundaries. Do not rely on color alone.
+
+A decision node explains the human-readable question, source/policy, inputs, true/false meaning, permission/state implications and tests rather than showing only a diamond.
+
+### Advanced intelligence
+
+Planned features include:
+
+- expected-vs-static/observed architecture/package drift;
+- source-to-sink/trust-boundary paths tied to analyzer/runtime evidence;
+- root vs propagated/secondary/recovered errors;
+- path-aware test/evidence coverage;
+- graph diff/history/time travel across release/package/branch/environment;
+- read-only runtime visual replay;
+- change impact/blast radius with potential vs tested/observed distinction;
+- incident/containment/recovery views;
+- modelled what-if scenarios labelled predicted until tested;
+- Flow AI explanations grounded only in authorized graph evidence.
+
+### Security / overhead
+
+Flow topology is sensitive reconnaissance material. Planned controls include default-deny `flow.*` permissions, tenant/site scope, redaction, export/deep-trace audit/re-auth policy and AI field filtering.
+
+Production tracing is sampled/bounded with retention/cardinality limits; deep traces are on-demand. Collector/profiler overhead is itself measured.
+
+Do not select a graph database simply because the product is graph-shaped. Use provider-neutral storage contracts; specialized graph storage requires measured need + ADR.
+
+### Authority separation
+
+Flow Intelligence does not replace authoritative systems:
+
+- Data Governance owns data policy/lineage semantics;
+- Security/Sentinel owns security enforcement/findings;
+- Performance owns performance evidence;
+- Reliability owns SLO/recovery rules;
+- Payment Security owns payment controls;
+- Release Workflow owns release state;
+- Observability owns broad operations telemetry.
+
+The System Graph references/correlates their evidence; the Flow GUI queries/projects/explains it.
+
+## Phase 5 — Quality Engineering & Payment Security remains in force
+
+Accepted layers remain `RESEARCH-DISCOVERY-100`, `QUALITY-GOVERNANCE-100`, `DATA-GOVERNANCE-200`, `RELIABILITY-ENGINEERING-200`, `PRODUCT-OUTCOMES-100`, `DELIVERY-EXCELLENCE-100`, `EFFICIENCY-FINOPS-100` and `PAYMENT-SECURITY-200`.
+
+Payment standard profile continues to forbid raw PAN/CVV/track/PIN in Nexora/generic package runtime/storage/logs/AI, prefers provider-hosted/tokenized flows, requires purpose-specific capabilities, Core-authoritative financial state, Secret/Network Brokers, hardened webhooks/payment surface, idempotency/reconciliation, provider sandbox and independent payment security evidence. Payment state/security can be projected into Flow Intelligence only using safe/redacted evidence; the graph is never financial authority.
 
 ## Active stage
 
@@ -105,7 +153,7 @@ Registered active unit: `SYS-RUNTIME-IDENTITY`
 
 Status: `BLOCKED` pending real-target execution.
 
-Phase 5 planning does not move this cursor.
+Phase 6 planning does not move this cursor.
 
 ### Current target blocker
 
@@ -128,10 +176,12 @@ Do **not** overwrite rc.93 with rc.94 merely to repair these fingerprints; repai
 
 ## Immediate sequence after runtime closure
 
-`CORE-QA-001 → AI-GOV-AUTOMATION-100 → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ADMIN-UX-CLOSURE-001 → SECURITY-BASELINE-200 → ARCH-BOUNDARY-100 → existing website-platform closure → mature builder/data/performance kernel`.
+`CORE-QA-001 → AI-GOV-AUTOMATION-100 → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ADMIN-UX-CLOSURE-001 → SECURITY-BASELINE-200 → ARCH-BOUNDARY-100 → existing website-platform closure → mature builder/data/performance kernel → SYSTEM-GRAPH-100`.
+
+Later Pro includes `PERFORMANCE-INTELLIGENCE-200 → RELIABILITY-ENGINEERING-200 → FLOW-INTELLIGENCE-200` when their other dependencies are satisfied.
 
 Later Platform sequence explicitly requires `COMMERCE-CLOSURE-001 → PAYMENT-SECURITY-200 → COMMERCE-200`.
 
 ## Completion warning
 
-Historical `DONE` is not target proof. Missing research/measurement/provider/outcome evidence is never inferred as PASS. Payment compliance scope depends on the deployed merchant/provider environment; Nexora architecture minimizes scope/risk but does not claim universal compliance or unhackability.
+Historical `DONE` is not target proof. Missing research/measurement/graph/provider/outcome evidence is never inferred as PASS. A beautiful/AI-generated flow diagram is not runtime evidence. Payment compliance scope depends on the deployed merchant/provider environment; Nexora architecture minimizes scope/risk but does not claim universal compliance or unhackability.
