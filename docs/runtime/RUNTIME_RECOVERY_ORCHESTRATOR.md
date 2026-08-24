@@ -14,6 +14,8 @@ Dry-run is the default. Apply mode requires:
 --apply --confirm=RECOVER-RUNTIME
 ```
 
+Apply mode is **single-writer per target**. The orchestrator acquires a non-blocking exclusive target lock before any apply-mode compatibility/recovery/reconcile work. A second concurrent apply attempt fails closed instead of racing sealed runtime identity, handoff receipts, or evidence generation.
+
 The orchestrator:
 
 1. inspects the explicit target with `nexora:runtime:compatibility-status --deep`;
@@ -24,7 +26,7 @@ The orchestrator:
 6. automatically runs `nexora:runtime:post-install-reconcile --confirm=RECONCILE` only when the target reports the exact stale-receipt state: `receipt-refresh-required`, `runtime_ready=true`, and `receipt_current=false`;
 7. re-runs the readiness assertion after reconciliation;
 8. resolves the target application's own bootstrapped `config('app.url')` and performs a verified HTTP(S) `GET /login` without disabling TLS verification or following redirects;
-9. writes a machine-readable apply-mode outcome receipt under protected target runtime storage.
+9. writes a machine-readable apply-mode outcome receipt under protected target runtime storage using a unique per-run identifier so rapid sequential runs cannot overwrite previous evidence.
 
 Arbitrary HTTP target overrides are intentionally unsupported. The orchestrator cannot certify a different host merely because that host returns `/login` HTTP 200.
 
@@ -39,6 +41,8 @@ The orchestrator does not:
 - change the target version;
 - ignore unrelated compatibility mismatches;
 - accept JSON PASS from a child command that exited non-zero;
+- allow concurrent apply-mode writers for the same target;
+- reuse a timestamp-only receipt filename that can silently replace previous evidence;
 - downgrade an explicit non-200 `/login` result to `BLOCKED`;
 - accept an arbitrary alternate HTTP host for target certification;
 - disable TLS verification;
@@ -58,12 +62,14 @@ Authorized closure attempt:
 npm run runtime:recover -- --target="D:\laragon\www\nexora" --apply --confirm=RECOVER-RUNTIME
 ```
 
+If another apply-mode recovery already owns the target lock, the second run fails closed. Do not delete or bypass the lock to force progress; first establish whether another operator/process is still active.
+
 If target-owned `config('app.url')` is missing/invalid or its HTTPS connection cannot be verified by the PHP runtime, automated HTTP certification remains `BLOCKED`/`FAIL` as appropriate. Do not supply an alternate host or disable TLS merely to obtain green status; repair the target URL/trust configuration or provide separate authorized browser evidence.
 
 ## Result semantics
 
 - `status=pass` / exit `0`: deep compatibility, final readiness/current receipt, and target-owned `/login` HTTP 200 all passed.
 - `status=blocked` / exit `2`: runtime compatibility/readiness passed but the target-owned HTTP smoke could not be certified automatically, for example because of local TLS trust or web-server reachability.
-- `status=fail` / exit `1`: a recovery/compatibility/readiness invariant failed, an explicit HTTP/configuration failure occurred, or required evidence could not be safely produced. Do not bypass the failing control.
+- `status=fail` / exit `1`: a recovery/compatibility/readiness invariant failed, an explicit HTTP/configuration failure occurred, another apply run already owns the target lock, or required evidence could not be safely produced. Do not bypass the failing control.
 
 Project state is advanced only after the real target evidence is reviewed and canonical `.ai` state is updated.
