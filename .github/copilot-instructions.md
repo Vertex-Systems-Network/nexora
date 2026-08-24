@@ -2,30 +2,41 @@
 
 Before planning, editing, reviewing, testing or certifying this repository:
 
-1. Read `/AGENTS.md`.
-2. Read `/.ai/README.md`.
-3. Read `/.ai/state.json` and `/.ai/handoff/current.md`.
-4. Resolve the active stage through `/.ai/roadmap/stages.md` and release train through `/.ai/roadmap/release-trains.md`.
-5. Read `/.ai/governance/development-intake.md`.
-6. Resolve requested work to registered IDs in `/.ai/registry/development-units.json`.
-7. Read `/.ai/plans/master-execution-plan.md`, `/.ai/plans/plan-template.md` and current `/.ai/plans/active.md`.
-8. Check relevant capability/system/future-system/security docs.
-9. Use `/.ai/roadmap/legacy-aliases.md` before interpreting historical `N1.x` labels.
-10. Follow `/.ai/quality/definition-of-done.md` and `/.ai/quality/verification-matrix.md`.
-11. Preserve `/ARCHITECTURE.md` and `/SECURITY.md` boundaries.
-12. For security-sensitive work follow `/.ai/security/security-program.md` and use the threat-model template when required.
-13. For AI product work follow `/.ai/architecture/ai-platform.md`; for AI design/Studio work follow `/.ai/design/ai-design-professional.md`.
+1. Read `/AGENTS.md`, `/.ai/README.md`, `/.ai/state.json` and `/.ai/handoff/current.md`.
+2. Resolve active stage/release train through `/.ai/roadmap/stages.md` and `/.ai/roadmap/release-trains.md`.
+3. Read `/.ai/governance/development-intake.md` and resolve work to IDs in the main/relevant domain registries.
+4. Read the master execution plan, active plan and plan template.
+5. For substantial new/redesigned work follow `/.ai/quality/engineering-lifecycle.md`, `/.ai/quality/lean-six-sigma.md` and ResearchBrief/CTQ rules.
+6. For material data work follow `/.ai/data/data-flow-governance.md`.
+7. Follow `/.ai/quality/definition-of-done.md` and verification matrix.
+8. Preserve `/ARCHITECTURE.md` and `/SECURITY.md` boundaries.
+9. For high/critical work follow `/.ai/security/security-program.md` and threat-model policy. Payment-provider work must also follow `/.ai/security/payment-security.md`.
+10. For runtime-affecting work follow performance/code-quality budgets; for critical stateful/provider work follow reliability policy.
+11. For AI product/design work follow the AI architecture/design contracts.
+12. Inspect current HEAD/source/tests before trusting historical completion claims.
 
 ## Mandatory planning gate
 
-Do not implement an unregistered system, module, feature, extension, app, integration, studio pack, theme, AI tool/agent, migration adapter, operations capability or security control.
+Do not implement an unregistered system/module/feature/extension/app/integration/studio-pack/theme/AI tool/agent/migration/ops/security control.
 
-If missing, register and plan it first with stable ID, stage/release train, dependencies, architecture/data/migration/permission/tenancy/security/privacy/UI/API/theme/Studio/AI/test/verification/rollback decisions and acceptance criteria. Then update the active plan before coding.
+New/redesigned substantial work uses proportional Research/VOC/baseline/CTQ + DMADV; existing defect/incident/regression work uses DMAIC and closes with durable Control evidence. High/critical/complex material failure modes require FMEA where applicable in addition to threat modeling.
 
-AI-discovered optional ideas may be registered as `PROPOSED` but may not be silently implemented unless required by already-approved active scope.
+Material data changes require DataFlow/classification/authority/lineage/retention/delete/AI/package decisions. Runtime-affecting changes require a measurable performance budget/profile or explicit N/A. Critical stateful/provider flows require timeout/retry/idempotency/degradation/recovery decisions.
 
-Do not skip stages, do not treat historical `DONE` labels as real-target verification, and do not mark runtime/browser behavior complete from source/static checks alone.
+## Payment security
 
-High/critical-risk units require threat modeling. First-party packages must use the same public contracts/capability/trust model as third-party packages.
+Payment-provider integrations are critical. Under the standard profile:
 
-At the end of meaningful work, update affected registry entries, `/.ai/state.json`, `/.ai/handoff/current.md` and the active plan so another agent can resume without chat context.
+- raw PAN/CVV/track/PIN data must not enter Nexora Core/generic package runtime/storage/logs/analytics/backups/AI;
+- prefer provider-hosted/tokenized flows; generic raw-card collection is forbidden by default;
+- payment packages use purpose-specific capabilities and brokered secrets/network access, not generic power;
+- Core validates canonical order/tenant/amount/currency/financial state;
+- browser return/success URL is not proof of payment;
+- signed/replay-safe tenant-bound webhook/API reconciliation, idempotency and concurrency controls are mandatory;
+- payment-entry pages restrict scripts/slots through payment-specific CSP/origin/tamper policy;
+- payment activation requires provider sandbox tests, threat model, FMEA and independent payment-security review;
+- generic Sentinel PASS is not payment certification.
+
+Do not skip stages, do not treat historical `DONE` as target verification, and never fabricate research, measurement, provider, outcome or compliance evidence.
+
+At meaningful completion update affected registries, state, handoff and active plan so the next agent needs no chat context.
