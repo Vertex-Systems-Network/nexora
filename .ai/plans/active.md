@@ -113,15 +113,15 @@ Required behavior:
 1. inspect deep target compatibility first;
 2. if already compatible, do not run identity repair;
 3. if target is exactly rc.93 and mismatches are only the four approved planes, delegate to the version-pinned rc.93 adapter;
-4. independently re-run deep compatibility after repair;
-5. assert post-install readiness;
+4. independently re-run deep compatibility after repair and require both child exit code `0` and the expected PASS payload;
+5. assert post-install readiness and bind PASS to child exit code `0`;
 6. automatically reconcile **only** `receipt-refresh-required` with `runtime_ready=true` and `receipt_current=false`;
 7. re-assert readiness after reconciliation;
-8. resolve target `app.url` or accept explicit `--base-url`, then perform verified `GET /login` without disabling TLS verification or following redirects;
-9. write a machine-readable apply-mode recovery receipt under protected target runtime storage;
-10. return PASS only when compatibility, final readiness/current receipt and `/login` HTTP 200 all pass.
+8. resolve only the target application's own bootstrapped `config('app.url')`, then perform verified `GET /login` without disabling TLS verification or following redirects; arbitrary alternate HTTP hosts are forbidden;
+9. write a machine-readable apply-mode recovery outcome receipt under protected target runtime storage;
+10. return PASS only when compatibility, final readiness/current receipt and target-owned `/login` HTTP 200 all pass.
 
-If HTTP smoke cannot be certified because of local TLS trust/web-server reachability, return `BLOCKED`, preserve successful runtime/readiness evidence, and do not mislabel target verification as complete.
+If target-owned HTTP smoke cannot be certified because of local TLS trust/web-server reachability, return `BLOCKED`, preserve successful runtime/readiness evidence, and do not mislabel target verification as complete. If `/login` returns an explicit non-200/configuration failure, return `FAIL`, not `BLOCKED`.
 
 ## Guardrails
 
@@ -131,9 +131,12 @@ If HTTP smoke cannot be certified because of local TLS trust/web-server reachabi
 - The rc.93 adapter remains pinned to exactly `1.0.0-rc.93` and only the four allowed identity mismatches.
 - Any unrelated/immutable mismatch fails closed.
 - Apply mode requires an exact confirmation token.
+- A child JSON PASS is never accepted when that child exited non-zero.
 - The rc.93 adapter preserves protected backup + rollback-on-non-convergence behavior.
 - Receipt reconciliation is allowed only after runtime compatibility is PASS and the exact stale-receipt state is observed.
+- The final HTTP smoke is target-bound to the target application's own bootstrapped `app.url`; arbitrary URL overrides are not supported.
 - TLS verification may not be disabled merely to obtain `/login` PASS.
+- Explicit HTTP non-200 is FAIL; only transport/TLS inability with no HTTP result is BLOCKED.
 - Orchestrator receipts are evidence artifacts, not authority to edit canonical project state by themselves.
 - Source/CI PASS never substitutes for real target/browser evidence.
 
@@ -147,7 +150,7 @@ DMAIC/control intent:
 - **Measure:** the observed repair required separate repair, compatibility, readiness, reconcile and follow-up readiness/browser actions.
 - **Analyze:** primitives were correctly fail-closed but lacked a post-approval coordinator.
 - **Improve:** add one bounded orchestrator over existing trusted primitives.
-- **Control:** regression contract, exact confirmation, mismatch/version gates, independent re-verification, machine-readable receipts and exact-head CI/review.
+- **Control:** regression contract, exact confirmation, mismatch/version gates, child-exit binding, target-owned HTTP identity, independent re-verification, machine-readable receipts and exact-head CI/review.
 
 CTQs:
 
@@ -156,7 +159,8 @@ CTQs:
 - preserve immutable source/deployment/trust planes;
 - no hidden upgrade/dependency/migration work;
 - automatic reconcile only for the exact stale-receipt state;
-- independent compatibility + readiness verification;
+- independent compatibility + readiness verification including process exit status;
+- target-owned HTTP endpoint only;
 - verified TLS for HTTP smoke;
 - deterministic evidence output;
 - fail/blocked instead of false PASS.
@@ -182,17 +186,20 @@ Failure modes and controls:
 - unrelated mismatch → no approved adapter, fail closed;
 - accidental mutation → dry-run default + `RECOVER-RUNTIME` confirmation;
 - shell injection → child commands are fixed argument arrays with shell bypass; target path is not interpolated into shell text;
+- child emits PASS JSON but exits non-zero → PASS predicate also requires exit code `0`;
 - hidden dependency/upgrade/migration → explicitly absent and regression-guarded;
 - stale receipt reconciled when runtime unhealthy → forbidden; requires exact receipt-refresh state with runtime ready;
 - repair claims its own success → independent compatibility command runs after repair;
 - stale receipt claims readiness → readiness is re-run after reconcile;
+- arbitrary external host returns `/login` 200 → impossible through supported interface because smoke URL is derived only from target-owned bootstrapped `config('app.url')`;
 - insecure local HTTPS shortcut → TLS peer/name verification stays enabled;
-- HTTP smoke failure after valid repair → do not roll back a compatible runtime solely for transport smoke failure; report BLOCKED and preserve evidence;
+- target-owned `/login` explicit non-200 → FAIL, never downgraded to BLOCKED;
+- transport/TLS unavailable after valid repair → BLOCKED without rolling back an independently compatible runtime solely for transport evidence;
 - false canonical advancement → state remains BLOCKED until reviewed target evidence satisfies DoD.
 
 ## Performance / reliability / cost
 
-No product performance change is intended. Operator orchestration executes a bounded number of local subprocesses and one HTTP GET. No retry loop is introduced. Reliability is deterministic stop-on-failure plus preservation of existing repair backup/rollback semantics.
+No product performance change is intended. Operator orchestration executes a bounded number of local subprocesses and one target-owned HTTP GET. No retry loop is introduced. Reliability is deterministic stop-on-failure plus preservation of existing repair backup/rollback semantics.
 
 ## Execution chunks
 
@@ -216,6 +223,7 @@ No product performance change is intended. Operator orchestration executes a bou
 - [x] Add `scripts/runtime-recovery-orchestrator.php`.
 - [x] Add single `runtime:recover` npm operator entrypoint.
 - [x] Add regression contract + operator documentation.
+- [x] Self-audit closed child-exit/HTTP-status/alternate-host false-green loopholes before merge.
 - [ ] Exact-head source certification PASS.
 - [ ] Independent exact-head review for the critical recovery-control change.
 - [ ] Merge canonical implementation.
@@ -244,7 +252,7 @@ No product performance change is intended. Operator orchestration executes a bou
 
 - Existing compatibility/readiness contracts remain authoritative.
 - `Rc93PostInstallIdentityRepairPackTest` remains source regression evidence for the bounded repair adapter.
-- `RuntimeRecoveryOrchestratorTest` guards orchestration confirmation, sequencing, reconcile conditions, TLS verification, forbidden upgrade/dependency/migration behavior and npm entrypoint.
+- `RuntimeRecoveryOrchestratorTest` guards orchestration confirmation, sequencing, child-exit binding, reconcile conditions, target-owned URL binding, TLS verification, HTTP PASS/FAIL/BLOCKED semantics, forbidden upgrade/dependency/migration behavior and npm entrypoint.
 - Source CI/static tests are not target proof.
 - High/critical change requires exact-head independent review in addition to authoring tests/CI.
 
@@ -260,7 +268,7 @@ Advance only when:
 2. real rc.93 target repair evidence is accepted;
 3. deep compatibility PASS, zero mismatches, installed-data-plane mode;
 4. final readiness assertion PASS with current receipt;
-5. `/login` is reachable without the blocker;
+5. target-owned `/login` is reachable without the blocker;
 6. state/handoff/registry/ledger evidence is updated;
 7. no immutable trust plane or validation/security rule was relaxed to force PASS.
 
