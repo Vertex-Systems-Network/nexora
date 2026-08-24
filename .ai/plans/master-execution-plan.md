@@ -2,251 +2,248 @@
 
 ## Objective
 
-Deliver Nexora stage by stage without losing work, silently skipping prerequisites, creating unplanned systems/packages, duplicating completed work or declaring source-only work production-complete.
+Deliver Nexora stage by stage without losing work, skipping prerequisites, creating hidden systems/packages, duplicating existing capabilities, optimizing the wrong problem, or declaring source-only work product-complete.
 
-This plan is the execution method for `.ai/roadmap/stages.md`. The stage graph controls sequencing; `.ai/registry/development-units.json` controls which implementation units are authorized/planned.
+`.ai/roadmap/stages.md` controls canonical dependencies; main/domain registries control authorized development units; `.ai/quality/engineering-lifecycle.md` controls the closed-loop quality method.
 
-## Zero-skip + zero-hidden-work rule
+## Zero-skip + zero-hidden-work + evidence rule
 
-The execution cursor may advance only when the current stage satisfies its applicable Definition of Done and evidence is recorded.
+The cursor advances only when the active stage satisfies its applicable Definition of Done and evidence is recorded.
 
-Later source code does not waive earlier gates.
+Later code does not waive earlier gates. New work cannot be hidden in chat or an unrelated stage. AI assumptions are not measurements, VOC, root cause, compliance or target evidence.
 
-A new system/module/feature/package/AI/ops/security capability may not be hidden inside another stage or started directly from chat. It must pass `.ai/governance/development-intake.md` first.
+## Unit lifecycle
+
+```text
+Signal / request
+→ registry search
+→ Research / problem / VOC / baseline
+→ CTQs / intended outcome
+→ stage + dependencies
+→ architecture + DataFlow
+→ security/privacy + threat model/FMEA
+→ UX/design/accessibility
+→ implementation
+→ code quality + QA
+→ performance + reliability
+→ release
+→ observe outcome
+→ improve/control
+→ evolve/deprecate
+```
+
+The flow can iterate; required decisions/evidence cannot be silently omitted.
+
+## Method selection
+
+### New/materially redesigned substantial capability
+
+Use proportional **DMADV**:
+
+`Define → Measure → Analyze → Design → Verify`
+
+Use ResearchBrief, CTQs, alternatives/trade-offs and FMEA for high/critical systems.
+
+### Existing defect/incident/regression/optimization
+
+Use proportional **DMAIC**:
+
+`Define → Measure → Analyze → Improve → Control`
+
+Control means regression prevention: test, budget, SLO/alert, static/architecture rule, Sentinel policy, documentation or another durable control.
+
+Trivial non-behavioral copy/style/typo changes stay lightweight.
 
 ## Before every new unit
 
-1. Search `.ai/registry/development-units.json`.
-2. If absent, classify/register it with stable unit ID.
-3. Assign parent stage and release train.
-4. Define dependencies/conflicts.
-5. Decide Core vs first-party package vs external delivery.
-6. Classify security risk and determine threat-model requirement.
-7. Record architecture/data/migration/authorization/privacy/UI/API/theme/Studio/extension/AI/observability/performance impacts.
-8. Define acceptance criteria, tests, target verification and rollback/recovery.
-9. Add/update roadmap/capability docs if scope is new.
-10. Create/update `.ai/plans/active.md`.
-11. Only then implement.
+1. Search main + relevant domain registries.
+2. Register/reconcile stable unit ID.
+3. Assign parent stage/release train/dependencies.
+4. Decide Core vs first-party package vs external.
+5. Establish ResearchBrief/problem/VOC/baseline/CTQs at proportional depth.
+6. Define architecture/contracts/ADR.
+7. Define DataFlow/classification/authority/lineage/migrations/retention.
+8. Classify security risk; create threat model for high/critical.
+9. Create FMEA for high/critical/complex material failures where applicable.
+10. Define UI/accessibility/API/theme/Studio/package/AI surfaces.
+11. Define performance/code-quality budget/profile.
+12. Define reliability timeout/retry/idempotency/degradation/SLO/recovery.
+13. Define privacy/compliance/cost/observability.
+14. Define tests/target verification/rollback/post-release control.
+15. Update roadmap/capability docs if scope is new.
+16. Create/update `.ai/plans/active.md`.
+17. Only then implement.
 
-An explicitly requested user feature may pass through this gate without asking the user to repeat the same instruction. An AI-discovered optional idea may be registered as `PROPOSED`, but may not be silently implemented unless required by approved active scope.
+AI-discovered optional ideas may be `PROPOSED`; they are not silently promoted.
 
-## Before every stage
+## Payment-provider special gate
 
-The AI must create/update `.ai/plans/active.md` from `.ai/plans/plan-template.md` with:
+Any work that authorizes/captures/refunds payments, receives provider webhooks, stores payment-method references or affects payment-entry UI follows `.ai/security/payment-security.md` and `PAYMENT-SECURITY-200`.
 
-- parent stable stage ID;
-- registered development-unit IDs;
-- release train;
-- exact objective and acceptance criteria;
-- imported existing implementation;
-- gaps found by code/tests/docs inspection;
-- dependencies and their evidence;
-- scope and explicit non-scope;
-- architecture/contracts/ADR impact;
-- data model/migrations/fresh-install/upgrade/backfill impact;
-- roles/permissions/runtime capabilities/tenancy;
-- security risk/threat model/reviewer requirements;
-- privacy/consent/retention/export/delete impact;
-- backend services;
-- Admin/Studio/frontend UX and accessibility;
-- extension/package/theme surfaces;
-- public API/headless/webhook/SDK surfaces;
-- AI read/draft/execute/tools/approval/evals;
-- performance/cache/delivery impact;
-- observability/audit;
-- tests/evals;
-- target verification commands/workflows;
-- rollback/recovery/upgrade compatibility;
-- documentation/handoff updates;
-- ordered execution chunks.
+Standard-profile invariants:
 
-Coding does not start until that plan is internally coherent.
+- raw PAN/CVV/track/PIN data does not enter Nexora Core/generic package runtime/storage/logs/analytics/backup/AI;
+- hosted/tokenized provider flows preferred; generic direct raw-card collection forbidden by default;
+- purpose-specific payment capabilities only;
+- Core validates canonical amount/currency/order/state;
+- Secret/Network Brokers mediate credentials/egress;
+- signed/fresh/replay-safe tenant-bound webhook gateway;
+- browser return is UX, not financial truth;
+- payment page restricts scripts/slots with CSP/tamper controls;
+- non-idempotent ambiguous mutations reconcile before retry;
+- threat model + FMEA + independent payment security review + sandbox tests before activation;
+- generic Sentinel/package PASS is not payment certification.
 
 ## Package-specific planning
 
-Before creating an Extension/App/Integration/Studio Pack/Theme, the plan must define:
-
-- stable package unit ID and family;
-- manifest identity/version/compatibility policy;
-- public Nexora contracts only;
-- declared runtime capabilities;
-- runtime mode (`declarative` preferred, `trusted-php` exceptional);
-- migration policy (`none` or `forward-only` under current contracts);
-- network/filesystem/secret access;
-- Admin/Studio/theme/API slots;
-- Sentinel/Supply Chain requirements;
-- install/activate/deactivate/update/rollback/uninstall lifecycle;
-- compatibility/regression matrix.
+Before Extension/App/Integration/Studio Pack/Theme creation define identity/version/compatibility, public contracts, capabilities, runtime/migration mode, data purpose, network/filesystem/secrets, UI slots, Sentinel/Supply Chain, lifecycle, security/performance/reliability/code-quality tests and rollback/uninstall behavior.
 
 First-party status never grants private Core shortcuts.
 
 ## Stage chunking
 
-Large parent stages may be split into chunks such as:
-
-```text
-CONTENT-MODEL-200-A  contracts + schema model
-CONTENT-MODEL-200-B  persistence + migrations
-CONTENT-MODEL-200-C  Admin CRUD
-CONTENT-MODEL-200-D  extension/API/AI registration
-CONTENT-MODEL-200-E  Studio/query integration
-CONTENT-MODEL-200-F  tests + target verification
-```
-
-Chunk suffixes are execution labels, not new canonical roadmap identities. A parent stage remains active until all required chunks close.
+Large parent stages may use execution chunks (`STAGE-ID-A/B/C`). Chunk suffixes are not new canonical roadmap IDs. Parent stays active until all required chunks close.
 
 ## Per-chunk loop
 
-1. Re-read current state, active plan and registered unit(s).
-2. Inspect current source; never rely only on previous prose claims.
-3. Implement the smallest architecture-correct slice.
-4. Add/update migrations/contracts/tests/security controls in the same slice where applicable.
-5. Run source/static/unit/integration/security checks available to the environment.
-6. Fix regressions before proceeding.
-7. Record evidence and changed behavior.
-8. Update active plan and unit status/evidence.
-9. Continue only when current chunk postconditions are satisfied.
+1. Re-read state, active plan and registered units.
+2. Inspect current source; do not trust prose alone.
+3. Implement smallest architecture-correct slice.
+4. Add contracts/migrations/tests/security/data/reliability controls in the same slice where applicable.
+5. Run source/static/unit/integration/security/performance checks available.
+6. Fix regressions/root blocker before proceeding.
+7. Record evidence, changed behavior and residual risk.
+8. Update active plan/unit status.
+9. Continue only after chunk postconditions pass.
 
-## Required cross-cutting checks
+## Required cross-cutting applicability decisions
 
-Every unit must explicitly decide whether each applies:
+Every substantial unit explicitly decides:
 
-- architecture boundary / ADR;
-- tenancy/site scoping;
-- auth/roles/permissions;
-- extension/runtime capabilities;
+- research/problem/VOC/baseline/CTQs;
+- architecture/ADR;
+- data flow/classification/lineage/retention;
+- tenancy/auth/permissions/runtime capabilities;
 - security/Sentinel/threat model;
-- privacy/consent/retention;
+- FMEA/failure modes;
+- privacy/compliance;
 - migrations/fresh install/upgrade/backfill;
-- audit log;
-- localization;
-- accessibility;
-- SEO/AEO/routing implications;
-- caching/performance;
-- API/headless/webhook/SDK exposure;
-- theme/Studio/extension surface;
-- AI read/draft/execute/tool exposure;
-- import/export/configuration;
-- rollback/recovery;
-- observability;
-- tests/evals;
-- documentation.
+- UX/accessibility/i18n;
+- SEO/AEO/routing;
+- API/headless/webhook/SDK;
+- theme/Studio/package surfaces;
+- AI context/read/draft/execute;
+- performance/code quality;
+- reliability/SLO/recovery;
+- observability/audit;
+- cost/resource efficiency;
+- tests/evals/target evidence;
+- release/rollback/recovery;
+- post-release outcome/control;
+- documentation/deprecation.
 
-`Not applicable` must be an explicit decision, not an omission.
+`NOT_APPLICABLE` is explicit, not an omission.
 
 ## Security gates
 
-Security is continuous.
+Security is continuous. High/critical units require threat modeling. Auth/tenancy/public-write/executable-package/secret/network/payment/destructive/AI-tool units require explicit security review. `SENTINEL-200` later adds advanced isolation/revocation and does not replace earlier controls.
 
-- `SECURITY-BASELINE-200` executes early, before large platform expansion.
-- Every unit receives risk class.
-- `high` and `critical` units require threat modeling.
-- auth/tenancy/public-write/executable-package/secret/network/payment/destructive/AI-tool units require explicit security review.
-- `SENTINEL-200` later adds advanced package vulnerability/revocation/isolation capabilities but does not replace earlier security controls.
+AI-generated code is untrusted contributor output until objective evidence passes.
 
-AI-generated code is treated as untrusted contributor output until tests/review/evidence pass.
+## Reliability gates
 
-## Independent review rule
+Critical recurring/stateful/provider workflows define bounded timeouts/retries/idempotency/concurrency/failure isolation/degradation/recovery and meaningful SLO/error-budget policy where applicable. Fault tests run in approved safe environments.
 
-The same AI may plan and implement work, but self-asserted correctness is not sufficient certification for critical boundaries.
+Financial/destructive operations are never blindly retried after ambiguous results.
 
-High-risk architecture/security/AI execution/package-runtime changes require at least one independent review pass or reviewer context plus automated evidence. Final target/release claims require real execution evidence where applicable.
+## Independent review
+
+One model/session may perform multiple practical roles, but high-risk architecture/security/payment/AI execution/package-runtime work requires a distinct review pass/context plus automated/target evidence. Self-asserted correctness is never certification.
 
 ## Definition of Done levels
 
 ### SOURCE_DONE
 
-Requires applicable source contracts, migrations, backend/frontend implementation, architecture/security checks, tests/static checks and documentation to be coherent.
+Applicable source/contracts/migrations/data/security/backend/frontend/tests/static/performance/reliability/docs are coherent and source evidence passes.
 
 ### TARGET_VERIFIED
 
-Requires real environment/browser/operator evidence for behavior that cannot be proven statically.
+Required real environment/browser/provider/operator behavior is exercised successfully.
 
-### Stage closure
+### Outcome/control evidence
 
-A stage closes only when its required DoD level is satisfied. Product workflows generally require target evidence before stable production claims.
+For units whose success depends on post-release use/operations, target verification does not fabricate future outcomes. Record required observation trigger/window and keep the unit/release control obligation visible until evidence exists.
 
 ## Failure handling
 
 When blocked:
 
-1. set state/unit to `BLOCKED`;
-2. record the first/root blocker, not a vague list;
+1. set stage/unit `BLOCKED`;
+2. record first/root blocker;
 3. preserve successful evidence;
-4. do not jump to unrelated roadmap stages;
-5. fix blocker or obtain explicit user roadmap change;
-6. add regression protection for repeated blocker classes.
+4. do not jump to unrelated stages;
+5. fix blocker or obtain explicit roadmap change;
+6. use DMAIC/root-cause evidence for recurrent failures;
+7. add durable Control protection.
 
-## Architecture-change handling
+## Architecture/data change handling
 
-When implementation conflicts with `ARCHITECTURE.md`:
+When implementation conflicts with architecture/data authority:
 
-- do not silently choose the easiest side;
+- do not choose the easiest side silently;
 - identify intended authority;
-- create/update ADR for deliberate architecture change;
-- update architecture tests;
-- preserve migration/backward-compatibility/security impact.
+- write/update ADR;
+- update architecture/data tests;
+- preserve compatibility/migration/security impact.
 
 ## Roadmap-change handling
 
-A new feature/request/gap is processed as:
-
 ```text
 request / discovered gap
--> intake classification
--> registry search
--> reuse existing unit OR create stable unit ID
--> map stage + release train + dependencies
--> architecture/security/data/API/AI impact plan
--> update roadmap/capability docs when new
--> update active plan
--> implementation
+→ research/classify
+→ registry search
+→ reuse or stable new unit ID
+→ stage/release train/dependencies
+→ quality/architecture/data/security/performance/reliability plan
+→ update roadmap/capability docs
+→ active plan
+→ implementation
 ```
 
-If changing priority would move the active cursor, that requires explicit user priority change. Do not bury substantial new work inside unrelated stages.
+Moving the active cursor requires explicit user priority change.
 
 ## AI execution safety
 
-Development AI and future Nexora AI runtime follow the same philosophy: structured plan before mutation, typed contracts, least privilege, validation, approval where required, audit and recovery.
+Development AI and future product AI share structured-plan/typed-contract/least-privilege/validation/approval/audit/recovery principles.
 
 The development agent must not:
 
-- disable security boundaries to make tests pass;
-- call static validation real-target verification;
+- disable controls to make tests/scores pass;
+- fabricate research/measurements/root cause/target verification;
 - edit shipped migrations when additive migration is required;
-- create private Core shortcuts for first-party packages;
-- hard-code vertical products into Core merely because it is easier;
-- create parallel roadmap/state sources of truth;
-- silently renumber historical milestones;
-- overwrite target installations to conceal repair/upgrade problems;
+- use private Core shortcuts;
+- hide vertical products in Core;
+- create parallel roadmap/state truth;
+- silently renumber semantic IDs;
+- overwrite targets to hide repair/upgrade issues;
 - implement an unregistered unit;
-- silently promote AI-discovered optional ideas to implementation;
-- grant AI unrestricted shell/database/filesystem/secret/network powers as product features.
+- silently promote optional AI ideas;
+- grant product AI unrestricted shell/DB/filesystem/secrets/network;
+- allow raw payment account data into the standard Nexora/payment-package runtime;
+- mark a payment paid from browser redirect alone;
+- retry an ambiguous non-idempotent financial mutation without reconciliation.
 
 ## Release-train sequencing
 
-The default commercial sequence is:
-
-1. **Builder Beta** — secure CMS/site-builder kernel and professional publishing workflow.
-2. **Pro** — AI-native design/content/DX, AEO, APIs, migration, experimentation and interoperability.
-3. **Platform** — marketplace, commerce, portals, collaboration, managed cloud, enterprise and advanced runtime security/operations.
-4. **Production** — performance, accessibility and final exact-source/target certification.
-
-Do not block Builder Beta on deep CRM/enterprise/cloud productization.
+1. **Builder Beta** — research/quality-governed secure CMS/site-builder + data/performance/code-quality foundations.
+2. **Pro** — AI-native, Performance Intelligence, Reliability, Product Outcomes and Delivery Excellence.
+3. **Platform** — marketplace, Payment Security + Commerce, portals, managed cloud, enterprise/security/ops/cost.
+4. **Production** — performance/accessibility/payment-enabled/security/reliability/exact-source certification.
 
 ## End-of-pass handoff
 
-Before ending a meaningful pass:
-
-1. update affected registry unit status/evidence;
-2. update `.ai/state.json`;
-3. update `.ai/handoff/current.md`;
-4. update `.ai/plans/active.md`;
-5. update capability/stage/release/security docs if scope changed;
-6. record source and target evidence separately;
-7. state next exact action;
-8. never delete historical evidence.
+Update affected registries, state, handoff, active plan, and changed roadmap/quality/data/security/performance/reliability docs. Record source/target/provider/outcome evidence separately and state the exact next action. Preserve history.
 
 ## Final release rule
 
-`N2-STABLE-100` cannot be reached by percentage estimates. It requires preceding production gates and `RELEASE-CERT-100` evidence. Capability coverage is tracked by the registry/matrix, not a vague global completion percentage.
+`N2-STABLE-100` cannot be reached by percentage estimates. It requires preceding production gates and `RELEASE-CERT-100` evidence for the intended source/deployment capabilities. Payment-specific evidence is conditional on payment support being enabled, but cannot be skipped when it is enabled.
