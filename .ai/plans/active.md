@@ -6,8 +6,8 @@
 - Registered development unit: `SYS-RUNTIME-IDENTITY`
 - Release train: `builder-beta`
 - Status: `BLOCKED` pending real-target execution
-- Current repair-tooling source base: `main@7abf7a8dfded06b21f1e179c1635146d6a1fcf1b`
-- Repair-tooling branch: `fix/rc93-post-install-identity-repair-pack`
+- Canonical repair-tooling source: `main@626c8fc656bc28d23000c3e9e5ed6d220d9804a7` (PR #26)
+- Exact-head source certification: PR head `d664aa1e7639439a5590feeb94c417714e84258e`, run `#763`, PASS
 - Real target: Windows + Laragon, `D:\laragon\www\nexora`
 - Installed target release: `1.0.0-rc.93`
 - Method: bounded existing-problem repair; DMAIC/control evidence applies to the missing repair-artifact/tooling gap
@@ -48,14 +48,14 @@ Observed stale post-install fingerprints:
 
 The legacy handoff said a prepared external rc.93 Post-Install Identity Repair Pack existed, but the repository did not contain a discoverable executable artifact. That was a real zero-skip execution gap: the plan required a critical repair mechanism that a future agent/operator could not deterministically recover from source.
 
-The source-side corrective work for that gap is now represented by:
+PR #26 closed that source-side gap and merged the canonical repair tooling:
 
 - `scripts/rc93-post-install-identity-repair.php` — self-contained external repair executable;
 - `scripts/rc93-post-install-identity-repair.ps1` — Windows/PowerShell wrapper;
 - `tests/Unit/Certification/Rc93PostInstallIdentityRepairPackTest.php` — regression/control contract;
 - `docs/runtime/RC93_POST_INSTALL_IDENTITY_REPAIR.md` — operator procedure.
 
-This source work does **not** change the target status. `RUNTIME-CLOSURE-001` remains BLOCKED until real-target execution passes.
+This source closure does **not** change the target status. `RUNTIME-CLOSURE-001` remains BLOCKED until real-target execution passes.
 
 ## Guardrails
 
@@ -125,7 +125,7 @@ No product performance change is intended. Reliability requirement is determinis
 - [x] Add a version-pinned, dry-run-first external repair executable.
 - [x] Add explicit Windows wrapper and operator documentation.
 - [x] Add regression/control coverage for version pin, allowed mismatch set, confirmation, backup/rollback and forbidden upgrade/shell paths.
-- [ ] Require exact-head source certification PASS and merge before using the pack as canonical source tooling.
+- [x] Exact-head source certification PASS (`run #763`) and canonical merge complete (`PR #26`, `main@626c8fc656bc28d23000c3e9e5ed6d220d9804a7`).
 
 ### A — safe rc.93 repair on the real target
 
