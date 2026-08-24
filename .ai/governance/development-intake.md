@@ -17,6 +17,7 @@ request / discovered gap
     -> register or reconcile unit
     -> map parent stage + dependencies
     -> architecture/data/security/API/AI impact
+    -> performance/code-quality/budget impact
     -> acceptance criteria + tests + rollback
     -> active plan
     -> implementation
@@ -40,7 +41,7 @@ Every planned unit uses one type:
 - `ai-tool` — typed AI tool callable through the AI Tool Registry.
 - `ai-agent` — bounded planner/assistant/agent using approved AI tools.
 - `migration-adapter` — source-platform import/migration adapter.
-- `ops-capability` — deployment, observability, backup, DR or cloud operational capability.
+- `ops-capability` — deployment, observability, performance, backup, DR or cloud operational capability.
 - `security-control` — preventive/detective/response security capability.
 
 ## Unit lifecycle
@@ -68,7 +69,7 @@ The AI may plan it immediately. Before implementation it must:
 3. map it to a canonical stage/release train;
 4. record dependencies;
 5. create/update the active execution plan;
-6. perform mandatory architecture/security/data/API/AI impact review;
+6. perform mandatory architecture/security/data/API/AI/performance impact review;
 7. define verification and rollback;
 8. only then write implementation code.
 
@@ -123,13 +124,35 @@ Every unit must record:
 15. extension/package surface;
 16. AI read/draft/execute exposure;
 17. observability/audit requirements;
-18. performance/cache considerations;
+18. **performance/code-quality impact, budget IDs and reproducible test profiles, or explicit `NOT_APPLICABLE` reason**;
 19. testing/eval strategy;
 20. target verification steps;
 21. rollback/recovery/update compatibility;
 22. documentation/migration notes;
 23. explicit acceptance criteria;
 24. explicit out-of-scope items.
+
+## Performance planning rule
+
+Performance is a design constraint, not a final release cleanup task.
+
+For any unit that can affect runtime behavior, the active plan must consider:
+
+- public frontend load and Core Web Vitals impact;
+- Admin/Studio browser/API load;
+- backend route/controller/service execution;
+- DB query count/time and N+1/duplication risk;
+- cache/invalidation;
+- external HTTP/storage cost;
+- CPU/wall time/peak memory where relevant;
+- JS/CSS/image/font/request/bundle cost;
+- Theme/Extension/App attribution;
+- code-quality/build regressions;
+- baseline/budget and test profile.
+
+Use `.ai/performance/performance-budget-template.md` when a measurable budget applies.
+
+The accepted performance architecture lives in `.ai/performance/performance-platform.md` and `.ai/roadmap/capability-matrix-phase4-performance.md`.
 
 ## Package planning rule
 
@@ -146,15 +169,21 @@ Before AI creates an Extension/App/Integration/Studio Pack/Theme, the plan must 
 - network/filesystem/secret access;
 - Sentinel/Supply Chain expectations;
 - install/activate/deactivate/update/rollback/uninstall behavior;
-- compatibility and regression tests.
+- compatibility and regression tests;
+- **frontend asset/request/main-thread budget where applicable**;
+- **backend/query/cache/memory/runtime budget where applicable**;
+- **hook/event/filter/slot attribution expectations**;
+- **code-quality profile and package-version performance comparison policy**.
 
 No package may rely on private Core shortcuts merely because it is first-party.
 
+A package may not claim a Nexora performance/quality badge without reproducible source/build/package identity, test profile and evidence. Performance/quality status is separate from Sentinel security trust.
+
 ## New feature planning rule
 
-A new feature inside an existing system is still a unit. Do not bypass planning by calling it a 'small change' when it changes behavior, data, permissions, public contracts, package capability, security or UX semantics.
+A new feature inside an existing system is still a unit. Do not bypass planning by calling it a 'small change' when it changes behavior, data, permissions, public contracts, package capability, security, performance or UX semantics.
 
-Trivial typo/copy/style-only fixes may remain inside the active unit without a new registry item when they do not alter behavior or contracts.
+Trivial typo/copy/style-only fixes may remain inside the active unit without a new registry item when they do not alter behavior, contracts or measurable runtime/build impact.
 
 ## Architecture decision rule
 
@@ -167,16 +196,21 @@ Create or update an ADR before implementation when a unit:
 - changes extension/theme isolation;
 - introduces a new external protocol/provider abstraction;
 - changes the canonical content/routing/query model;
+- introduces a new performance telemetry/runner/attribution model;
 - gives AI a new execution capability.
 
 ## Security rule
 
 Security is continuous, not a late stage. Every unit receives a security impact classification. `high` and `critical` units require an explicit threat model before implementation.
 
+Performance tooling must also be threat-modeled when it can inspect sensitive runtime traces, execute browsers, accept external URLs, run package analyzers or access authenticated test flows.
+
 ## AI development rule
 
 An AI agent may plan, implement and test work, but it may not use its own claims as sufficient certification. High-risk/security/architecture work requires independent review evidence or a separate review pass, plus automated checks and real-target evidence where applicable.
 
+AI performance recommendations must be grounded in measured evidence and may not fabricate performance PASS results or silently disable security/features/packages to improve a score.
+
 ## Enforcement destination
 
-`AI-GOV-AUTOMATION-100` will add machine validation so CI can reject inconsistent/unplanned work. Until that stage is implemented, `AGENTS.md`, this protocol, the development-unit registry, the active plan and review rules are mandatory procedural controls.
+`AI-GOV-AUTOMATION-100` will add machine validation so CI can reject inconsistent/unplanned work. Until that stage is implemented, `AGENTS.md`, this protocol, the development-unit registries, the active plan and review rules are mandatory procedural controls.
