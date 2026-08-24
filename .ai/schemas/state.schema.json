@@ -3,149 +3,92 @@
   "$id": "https://nexora.local/.ai/schemas/state.schema.json",
   "title": "Nexora AI Execution State",
   "type": "object",
-  "required": [
-    "schema_version",
-    "project",
-    "control_plane_revision",
-    "base_branch",
-    "base_sha",
-    "source_release",
-    "source_status",
-    "target_status",
-    "canonical_stage_count",
-    "current_stage",
-    "active_development_units",
-    "next_actions",
-    "next_stage",
-    "governance",
-    "updated_at"
-  ],
+  "required": ["schema_version", "project", "control_plane_revision", "base_branch", "base_sha", "source_release", "source_status", "target_status", "canonical_stage_count", "current_stage", "active_development_units", "next_actions", "next_stage", "governance", "updated_at"],
   "properties": {
-    "schema_version": { "type": "string" },
-    "project": { "const": "Nexora" },
-    "control_plane_revision": { "type": "integer", "minimum": 1 },
-    "control_plane_branch": { "type": "string" },
-    "base_branch": { "type": "string", "minLength": 1 },
-    "base_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-    "last_verified_source_sha": {
-      "oneOf": [
-        { "type": "null" },
-        { "type": "string", "pattern": "^[0-9a-f]{40}$" }
-      ]
-    },
-    "source_release": { "type": "string", "minLength": 1 },
-    "installer_protocol": { "type": "string" },
-    "source_generation": { "type": "string" },
-    "source_status": { "$ref": "#/$defs/status" },
-    "target_status": { "$ref": "#/$defs/status" },
-    "canonical_stage_count": { "type": "integer", "minimum": 1 },
-    "current_stage": { "$ref": "#/$defs/stage" },
-    "active_development_units": {
-      "type": "array",
-      "minItems": 1,
-      "items": { "type": "string", "pattern": "^(SYS|MOD|FEAT|EXT|APP|INT|SPK|THM|AIT|AIA|MIG|OPS|SEC)-[A-Z0-9-]+$" },
-      "uniqueItems": true
-    },
+    "schema_version": {"type": "string"},
+    "project": {"const": "Nexora"},
+    "control_plane_revision": {"type": "integer", "minimum": 1},
+    "control_plane_branch": {"type": "string"},
+    "base_branch": {"type": "string", "minLength": 1},
+    "base_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "last_verified_source_sha": {"oneOf": [{"type": "null"}, {"type": "string", "pattern": "^[0-9a-f]{40}$"}]},
+    "source_release": {"type": "string", "minLength": 1},
+    "installer_protocol": {"type": "string"},
+    "source_generation": {"type": "string"},
+    "source_status": {"$ref": "#/$defs/status"},
+    "target_status": {"$ref": "#/$defs/status"},
+    "canonical_stage_count": {"type": "integer", "minimum": 1},
+    "current_stage": {"$ref": "#/$defs/stage"},
+    "active_development_units": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^(SYS|MOD|FEAT|EXT|APP|INT|SPK|THM|AIT|AIA|MIG|OPS|SEC)-[A-Z0-9-]+$"}, "uniqueItems": true},
     "completed_control_stages": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "status"],
-        "properties": {
-          "id": { "type": "string" },
-          "status": { "$ref": "#/$defs/status" },
-          "evidence": { "type": "string" }
-        },
+        "properties": {"id": {"type": "string"}, "status": {"$ref": "#/$defs/status"}, "evidence": {"type": "string"}},
         "additionalProperties": false
       }
     },
-    "current_target": { "type": "object" },
+    "current_target": {"type": "object"},
     "blocker": {
       "type": "object",
       "required": ["category", "summary"],
-      "properties": {
-        "category": { "type": "string" },
-        "summary": { "type": "string" },
-        "guardrail": { "type": "string" }
-      },
+      "properties": {"category": {"type": "string"}, "summary": {"type": "string"}, "guardrail": {"type": "string"}},
       "additionalProperties": false
     },
-    "next_actions": {
-      "type": "array",
-      "minItems": 1,
-      "items": { "type": "string", "minLength": 1 }
-    },
+    "next_actions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
     "next_stage": {
       "type": "object",
       "required": ["id", "name", "advance_when"],
-      "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "advance_when": { "type": "string" }
-      },
+      "properties": {"id": {"type": "string"}, "name": {"type": "string"}, "advance_when": {"type": "string"}},
       "additionalProperties": false
     },
-    "post_core_qa_sequence": { "type": "array", "items": { "type": "string" } },
+    "post_core_qa_sequence": {"type": "array", "items": {"type": "string"}},
     "governance": {
       "type": "object",
-      "required": [
-        "development_unit_registry_required",
-        "active_plan_required_before_substantial_implementation",
-        "new_feature_must_be_planned_before_implementation",
-        "zero_skip_stage_protocol_required",
-        "zero_hidden_work_protocol_required"
-      ],
+      "required": ["development_unit_registry_required", "active_plan_required_before_substantial_implementation", "new_feature_must_be_planned_before_implementation", "zero_skip_stage_protocol_required", "zero_hidden_work_protocol_required"],
       "properties": {
-        "development_unit_registry_required": { "const": true },
-        "domain_child_registries_allowed": { "type": "boolean" },
-        "active_plan_required_before_substantial_implementation": { "const": true },
-        "new_feature_must_be_planned_before_implementation": { "const": true },
-        "ai_discovered_optional_work_requires_promotion_or_active_scope": { "type": "boolean" },
-        "high_critical_threat_model_required": { "type": "boolean" },
-        "first_party_packages_use_public_contracts": { "type": "boolean" },
-        "source_and_target_evidence_separate": { "type": "boolean" },
-        "zero_skip_stage_protocol_required": { "const": true },
-        "zero_hidden_work_protocol_required": { "const": true },
-        "performance_budget_or_not_applicable_required_for_runtime_affecting_units": { "type": "boolean" },
-        "theme_extension_runtime_cost_attribution_required_when_applicable": { "type": "boolean" },
-        "performance_quality_security_verdicts_separate": { "type": "boolean" }
+        "development_unit_registry_required": {"const": true},
+        "domain_child_registries_allowed": {"type": "boolean"},
+        "active_plan_required_before_substantial_implementation": {"const": true},
+        "new_feature_must_be_planned_before_implementation": {"const": true},
+        "ai_discovered_optional_work_requires_promotion_or_active_scope": {"type": "boolean"},
+        "research_voc_ctq_required_for_substantial_new_work": {"type": "boolean"},
+        "dmadv_for_new_or_redesigned_substantial_work": {"type": "boolean"},
+        "dmaic_for_defect_incident_regression_improvement": {"type": "boolean"},
+        "fmea_required_for_high_critical_complex_failures_when_applicable": {"type": "boolean"},
+        "data_flow_governance_required_for_material_data_changes": {"type": "boolean"},
+        "high_critical_threat_model_required": {"type": "boolean"},
+        "first_party_packages_use_public_contracts": {"type": "boolean"},
+        "source_and_target_evidence_separate": {"type": "boolean"},
+        "zero_skip_stage_protocol_required": {"const": true},
+        "zero_hidden_work_protocol_required": {"const": true},
+        "performance_budget_or_not_applicable_required_for_runtime_affecting_units": {"type": "boolean"},
+        "theme_extension_runtime_cost_attribution_required_when_applicable": {"type": "boolean"},
+        "reliability_plan_required_for_critical_stateful_provider_workflows": {"type": "boolean"},
+        "payment_provider_profile_required_for_payment_integrations": {"type": "boolean"},
+        "raw_payment_account_data_forbidden_in_standard_payment_profile": {"type": "boolean"},
+        "payment_specific_evidence_separate_from_generic_sentinel": {"type": "boolean"},
+        "performance_quality_security_verdicts_separate": {"type": "boolean"}
       },
       "additionalProperties": true
     },
-    "verification_required": { "type": "object" },
-    "release_trains": {
-      "type": "array",
-      "items": { "enum": ["builder-beta", "pro", "platform", "production"] },
-      "uniqueItems": true
-    },
-    "roadmap_sources": { "type": "array", "items": { "type": "string" } },
-    "phase_1_scope": { "type": "string" },
-    "phase_2_scope": { "type": "string" },
-    "phase_3_scope": { "type": "string" },
-    "phase_4_scope": { "type": "string" },
-    "updated_at": { "type": "string", "format": "date-time" }
+    "verification_required": {"type": "object"},
+    "release_trains": {"type": "array", "items": {"enum": ["builder-beta", "pro", "platform", "production"]}, "uniqueItems": true},
+    "roadmap_sources": {"type": "array", "items": {"type": "string"}},
+    "phase_1_scope": {"type": "string"},
+    "phase_2_scope": {"type": "string"},
+    "phase_3_scope": {"type": "string"},
+    "phase_4_scope": {"type": "string"},
+    "phase_5_scope": {"type": "string"},
+    "updated_at": {"type": "string", "format": "date-time"}
   },
   "$defs": {
-    "status": {
-      "enum": [
-        "SOURCE_DONE",
-        "TARGET_VERIFIED",
-        "PARTIAL",
-        "BLOCKED",
-        "PLANNED",
-        "EXTERNAL",
-        "DEFERRED_CERTIFICATION"
-      ]
-    },
+    "status": {"enum": ["SOURCE_DONE", "TARGET_VERIFIED", "PARTIAL", "BLOCKED", "PLANNED", "EXTERNAL", "DEFERRED_CERTIFICATION"]},
     "stage": {
       "type": "object",
       "required": ["id", "name", "status"],
-      "properties": {
-        "id": { "type": "string", "pattern": "^[A-Z0-9-]+$" },
-        "name": { "type": "string", "minLength": 1 },
-        "status": { "$ref": "#/$defs/status" },
-        "legacy_aliases": { "type": "array", "items": { "type": "string" } }
-      },
+      "properties": {"id": {"type": "string", "pattern": "^[A-Z0-9-]+$"}, "name": {"type": "string", "minLength": 1}, "status": {"$ref": "#/$defs/status"}, "legacy_aliases": {"type": "array", "items": {"type": "string"}}},
       "additionalProperties": false
     }
   },
