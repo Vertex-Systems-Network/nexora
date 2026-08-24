@@ -19,8 +19,6 @@
         "diagnostics:target": "php scripts/target-diagnostics.php",
         "diagnostics:target:full": "php scripts/target-diagnostics.php --install-deps --full",
         "repair:rc93": "php scripts/rc93-post-install-identity-repair.php",
-        "runtime:compatibility": "php artisan nexora:runtime:compatibility-status --deep",
-        "runtime:post-install": "php artisan nexora:runtime:post-install-status --assert-ready",
         "verify:dependencies": "php scripts/dependency-contract-verify.php --strict-locks",
         "audit:dependencies": "php scripts/dependency-audit.php",
         "certify:target": "php scripts/target-runtime-run.php",
