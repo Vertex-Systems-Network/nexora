@@ -5,10 +5,11 @@ mission: >-
   Build a secure, extensible, self-hostable and optionally managed AI-native web platform that
   combines and advances the strongest ideas from WordPress, Webflow, Wix, Shopify, Framer,
   component-driven visual builders and enterprise SaaS while using evidence-driven quality,
-  formal data governance, reliability engineering, an explainable System Graph and strict
-  financial/payment boundaries. Themes, extensions, apps, integrations and AI agents may not
-  bypass Nexora public contracts, capabilities, tenancy, publishing semantics, data policies,
-  planning governance, performance, reliability, graph evidence or security boundaries.
+  formal data governance, reliability engineering, an explainable System Graph, governed
+  AI-native development orchestration and strict financial/payment boundaries. Themes,
+  extensions, apps, integrations, product AI agents and development AI agents may not bypass
+  Nexora public contracts, capabilities, tenancy, planning governance, evidence authority,
+  performance, reliability, graph evidence or security boundaries.
 
 canonical_control_plane: .ai
 agent_entrypoint: AGENTS.md
@@ -19,11 +20,15 @@ legacy_master_plan: docs/NEXORA_PLAN_STATUS.md
 
 governance:
   development_intake: .ai/governance/development-intake.md
+  ai_development_orchestration: .ai/governance/ai-development-orchestration.md
+  ai_governance_automation: .ai/governance/automation-plan.md
+  ai_development_run_schema: .ai/schemas/ai-development-run.schema.json
   development_unit_registry: .ai/registry/development-units.json
   domain_registries:
     - .ai/registry/performance-units.json
     - .ai/registry/quality-payment-units.json
     - .ai/registry/flow-units.json
+    - .ai/registry/ai-development-units.json
   active_plan: .ai/plans/active.md
   plan_template: .ai/plans/plan-template.md
   stage_graph: .ai/roadmap/stages.md
@@ -79,6 +84,7 @@ special_security_profiles:
   - identity-provider
   - high-risk-data
   - ai-execution
+  - ai-development-orchestration
   - infrastructure
   - flow-sensitive-topology
 
@@ -100,6 +106,21 @@ non_negotiable_principles:
   - evidence-before-assumption
   - dmadv-for-new-redesigned-substantial-work
   - dmaic-and-control-for-defects-incidents-regressions
+  - ai-development-is-a-privileged-supply-chain-workflow
+  - ai-development-run-binds-exact-base-plan-policy-and-scope
+  - repository-and-external-task-artifacts-are-untrusted-instruction-inputs
+  - ai-scope-expansion-replans-before-mutation
+  - concurrent-ai-writers-fail-closed-on-overlap-or-stale-base
+  - ai-development-tools-use-least-privilege-capabilities
+  - governance-cannot-self-weaken-to-certify-the-same-change
+  - test-oracle-cannot-be-silently-weakened-for-green-status
+  - ai-authored-pass-prose-is-not-machine-runtime-or-provider-evidence
+  - critical-review-binds-exact-head-and-is-independent
+  - repeated-ai-failure-loops-are-bounded-and-return-to-analysis
+  - ai-dependency-additions-require-supply-chain-intake
+  - material-ai-waivers-are-scoped-expiring-and-audited
+  - reviewed-and-promoted-source-artifact-identity-must-match
+  - no-private-chain-of-thought-required-for-development-audit
   - data-authority-lineage-and-classification-explicit
   - graph-plus-evidence-is-truth-diagram-is-projection
   - declared-static-observed-tested-production-and-ai-inferred-evidence-remain-distinct
