@@ -2,10 +2,11 @@ schema_version: "1.0"
 project: Nexora
 product_class: advanced extensible web platform / CMS / site builder / application ecosystem
 mission: >-
-  Build a secure, extensible, self-hostable platform that combines and advances the strongest
-  ideas from WordPress, Webflow, Wix, Shopify and enterprise SaaS without allowing themes,
-  extensions, apps or integrations to bypass Nexora public contracts, capabilities, tenancy,
-  publishing semantics or security boundaries.
+  Build a secure, extensible, self-hostable and optionally managed AI-native web platform that
+  combines and advances the strongest ideas from WordPress, Webflow, Wix, Shopify, Framer,
+  component-driven visual builders and enterprise SaaS without allowing themes, extensions,
+  apps, integrations or AI agents to bypass Nexora public contracts, capabilities, tenancy,
+  publishing semantics, planning governance or security boundaries.
 
 canonical_control_plane: .ai
 agent_entrypoint: AGENTS.md
@@ -14,9 +15,25 @@ security_constitution: SECURITY.md
 legacy_operational_ledger: NEXORA_AI_PROJECT_STATE.md
 legacy_master_plan: docs/NEXORA_PLAN_STATUS.md
 
+governance:
+  development_intake: .ai/governance/development-intake.md
+  development_unit_registry: .ai/registry/development-units.json
+  active_plan: .ai/plans/active.md
+  plan_template: .ai/plans/plan-template.md
+  stage_graph: .ai/roadmap/stages.md
+  release_trains: .ai/roadmap/release-trains.md
+  security_program: .ai/security/security-program.md
+  threat_model_template: .ai/security/threat-model-template.md
+
 current_source_release: 1.0.0-rc.94
 installer_protocol: v5.29
 source_generation: n1-v5.29
+
+release_trains:
+  - builder-beta
+  - pro
+  - platform
+  - production
 
 package_families:
   extension_lifecycle:
@@ -43,11 +60,21 @@ extension_migration_policies:
 non_negotiable_principles:
   - core-remains-generic
   - public-contracts-and-capabilities
+  - pre-plan-before-implementation
+  - registered-development-unit-before-code
+  - no-hidden-work
   - fail-closed-security
+  - continuous-security-not-late-audit
+  - threat-model-high-and-critical-work
   - quarantine-before-execution
+  - declarative-extension-runtime-preferred
+  - no-private-core-shortcuts-for-first-party-packages
   - deterministic-runtime-registration
   - shared-admin-design-system
   - portable-migrations
+  - builder-kernel-before-deep-business-breadth
+  - ai-is-governed-client-not-privileged-bypass
+  - typed-least-privilege-ai-tools
   - source-done-is-not-target-verified
   - real-target-evidence-before-product-completion
   - append-only-history-and-evidence
