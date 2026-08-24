@@ -1,94 +1,90 @@
 # Nexora Future Systems Registry
 
-This file lists future platform systems accepted into the canonical roadmap. These are planning commitments, not implementation claims.
+Planning commitments only; not implementation claims. Use the canonical stage graph for order/dependencies and main/domain registries for development-unit detail.
 
-Use:
+## Governance / Quality Engineering
 
-- `.ai/roadmap/stages.md` for canonical execution order/dependencies;
-- `.ai/registry/development-units.json` for pre-planned implementation units;
-- `.ai/governance/development-intake.md` before adding or starting any new unit;
-- `.ai/roadmap/release-trains.md` for Builder Beta / Pro / Platform / Production product gates.
+- `AI-GOV-AUTOMATION-100` — machine-enforced registry/stage/plan/state/DoD consistency.
+- `RESEARCH-DISCOVERY-100` — ResearchBrief/VOC/problem validation/current market/standards/baseline/CTQ inputs.
+- `QUALITY-GOVERNANCE-100` — closed-loop Quality OS, proportional DMADV/DMAIC, FMEA/root-cause/control-plan traceability.
+- `SECURITY-BASELINE-200` — early identity/browser/AppSec/tenancy/secrets/threat-model baseline.
 
-## Governance and secure-development controls
+## Architecture / Data / website-platform primitives
 
-- `AI-GOV-AUTOMATION-100` — machine-enforced registry/stage/plan/state/DoD/handoff consistency checks.
-- `SECURITY-BASELINE-200` — early continuous security baseline covering identity/MFA, browser hardening, AppSec CI, tenancy/authorization, secrets and threat modeling.
+- `ARCH-BOUNDARY-100`
+- `CONTENT-MODEL-200`
+- `DATA-GOVERNANCE-200` — formal DataFlow/classification/authority/lineage/retention/export/delete and package/API/AI data policy.
+- `TAXONOMY-200`
+- `QUERY-ENGINE-200`
+- `ROUTING-200`
+- `NAVIGATION-100`
+- `THEME-CONTRACT-200`
+- `EXT-SDK-200`
+- `SITE-BUILDER-200`
+- `THEME-STUDIO-200`
+- `RELEASE-WORKFLOW-200`
+- `TEMPLATE-ECOSYSTEM-100`
 
-## Architecture and website-platform primitives
+## Delivery / performance / content operations
 
-- `ARCH-BOUNDARY-100` — architecture/implementation boundary reconciliation and enforcement.
-- `CONTENT-MODEL-200` — dynamic content types, custom fields/groups, relations, hierarchy, schema versioning and policies.
-- `TAXONOMY-200` — generic custom taxonomy definitions and bindings.
-- `QUERY-ENGINE-200` — typed content/archive query engine.
-- `ROUTING-200` — permalink, archive, rewrite, redirect and canonical route platform.
-- `NAVIGATION-100` — public menus/navigation and theme locations.
-- `THEME-CONTRACT-200` — deterministic theme manifest/template hierarchy and presentation contracts.
-- `EXT-SDK-200` — typed events/filters/UI slots/runtime APIs and extension registration surfaces.
-- `SITE-BUILDER-200` — structured visual site builder 2.0.
-- `THEME-STUDIO-200` — global visual design system and theme-level editing.
-- `RELEASE-WORKFLOW-200` — preview/staging/branching/merge/scheduled and selective publishing/rollback workflow.
-- `TEMPLATE-ECOSYSTEM-100` — site/page/section/component/theme/starter kits with safe dependency/update/customization model.
+- `I18N-200`
+- `FRONTEND-RUNTIME-200`
+- `PERFORMANCE-FOUNDATION-200`
+- `CODE-QUALITY-200`
+- `MEDIA-DAM-200`
+- `SEARCH-200`
+- `FORMS-WORKFLOW-200`
+- `PRIVACY-CONSENT-100`
+- `SEO-AI-200`
 
-## Delivery, performance, content operations and discovery
+## AI / API / interoperability
 
-- `I18N-200` — localization and multilingual publishing 2.0.
-- `FRONTEND-RUNTIME-200` — cache/CDN/image/rendering delivery runtime.
-- `PERFORMANCE-FOUNDATION-200` — provider-neutral lab/RUM/backend profiling, Admin/server traces, Theme/Extension attribution, performance budgets and regression baselines.
-- `CODE-QUALITY-200` — Core/Theme/Extension/App code-quality analysis with static/build findings correlated to runtime cost.
-- `PERFORMANCE-INTELLIGENCE-200` — Nexora Performance Center: PageSpeed/GTmetrix-class lab/field reports, waterfall, filmstrip/video, scripted profiles, frontend/backend/package attribution, compare/history/monitoring/alerts and secure external runners.
-- `MEDIA-DAM-200` — DAM Studio 2.0 and asset intelligence.
-- `SEARCH-200` — search facets and provider abstraction.
-- `FORMS-WORKFLOW-200` — forms, lead capture and visual workflow product.
-- `PRIVACY-CONSENT-100` — consent categories, GPC/DNT, retention, export/delete and regional policy integration including performance RUM policy.
-- `SEO-AI-200` — SEO 2.0 + AEO/AI visibility, AI-readable representations and entity/citation intelligence.
+- `AI-KERNEL-100`
+- `API-PLATFORM-100`
+- `CONFIG-AS-CODE-100`
+- `AGENT-INTEROP-100`
+- `AI-CONTENT-100`
+- `AI-DESIGN-100`
+- `DESIGN-IMPORT-100`
+- `AI-DX-100`
 
-See `.ai/performance/performance-platform.md`, `.ai/performance/performance-budget-template.md` and `.ai/roadmap/capability-matrix-phase4-performance.md` for the accepted performance architecture.
+## Performance / Reliability / Product improvement
 
-## API, interoperability and configuration
+- `PERFORMANCE-INTELLIGENCE-200` — PageSpeed/GTmetrix-class analysis plus Nexora-native source/package attribution.
+- `RELIABILITY-ENGINEERING-200` — SLI/SLO/error budgets, timeout/retry/idempotency, failure isolation, fault testing and incident/reconciliation control.
+- `EXPERIMENTATION-100`
+- `PRODUCT-OUTCOMES-100` — privacy-aware CTQ/adoption/task-success/time-to-value/error/feedback evidence.
+- `PERSONALIZATION-100`
+- `APP-RUNTIME-100`
+- `MIGRATION-CENTER-100`
+- `DX-200`
+- `DELIVERY-EXCELLENCE-100` — engineering-flow/DORA-style lead/stability/recovery/rework/AI-quality evidence without individual ranking.
 
-- `API-PLATFORM-100` — REST/GraphQL/OAuth/headless/webhook subscription platform.
-- `CONFIG-AS-CODE-100` — import/export and configuration-as-code platform.
-- `AGENT-INTEROP-100` — external AI-agent gateway with scoped identity, capability negotiation and typed auditable tools.
-- `DESIGN-IMPORT-100` — Figma/design-source import into Nexora tokens/components/layout AST with validation.
+## Marketplace / Payments / Commerce / customer systems
 
-## AI-native product systems
+- `MARKETPLACE-200`
+- `PAYMENT-SECURITY-200` — mandatory payment-provider security gate before Commerce 2.0: provider-hosted/tokenized default, raw account-data exclusion, purpose-specific capabilities, Secret/Network Brokers, hardened webhook/payment surface, idempotency/reconciliation, sandbox activation and revocation/recovery.
+- `COMMERCE-200` — Storefront/Checkout 2.0 only after payment-security boundary for payment-enabled flows.
+- `PORTAL-200`
+- `COLLAB-200`
 
-- `AI-KERNEL-100` — model gateway, agent runtime, Tool Registry, capability gate, context, structured actions, approvals, audit, prompt registry, evals and telemetry.
-- `AI-CONTENT-100` — governed AI content/CMS/media/SEO/AEO workflows.
-- `AI-DESIGN-100` — AI Design Professional and structured Studio/site-building workflows.
-- `AI-DX-100` — AI-assisted extension/app/theme/SDK development and independent review workflow, consuming code-quality/performance evidence.
+Payment planning details live in `.ai/security/payment-security.md`, `.ai/registry/quality-payment-units.json` and the Phase 5 capability addendum. Generic Sentinel/package success is not payment certification.
 
-## Optimization and app-runtime systems
+## Cloud / enterprise / security / operations / efficiency
 
-- `EXPERIMENTATION-100` — A/B and multivariate testing, goals, safe rollout, analytics, performance-impact evidence and AI-assisted variants.
-- `PERSONALIZATION-100` — privacy-safe audience/segment personalization with deterministic fallback.
-- `APP-RUNTIME-100` — capability-bounded low-code/full-stack functions/jobs/schedules/data actions/integrations/secrets runtime.
-
-## Marketplace and business systems
-
-- `MARKETPLACE-200` — publisher economy, discovery, licensing, compatibility, revocation, safe update channels and reproducible package quality/performance profiles.
-- `COMMERCE-200` — Storefront/Checkout 2.0, variants/inventory/discount/cart/functions/provider/fulfillment extension surfaces.
-- `PORTAL-200` — customer/member portal builder across commerce, CRM, membership and helpdesk.
-- `COLLAB-200` — collaboration, presence, locks, comments and approvals.
-
-## Migration, cloud, security and operations
-
-- `MIGRATION-CENTER-100` — WordPress/Webflow/Drupal/Shopify migration adapters and SEO-safe migration workflows.
-- `DX-200` — CLI/SDK/docs/reference package developer experience including performance/quality tooling.
-- `MANAGED-CLOUD-100` — optional managed Nexora hosting/provisioning/domains/SSL/CDN/backups/staging/distributed performance runners/monitoring/metering/scaling.
-- `SENTINEL-200` — vulnerability intelligence, stronger package policy, emergency revocation and real isolation strategy for executable workloads.
-- `ENTERPRISE-GOV-200` — enterprise governance 2.0.
-- `OBSERVABILITY-200` — diagnostics and operations center consuming shared performance telemetry rather than duplicating it.
-- `DR-PLATFORM-100` — updates, rollback, backup/restore and disaster recovery.
-- `PERF-CWV-CERT-100` — final performance/Core Web Vitals/frontend/backend/package/code-quality release gate.
-- `A11Y-CERT-100` — accessibility/international certification gate.
-- `RELEASE-CERT-100` — final exact-source/target release certification.
-- `N2-STABLE-100` — stable production release.
+- `MANAGED-CLOUD-100`
+- `SENTINEL-200`
+- `ENTERPRISE-GOV-200`
+- `OBSERVABILITY-200`
+- `EFFICIENCY-FINOPS-100` — provider-neutral request/tenant/storage/bandwidth/DB/AI/media/search/provider cost/resource attribution and budgets.
+- `DR-PLATFORM-100`
+- `PERF-CWV-CERT-100`
+- `A11Y-CERT-100`
+- `RELEASE-CERT-100`
+- `N2-STABLE-100`
 
 ## Planning rule
 
-A future system must not be implemented merely because it appears in this file. Before implementation it must have a registered development unit, mapped parent stage, active plan, dependencies, security classification, acceptance criteria, verification and rollback/recovery plan.
+Appearing here never authorizes coding by itself. Before implementation every system needs registered unit(s), active plan, research/CTQ evidence at proportional depth, architecture/data/security/privacy/performance/reliability decisions, tests/verification and rollback/control evidence.
 
-Performance-affecting work must also declare the relevant performance budget/test profile or explicitly state why runtime performance is not applicable.
-
-If a new capability is discovered later, add it to the plan/registry first. Do not hide it inside another stage or start coding it before planning.
+Payment providers additionally require the critical payment security profile and sandbox/security review. Newly discovered capabilities are planned/registered first; they are never hidden inside another stage.
