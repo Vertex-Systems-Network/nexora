@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 2,
+  "control_plane_revision": 3,
   "control_plane_branch": "ai/control-plane-phase-1",
   "base_branch": "main",
   "base_sha": "f854c50c0f7687fc87fdfab01b49562392af4ef4",
@@ -15,16 +15,14 @@
     "id": "RUNTIME-CLOSURE-001",
     "name": "Installation + Runtime Closure",
     "status": "BLOCKED",
-    "legacy_aliases": [
-      "N1.0A",
-      "DEV-3"
-    ]
+    "legacy_aliases": ["N1.0A", "DEV-3"]
   },
+  "active_development_units": ["SYS-RUNTIME-IDENTITY"],
   "completed_control_stages": [
     {
       "id": "AI-GOV-001",
       "status": "SOURCE_DONE",
-      "evidence": "AGENTS.md plus .ai control plane, imported system registry, Phase 2 capability matrix, canonical stage graph, AI architecture/design contracts and zero-skip execution protocol on ai/control-plane-phase-1"
+      "evidence": "AGENTS.md plus .ai control plane, system/capability registries, canonical stage graph, release trains, development intake/schema/registry, security program, plan template, AI architecture/design contracts and zero-hidden-work execution protocol on ai/control-plane-phase-1"
     }
   ],
   "current_target": {
@@ -50,19 +48,44 @@
     "name": "Super Admin + Core Application Functional QA",
     "advance_when": "RUNTIME-CLOSURE-001 is TARGET_VERIFIED"
   },
+  "post_core_qa_sequence": [
+    "AI-GOV-AUTOMATION-100",
+    "ADMIN-UX-CLOSURE-001",
+    "SECURITY-BASELINE-200",
+    "ARCH-BOUNDARY-100"
+  ],
+  "governance": {
+    "development_unit_registry_required": true,
+    "active_plan_required_before_substantial_implementation": true,
+    "new_feature_must_be_planned_before_implementation": true,
+    "ai_discovered_optional_work_requires_promotion_or_active_scope": true,
+    "high_critical_threat_model_required": true,
+    "first_party_packages_use_public_contracts": true,
+    "source_and_target_evidence_separate": true,
+    "zero_skip_stage_protocol_required": true,
+    "zero_hidden_work_protocol_required": true
+  },
   "verification_required": {
     "source_and_target_separate": true,
     "real_target_required_for_runtime_behavior": true,
     "architecture_review_required_for_boundary_changes": true,
+    "security_review_required_for_high_risk_boundaries": true,
     "regression_protection_required_for_fixed_blockers": true,
-    "zero_skip_stage_protocol_required": true,
+    "development_unit_registry_required": true,
     "active_plan_required_before_substantial_stage_implementation": true
   },
+  "release_trains": ["builder-beta", "pro", "platform", "production"],
   "roadmap_sources": [
     ".ai/roadmap/stages.md",
+    ".ai/roadmap/release-trains.md",
+    ".ai/governance/development-intake.md",
+    ".ai/registry/development-units.json",
     ".ai/roadmap/capability-matrix.md",
     ".ai/roadmap/competitive-benchmark.md",
+    ".ai/roadmap/future-systems.md",
     ".ai/plans/master-execution-plan.md",
+    ".ai/plans/plan-template.md",
+    ".ai/security/security-program.md",
     ".ai/architecture/ai-platform.md",
     ".ai/design/ai-design-professional.md",
     "NEXORA_AI_PROJECT_STATE.md",
@@ -71,6 +94,7 @@
     "SECURITY.md"
   ],
   "phase_1_scope": "Imported and normalized systems and plans already documented in the repository into a deterministic AI control plane.",
-  "phase_2_scope": "Added capability-gap planning for WordPress/Webflow/Wix/Shopify-class extensibility and Nexora AI-native product architecture, with explicit new stable stages and dependency ordering. No product/runtime implementation was performed in this planning phase.",
-  "updated_at": "2026-08-24T18:19:00+05:00"
+  "phase_2_scope": "Added capability-gap planning for WordPress/Webflow/Wix/Shopify-class extensibility and Nexora AI-native product architecture.",
+  "phase_3_scope": "Established mandatory pre-planned development units, builder-first release trains, early continuous security, release/staging workflow, templates, privacy, external-agent interoperability, AEO/AI-readable web, experimentation/personalization, design import, capability-bounded app runtime and optional Managed Cloud. New features must enter the plan/registry before implementation.",
+  "updated_at": "2026-08-24T18:48:00+05:00"
 }
