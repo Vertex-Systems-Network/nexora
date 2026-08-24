@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 5,
+  "control_plane_revision": 6,
   "control_plane_branch": "ai/control-plane-phase-1",
   "base_branch": "main",
   "base_sha": "f854c50c0f7687fc87fdfab01b49562392af4ef4",
@@ -11,7 +11,7 @@
   "source_generation": "n1-v5.29",
   "source_status": "PARTIAL",
   "target_status": "BLOCKED",
-  "canonical_stage_count": 73,
+  "canonical_stage_count": 75,
   "current_stage": {
     "id": "RUNTIME-CLOSURE-001",
     "name": "Installation + Runtime Closure",
@@ -23,7 +23,7 @@
     {
       "id": "AI-GOV-001",
       "status": "SOURCE_DONE",
-      "evidence": "AGENTS.md and .ai control plane now include pre-planned unit governance, research/quality lifecycle, data-flow governance, continuous security, payment-security architecture, performance/code-quality planning, reliability/delivery models, AI architecture/design contracts and deterministic handoff on ai/control-plane-phase-1. These are planning/control-plane claims only, not product implementation claims."
+      "evidence": "AGENTS.md and .ai control plane include pre-planned unit governance, Research/Quality lifecycle, data governance, continuous security, payment security, performance/code quality, reliability/delivery and Phase 6 canonical System Graph/Flow Intelligence planning with evidence classes, registries, DoD/verification and deterministic handoff. These are control-plane/planning claims only, not runtime/product implementation claims."
     }
   ],
   "current_target": {
@@ -68,6 +68,12 @@
     "dmaic_for_defect_incident_regression_improvement": true,
     "fmea_required_for_high_critical_complex_failures_when_applicable": true,
     "data_flow_governance_required_for_material_data_changes": true,
+    "system_graph_flow_plan_required_for_material_relationship_changes": true,
+    "system_graph_evidence_classes_must_remain_distinct": true,
+    "ai_inferred_flow_never_runtime_truth": true,
+    "flow_intelligence_cannot_duplicate_domain_truth": true,
+    "sensitive_flow_topology_default_deny": true,
+    "graph_database_requires_measured_need_and_adr": true,
     "high_critical_threat_model_required": true,
     "first_party_packages_use_public_contracts": true,
     "source_and_target_evidence_separate": true,
@@ -86,6 +92,9 @@
     "real_target_required_for_runtime_behavior": true,
     "architecture_review_required_for_boundary_changes": true,
     "data_flow_review_required_for_material_data_changes": true,
+    "system_graph_review_required_for_material_relationship_changes": true,
+    "flow_evidence_class_and_provenance_required_for_flow_claims": true,
+    "flow_sensitive_access_and_redaction_required": true,
     "security_review_required_for_high_risk_boundaries": true,
     "payment_security_review_required_for_payment_integrations": true,
     "provider_sandbox_required_for_payment_provider_activation": true,
@@ -94,7 +103,8 @@
     "active_plan_required_before_substantial_stage_implementation": true,
     "performance_evidence_required_for_performance_claims": true,
     "lab_field_backend_evidence_must_remain_distinguishable": true,
-    "future_product_outcome_must_not_be_fabricated": true
+    "future_product_outcome_must_not_be_fabricated": true,
+    "modelled_flow_must_not_be_presented_as_verified": true
   },
   "release_trains": ["builder-beta", "pro", "platform", "production"],
   "roadmap_sources": [
@@ -104,15 +114,18 @@
     ".ai/registry/development-units.json",
     ".ai/registry/performance-units.json",
     ".ai/registry/quality-payment-units.json",
+    ".ai/registry/flow-units.json",
     ".ai/roadmap/capability-matrix.md",
     ".ai/roadmap/capability-matrix-phase3.md",
     ".ai/roadmap/capability-matrix-phase4-performance.md",
     ".ai/roadmap/capability-matrix-phase5-quality-payments.md",
+    ".ai/roadmap/capability-matrix-phase6-flow-intelligence.md",
     ".ai/quality/engineering-lifecycle.md",
     ".ai/quality/lean-six-sigma.md",
     ".ai/quality/fmea-template.md",
     ".ai/research/research-brief-template.md",
     ".ai/data/data-flow-governance.md",
+    ".ai/flow/system-graph.md",
     ".ai/security/security-program.md",
     ".ai/security/payment-security.md",
     ".ai/performance/performance-platform.md",
@@ -134,6 +147,7 @@
   "phase_2_scope": "Added capability-gap planning for WordPress/Webflow/Wix/Shopify-class extensibility and Nexora AI-native product architecture.",
   "phase_3_scope": "Established mandatory pre-planned development units, builder-first release trains, early continuous security, release/staging workflow, templates, privacy, agent interoperability, AEO, experimentation/personalization, design import, bounded app runtime and optional Managed Cloud.",
   "phase_4_scope": "Integrated performance-by-design: PERFORMANCE-FOUNDATION-200, CODE-QUALITY-200 and PERFORMANCE-INTELLIGENCE-200 with frontend/Admin/backend/package attribution, budgets, PageSpeed/GTmetrix-class analysis and expanded final performance certification.",
-  "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS: RESEARCH-DISCOVERY-100, QUALITY-GOVERNANCE-100, proportional DMADV/DMAIC/VOC/CTQ/FMEA/control plans, DATA-GOVERNANCE-200, RELIABILITY-ENGINEERING-200, PRODUCT-OUTCOMES-100, DELIVERY-EXCELLENCE-100 and EFFICIENCY-FINOPS-100. Added PAYMENT-SECURITY-200 before Commerce 2.0 with a critical payment-provider security profile, raw account-data exclusion, provider-hosted/tokenized default, purpose-specific capabilities, Secret/Network Brokers, hardened webhooks/payment surface, idempotency/reconciliation, sandbox activation, independent review and kill/recovery controls. No runtime/product implementation is claimed by this planning revision.",
-  "updated_at": "2026-08-24T19:37:00+05:00"
+  "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
+  "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system. The plan now covers canonical typed graph nodes/edges, declared/static/observed/tested/production-observed/AI-inferred evidence separation, Theme/Extension/module/runtime/data/security/permission/error/state/transaction/concurrency/retry/event/network/DB/cache/deployment/config/supply-chain/ownership/test/performance/reliability/cost/payment/AI/release lenses, accessible flowchart projections, drift detection, read-only runtime replay, graph diff/history, change impact/blast radius, incident views, modelled what-if analysis, sensitive flow permissions/redaction, bounded tracing overhead, provider-neutral storage, AI explanation tools and CI/DoD/verification integration. These remain planning commitments, not product implementation claims.",
+  "updated_at": "2026-08-24T20:23:00+05:00"
 }
