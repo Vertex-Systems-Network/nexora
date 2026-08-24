@@ -9,18 +9,19 @@ Every AI agent, coding agent, reviewer, planner or automation working in this re
 3. Read `.ai/handoff/current.md`.
 4. Read `.ai/roadmap/stages.md` and release trains.
 5. Read `.ai/governance/development-intake.md`.
-6. Read `.ai/registry/development-units.json` plus relevant child registries (`performance-units.json`, `quality-payment-units.json`, future domain registries) and resolve requested work to registered unit ID(s).
+6. Read `.ai/registry/development-units.json` plus relevant child registries (`performance-units.json`, `quality-payment-units.json`, `flow-units.json`, future domain registries) and resolve requested work to registered unit ID(s).
 7. Read `.ai/plans/master-execution-plan.md`, `.ai/plans/active.md` and the plan template.
 8. For substantial new/redesigned work read `.ai/quality/engineering-lifecycle.md`, `.ai/quality/lean-six-sigma.md` and use the ResearchBrief/CTQ requirements.
 9. For material data work read `.ai/data/data-flow-governance.md`.
-10. Read `ARCHITECTURE.md` and `SECURITY.md` before architecture/runtime trust/tenancy/package/public API/security changes.
-11. Read `.ai/security/security-program.md`; use the threat-model template for high/critical work. Payment-provider work must additionally read `.ai/security/payment-security.md` and the payment child registry.
-12. Read `.ai/performance/performance-platform.md` and performance budgets for runtime-affecting work.
-13. Read `.ai/reliability/reliability-program.md` for critical recurring/provider/stateful workflows.
-14. Read `.ai/delivery/delivery-excellence.md` for release/CI/process work.
-15. Read AI architecture/design contracts when relevant.
-16. Read relevant capability matrices/addenda and system/future-system registries.
-17. Inspect current Git HEAD and relevant source/tests before trusting historical completion claims.
+10. For material runtime/package/data/security/permission/event/network/state/error/deployment relationship changes read `.ai/flow/system-graph.md` and plan expected graph/evidence contribution.
+11. Read `ARCHITECTURE.md` and `SECURITY.md` before architecture/runtime trust/tenancy/package/public API/security changes.
+12. Read `.ai/security/security-program.md`; use the threat-model template for high/critical work. Payment-provider work must additionally read `.ai/security/payment-security.md` and the payment child registry.
+13. Read `.ai/performance/performance-platform.md` and performance budgets for runtime-affecting work.
+14. Read `.ai/reliability/reliability-program.md` for critical recurring/provider/stateful workflows.
+15. Read `.ai/delivery/delivery-excellence.md` for release/CI/process work.
+16. Read AI architecture/design contracts when relevant.
+17. Read relevant capability matrices/addenda and system/future-system registries.
+18. Inspect current Git HEAD and relevant source/tests before trusting historical completion claims.
 
 ## Mandatory pre-planning rule
 
@@ -33,7 +34,7 @@ If requested work is absent from the main/relevant domain registry:
 3. add as `PROPOSED` or `PLANNED`;
 4. map stage/release train/dependencies;
 5. establish problem/research/VOC/baseline/CTQs at proportional depth;
-6. plan architecture/data/permissions/security/privacy/design/API/theme/Studio/AI/performance/reliability/observability/cost/test/rollback impact;
+6. plan architecture/data/permissions/security/privacy/design/API/theme/Studio/AI/performance/System-Graph/reliability/observability/cost/test/rollback impact;
 7. create/update active plan;
 8. only then implement.
 
@@ -51,6 +52,27 @@ AI-discovered optional work may be registered/planned but not silently implement
 
 Material data changes declare authoritative source, classification, tenant/site/user scope, transformations, derived copies, package/API/AI exposure, retention/export/delete and recovery implications. Derived caches/search/analytics/vector stores are not silently authoritative.
 
+## System Graph / Flow rule
+
+**Graph + evidence is truth. Diagram is a projection of that truth.**
+
+For material relationship changes, plan expected graph nodes/edges, package/source/version ownership, data/network/secret/permission/capability/state/error/retry/deployment relationships, evidence providers and expected-vs-observed checks or explicitly record `NOT_APPLICABLE`.
+
+Evidence classes are distinct:
+
+- `declared`
+- `static`
+- `observed`
+- `tested`
+- `production-observed`
+- `ai-inferred`
+
+Never promote `ai-inferred` or static analysis to observed runtime truth. One runtime trace does not prove all possible paths or concurrency safety.
+
+Flow Intelligence consumes authoritative Data Governance, Security/Sentinel, Performance, Reliability, Payment, Release and Observability evidence. Do not create a duplicate source of truth merely for visualization.
+
+The Flow Center is sensitive reconnaissance material: apply default-deny `flow.*` permissions, tenant scope, redaction, export/deep-trace audit and bounded sampling/retention.
+
 ## Payment security rule
 
 Payment-provider integrations are critical and use `.ai/security/payment-security.md`.
@@ -64,26 +86,27 @@ Standard profile invariants include:
 - browser return URL is not proof of payment;
 - signed provider webhook/API reconciliation, idempotency and concurrency guards are mandatory;
 - protected payment pages restrict scripts/slots and use payment-specific browser controls;
-- payment package activation requires payment-specific sandbox/security evidence; Sentinel PASS alone is insufficient.
+- payment package activation requires payment-specific sandbox/security evidence; Sentinel PASS alone is insufficient;
+- payment state/security paths may be projected in Flow Intelligence only with redacted non-account-data evidence.
 
 ## Performance-by-design rule
 
-Runtime-affecting work defines a measurable budget/test profile or `NOT_APPLICABLE` with reason. Theme/Extension/App work plans frontend/main-thread, Admin/backend, DB/cache/network/memory, package attribution and code-quality impact.
+Runtime-affecting work defines a measurable budget/test profile or `NOT_APPLICABLE` with reason. Theme/Extension/App work plans frontend/main-thread, Admin/backend, DB/cache/network/memory, package attribution, code-quality impact and stable System Graph correlation where applicable.
 
-Performance/quality/security verdicts remain separate.
+Performance/quality/security/payment verdicts remain separate.
 
 ## Reliability rule
 
-Critical stateful/provider workflows define timeout/retry/idempotency/failure-isolation/degradation/recovery behavior. Never blindly retry a non-idempotent financial/destructive operation after an ambiguous result; reconcile authoritative state first.
+Critical stateful/provider workflows define timeout/retry/idempotency/failure-isolation/degradation/recovery behavior. Never blindly retry a non-idempotent financial/destructive operation after an ambiguous result; reconcile authoritative state first. State/retry/error/recovery paths should be graphable where applicable.
 
 ## Execution rule
 
 Work only on the active stage in `.ai/state.json` unless the user explicitly changes priority. Do not skip stages, silently reopen completed stages, or mark target behavior complete from source/static checks.
 
-Before substantial implementation, the active plan must contain the required research/quality/architecture/data/security/privacy/design/API/theme/Studio/AI/performance/reliability/observability/testing/verification/rollback decisions.
+Before substantial implementation, the active plan must contain the required research/quality/architecture/data/security/privacy/design/API/theme/Studio/AI/performance/System-Graph/reliability/observability/testing/verification/rollback decisions.
 
-High/critical units require a threat model and independent review evidence as defined by governance. Payment/financial work additionally requires FMEA/payment-specific evidence.
+High/critical units require a threat model and independent review evidence as defined by governance. Payment/financial work additionally requires FMEA/payment-specific evidence. Canonical graph trust-boundary/provider/storage changes are high-risk architecture work.
 
-Every meaningful pass updates `.ai/state.json`, `.ai/handoff/current.md`, the active plan and affected registry entries. Scope changes update relevant roadmap/capability/quality/data/security/performance/reliability docs.
+Every meaningful pass updates `.ai/state.json`, `.ai/handoff/current.md`, the active plan and affected registry entries. Scope changes update relevant roadmap/capability/quality/data/security/performance/flow/reliability docs.
 
 `NEXORA_AI_PROJECT_STATE.md` remains historical evidence. `.ai/state.json` is canonical active state. Historical `N1.x` names are aliases only; use stable semantic stage/unit IDs.
