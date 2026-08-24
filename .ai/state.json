@@ -23,7 +23,7 @@
     {
       "id": "AI-GOV-001",
       "status": "SOURCE_DONE",
-      "evidence": "AGENTS.md and .ai control plane include pre-planned unit governance, Research/Quality lifecycle, data governance, continuous security, payment security, performance/code quality, System Graph/Flow Intelligence and Phase 7 AI-native development orchestration planning. AI-GOV-AUTOMATION-100 is now explicitly planned to govern instruction trust, run manifests, scope leases, least-privilege dev tools, anti-self-weakening, test/evidence integrity, review independence, multi-agent coordination, dependency intake, waivers and adversarial development-agent fixtures. These are planning/control-plane claims only, not runtime/product implementation claims."
+      "evidence": "AGENTS.md and .ai control plane include pre-planned unit governance, Research/Quality lifecycle, data governance, continuous security, payment security, performance/code quality, System Graph/Flow Intelligence and Phase 7 AI-native development orchestration planning. AI-GOV-AUTOMATION-100 is explicitly planned; these are planning/control-plane claims only, not runtime/product implementation claims."
     }
   ],
   "current_target": {
@@ -32,18 +32,28 @@
     "installed_release": "1.0.0-rc.93",
     "expected_source_release_after_clean_upgrade_or_install": "1.0.0-rc.94"
   },
+  "runtime_closure_evidence": {
+    "evidence_date": "2026-08-25",
+    "source": "operator-supplied real-target command output in the active development session",
+    "repair_dry_run": "PASS; exact rc.93 target; only activation/environment/process/service mismatched; no mutation",
+    "repair_apply": "PASS; only four approved planes repaired; protected backup and repair receipt emitted",
+    "deep_compatibility": "PASS; mismatches=[]; compatible=true; mode=installed-data-plane; deployment_drift=pass",
+    "readiness_before_reconcile": "receipt-refresh-required; runtime_ready=true; receipt_current=false",
+    "receipt_reconcile": "PASS; new post-install receipt bound to repaired installation lock",
+    "final_readiness": "PENDING fresh assert-ready after reconcile",
+    "login": "PENDING /login target evidence",
+    "reviewed_dependency_attestation": "missing; tracked separately from runtime identity compatibility"
+  },
   "blocker": {
     "category": "runtime",
-    "summary": "The already-installed rc.93 target has four stale post-install runtime identity fingerprints: environment, activation, service and process. Canonical fail-closed repair tooling is now merged at main@626c8fc656bc28d23000c3e9e5ed6d220d9804a7; live target execution remains pending.",
-    "guardrail": "Do not overwrite rc.93 with rc.94 merely to repair these four fingerprints; that would mix repair with a source/version upgrade."
+    "summary": "The rc.93 four-plane identity mismatch is repaired and independent deep compatibility now passes. The guarded post-install receipt reconcile also passed. RUNTIME-CLOSURE-001 remains BLOCKED only until a fresh final readiness assertion proves the receipt is current and /login target evidence passes. A deterministic Runtime Recovery / Closure Orchestrator is being added under SYS-RUNTIME-IDENTITY so future approved recoveries do not require manual command chaining.",
+    "guardrail": "Do not overwrite rc.93 with rc.94 to close this stage. Do not advance from source/CI or the repair receipt alone. Final real-target readiness + /login evidence remains mandatory."
   },
   "next_actions": [
-    "From canonical main, run dry-run: php scripts/rc93-post-install-identity-repair.php --target=\"D:\\laragon\\www\\nexora\".",
-    "Require dry-run status=pass and mode=dry-run, source/deployment/lock/API prechecks PASS, and no mismatches outside environment, activation, service and process.",
-    "If dry-run passes, run: php scripts/rc93-post-install-identity-repair.php --target=\"D:\\laragon\\www\\nexora\" --apply --confirm=REPAIR-RC93.",
-    "From D:\\laragon\\www\\nexora run php artisan nexora:runtime:compatibility-status --deep and require status=pass, mismatches=[], compatible=true and mode=installed-data-plane.",
-    "Run php artisan nexora:runtime:post-install-status --assert-ready.",
-    "If both runtime gates pass, test /login and advance to CORE-QA-001."
+    "Complete exact-head certification and independent review for the Runtime Recovery / Closure Orchestrator; merge only if controls remain fail-closed.",
+    "On the real target, obtain a fresh php artisan nexora:runtime:post-install-status --assert-ready result after the successful receipt reconcile and require status=pass, ready=true, runtime_ready=true, receipt_current=true, errors=[].",
+    "Obtain /login HTTP/browser evidence without runtime/tenant/bootstrap failure.",
+    "Only then update SYS-RUNTIME-IDENTITY evidence/status and advance to CORE-QA-001."
   ],
   "next_stage": {
     "id": "CORE-QA-001",
@@ -172,6 +182,6 @@
   "phase_4_scope": "Integrated performance-by-design: PERFORMANCE-FOUNDATION-200, CODE-QUALITY-200 and PERFORMANCE-INTELLIGENCE-200 with frontend/Admin/backend/package attribution, budgets, PageSpeed/GTmetrix-class analysis and expanded final performance certification.",
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
-  "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with a governed development-agent orchestration layer: explicit instruction trust boundary, pinned run manifest, context freshness, scope leases/concurrent-writer protection, scope-delta gate, least-privilege development tools, control-plane self-modification guard, operational branch/PR protection evidence, test-oracle integrity, evidence attestation/provenance, exact-head independent review, multi-agent DAG/merge coordination, retry/cost circuit breakers, checkpoints, dependency intake, model/tool drift capture, scoped expiring waivers, adversarial agent fixtures and promotion contracts. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-08-25T02:32:00+05:00"
+  "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
+  "updated_at": "2026-08-25T04:00:00+05:00"
 }
