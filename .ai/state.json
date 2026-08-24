@@ -34,13 +34,14 @@
   },
   "blocker": {
     "category": "runtime",
-    "summary": "The already-installed rc.93 target has four stale post-install runtime identity fingerprints: environment, activation, service and process.",
+    "summary": "The already-installed rc.93 target has four stale post-install runtime identity fingerprints: environment, activation, service and process. Canonical fail-closed repair tooling is now merged at main@626c8fc656bc28d23000c3e9e5ed6d220d9804a7; live target execution remains pending.",
     "guardrail": "Do not overwrite rc.93 with rc.94 merely to repair these four fingerprints; that would mix repair with a source/version upgrade."
   },
   "next_actions": [
-    "Run the prepared rc.93 Post-Install Identity Repair Pack externally against the installed target.",
-    "Run php artisan nexora:runtime:compatibility-status --deep.",
-    "Require status=pass, mismatches=[], compatible=true and mode=installed-data-plane.",
+    "From canonical main, run dry-run: php scripts/rc93-post-install-identity-repair.php --target=\"D:\\laragon\\www\\nexora\".",
+    "Require dry-run status=pass and mode=dry-run, source/deployment/lock/API prechecks PASS, and no mismatches outside environment, activation, service and process.",
+    "If dry-run passes, run: php scripts/rc93-post-install-identity-repair.php --target=\"D:\\laragon\\www\\nexora\" --apply --confirm=REPAIR-RC93.",
+    "From D:\\laragon\\www\\nexora run php artisan nexora:runtime:compatibility-status --deep and require status=pass, mismatches=[], compatible=true and mode=installed-data-plane.",
     "Run php artisan nexora:runtime:post-install-status --assert-ready.",
     "If both runtime gates pass, test /login and advance to CORE-QA-001."
   ],
@@ -172,5 +173,5 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with a governed development-agent orchestration layer: explicit instruction trust boundary, pinned run manifest, context freshness, scope leases/concurrent-writer protection, scope-delta gate, least-privilege development tools, control-plane self-modification guard, operational branch/PR protection evidence, test-oracle integrity, evidence attestation/provenance, exact-head independent review, multi-agent DAG/merge coordination, retry/cost circuit breakers, checkpoints, dependency intake, model/tool drift capture, scoped expiring waivers, adversarial agent fixtures and promotion contracts. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-08-25T02:06:00+05:00"
+  "updated_at": "2026-08-25T02:32:00+05:00"
 }
