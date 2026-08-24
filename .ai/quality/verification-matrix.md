@@ -1,6 +1,6 @@
 # Nexora Verification Matrix
 
-Minimum evidence classes before a stage/unit advances. Source, target, provider, graph and post-release evidence remain distinguishable.
+Minimum evidence classes before a stage/unit advances. Source, target, provider, graph, AI-development-run and post-release evidence remain distinguishable.
 
 ## Builder Beta / foundation stages
 
@@ -8,7 +8,7 @@ Minimum evidence classes before a stage/unit advances. Source, target, provider,
 |---|---|---|---|---|
 | `RUNTIME-CLOSURE-001` | runtime/source guards | compatibility/readiness | real target required | exact identity-plane output |
 | `CORE-QA-001` | tests/typecheck | auth/roles/settings/media CRUD | browser/target required | direct URL/session persistence |
-| `AI-GOV-AUTOMATION-100` | schema/registry/stage validators | broken fixtures rejected | CI required | unregistered/stale/inconsistent work fails |
+| `AI-GOV-AUTOMATION-100` | schema/registry/stage/run-manifest/protected-policy validators | invalid governance + prompt-injection + stale-run + race + scope-delta + test/evidence/review/waiver/dependency fixtures rejected | CI/repository-rules evidence required where accessible | unregistered/stale/inconsistent work fails; AI cannot self-weaken governance/test oracle, forge target evidence or self-approve critical work; reviewed/promoted exact-head identity enforced |
 | `RESEARCH-DISCOVERY-100` | ResearchBrief schema/policy tests | request -> evidence -> unit/CTQ mapping | representative workflow | AI cannot fabricate VOC/baselines/sources |
 | `QUALITY-GOVERNANCE-100` | DMADV/DMAIC/FMEA/control validators | representative new-unit + regression workflow | process evidence | proportionality and traceability |
 | `ADMIN-UX-CLOSURE-001` | component/type tests | Admin shell flows | browser required | responsive/appearance/a11y |
@@ -42,6 +42,26 @@ Minimum evidence classes before a stage/unit advances. Source, target, provider,
 | `SEARCH-200` | index/facet/provider | content/commerce | required | ranking/privacy/performance |
 | `FORMS-WORKFLOW-200` | validation/abuse | lead/provider/automation | required | rate/consent evidence |
 | `PRIVACY-CONSENT-100` | consent/policy | analytics/forms/RUM/System-Graph telemetry | required | GPC/DNT/export/delete/retention |
+
+## `AI-GOV-AUTOMATION-100` orchestration evidence
+
+The stage must demonstrate representative end-to-end cases, not only schema validation:
+
+- valid run manifest binds exact base SHA, stage/unit, plan/policy digests, scope/capabilities/lease/review profile;
+- a material HEAD/plan/policy change makes the run stale;
+- issue/source/log/README/web prompt injection cannot override governance or grant secrets/network/tools;
+- overlapping writers on the same protected file/migration fail or coordinate explicitly;
+- child agent cannot exceed parent scope/capabilities;
+- new dependency/permission/network/secret/migration/trust-boundary behavior triggers scope-delta re-plan;
+- feature/runtime change cannot weaken/remove/downgrade its own governing check to obtain PASS;
+- deleted/skipped/relaxed critical tests are surfaced and cannot silently satisfy verification;
+- AI-authored `PASS`/`TARGET_VERIFIED` files cannot satisfy machine/runtime/provider evidence;
+- review is bound to exact head SHA and becomes stale after material head change;
+- repeated equivalent failure loop trips a bounded circuit instead of disabling controls;
+- dependency addition/major upgrade requires intake beyond green typecheck/build;
+- expired, self-approved or over-broad material waiver fails;
+- promoted source/artifact identity matches reviewed/verified/attested identity;
+- operational repository rules/settings are checked where accessible; unavailable settings produce `UNKNOWN`, not PASS.
 
 ## Pro stages
 
@@ -93,35 +113,30 @@ Minimum evidence classes before a stage/unit advances. Source, target, provider,
 |---|---|
 | `PERF-CWV-CERT-100` | exact release/profile CWV/frontend/backend/package/code-quality regression evidence |
 | `A11Y-CERT-100` | keyboard/screen-reader/contrast/RTL/international evidence |
-| `RELEASE-CERT-100` | exact-source dependency/browser/DB/security/reliability/backup/restore/HA/package evidence; release-critical System Graph identities/drift/test-evidence controls; payment-enabled releases also require current payment-provider/Flow evidence |
+| `RELEASE-CERT-100` | exact-source dependency/browser/DB/security/reliability/backup/restore/HA/package evidence; reviewed/promoted source/build identity consistency; release-critical System Graph identities/drift/test-evidence controls; payment-enabled releases also require current payment-provider/Flow evidence |
 | `N2-STABLE-100` | all applicable prior production gates PASS for intended release/deployment capabilities |
 
-## Required Flow evidence examples
+## Evidence authority examples
 
-A Flow/System Graph claim records, where applicable:
+AI-development and Flow evidence must preserve producer/provenance distinctions.
 
-- canonical node/edge IDs;
-- evidence class;
-- provider/source;
-- source/build/package/deployment identity;
-- environment;
-- first/last seen;
-- confidence;
-- tenant/site scope;
-- redaction/classification;
-- related test/security/performance/reliability evidence.
+Examples that remain separate:
 
-Examples that must remain distinguishable:
+- plan declaration;
+- AI hypothesis (`ai-inferred`);
+- static analyzer finding;
+- controlled test result;
+- CI build result on exact SHA;
+- target runtime observation;
+- provider sandbox evidence;
+- production-observed telemetry;
+- reviewer approval on exact head;
+- artifact provenance/attestation.
 
-- declared edge with no runtime evidence;
-- static source-to-sink path;
-- observed runtime edge;
-- tested permission denial;
-- production-observed network destination;
-- AI/modelled impact hypothesis.
+A developer/AI-authored Markdown/JSON statement about one of these cannot substitute for the authoritative producer.
 
 ## Evidence naming
 
-Use explicit categories: `research_evidence`, `ctq_evidence`, `development_units`, `architecture_checks`, `data_flow_checks`, `system_graph_checks`, `flow_checks`, `source_checks`, `integration_checks`, `target_checks`, `security_checks`, `fmea_checks`, `privacy_checks`, `payment_checks`, `performance_checks`, `code_quality_checks`, `reliability_checks`, `ai_evals`, `outcome_checks`, `known_gaps`.
+Use explicit categories: `research_evidence`, `ctq_evidence`, `development_units`, `ai_development_runs`, `scope_leases`, `scope_delta_checks`, `test_oracle_checks`, `evidence_attestations`, `review_checks`, `waiver_checks`, `dependency_intake_checks`, `repository_policy_checks`, `architecture_checks`, `data_flow_checks`, `system_graph_checks`, `flow_checks`, `source_checks`, `integration_checks`, `target_checks`, `security_checks`, `fmea_checks`, `privacy_checks`, `payment_checks`, `performance_checks`, `code_quality_checks`, `reliability_checks`, `ai_evals`, `outcome_checks`, `known_gaps`.
 
 Unexecuted evidence is `NOT_RUN`, `NOT_APPLICABLE` or `UNKNOWN`, never omitted as if PASS.
