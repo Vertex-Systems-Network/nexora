@@ -1,13 +1,23 @@
 # Nexora Future Systems Registry
 
-This file lists future platform systems accepted into the canonical roadmap after the Phase 2 capability-gap audit. These are planning commitments, not implementation claims.
+This file lists future platform systems accepted into the canonical roadmap. These are planning commitments, not implementation claims.
 
-Use `.ai/roadmap/stages.md` for execution order and dependencies, and `.ai/roadmap/capability-matrix.md` for detailed capability rows.
+Use:
 
-## Architecture and platform primitives
+- `.ai/roadmap/stages.md` for canonical execution order/dependencies;
+- `.ai/registry/development-units.json` for pre-planned implementation units;
+- `.ai/governance/development-intake.md` before adding or starting any new unit;
+- `.ai/roadmap/release-trains.md` for Builder Beta / Pro / Platform / Production product gates.
+
+## Governance and secure-development controls
+
+- `AI-GOV-AUTOMATION-100` — machine-enforced registry/stage/plan/state/DoD/handoff consistency checks.
+- `SECURITY-BASELINE-200` — early continuous security baseline covering identity/MFA, browser hardening, AppSec CI, tenancy/authorization, secrets and threat modeling.
+
+## Architecture and website-platform primitives
 
 - `ARCH-BOUNDARY-100` — architecture/implementation boundary reconciliation and enforcement.
-- `CONTENT-MODEL-200` — dynamic content types, custom fields, relations, schema versioning and policies.
+- `CONTENT-MODEL-200` — dynamic content types, custom fields/groups, relations, hierarchy, schema versioning and policies.
 - `TAXONOMY-200` — generic custom taxonomy definitions and bindings.
 - `QUERY-ENGINE-200` — typed content/archive query engine.
 - `ROUTING-200` — permalink, archive, rewrite, redirect and canonical route platform.
@@ -16,6 +26,8 @@ Use `.ai/roadmap/stages.md` for execution order and dependencies, and `.ai/roadm
 - `EXT-SDK-200` — typed events/filters/UI slots/runtime APIs and extension registration surfaces.
 - `SITE-BUILDER-200` — structured visual site builder 2.0.
 - `THEME-STUDIO-200` — global visual design system and theme-level editing.
+- `RELEASE-WORKFLOW-200` — preview/staging/branching/merge/scheduled and selective publishing/rollback workflow.
+- `TEMPLATE-ECOSYSTEM-100` — site/page/section/component/theme/starter kits with safe dependency/update/customization model.
 
 ## Delivery, content operations and discovery
 
@@ -23,33 +35,43 @@ Use `.ai/roadmap/stages.md` for execution order and dependencies, and `.ai/roadm
 - `FRONTEND-RUNTIME-200` — cache/CDN/image/rendering delivery runtime.
 - `MEDIA-DAM-200` — DAM Studio 2.0 and asset intelligence.
 - `SEARCH-200` — search facets and provider abstraction.
-- `SEO-AI-200` — SEO 2.0 + AI visibility intelligence.
 - `FORMS-WORKFLOW-200` — forms, lead capture and visual workflow product.
+- `PRIVACY-CONSENT-100` — consent categories, GPC/DNT, retention, export/delete and regional policy integration.
+- `SEO-AI-200` — SEO 2.0 + AEO/AI visibility, AI-readable representations and entity/citation intelligence.
 
-## API and configuration
+## API, interoperability and configuration
 
 - `API-PLATFORM-100` — REST/GraphQL/OAuth/headless/webhook subscription platform.
 - `CONFIG-AS-CODE-100` — import/export and configuration-as-code platform.
+- `AGENT-INTEROP-100` — external AI-agent gateway with scoped identity, capability negotiation and typed auditable tools.
+- `DESIGN-IMPORT-100` — Figma/design-source import into Nexora tokens/components/layout AST with validation.
 
 ## AI-native product systems
 
-- `AI-KERNEL-100` — model gateway, agent runtime, tool registry, capability gate, context, structured actions, approvals, audit, prompt registry, evals and telemetry.
-- `AI-CONTENT-100` — governed AI content/CMS/media/SEO workflows.
+- `AI-KERNEL-100` — model gateway, agent runtime, Tool Registry, capability gate, context, structured actions, approvals, audit, prompt registry, evals and telemetry.
+- `AI-CONTENT-100` — governed AI content/CMS/media/SEO/AEO workflows.
 - `AI-DESIGN-100` — AI Design Professional and structured Studio/site-building workflows.
-- `AI-DX-100` — AI-assisted extension/app/theme/SDK development and review.
+- `AI-DX-100` — AI-assisted extension/app/theme/SDK development and independent review workflow.
+
+## Optimization and app-runtime systems
+
+- `EXPERIMENTATION-100` — A/B and multivariate testing, goals, safe rollout, analytics and AI-assisted variants.
+- `PERSONALIZATION-100` — privacy-safe audience/segment personalization with deterministic fallback.
+- `APP-RUNTIME-100` — capability-bounded low-code/full-stack functions/jobs/schedules/data actions/integrations/secrets runtime.
 
 ## Marketplace and business systems
 
-- `MARKETPLACE-200` — publisher economy, discovery, licensing, compatibility and safe update channels.
-- `COMMERCE-200` — Storefront/Checkout 2.0, variants/inventory/discount/cart/functions/provider extensions.
+- `MARKETPLACE-200` — publisher economy, discovery, licensing, compatibility, revocation and safe update channels.
+- `COMMERCE-200` — Storefront/Checkout 2.0, variants/inventory/discount/cart/functions/provider/fulfillment extension surfaces.
 - `PORTAL-200` — customer/member portal builder across commerce, CRM, membership and helpdesk.
 - `COLLAB-200` — collaboration, presence, locks, comments and approvals.
 
-## Migration, security and operations
+## Migration, cloud, security and operations
 
 - `MIGRATION-CENTER-100` — WordPress/Webflow/Drupal/Shopify migration adapters and SEO-safe migration workflows.
 - `DX-200` — CLI/SDK/docs/reference package developer experience.
-- `SENTINEL-200` — runtime security, vulnerability intelligence and real isolation strategy.
+- `MANAGED-CLOUD-100` — optional managed Nexora hosting/provisioning/domains/SSL/CDN/backups/staging/monitoring/metering/scaling.
+- `SENTINEL-200` — vulnerability intelligence, stronger package policy, emergency revocation and real isolation strategy for executable workloads.
 - `ENTERPRISE-GOV-200` — enterprise governance 2.0.
 - `OBSERVABILITY-200` — diagnostics and operations center.
 - `DR-PLATFORM-100` — updates, rollback, backup/restore and disaster recovery.
@@ -60,4 +82,6 @@ Use `.ai/roadmap/stages.md` for execution order and dependencies, and `.ai/roadm
 
 ## Planning rule
 
-A future system must not be implemented merely because it appears in this registry. The active cursor, dependencies, active stage plan and Definition of Done remain authoritative.
+A future system must not be implemented merely because it appears in this file. Before implementation it must have a registered development unit, mapped parent stage, active plan, dependencies, security classification, acceptance criteria, verification and rollback/recovery plan.
+
+If a new capability is discovered later, add it to the plan/registry first. Do not hide it inside another stage or start coding it before planning.
