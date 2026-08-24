@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "project": "Nexora",
   "control_plane_revision": 7,
-  "control_plane_branch": "ai/control-plane-phase-1",
+  "control_plane_branch": "main",
   "base_branch": "main",
   "base_sha": "f854c50c0f7687fc87fdfab01b49562392af4ef4",
   "last_verified_source_sha": null,
@@ -172,5 +172,5 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with a governed development-agent orchestration layer: explicit instruction trust boundary, pinned run manifest, context freshness, scope leases/concurrent-writer protection, scope-delta gate, least-privilege development tools, control-plane self-modification guard, operational branch/PR protection evidence, test-oracle integrity, evidence attestation/provenance, exact-head independent review, multi-agent DAG/merge coordination, retry/cost circuit breakers, checkpoints, dependency intake, model/tool drift capture, scoped expiring waivers, adversarial agent fixtures and promotion contracts. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-08-24T20:51:00+05:00"
+  "updated_at": "2026-08-25T02:06:00+05:00"
 }
