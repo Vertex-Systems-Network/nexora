@@ -2,227 +2,190 @@
 
 ## Resume instruction
 
-Read in order:
-
-1. `AGENTS.md`
-2. `.ai/README.md`
-3. `.ai/state.json`
-4. `.ai/roadmap/stages.md` + release trains
-5. `.ai/governance/development-intake.md`
-6. `.ai/governance/ai-development-orchestration.md`
-7. main + relevant domain registries (`development-units.json`, `performance-units.json`, `quality-payment-units.json`, `flow-units.json`, `ai-development-units.json`)
-8. `.ai/plans/master-execution-plan.md`, plan template and active plan
-9. `.ai/quality/engineering-lifecycle.md` + `.ai/quality/lean-six-sigma.md`
-10. ResearchBrief/DataFlow documents where relevant
-11. `.ai/flow/system-graph.md` for material runtime/package/data/security/permission/event/network/state/error/deployment relationships
-12. security program; payment work also reads `.ai/security/payment-security.md`
-13. performance/reliability/delivery documents where relevant
-14. capability matrices/addenda + system registries
-15. architecture/AI/design constitutions and current source/tests.
+Always begin with `AGENTS.md`, `.ai/state.json`, this handoff, the canonical roadmap/registries, and `.ai/plans/active.md`. Then inspect current `main` HEAD, open PRs, exact active unit and exact target evidence before implementation.
 
 ## Current source context
 
 - Canonical branch: `main`
-- Current canonical repair-tooling merge: `626c8fc656bc28d23000c3e9e5ed6d220d9804a7` (`PR #26`)
-- PR #26 exact certified head: `d664aa1e7639439a5590feeb94c417714e84258e`
-- PR #26 release-certification run: `#763` — **PASS**
-- Historical control-plane creation baseline: `f854c50c0f7687fc87fdfab01b49562392af4ef4`
+- Baseline at start of current orchestration pass: `dffb238e655a1c474f4f7ce7e75c6eda004c0c32`
 - Documented source release: `1.0.0-rc.94`
 - Installer protocol: `v5.29`
 - Source generation: `n1-v5.29`
 - Control-plane revision: `7`
-- Canonical stage count: `75` (`0` through `74`)
+- Canonical stage count: `75`
+- Existing canonical rc.93 repair tooling originated in PR #26
 
-Always inspect current HEAD. Historical SHAs are evidence references, not self-referential requirements.
+Historical SHAs are evidence references. Always re-read current HEAD.
 
-## Core governance rule
+## Governance invariants
 
-No implementable system/module/feature/package/AI/ops/security capability begins from chat/idea alone. It must be registered, dependency-mapped and represented in the active plan first.
-
-Substantial new/redesigned work uses proportional Research/VOC/baseline/CTQ + DMADV. Existing defects/incidents/regressions use DMAIC and durable Control evidence. High/critical/complex material failures use FMEA where applicable in addition to threat modeling.
-
-Material data changes use formal DataFlow/classification/ownership/lineage/retention/delete/AI/package exposure policy. Critical stateful/provider flows include reliability/idempotency/recovery policy. Material relationship changes require System Graph/Flow planning.
-
-## Phase 7 — AI-Native Development Orchestration
-
-The AI-native development workflow itself is treated as a privileged supply-chain/agentic system. No extra top-level stage was added; `AI-GOV-AUTOMATION-100` is expanded with the governed development-agent layer.
-
-Key planned controls remain:
-
-- instruction trust boundary;
-- exact base SHA + active-plan/policy identity;
-- stale-context invalidation;
-- scope/path leases and parallel-writer safety;
-- material scope-delta re-planning;
-- least-privilege repository/package/network/secret/governance/target capabilities;
-- governance self-modification protection;
-- test-oracle integrity;
-- evidence authority/attestation;
-- exact-head independent review and stale-review invalidation;
-- multi-agent DAG + child capability subsets;
-- bounded retry/attempt/cost circuit breakers;
-- dependency/supply-chain intake;
-- scoped expiring waivers;
-- adversarial development-agent fixtures;
-- reviewed/tested/promoted artifact identity/provenance;
-- concise action/evidence audit without private chain-of-thought logging.
-
-Repository-level finding remains unresolved operationally: GitHub reports `main` as protected but required-status-check enforcement is off and required checks are empty. Future `AI-GOV-AUTOMATION-100` must verify real repository rules rather than trust documentation.
-
-## Phase 6 — System Graph & Flow Intelligence
-
-Canonical stages remain:
-
-- `SYSTEM-GRAPH-100` — Builder Beta foundation;
-- `FLOW-INTELLIGENCE-200` — Pro advanced Flow Center.
-
-Invariant:
-
-**Graph + evidence is source of truth. Diagram is a projection of that truth.**
-
-Evidence classes remain distinct: `declared`, `static`, `observed`, `tested`, `production-observed`, `ai-inferred`.
-
-Flow Intelligence consumes Data Governance, Security/Sentinel, Performance, Reliability, Payment, Release and Observability evidence rather than replacing those authorities. Sensitive topology remains default-deny/redacted/audited and production tracing remains bounded.
-
-## Phase 5 — Quality Engineering & Payment Security
-
-Accepted layers remain `RESEARCH-DISCOVERY-100`, `QUALITY-GOVERNANCE-100`, `DATA-GOVERNANCE-200`, `RELIABILITY-ENGINEERING-200`, `PRODUCT-OUTCOMES-100`, `DELIVERY-EXCELLENCE-100`, `EFFICIENCY-FINOPS-100` and `PAYMENT-SECURITY-200`.
-
-Payment standard profile continues to forbid raw PAN/CVV/track/PIN in Nexora/generic package runtime/storage/logs/AI, prefers provider-hosted/tokenized flows, and requires purpose-specific capabilities, Core-authoritative financial state, Secret/Network Brokers, hardened webhooks/payment surface, idempotency/reconciliation, provider sandbox and independent payment-security evidence.
+- No future stage starts before the active stage is genuinely accepted.
+- Source/CI evidence and real-target evidence remain separate.
+- Existing defects use DMAIC/control evidence; high/critical work keeps FMEA/threat controls.
+- AI-authored PASS prose is not runtime proof.
+- Critical changes require exact-head independent review in addition to authoring tests/CI.
+- No test/security/governance weakening merely to obtain PASS.
+- Dependency, migration, permission, network, secret, trust-boundary or destructive scope deltas require re-plan before implementation.
+- System Graph evidence classes remain distinct; static/inferred evidence is never runtime truth.
 
 ## Active stage
 
 `RUNTIME-CLOSURE-001 — Installation + Runtime Closure`
 
-Registered active unit: `SYS-RUNTIME-IDENTITY`
+Active unit:
 
-Status: **BLOCKED pending real-target execution**.
+`SYS-RUNTIME-IDENTITY`
 
-No source CI, repair receipt or planning document moves this cursor.
+Status:
 
-## Current target blocker
+**BLOCKED pending final real-target readiness + `/login` evidence.**
 
-Real target:
+Do not start `CORE-QA-001` yet.
 
-`D:\laragon\www\nexora`
+## Real target
 
-Installed release:
-
-`1.0.0-rc.93`
-
-Known stale post-install identity planes:
-
-- environment
-- activation
-- service
-- process
-
-Do **not** overwrite rc.93 with rc.94 merely to repair these fingerprints. Repair and upgrade are separate operations.
-
-## rc.93 repair-tooling gap — SOURCE CLOSED
-
-A fresh audit found that the handoff referred to a prepared external repair pack, but no deterministic executable artifact existed in source. This was a genuine zero-skip continuity gap.
-
-PR #26 closed the source-side gap and is merged at `main@626c8fc656bc28d23000c3e9e5ed6d220d9804a7`.
-
-Canonical artifacts:
-
-- `scripts/rc93-post-install-identity-repair.php`
-- `scripts/rc93-post-install-identity-repair.ps1`
-- `tests/Unit/Certification/Rc93PostInstallIdentityRepairPackTest.php`
-- `docs/runtime/RC93_POST_INSTALL_IDENTITY_REPAIR.md`
-
-Exact PR head `d664aa1e7639439a5590feeb94c417714e84258e` passed release-certification run `#763`, including certification preflight, Source Guard, unified source certification and frontend dependency compatibility.
-
-### Repair safety contract
-
-The canonical tool:
-
-- is pinned to both running and installed version `1.0.0-rc.93`;
-- boots the target's own autoloader/container and does not copy rc.94 application source into it;
-- verifies the sealed installation lock;
-- verifies source activation and deep deployment/source identity;
-- permits only `environment`, `activation`, `service`, `process` mismatches;
-- refuses any immutable/unrelated mismatch before mutation;
-- requires healthy service/process identity;
-- defaults to dry-run;
-- requires `--apply --confirm=REPAIR-RC93` to mutate;
-- creates and verifies a protected sealed-lock backup;
-- updates only bounded runtime identity metadata through target contracts;
-- requires convergence to `compatible=true`, `mismatches=[]`, `mode=installed-data-plane`;
-- restores the original sealed lock and verifies its SHA-256 if convergence fails;
-- writes a protected receipt after successful convergence.
-
-A repair receipt remains repair evidence only, never final target certification.
-
-## Exact next actions — REAL TARGET REQUIRED
-
-### 1. Dry-run from canonical source checkout
-
-```powershell
-php scripts/rc93-post-install-identity-repair.php --target="D:\laragon\www\nexora"
+```text
+D:\laragon\www\nexora
+installed release: 1.0.0-rc.93
 ```
 
-PowerShell wrapper equivalent:
+## Live target evidence received on 2026-08-25
 
-```powershell
-.\scripts\rc93-post-install-identity-repair.ps1 -Target "D:\laragon\www\nexora"
-```
+The operator supplied real command output from the target.
 
-Require dry-run `status=pass`, `mode=dry-run`, immutable/source/deployment/lock/API prechecks PASS and no mismatch outside the four known stale planes.
+### rc.93 repair dry-run — PASS
 
-### 2. Apply only after dry-run PASS
+Observed:
 
-```powershell
-php scripts/rc93-post-install-identity-repair.php --target="D:\laragon\www\nexora" --apply --confirm=REPAIR-RC93
-```
+- exact running/installed `1.0.0-rc.93`;
+- only `activation`, `environment`, `process`, `service` mismatched;
+- dry-run performed no mutation.
 
-PowerShell wrapper equivalent:
+### rc.93 bounded repair apply — PASS
 
-```powershell
-.\scripts\rc93-post-install-identity-repair.ps1 -Target "D:\laragon\www\nexora" -Apply -Confirm REPAIR-RC93
-```
+Observed:
 
-### 3. Independent compatibility evidence from installed target
+- only the four approved planes repaired;
+- sealed installation lock changed from SHA-256 `5db5fbf7f33a5d901146544463547800a114acad80bb62053d17c7e88e069d88` to `1576c4212323c11dbb591a45a27988afa6e5c55a62982808af738e918828022a`;
+- protected backup + repair receipt paths emitted;
+- mutation completed through the approved bounded repair path.
 
-```powershell
-cd D:\laragon\www\nexora
-php artisan nexora:runtime:compatibility-status --deep
-```
+### Independent deep compatibility — PASS
 
-Require:
+Observed:
 
 ```text
 status=pass
 mismatches=[]
-compatible=true
-mode=installed-data-plane
+runtime.compatible=true
+runtime.mode=installed-data-plane
+deployment_drift.status=pass
 ```
 
-### 4. Post-install readiness
+Environment, activation, service and process now match. Immutable/source/deployment/framework/data-plane/storage/host/resource/policy/dependency compatibility remained PASS.
 
-```powershell
-php artisan nexora:runtime:post-install-status --assert-ready
-```
+The dependency runtime fingerprint is compatible. `reviewed dependency-lock attestation = missing` remains a separate release/dependency-governance item and must not be confused with the closed four-plane identity mismatch.
 
-Must PASS.
+### Post-install handoff
 
-### 5. Browser handoff
-
-Open:
+First readiness assertion correctly reported:
 
 ```text
-http://nexora/login
+status=receipt-refresh-required
+ready=false
+runtime_ready=true
+receipt_current=false
 ```
 
-Only when compatibility, readiness and browser handoff pass may `RUNTIME-CLOSURE-001` become `TARGET_VERIFIED` and the cursor advance to `CORE-QA-001`.
+The old post-install receipt referenced the pre-repair installation-lock/activation identity.
 
-## Immediate sequence after runtime closure
+The operator then ran:
 
-`CORE-QA-001 → AI-GOV-AUTOMATION-100 → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ADMIN-UX-CLOSURE-001 → SECURITY-BASELINE-200 → ARCH-BOUNDARY-100 → existing website-platform closure → mature builder/data/performance kernel → SYSTEM-GRAPH-100`.
+```text
+php artisan nexora:runtime:post-install-reconcile --confirm=RECONCILE
+```
 
-Later Pro includes `PERFORMANCE-INTELLIGENCE-200 → RELIABILITY-ENGINEERING-200 → FLOW-INTELLIGENCE-200` when dependencies are satisfied. Platform payment sequence remains `COMMERCE-CLOSURE-001 → PAYMENT-SECURITY-200 → COMMERCE-200`.
+and received `status=pass` with a new receipt bound to the repaired installation lock.
+
+Still missing for current-stage acceptance:
+
+1. a **fresh** `php artisan nexora:runtime:post-install-status --assert-ready` after that reconcile, proving `status=pass`, `ready=true`, `runtime_ready=true`, `receipt_current=true`, `errors=[]`;
+2. `/login` target evidence without runtime/tenant/bootstrap failure.
+
+## Operator-automation gap discovered
+
+The architecture correctly separated repair authorization, compatibility verification, readiness and receipt reconciliation, but after approval the operator had to chain those commands manually. That is a real control/UX gap.
+
+Current branch work under the same active unit adds a **Runtime Recovery / Closure Orchestrator**. It is not a new roadmap stage or upgrade engine.
+
+Planned/coded contract:
+
+```text
+Observe compatibility
+→ if compatible, skip repair
+→ else use only an approved version-specific adapter
+→ independent compatibility re-check
+→ assert readiness
+→ auto-reconcile only receipt-refresh-required + runtime_ready=true
+→ assert readiness again
+→ verified GET /login
+→ machine-readable recovery receipt
+→ PASS / BLOCKED / FAIL
+```
+
+Mutation still requires one explicit confirmation:
+
+```text
+--apply --confirm=RECOVER-RUNTIME
+```
+
+The orchestrator must never install/update dependencies, run migrations, copy source, change versions, disable TLS verification or broaden unrelated mismatches.
+
+Canonical files in the current implementation branch:
+
+- `scripts/runtime-recovery-orchestrator.php`
+- `tests/Unit/Certification/RuntimeRecoveryOrchestratorTest.php`
+- `docs/runtime/RUNTIME_RECOVERY_ORCHESTRATOR.md`
+- `package.json` → `runtime:recover`
+
+## Current source-work acceptance requirements
+
+Before merging the orchestrator:
+
+1. exact-head certification preflight PASS;
+2. Source Guard PASS;
+3. unified source certification PASS;
+4. frontend dependency compatibility PASS;
+5. orchestrator regression contract PASS;
+6. exact-head independent review for the critical recovery-control change;
+7. no scope expansion outside `SYS-RUNTIME-IDENTITY`.
+
+Source merge does **not** advance the runtime stage by itself.
+
+## Exact target continuation after orchestrator source closure
+
+The intended operator experience becomes one bounded command from a canonical source checkout:
+
+```bat
+npm run runtime:recover -- --target="D:\laragon\www\nexora" --apply --confirm=RECOVER-RUNTIME
+```
+
+Because this specific target is already repaired and reconciled, the orchestrator should observe compatibility PASS, skip the identity repair, assert final readiness, avoid unnecessary reconcile if the receipt is current, and attempt `/login` HTTP smoke.
+
+If HTTP smoke is blocked only by local TLS trust/client reachability while runtime readiness passes, preserve the result as `BLOCKED`; do not disable TLS verification to force green.
+
+## Next stage after genuine closure
+
+Only after `RUNTIME-CLOSURE-001` becomes `TARGET_VERIFIED`:
+
+`CORE-QA-001 — Super Admin + Core Application Functional QA`
+
+Then canonical sequence remains:
+
+`AI-GOV-AUTOMATION-100 → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ADMIN-UX-CLOSURE-001 → SECURITY-BASELINE-200 → ARCH-BOUNDARY-100`.
+
+Later Builder Beta reaches `SYSTEM-GRAPH-100` only when dependencies are satisfied; later Pro reaches `FLOW-INTELLIGENCE-200` only after its dependency graph is satisfied.
 
 ## Completion warning
 
-Historical `DONE` is not target proof. `CI green` is not automatically independent target evidence. Missing research/measurement/graph/provider/outcome evidence is never inferred as PASS. AI-authored PASS files and repair receipts are not machine/runtime target evidence. A Flow diagram is not runtime evidence. Payment/security/compliance claims still require their specific real evidence.
+Do not infer final target PASS from the successful repair, compatibility output, reconcile output, source CI or an orchestrator-authored receipt. Final readiness/current-receipt and `/login` evidence remain mandatory for the active stage.
