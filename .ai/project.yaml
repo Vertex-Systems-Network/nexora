@@ -1,0 +1,53 @@
+schema_version: "1.0"
+project: Nexora
+product_class: advanced extensible web platform / CMS / site builder / application ecosystem
+mission: >-
+  Build a secure, extensible, self-hostable platform that combines and advances the strongest
+  ideas from WordPress, Webflow, Wix, Shopify and enterprise SaaS without allowing themes,
+  extensions, apps or integrations to bypass Nexora public contracts, capabilities, tenancy,
+  publishing semantics or security boundaries.
+
+canonical_control_plane: .ai
+agent_entrypoint: AGENTS.md
+architecture_constitution: ARCHITECTURE.md
+security_constitution: SECURITY.md
+legacy_operational_ledger: NEXORA_AI_PROJECT_STATE.md
+legacy_master_plan: docs/NEXORA_PLAN_STATUS.md
+
+current_source_release: 1.0.0-rc.94
+installer_protocol: v5.29
+source_generation: n1-v5.29
+
+package_families:
+  extension_lifecycle:
+    - extension
+    - app
+    - integration
+    - studio-pack
+  separate_lifecycles:
+    - theme
+  external_product_families:
+    - books
+    - professional-profile-cv-biography
+    - lms
+    - booking
+    - projects
+
+extension_runtime_modes:
+  - declarative
+  - trusted-php
+extension_migration_policies:
+  - none
+  - forward-only
+
+non_negotiable_principles:
+  - core-remains-generic
+  - public-contracts-and-capabilities
+  - fail-closed-security
+  - quarantine-before-execution
+  - deterministic-runtime-registration
+  - shared-admin-design-system
+  - portable-migrations
+  - source-done-is-not-target-verified
+  - real-target-evidence-before-product-completion
+  - append-only-history-and-evidence
