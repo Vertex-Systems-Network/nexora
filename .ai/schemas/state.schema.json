@@ -12,6 +12,7 @@
     "source_release",
     "source_status",
     "target_status",
+    "canonical_stage_count",
     "current_stage",
     "active_development_units",
     "next_actions",
@@ -37,6 +38,7 @@
     "source_generation": { "type": "string" },
     "source_status": { "$ref": "#/$defs/status" },
     "target_status": { "$ref": "#/$defs/status" },
+    "canonical_stage_count": { "type": "integer", "minimum": 1 },
     "current_stage": { "$ref": "#/$defs/stage" },
     "active_development_units": {
       "type": "array",
@@ -95,6 +97,7 @@
       ],
       "properties": {
         "development_unit_registry_required": { "const": true },
+        "domain_child_registries_allowed": { "type": "boolean" },
         "active_plan_required_before_substantial_implementation": { "const": true },
         "new_feature_must_be_planned_before_implementation": { "const": true },
         "ai_discovered_optional_work_requires_promotion_or_active_scope": { "type": "boolean" },
@@ -102,7 +105,10 @@
         "first_party_packages_use_public_contracts": { "type": "boolean" },
         "source_and_target_evidence_separate": { "type": "boolean" },
         "zero_skip_stage_protocol_required": { "const": true },
-        "zero_hidden_work_protocol_required": { "const": true }
+        "zero_hidden_work_protocol_required": { "const": true },
+        "performance_budget_or_not_applicable_required_for_runtime_affecting_units": { "type": "boolean" },
+        "theme_extension_runtime_cost_attribution_required_when_applicable": { "type": "boolean" },
+        "performance_quality_security_verdicts_separate": { "type": "boolean" }
       },
       "additionalProperties": true
     },
@@ -116,6 +122,7 @@
     "phase_1_scope": { "type": "string" },
     "phase_2_scope": { "type": "string" },
     "phase_3_scope": { "type": "string" },
+    "phase_4_scope": { "type": "string" },
     "updated_at": { "type": "string", "format": "date-time" }
   },
   "$defs": {
