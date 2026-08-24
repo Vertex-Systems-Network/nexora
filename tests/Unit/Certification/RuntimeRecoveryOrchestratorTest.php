@@ -10,7 +10,7 @@ use Tests\TestCase;
 final class RuntimeRecoveryOrchestratorTest extends TestCase
 {
     #[Test]
-    public function orchestrator_is_dry_run_first_target_bound_and_fail_closed(): void
+    public function orchestrator_is_dry_run_first_target_bound_serialized_and_fail_closed(): void
     {
         $path = base_path('scripts/runtime-recovery-orchestrator.php');
         self::assertFileExists($path);
@@ -39,6 +39,10 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
             'recovery-orchestrator',
             'target_verification_complete',
             'nexoraRuntimeRecoveryAppliedFailure',
+            'LOCK_EX | LOCK_NB',
+            "'.apply.lock'",
+            "'exclusive-nonblocking'",
+            'bin2hex(random_bytes(6))',
         ] as $required) {
             self::assertStringContainsString($required, $source);
         }
@@ -56,6 +60,17 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
         // mismatch set can enter the version-specific mutation adapter.
         self::assertStringContainsString("\$mismatches !== []", $source);
         self::assertStringContainsString("(\$payload['status'] ?? null) === 'fail'", $source);
+
+        // Apply mode is one-writer-per-target. A second concurrent operator must
+        // fail closed rather than race sealed identity or handoff receipts.
+        self::assertStringContainsString('nexoraRuntimeRecoveryAcquireApplyLock($target)', $source);
+        self::assertStringContainsString('LOCK_EX | LOCK_NB', $source);
+        self::assertStringContainsString('Another apply-mode runtime recovery is already active for this target.', $source);
+
+        // Evidence filenames are unique even for rapid sequential runs in the
+        // same second, preventing silent replacement of previous receipts.
+        self::assertStringContainsString('$receiptId = bin2hex(random_bytes(6));', $source);
+        self::assertStringContainsString("'-'.\$receiptId.'.json'", $source);
 
         // Explicit HTTP/configuration failure remains FAIL; transport/TLS
         // unreachability remains BLOCKED and cannot be downgraded/upgraded.
