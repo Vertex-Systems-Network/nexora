@@ -32,8 +32,10 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
             "'/login'",
             "'verify_peer' => true",
             "'verify_peer_name' => true",
+            "'follow_location' => 0",
             'recovery-orchestrator',
             'target_verification_complete',
+            "['bypass_shell' => true]",
         ] as $required) {
             self::assertStringContainsString($required, $source);
         }
@@ -43,6 +45,22 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
         self::assertStringContainsString('nexoraRuntimeRecoveryCompatibility($target)', $source);
         self::assertStringContainsString('nexoraRuntimeRecoveryPostInstallStatus($target, true)', $source);
         self::assertStringContainsString('nexoraRuntimeRecoveryNeedsReceiptRefresh($readinessPayload)', $source);
+
+        // A JSON PASS is not trusted unless the child command itself exited 0.
+        self::assertStringContainsString("return \$result['exit_code'] === 0", $source);
+        self::assertStringContainsString('nexoraRuntimeRecoveryCompatibilityPayloadPass($result[\'payload\'])', $source);
+        self::assertStringContainsString('nexoraRuntimeRecoveryReadyPayload($result[\'payload\'])', $source);
+
+        // Only an observed failed rc.93 compatibility result with a non-empty,
+        // fully allow-listed mismatch set can enter the version-specific adapter.
+        self::assertStringContainsString("\$mismatches !== []", $source);
+        self::assertStringContainsString("(\$compatibilityPayload['status'] ?? null) === 'fail'", $source);
+
+        // Explicit HTTP failures stay FAIL; transport/TLS unreachability is BLOCKED.
+        self::assertStringContainsString("'fail' => 'fail'", $source);
+        self::assertStringContainsString("'fail' => 1", $source);
+        self::assertStringContainsString("default => 'blocked'", $source);
+        self::assertStringContainsString('if ($receipt === null)', $source);
 
         foreach ([
             'composer install',
