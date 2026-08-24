@@ -42,15 +42,16 @@
     "receipt_reconcile": "PASS; new post-install receipt bound to repaired installation lock",
     "final_readiness": "PENDING fresh assert-ready after reconcile",
     "login": "PENDING /login target evidence",
-    "reviewed_dependency_attestation": "missing; tracked separately from runtime identity compatibility"
+    "reviewed_dependency_attestation": "missing; tracked separately from runtime identity compatibility",
+    "orchestrator_source_work": "PR #30 remains source work under SYS-RUNTIME-IDENTITY. The hardened orchestrator is dry-run-first, exact rc.93-adapter bounded, child-exit bound, target-app-url bound, TLS fail-closed, single-writer per target in apply mode, and emits unique non-overwriting recovery receipts. Final hardened-head exact-source CI and independent review remain required before merge."
   },
   "blocker": {
     "category": "runtime",
-    "summary": "The rc.93 four-plane identity mismatch is repaired and independent deep compatibility now passes. The guarded post-install receipt reconcile also passed. RUNTIME-CLOSURE-001 remains BLOCKED only until a fresh final readiness assertion proves the receipt is current and /login target evidence passes. A deterministic Runtime Recovery / Closure Orchestrator is being added under SYS-RUNTIME-IDENTITY so future approved recoveries do not require manual command chaining.",
-    "guardrail": "Do not overwrite rc.93 with rc.94 to close this stage. Do not advance from source/CI or the repair receipt alone. Final real-target readiness + /login evidence remains mandatory."
+    "summary": "The rc.93 four-plane identity mismatch is repaired and independent deep compatibility now passes. The guarded post-install receipt reconcile also passed. RUNTIME-CLOSURE-001 remains BLOCKED until a fresh final readiness assertion proves the receipt is current and /login target evidence passes. PR #30 adds a deterministic Runtime Recovery / Closure Orchestrator with exact-head CI binding, required recovery-contract verification, per-target apply serialization and unique evidence receipts; that source work still requires final hardened-head certification plus independent review before merge.",
+    "guardrail": "Do not overwrite rc.93 with rc.94 to close this stage. Do not advance from source/CI, a self-authored review, or a recovery receipt alone. Final real-target readiness + /login evidence remains mandatory."
   },
   "next_actions": [
-    "Complete exact-head certification and independent review for the Runtime Recovery / Closure Orchestrator; merge only if controls remain fail-closed.",
+    "Complete exact-head certification and independent review for the final hardened Runtime Recovery / Closure Orchestrator head; merge only if controls remain fail-closed.",
     "On the real target, obtain a fresh php artisan nexora:runtime:post-install-status --assert-ready result after the successful receipt reconcile and require status=pass, ready=true, runtime_ready=true, receipt_current=true, errors=[].",
     "Obtain /login HTTP/browser evidence without runtime/tenant/bootstrap failure.",
     "Only then update SYS-RUNTIME-IDENTITY evidence/status and advance to CORE-QA-001."
@@ -183,5 +184,5 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-08-25T04:00:00+05:00"
+  "updated_at": "2026-08-25T04:31:00+05:00"
 }
