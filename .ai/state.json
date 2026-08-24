@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 3,
+  "control_plane_revision": 4,
   "control_plane_branch": "ai/control-plane-phase-1",
   "base_branch": "main",
   "base_sha": "f854c50c0f7687fc87fdfab01b49562392af4ef4",
@@ -11,6 +11,7 @@
   "source_generation": "n1-v5.29",
   "source_status": "PARTIAL",
   "target_status": "BLOCKED",
+  "canonical_stage_count": 65,
   "current_stage": {
     "id": "RUNTIME-CLOSURE-001",
     "name": "Installation + Runtime Closure",
@@ -22,7 +23,7 @@
     {
       "id": "AI-GOV-001",
       "status": "SOURCE_DONE",
-      "evidence": "AGENTS.md plus .ai control plane, system/capability registries, canonical stage graph, release trains, development intake/schema/registry, security program, plan template, AI architecture/design contracts and zero-hidden-work execution protocol on ai/control-plane-phase-1"
+      "evidence": "AGENTS.md plus .ai control plane, system/capability registries, canonical stage graph, release trains, development intake/schema/registries, security program, performance/code-quality planning, plan template, AI architecture/design contracts and zero-hidden-work execution protocol on ai/control-plane-phase-1"
     }
   ],
   "current_target": {
@@ -56,6 +57,7 @@
   ],
   "governance": {
     "development_unit_registry_required": true,
+    "domain_child_registries_allowed": true,
     "active_plan_required_before_substantial_implementation": true,
     "new_feature_must_be_planned_before_implementation": true,
     "ai_discovered_optional_work_requires_promotion_or_active_scope": true,
@@ -63,7 +65,10 @@
     "first_party_packages_use_public_contracts": true,
     "source_and_target_evidence_separate": true,
     "zero_skip_stage_protocol_required": true,
-    "zero_hidden_work_protocol_required": true
+    "zero_hidden_work_protocol_required": true,
+    "performance_budget_or_not_applicable_required_for_runtime_affecting_units": true,
+    "theme_extension_runtime_cost_attribution_required_when_applicable": true,
+    "performance_quality_security_verdicts_separate": true
   },
   "verification_required": {
     "source_and_target_separate": true,
@@ -72,7 +77,9 @@
     "security_review_required_for_high_risk_boundaries": true,
     "regression_protection_required_for_fixed_blockers": true,
     "development_unit_registry_required": true,
-    "active_plan_required_before_substantial_stage_implementation": true
+    "active_plan_required_before_substantial_stage_implementation": true,
+    "performance_evidence_required_for_performance_claims": true,
+    "lab_field_backend_evidence_must_remain_distinguishable": true
   },
   "release_trains": ["builder-beta", "pro", "platform", "production"],
   "roadmap_sources": [
@@ -80,12 +87,17 @@
     ".ai/roadmap/release-trains.md",
     ".ai/governance/development-intake.md",
     ".ai/registry/development-units.json",
+    ".ai/registry/performance-units.json",
     ".ai/roadmap/capability-matrix.md",
+    ".ai/roadmap/capability-matrix-phase3.md",
+    ".ai/roadmap/capability-matrix-phase4-performance.md",
     ".ai/roadmap/competitive-benchmark.md",
     ".ai/roadmap/future-systems.md",
     ".ai/plans/master-execution-plan.md",
     ".ai/plans/plan-template.md",
     ".ai/security/security-program.md",
+    ".ai/performance/performance-platform.md",
+    ".ai/performance/performance-budget-template.md",
     ".ai/architecture/ai-platform.md",
     ".ai/design/ai-design-professional.md",
     "NEXORA_AI_PROJECT_STATE.md",
@@ -96,5 +108,6 @@
   "phase_1_scope": "Imported and normalized systems and plans already documented in the repository into a deterministic AI control plane.",
   "phase_2_scope": "Added capability-gap planning for WordPress/Webflow/Wix/Shopify-class extensibility and Nexora AI-native product architecture.",
   "phase_3_scope": "Established mandatory pre-planned development units, builder-first release trains, early continuous security, release/staging workflow, templates, privacy, external-agent interoperability, AEO/AI-readable web, experimentation/personalization, design import, capability-bounded app runtime and optional Managed Cloud. New features must enter the plan/registry before implementation.",
-  "updated_at": "2026-08-24T18:48:00+05:00"
+  "phase_4_scope": "Integrated a performance-by-design architecture: PERFORMANCE-FOUNDATION-200, CODE-QUALITY-200 and PERFORMANCE-INTELLIGENCE-200; frontend/Admin/backend/code-execution and Theme/Extension attribution; performance budgets/regression baselines; PageSpeed/GTmetrix-class lab/field/waterfall/filmstrip/monitoring capabilities; secure external runners; AI-grounded remediation; Marketplace/release quality evidence; and expanded final PERF-CWV-CERT-100 without claiming implementation.",
+  "updated_at": "2026-08-24T19:10:00+05:00"
 }
