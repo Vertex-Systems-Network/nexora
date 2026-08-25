@@ -59,6 +59,10 @@ if ($errors === []) {
         "nexoraRuntimeRecoveryAppliedFailure",
         "'target_verification_complete' => \$overallStatus === 'pass'",
         "['bypass_shell' => true]",
+        "\$stderrHandle = @tmpfile()",
+        "2 => \$stderrHandle",
+        "@rewind(\$stderrHandle)",
+        "fclose(\$stderrHandle)",
         "LOCK_EX | LOCK_NB",
         "'.apply.lock'",
         "'exclusive-nonblocking'",
@@ -81,6 +85,15 @@ if ($errors === []) {
         || strpos($source, "\$steps['login_smoke'] = \$loginSmoke;") === false
         || strpos($source, "\$steps['web_identity_proof'] = \$webIdentity;") > strpos($source, "\$steps['login_smoke'] = \$loginSmoke;")) {
         $errors[] = 'exact target-to-web identity proof must precede authoritative login smoke';
+    }
+
+    if (str_contains($source, "2 => ['pipe', 'w']")) {
+        $errors[] = 'stderr must not use a second anonymous child pipe; that can deadlock on Windows when stderr fills before stdout reaches EOF';
+    }
+    if (strpos($source, '$exitCode = proc_close($process);') === false
+        || strpos($source, '@rewind($stderrHandle)') === false
+        || strpos($source, '$exitCode = proc_close($process);') > strpos($source, '@rewind($stderrHandle)')) {
+        $errors[] = 'transient stderr capture must be read only after the child process has closed';
     }
 
     $forbiddenSource = [
@@ -120,6 +133,7 @@ if ($errors === []) {
         'never written into the recovery receipt',
         'single-writer',
         'unique',
+        'Windows-safe child process capture',
         'status=blocked',
         'status=fail',
     ] as $needle) {
@@ -137,4 +151,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, stale-receipt gate, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
+fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, Windows-safe child stdout/stderr capture, stale-receipt gate, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
