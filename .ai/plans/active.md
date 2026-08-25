@@ -5,7 +5,7 @@
 - Parent stage: `RUNTIME-CLOSURE-001 — Installation + Runtime Closure`
 - Registered development unit: `SYS-RUNTIME-IDENTITY`
 - Release train: `builder-beta`
-- Status: `BLOCKED` pending final real-target readiness + `/login` evidence
+- Status: `BLOCKED` pending final real-target readiness + exact target-to-web `/login` evidence
 - Real target: Windows + Laragon, `D:\laragon\www\nexora`
 - Installed target release: `1.0.0-rc.93`
 - Current canonical source baseline for this pass: `main@dffb238e655a1c474f4f7ce7e75c6eda004c0c32`
@@ -15,13 +15,15 @@
 
 The Research/Quality/Data/Reliability/Payment/System-Graph/Flow/AI-development planning programs do **not** widen this active runtime closure. Do not start `CORE-QA-001` or later stages until this stage is `TARGET_VERIFIED`.
 
-This pass remains inside `SYS-RUNTIME-IDENTITY`. The Runtime Recovery / Closure Orchestrator is a control improvement for the already-active recovery workflow, not a new product/domain capability. It may coordinate only already-authorized runtime identity repair/readiness primitives.
+This pass remains inside `SYS-RUNTIME-IDENTITY`. The Runtime Recovery / Closure Orchestrator is a control improvement for the already-active recovery workflow, not a new product/domain capability. It may coordinate only already-authorized runtime identity repair/readiness primitives and the already-existing CLI↔web `SourceActivationHandshake` proof surface.
 
-System Graph/Flow product contribution remains `NOT_APPLICABLE`: no new product runtime/package/data/security relationship model is introduced. No dependency, migration, permission, tenant, payment, public API or product-AI scope is added.
+The exact target-to-web hardening does not add a public route, external network destination, dependency, permission, secret source, migration, tenant capability, payment surface, product API, or product-AI behavior. It reuses the existing target-owned `/install/source-status` route, existing `SourceActivationHandshake`, and existing `nexora:source:status --require-web-ack` verification contract.
+
+System Graph/Flow product contribution remains `NOT_APPLICABLE`: no new product runtime/package/data/security relationship model is introduced.
 
 ## Objective
 
-Close the installed rc.93 post-install runtime identity mismatch without disguising it as an rc.94 upgrade; prove compatibility/readiness on the real target; make the safe recovery sequence deterministic so operators do not manually chain internal commands; then advance to `CORE-QA-001` only after final target evidence passes.
+Close the installed rc.93 post-install runtime identity mismatch without disguising it as an rc.94 upgrade; prove compatibility/readiness on the real target; prove that the HTTP origin being certified is served by the exact target rather than merely trusting `app.url`; make the safe recovery sequence deterministic; then advance to `CORE-QA-001` only after final target evidence passes.
 
 ## Real-target evidence received — 2026-08-25
 
@@ -82,9 +84,9 @@ This was expected after the sealed installation lock and activation fingerprint 
 
 `php artisan nexora:runtime:post-install-reconcile --confirm=RECONCILE` then returned `status=pass` and a new receipt bound to the repaired installation lock SHA-256.
 
-**Still required before stage advancement:** a fresh `post-install-status --assert-ready` result proving `status=pass`, `ready=true`, `runtime_ready=true`, `receipt_current=true`, followed by real `/login` evidence.
+**Still required before stage advancement:** a fresh `post-install-status --assert-ready` result proving `status=pass`, `ready=true`, `runtime_ready=true`, `receipt_current=true`, followed by exact target-to-web proof and real `/login` evidence.
 
-## Root-cause / control finding
+## Root-cause / control findings
 
 The underlying defect was stale post-install runtime identity sealing. The first source-side gap was that the referenced rc.93 repair pack was not committed/discoverable; PR #26 closed that gap.
 
@@ -92,7 +94,9 @@ A second operator-experience/control gap was then observed: after explicit mutat
 
 A later adversarial pass found two additional reliability/evidence risks in the new orchestration layer: concurrent apply-mode writers could race the same sealed runtime target, and timestamp-only receipt names could overwrite prior evidence when multiple runs completed within the same second. Both are now part of the required control surface rather than accepted residual risk.
 
-The durable control improvement is a single Runtime Recovery / Closure Orchestrator that preserves human approval for mutation while automating deterministic verification/reconciliation steps, serializing apply-mode writers per target, and preserving every recovery outcome as unique evidence.
+A further adversarial pass found a **wrong-host false-PASS** surface: bootstrapping the target and reading its own `config('app.url')` prevents arbitrary operator URL override, but it does not prove that the server currently answering that URL is the same target directory. A stale/misconfigured `app.url` could point to another reachable Nexora deployment whose `/login` returns HTTP 200. Therefore `app.url + /login 200` is no longer sufficient acceptance evidence.
+
+The durable control improvement is a single Runtime Recovery / Closure Orchestrator that preserves human approval for mutation while automating deterministic verification/reconciliation, serializing apply-mode writers, preserving unique evidence, and proving a fresh target-local CLI→web nonce/source/runtime handshake before `/login` can become authoritative.
 
 ## Runtime Recovery / Closure Orchestrator contract
 
@@ -112,19 +116,24 @@ npm run runtime:recover -- --target="D:\laragon\www\nexora" --apply --confirm=RE
 
 Required behavior:
 
-1. in apply mode acquire a non-blocking exclusive lock bound to the explicit target before recovery/reconcile work; concurrent apply attempts fail closed;
+1. in apply mode acquire a non-blocking exclusive lock bound to the explicit target before recovery/reconcile/evidence work; concurrent apply attempts fail closed;
 2. inspect deep target compatibility first;
 3. if already compatible, do not run identity repair;
 4. if target is exactly rc.93 and mismatches are only the four approved planes, delegate to the version-pinned rc.93 adapter;
 5. independently re-run deep compatibility after repair and require both child exit code `0` and the expected PASS payload;
-6. assert post-install readiness and bind PASS to child exit code `0`;
+6. assert post-install readiness and bind PASS to child exit code `0`; `RuntimePostInstallHandoff::verifyCurrent()` independently rechecks source integrity, deep deployment identity, compatibility and activation identity;
 7. automatically reconcile **only** `receipt-refresh-required` with `runtime_ready=true` and `receipt_current=false`;
 8. re-assert readiness after reconciliation;
-9. resolve only the target application's own bootstrapped `config('app.url')`, then perform verified `GET /login` without disabling TLS verification or following redirects; arbitrary alternate HTTP hosts are forbidden;
-10. write a machine-readable apply-mode recovery outcome receipt under protected target runtime storage using a unique per-run identifier so rapid runs cannot overwrite historical evidence;
-11. return PASS only when compatibility, final readiness/current receipt and target-owned `/login` HTTP 200 all pass.
+9. resolve only the target application's own bootstrapped `config('app.url')` and reject credentials/query/fragment as an HTTP base;
+10. preflight the existing target-owned `/install/source-status` route with TLS verification enabled and redirects disabled **before** issuing challenge state, so pure transport failure does not mutate the handshake;
+11. issue a fresh target-local one-time challenge through the existing `SourceActivationHandshake` only after source integrity is PASS;
+12. send the bearer token only in-process through `X-Nexora-Activation-Token`; never copy it to logs, receipts, steps or public output;
+13. require HTTP 200 + `X-Nexora-Source-Ack: acknowledged` + matching acknowledgement nonce, then independently run local `nexora:source:status --require-web-ack` with exit code `0` and matching source/runtime fingerprints;
+14. only after exact target-to-web proof passes, perform verified `GET /login` on the same target-owned origin without redirects or TLS bypass;
+15. write a machine-readable apply-mode recovery outcome receipt under protected target runtime storage using a unique per-run identifier so rapid runs cannot overwrite historical evidence;
+16. return PASS only when compatibility, final readiness/current receipt, exact target-to-web proof and `/login` HTTP 200 all pass.
 
-If target-owned HTTP smoke cannot be certified because of local TLS trust/web-server reachability, return `BLOCKED`, preserve successful runtime/readiness evidence, and do not mislabel target verification as complete. If `/login` returns an explicit non-200/configuration failure, return `FAIL`, not `BLOCKED`.
+If source-status or `/login` cannot be certified because of local TLS trust/web-server reachability, return `BLOCKED` where no explicit HTTP/configuration rejection exists, preserve successful runtime/readiness evidence, and do not mislabel target verification as complete. Explicit non-200/source-contract/nonce/fingerprint failures are `FAIL`, not `BLOCKED`.
 
 ## Guardrails
 
@@ -139,9 +148,11 @@ If target-owned HTTP smoke cannot be certified because of local TLS trust/web-se
 - The rc.93 adapter preserves protected backup + rollback-on-non-convergence behavior.
 - Receipt reconciliation is allowed only after runtime compatibility is PASS and the exact stale-receipt state is observed.
 - Recovery outcome receipts use unique identifiers; prior evidence is never silently replaced by a same-second run.
-- The final HTTP smoke is target-bound to the target application's own bootstrapped `app.url`; arbitrary URL overrides are not supported.
-- TLS verification may not be disabled merely to obtain `/login` PASS.
-- Explicit HTTP non-200 is FAIL; only transport/TLS inability with no HTTP result is BLOCKED.
+- `app.url` is only the candidate target-owned origin, **not** sufficient proof of exact target web identity.
+- `/login` is skipped as non-authoritative until the fresh target-local one-time web acknowledgement and local CLI re-verification both PASS.
+- The one-time web acknowledgement token is secret, single-use and never persisted in the recovery receipt/log/public result.
+- TLS peer/name verification remains enabled for both source-status and `/login`; redirects remain disabled.
+- Explicit HTTP/source-contract/nonce/fingerprint mismatch is FAIL; only transport/TLS inability with no authoritative HTTP result is BLOCKED.
 - Orchestrator receipts are evidence artifacts, not authority to edit canonical project state by themselves.
 - Source/CI PASS never substitutes for real target/browser evidence.
 
@@ -151,11 +162,11 @@ This is an existing defect/control improvement, not a new product feature. Marke
 
 DMAIC/control intent:
 
-- **Define:** excessive manual sequencing after approved runtime repair creates operator error/repetition risk.
-- **Measure:** the observed repair required separate repair, compatibility, readiness, reconcile and follow-up readiness/browser actions.
-- **Analyze:** primitives were correctly fail-closed but lacked a post-approval coordinator; adversarial review additionally found concurrent-writer and same-second evidence-collision risks.
-- **Improve:** add one bounded orchestrator over existing trusted primitives with per-target apply serialization and unique evidence identities.
-- **Control:** regression contract, exact confirmation, mismatch/version gates, child-exit binding, single-writer lock, unique receipts, target-owned HTTP identity, independent re-verification, machine-readable evidence and exact-head CI/review.
+- **Define:** excessive manual sequencing and weak HTTP target binding create operator error and false-certification risk.
+- **Measure:** the observed repair required separate repair, compatibility, readiness, reconcile and follow-up readiness/browser actions; an `app.url`-only smoke could not distinguish a stale URL pointing at another deployment.
+- **Analyze:** primitives were fail-closed but lacked a post-approval coordinator; later audits found concurrent-writer, evidence-collision and wrong-host HTTP identity risks.
+- **Improve:** add one bounded orchestrator over existing trusted primitives with per-target apply serialization, unique evidence identities, and reuse of the existing one-time CLI↔web source acknowledgement trust contract.
+- **Control:** regression contract, exact confirmation, mismatch/version gates, child-exit binding, single-writer lock, unique receipts, exact target-to-web challenge proof, TLS/redirect controls, independent local re-verification, machine-readable evidence and exact-head CI/review.
 
 CTQs:
 
@@ -166,48 +177,55 @@ CTQs:
 - no hidden upgrade/dependency/migration work;
 - automatic reconcile only for the exact stale-receipt state;
 - independent compatibility + readiness verification including process exit status;
-- target-owned HTTP endpoint only;
-- verified TLS for HTTP smoke;
+- exact target-to-web identity proof before login smoke;
+- one-time challenge secret never written to evidence;
+- verified TLS and no redirects for HTTP proof;
 - unique/non-overwriting evidence output;
 - fail/blocked instead of false PASS.
 
 ## Architecture / data / authorization
 
-- Architecture: no product redesign; orchestration remains an external/operator control over existing runtime commands.
-- DataFlow: only installation/runtime evidence and protected local recovery receipts; no customer/product data flow.
+- Architecture: no product redesign; orchestration remains an external/operator control over existing runtime commands and the existing source-activation handshake trust primitive.
+- DataFlow: installation/runtime evidence, protected local recovery receipts, and a single-use local source-activation bearer token sent only to the target-owned origin; no customer/product data flow.
+- Secret handling: acknowledgement token originates from existing `SourceActivationHandshake`, remains in process memory/request header, is consumed once by the web process, and is excluded from orchestrator evidence.
+- Network: no new external destination; source-status and `/login` use the same bootstrapped `app.url` origin with TLS verification and redirects disabled.
 - System Graph/Flow: `NOT_APPLICABLE` to this bounded control improvement.
 - Migrations: none.
 - Permissions/auth policy: unchanged.
 - Packages/API/product-AI/payment: out of scope.
-- Runtime mutation authority: existing target `InstallationState` bounded repair + existing post-install receipt reconciliation only.
+- Runtime mutation authority: existing target `InstallationState` bounded repair + existing post-install receipt reconciliation + existing protected `SourceActivationHandshake` evidence only.
 
 ## Security / FMEA
 
-Risk remains `critical` because recovery may mutate sealed runtime identity evidence.
+Risk remains `critical` because recovery may mutate sealed runtime identity/evidence and certify a live web origin.
 
 Failure modes and controls:
 
 - wrong target/version → explicit target + target file/version checks;
-- source/deployment drift → existing repair adapter fails closed;
+- source/deployment drift → deep compatibility/readiness fail closed;
 - unrelated mismatch → no approved adapter, fail closed;
 - accidental mutation → dry-run default + `RECOVER-RUNTIME` confirmation;
-- concurrent apply writers race sealed state/receipts → non-blocking exclusive target lock; second writer fails closed;
-- rapid sequential runs overwrite a timestamp-only evidence file → unique random receipt identifier in every final filename;
-- shell injection → child commands are fixed argument arrays with shell bypass; target path is not interpolated into shell text;
-- child emits PASS JSON but exits non-zero → PASS predicate also requires exit code `0`;
+- concurrent apply writers race sealed state/receipts/handshake → non-blocking exclusive target lock; second writer fails closed;
+- rapid sequential runs overwrite timestamp-only evidence → unique random receipt identifier in every final filename;
+- shell injection → child commands are fixed argument arrays with shell bypass; target path/token are not interpolated into a shell command;
+- child emits PASS JSON but exits non-zero → PASS predicates also require exit code `0`;
 - hidden dependency/upgrade/migration → explicitly absent and regression-guarded;
 - stale receipt reconciled when runtime unhealthy → forbidden; requires exact receipt-refresh state with runtime ready;
-- repair claims its own success → independent compatibility command runs after repair;
-- stale receipt claims readiness → readiness is re-run after reconcile;
-- arbitrary external host returns `/login` 200 → impossible through supported interface because smoke URL is derived only from target-owned bootstrapped `config('app.url')`;
+- repair claims its own success → independent deep compatibility runs after repair;
+- stale receipt claims readiness → readiness re-runs after reconcile and itself verifies source/deployment/compatibility/activation;
+- stale/misconfigured `app.url` points at another reachable Nexora deployment → `/login` cannot run authoritatively until that web process consumes a fresh target-local one-time token and the exact target CLI verifies the same nonce/source/runtime fingerprints;
+- token leaks into evidence/logs → token is retained only in process memory/request header, removed before public step creation, and excluded from receipts/results;
+- source-status transport unavailable → preflight returns BLOCKED before challenge issuance, avoiding unnecessary handshake mutation;
+- wrong host exposes source-status but cannot consume target token → explicit acknowledgement rejection/mismatch is FAIL;
 - insecure local HTTPS shortcut → TLS peer/name verification stays enabled;
-- target-owned `/login` explicit non-200 → FAIL, never downgraded to BLOCKED;
-- transport/TLS unavailable after valid repair → BLOCKED without rolling back an independently compatible runtime solely for transport evidence;
-- false canonical advancement → state remains BLOCKED until reviewed target evidence satisfies DoD.
+- redirects mask a different destination → redirects disabled for both source-status and `/login`;
+- exact-target `/login` explicit non-200 → FAIL, never downgraded to BLOCKED;
+- transport/TLS unavailable after valid runtime readiness → BLOCKED without rolling back an independently compatible runtime solely for transport evidence;
+- false canonical advancement → state remains BLOCKED until independent review and real target evidence satisfy DoD.
 
 ## Performance / reliability / cost
 
-No product performance change is intended. Operator orchestration executes a bounded number of local subprocesses and one target-owned HTTP GET. No retry loop is introduced. Reliability is deterministic stop-on-failure, single-writer apply serialization, non-overwriting evidence, and preservation of existing repair backup/rollback semantics.
+No product performance change is intended. Apply orchestration executes a bounded number of local subprocesses, one source-status preflight GET, one one-time source-status acknowledgement GET, one local source-status verification, and one `/login` GET only after exact web identity proof succeeds. No retry loop is introduced. Reliability is deterministic stop-on-failure, single-writer apply serialization, non-overwriting evidence, exact web-target challenge binding, and preservation of existing repair backup/rollback semantics.
 
 ## Execution chunks
 
@@ -231,8 +249,9 @@ No product performance change is intended. Operator orchestration executes a bou
 - [x] Add `scripts/runtime-recovery-orchestrator.php`.
 - [x] Add single `runtime:recover` npm operator entrypoint.
 - [x] Add regression contract + operator documentation.
-- [x] Self-audit closed child-exit/HTTP-status/alternate-host false-green loopholes before merge.
+- [x] Self-audit closed child-exit/HTTP-status/arbitrary-host-override false-green loopholes.
 - [x] Second adversarial pass closed concurrent apply-writer and same-second receipt-overwrite risks.
+- [x] Third adversarial pass closed `app.url`-points-to-another-deployment false-PASS by requiring fresh target-local CLI→web challenge acknowledgement before `/login`.
 - [ ] Exact-head source certification PASS on the final hardened head.
 - [ ] Independent exact-head review for the critical recovery-control change.
 - [ ] Merge canonical implementation.
@@ -252,7 +271,8 @@ No product performance change is intended. Operator orchestration executes a bou
 
 ### D — product handoff
 
-- [ ] `/login` HTTP/browser evidence PASS without runtime/tenant/bootstrap failure.
+- [ ] Fresh exact target-to-web one-time challenge acknowledgement PASS.
+- [ ] `/login` HTTP/browser evidence PASS on that exact proven origin without runtime/tenant/bootstrap failure.
 - [ ] Update `SYS-RUNTIME-IDENTITY` evidence/status.
 - [ ] Update canonical state/handoff/ledger.
 - [ ] Advance only when target evidence passes.
@@ -261,14 +281,18 @@ No product performance change is intended. Operator orchestration executes a bou
 
 - Existing compatibility/readiness contracts remain authoritative.
 - `Rc93PostInstallIdentityRepairPackTest` remains source regression evidence for the bounded repair adapter.
-- `RuntimeRecoveryOrchestratorTest` guards orchestration confirmation, sequencing, child-exit binding, per-target apply serialization, unique receipt identity, reconcile conditions, target-owned URL binding, TLS verification, HTTP PASS/FAIL/BLOCKED semantics, forbidden upgrade/dependency/migration behavior and npm entrypoint.
+- `RuntimeRecoveryOrchestratorTest` guards confirmation, sequencing, child-exit binding, per-target apply serialization, unique receipt identity, reconcile conditions, target-owned URL selection, one-time exact target-to-web challenge ordering/secret handling, TLS/redirect behavior, HTTP PASS/FAIL/BLOCKED semantics, forbidden upgrade/dependency/migration behavior and npm entrypoint.
 - `runtime-recovery-orchestrator-contract-verify.php` is a required exact-head CI gate and independently checks the same fail-closed source invariants without relying on the PHPUnit suite being executed by release certification.
 - Source CI/static tests are not target proof.
 - High/critical change requires exact-head independent review in addition to authoring tests/CI.
 
 ## Rollback / recovery
 
-The rc.93 adapter continues to preserve and restore the exact pre-repair sealed installation lock if its own post-write compatibility does not converge. The orchestrator does not roll back a runtime that is independently compatible merely because later receipt or HTTP evidence is incomplete; those cases remain recoverable/verifiable without reverting valid runtime identity. Apply-mode process termination releases the OS file lock; the lock file itself is only a synchronization anchor and must not be interpreted as proof that a process remains active.
+The rc.93 adapter continues to preserve and restore the exact pre-repair sealed installation lock if its own post-write compatibility does not converge. The orchestrator does not roll back a runtime that is independently compatible merely because later receipt or HTTP evidence is incomplete; those cases remain recoverable/verifiable without reverting valid runtime identity.
+
+A source-identity challenge is only issued after a reachable source-status preflight. A successfully issued challenge may remain pending if transport fails between issuance and acknowledgement; it is bounded by the existing handshake TTL and may be superseded by a later authorized challenge. It is evidence state, not domain/customer data. The one-time token is not placed in the orchestrator receipt.
+
+Apply-mode process termination releases the OS file lock; the lock file itself is only a synchronization anchor and must not be interpreted as proof that a process remains active.
 
 ## Definition of Done
 
@@ -278,9 +302,10 @@ Advance only when:
 2. real rc.93 target repair evidence is accepted;
 3. deep compatibility PASS, zero mismatches, installed-data-plane mode;
 4. final readiness assertion PASS with current receipt;
-5. target-owned `/login` is reachable without the blocker;
-6. state/handoff/registry/ledger evidence is updated;
-7. no immutable trust plane or validation/security rule was relaxed to force PASS.
+5. fresh target-local CLI→web challenge proof binds the configured origin to the exact target;
+6. `/login` returns HTTP 200 on that same exact proven origin without runtime/tenant/bootstrap blocker;
+7. state/handoff/registry/ledger evidence is updated;
+8. no immutable trust plane or validation/security rule was relaxed to force PASS.
 
 ## Next stage
 
