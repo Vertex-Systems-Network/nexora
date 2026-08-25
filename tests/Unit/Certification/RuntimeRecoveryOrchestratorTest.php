@@ -86,8 +86,8 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
         // app.url alone is not identity proof. A fresh target-local one-time
         // challenge must be acknowledged by that web process and verified again
         // by the exact target CLI before /login can become authoritative.
-        $webProofPosition = strpos($source, "$steps['web_identity_proof'] = $webIdentity;");
-        $loginPosition = strpos($source, "$steps['login_smoke'] = $loginSmoke;");
+        $webProofPosition = strpos($source, "\$steps['web_identity_proof'] = \$webIdentity;");
+        $loginPosition = strpos($source, "\$steps['login_smoke'] = \$loginSmoke;");
         self::assertIsInt($webProofPosition);
         self::assertIsInt($loginPosition);
         self::assertLessThan($loginPosition, $webProofPosition);
