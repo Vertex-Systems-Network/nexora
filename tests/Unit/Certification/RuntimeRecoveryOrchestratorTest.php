@@ -46,6 +46,10 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
             "'verify_peer_name' => true",
             "'follow_location' => 0",
             "['bypass_shell' => true]",
+            '$stderrHandle = @tmpfile();',
+            '2 => $stderrHandle',
+            '@rewind($stderrHandle)',
+            'fclose($stderrHandle)',
             'nexoraRuntimeRecoveryResolveTargetAppUrl($target)',
             'recovery-orchestrator',
             'target_verification_complete',
@@ -66,6 +70,16 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
 
         // PASS requires both the expected JSON invariants and a zero child exit.
         self::assertGreaterThanOrEqual(2, substr_count($source, "return \$result['exit_code'] === 0"));
+
+        // Child stdout can remain a pipe, but stderr must be a transient regular
+        // file. Sequentially draining two anonymous pipes can deadlock when a
+        // verbose failing child fills stderr before stdout reaches EOF on Windows.
+        self::assertStringNotContainsString("2 => ['pipe', 'w']", $source);
+        $procClosePosition = strpos($source, '$exitCode = proc_close($process);');
+        $stderrReadPosition = strpos($source, '@rewind($stderrHandle)');
+        self::assertIsInt($procClosePosition);
+        self::assertIsInt($stderrReadPosition);
+        self::assertLessThan($stderrReadPosition, $procClosePosition);
 
         // Only an observed failed rc.93 result with a non-empty, fully allow-listed
         // mismatch set can enter the version-specific mutation adapter.
