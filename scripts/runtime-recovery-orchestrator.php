@@ -272,31 +272,32 @@ function nexoraRuntimeRecoveryResolveTargetAppUrl(string $target): ?string
     return $url !== '' ? $url : null;
 }
 
-/** @return array{status:string,url:string,http_status:?int,error:?string} */
-function nexoraRuntimeRecoveryLoginSmoke(string $targetAppUrl): array
+function nexoraRuntimeRecoverySafeBaseUrl(string $targetAppUrl): ?string
 {
     $parts = parse_url($targetAppUrl);
     if (! is_array($parts)
         || ! in_array(strtolower((string) ($parts['scheme'] ?? '')), ['http', 'https'], true)
         || trim((string) ($parts['host'] ?? '')) === ''
         || isset($parts['user'])
-        || isset($parts['pass'])) {
-        return [
-            'status' => 'fail',
-            'url' => $targetAppUrl,
-            'http_status' => null,
-            'error' => 'Target-owned app.url is not a safe absolute HTTP(S) URL for the bounded /login smoke.',
-        ];
+        || isset($parts['pass'])
+        || isset($parts['query'])
+        || isset($parts['fragment'])) {
+        return null;
     }
 
-    $url = rtrim($targetAppUrl, '/').'/login';
+    return rtrim($targetAppUrl, '/');
+}
+
+/** @param list<string> $headers @return array{status_code:?int,body:?string,headers:list<string>} */
+function nexoraRuntimeRecoveryHttpGet(string $url, array $headers): array
+{
     $context = stream_context_create([
         'http' => [
             'method' => 'GET',
             'ignore_errors' => true,
             'follow_location' => 0,
             'timeout' => 12,
-            'header' => "Accept: text/html\r\nUser-Agent: NexoraRuntimeRecovery/1\r\n",
+            'header' => implode("\r\n", $headers)."\r\n",
         ],
         'ssl' => [
             'verify_peer' => true,
@@ -306,21 +307,289 @@ function nexoraRuntimeRecoveryLoginSmoke(string $targetAppUrl): array
 
     $http_response_header = [];
     $body = @file_get_contents($url, false, $context);
-    $headers = is_array($http_response_header ?? null) ? $http_response_header : [];
+    $responseHeaders = is_array($http_response_header ?? null)
+        ? array_values(array_map(static fn ($header): string => (string) $header, $http_response_header))
+        : [];
     $statusCode = null;
-    if (isset($headers[0]) && preg_match('/\s(\d{3})(?:\s|$)/', (string) $headers[0], $matches) === 1) {
+    if (isset($responseHeaders[0]) && preg_match('/\s(\d{3})(?:\s|$)/', $responseHeaders[0], $matches) === 1) {
         $statusCode = (int) $matches[1];
     }
 
-    if ($statusCode === 200 && is_string($body)) {
-        return ['status' => 'pass', 'url' => $url, 'http_status' => 200, 'error' => null];
+    return [
+        'status_code' => $statusCode,
+        'body' => is_string($body) ? $body : null,
+        'headers' => $responseHeaders,
+    ];
+}
+
+/** @param list<string> $headers */
+function nexoraRuntimeRecoveryHeaderValue(array $headers, string $name): ?string
+{
+    $prefix = strtolower($name).':';
+    foreach ($headers as $header) {
+        if (str_starts_with(strtolower($header), $prefix)) {
+            return trim(substr($header, strlen($prefix)));
+        }
     }
-    if ($statusCode !== null) {
+
+    return null;
+}
+
+/** @return array{status:string,token:?string,nonce:?string,source_set_fingerprint:?string,runtime_class_fingerprint:?string,error:?string} */
+function nexoraRuntimeRecoveryIssueWebIdentityChallenge(string $target): array
+{
+    $targetLiteral = var_export($target, true);
+    $kernelClass = var_export('Illuminate\\Contracts\\Console\\Kernel', true);
+    $identityClass = var_export('App\\Nexora\\Installation\\SourceActivationIdentity', true);
+    $handshakeClass = var_export('App\\Nexora\\Installation\\SourceActivationHandshake', true);
+    $code = '$target='.$targetLiteral.';'
+        .'require $target.DIRECTORY_SEPARATOR."vendor".DIRECTORY_SEPARATOR."autoload.php";'
+        .'$app=require $target.DIRECTORY_SEPARATOR."bootstrap".DIRECTORY_SEPARATOR."app.php";'
+        .'$kernel=$app->make('.$kernelClass.');'
+        .'$kernel->bootstrap();'
+        .'$identity=$app->make('.$identityClass.');'
+        .'$handshake=$app->make('.$handshakeClass.');'
+        .'$source=$identity->inspect();'
+        .'if (($source["status"]??"fail")!=="pass") {'
+        .'fwrite(STDERR,json_encode(["status"=>"fail","error"=>"critical source identity is not PASS"],JSON_UNESCAPED_SLASHES));exit(3);}'
+        .'$receipt=$handshake->issueCliActivation($source);'
+        .'$token=$handshake->webAckToken($source);'
+        .'if (!is_string($token)||$token==="") {'
+        .'fwrite(STDERR,json_encode(["status"=>"fail","error"=>"one-time web acknowledgement token was not issued"],JSON_UNESCAPED_SLASHES));exit(4);}'
+        .'fwrite(STDOUT,json_encode(['
+        .'"status"=>"pass","token"=>$token,"nonce"=>$receipt["nonce"]??null,'
+        .'"source_set_fingerprint"=>$source["source_set_fingerprint"]??null,'
+        .'"runtime_class_fingerprint"=>$source["runtime_class_fingerprint"]??null'
+        .'],JSON_UNESCAPED_SLASHES));';
+
+    $result = nexoraRuntimeRecoveryRun([PHP_BINARY, '-r', $code], $target);
+    $payload = nexoraRuntimeRecoveryExtractJson($result['stdout'], $result['stderr']);
+    if ($result['exit_code'] !== 0 || ! is_array($payload) || ($payload['status'] ?? null) !== 'pass') {
+        return [
+            'status' => 'fail',
+            'token' => null,
+            'nonce' => null,
+            'source_set_fingerprint' => null,
+            'runtime_class_fingerprint' => null,
+            'error' => is_array($payload)
+                ? (string) ($payload['error'] ?? 'Unable to issue exact-target web identity challenge.')
+                : 'Unable to issue exact-target web identity challenge.',
+        ];
+    }
+
+    $token = trim((string) ($payload['token'] ?? ''));
+    $nonce = trim((string) ($payload['nonce'] ?? ''));
+    if (preg_match('/^[a-f0-9]{64}$/', $token) !== 1 || preg_match('/^[a-f0-9]{48}$/', $nonce) !== 1) {
+        return [
+            'status' => 'fail',
+            'token' => null,
+            'nonce' => null,
+            'source_set_fingerprint' => null,
+            'runtime_class_fingerprint' => null,
+            'error' => 'Exact-target web identity challenge returned invalid secret/nonce material.',
+        ];
+    }
+
+    return [
+        'status' => 'pass',
+        'token' => $token,
+        'nonce' => $nonce,
+        'source_set_fingerprint' => trim((string) ($payload['source_set_fingerprint'] ?? '')) ?: null,
+        'runtime_class_fingerprint' => trim((string) ($payload['runtime_class_fingerprint'] ?? '')) ?: null,
+        'error' => null,
+    ];
+}
+
+/** @return array{status:string,url:string,http_status:?int,challenge_issued:bool,nonce:?string,source_set_fingerprint:?string,runtime_class_fingerprint:?string,error:?string} */
+function nexoraRuntimeRecoveryWebIdentityProof(string $target, string $targetAppUrl): array
+{
+    $baseUrl = nexoraRuntimeRecoverySafeBaseUrl($targetAppUrl);
+    $url = $baseUrl === null ? $targetAppUrl : $baseUrl.'/install/source-status';
+    if ($baseUrl === null) {
         return [
             'status' => 'fail',
             'url' => $url,
-            'http_status' => $statusCode,
-            'error' => 'Expected HTTP 200 from target-owned /login without following redirects.',
+            'http_status' => null,
+            'challenge_issued' => false,
+            'nonce' => null,
+            'source_set_fingerprint' => null,
+            'runtime_class_fingerprint' => null,
+            'error' => 'Target-owned app.url is not a safe absolute HTTP(S) base URL for exact web identity proof.',
+        ];
+    }
+
+    $preflight = nexoraRuntimeRecoveryHttpGet($url, [
+        'Accept: application/json',
+        'User-Agent: NexoraRuntimeRecovery/1',
+        'Cache-Control: no-cache',
+    ]);
+    if ($preflight['status_code'] === null) {
+        return [
+            'status' => 'blocked',
+            'url' => $url,
+            'http_status' => null,
+            'challenge_issued' => false,
+            'nonce' => null,
+            'source_set_fingerprint' => null,
+            'runtime_class_fingerprint' => null,
+            'error' => 'Unable to reach target-owned /install/source-status with verified transport before issuing a challenge.',
+        ];
+    }
+    if ($preflight['status_code'] !== 200
+        || strtolower((string) nexoraRuntimeRecoveryHeaderValue($preflight['headers'], 'X-Nexora-Source-Ack')) !== 'token-required') {
+        return [
+            'status' => 'fail',
+            'url' => $url,
+            'http_status' => $preflight['status_code'],
+            'challenge_issued' => false,
+            'nonce' => null,
+            'source_set_fingerprint' => null,
+            'runtime_class_fingerprint' => null,
+            'error' => 'Target-owned source-status endpoint did not expose the expected fail-closed acknowledgement contract.',
+        ];
+    }
+
+    $challenge = nexoraRuntimeRecoveryIssueWebIdentityChallenge($target);
+    if (($challenge['status'] ?? 'fail') !== 'pass') {
+        return [
+            'status' => 'fail',
+            'url' => $url,
+            'http_status' => $preflight['status_code'],
+            'challenge_issued' => true,
+            'nonce' => null,
+            'source_set_fingerprint' => null,
+            'runtime_class_fingerprint' => null,
+            'error' => (string) ($challenge['error'] ?? 'Unable to issue exact-target web identity challenge.'),
+        ];
+    }
+
+    $token = (string) $challenge['token'];
+    $nonce = (string) $challenge['nonce'];
+    $ack = nexoraRuntimeRecoveryHttpGet($url, [
+        'Accept: application/json',
+        'User-Agent: NexoraRuntimeRecovery/1',
+        'Cache-Control: no-cache',
+        'X-Nexora-Activation-Token: '.$token,
+    ]);
+    unset($token, $challenge['token']);
+
+    if ($ack['status_code'] === null) {
+        return [
+            'status' => 'blocked',
+            'url' => $url,
+            'http_status' => null,
+            'challenge_issued' => true,
+            'nonce' => $nonce,
+            'source_set_fingerprint' => $challenge['source_set_fingerprint'],
+            'runtime_class_fingerprint' => $challenge['runtime_class_fingerprint'],
+            'error' => 'Exact-target web identity challenge was issued, but the acknowledgement transport/TLS request could not be completed.',
+        ];
+    }
+
+    $ackPayload = is_string($ack['body'])
+        ? nexoraRuntimeRecoveryExtractJson($ack['body'])
+        : null;
+    $ackHandshake = is_array($ackPayload['activation_handshake'] ?? null)
+        ? $ackPayload['activation_handshake']
+        : [];
+    $httpAckPass = $ack['status_code'] === 200
+        && strtolower((string) nexoraRuntimeRecoveryHeaderValue($ack['headers'], 'X-Nexora-Source-Ack')) === 'acknowledged'
+        && is_array($ackPayload)
+        && ($ackPayload['status'] ?? null) === 'pass'
+        && ($ackPayload['diagnostic_detail'] ?? null) === 'authorized'
+        && ($ackHandshake['acknowledgement_authorized'] ?? false) === true
+        && hash_equals($nonce, (string) ($ackHandshake['nonce'] ?? ''));
+    if (! $httpAckPass) {
+        return [
+            'status' => 'fail',
+            'url' => $url,
+            'http_status' => $ack['status_code'],
+            'challenge_issued' => true,
+            'nonce' => $nonce,
+            'source_set_fingerprint' => $challenge['source_set_fingerprint'],
+            'runtime_class_fingerprint' => $challenge['runtime_class_fingerprint'],
+            'error' => 'The app.url web process did not acknowledge the exact target-local one-time source/runtime challenge.',
+        ];
+    }
+
+    $local = nexoraRuntimeRecoveryRun([
+        PHP_BINARY,
+        $target.DIRECTORY_SEPARATOR.'artisan',
+        'nexora:source:status',
+        '--require-web-ack',
+    ], $target);
+    $localPayload = nexoraRuntimeRecoveryExtractJson($local['stdout'], $local['stderr']);
+    $localHandshake = is_array($localPayload['activation_handshake'] ?? null)
+        ? $localPayload['activation_handshake']
+        : [];
+    $localPass = $local['exit_code'] === 0
+        && is_array($localPayload)
+        && ($localPayload['status'] ?? null) === 'pass'
+        && ($localHandshake['status'] ?? null) === 'pass'
+        && ($localHandshake['web_ack_valid'] ?? false) === true
+        && hash_equals($nonce, (string) ($localHandshake['nonce'] ?? ''))
+        && hash_equals(
+            (string) ($challenge['source_set_fingerprint'] ?? ''),
+            (string) ($localPayload['source_set_fingerprint'] ?? ''),
+        )
+        && hash_equals(
+            (string) ($challenge['runtime_class_fingerprint'] ?? ''),
+            (string) ($localPayload['runtime_class_fingerprint'] ?? ''),
+        );
+    if (! $localPass) {
+        return [
+            'status' => 'fail',
+            'url' => $url,
+            'http_status' => 200,
+            'challenge_issued' => true,
+            'nonce' => $nonce,
+            'source_set_fingerprint' => $challenge['source_set_fingerprint'],
+            'runtime_class_fingerprint' => $challenge['runtime_class_fingerprint'],
+            'error' => 'Web acknowledgement returned, but local CLI verification did not bind it to the exact target source/runtime generation.',
+        ];
+    }
+
+    return [
+        'status' => 'pass',
+        'url' => $url,
+        'http_status' => 200,
+        'challenge_issued' => true,
+        'nonce' => $nonce,
+        'source_set_fingerprint' => $challenge['source_set_fingerprint'],
+        'runtime_class_fingerprint' => $challenge['runtime_class_fingerprint'],
+        'error' => null,
+    ];
+}
+
+/** @return array{status:string,url:string,http_status:?int,error:?string} */
+function nexoraRuntimeRecoveryLoginSmoke(string $targetAppUrl): array
+{
+    $baseUrl = nexoraRuntimeRecoverySafeBaseUrl($targetAppUrl);
+    if ($baseUrl === null) {
+        return [
+            'status' => 'fail',
+            'url' => $targetAppUrl,
+            'http_status' => null,
+            'error' => 'Target-owned app.url is not a safe absolute HTTP(S) base URL for the bounded /login smoke.',
+        ];
+    }
+
+    $url = $baseUrl.'/login';
+    $response = nexoraRuntimeRecoveryHttpGet($url, [
+        'Accept: text/html',
+        'User-Agent: NexoraRuntimeRecovery/1',
+        'Cache-Control: no-cache',
+    ]);
+
+    if ($response['status_code'] === 200 && is_string($response['body'])) {
+        return ['status' => 'pass', 'url' => $url, 'http_status' => 200, 'error' => null];
+    }
+    if ($response['status_code'] !== null) {
+        return [
+            'status' => 'fail',
+            'url' => $url,
+            'http_status' => $response['status_code'],
+            'error' => 'Expected HTTP 200 from exact-target /login without following redirects.',
         ];
     }
 
@@ -328,7 +597,7 @@ function nexoraRuntimeRecoveryLoginSmoke(string $targetAppUrl): array
         'status' => 'blocked',
         'url' => $url,
         'http_status' => null,
-        'error' => 'Unable to complete verified target-owned HTTP(S) /login smoke. Check web-server reachability and PHP CA trust; TLS verification is not disabled.',
+        'error' => 'Unable to complete verified exact-target HTTP(S) /login smoke. Check web-server reachability and PHP CA trust; TLS verification is not disabled.',
     ];
 }
 
@@ -406,7 +675,7 @@ function nexoraRuntimeRecoveryWriteReceipt(string $target, array $payload): ?str
         json_encode($copy, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
     );
     $receiptId = bin2hex(random_bytes(6));
-    $path = $directory.DIRECTORY_SEPARATOR.'runtime-recovery-'.gmdate('Ymd\THis\Z').'-'.$receiptId.'.json';
+    $path = $directory.DIRECTORY_SEPARATOR.'runtime-recovery-'.gmdate('Ymd\\THis\\Z').'-'.$receiptId.'.json';
     $temporary = $path.'.tmp-'.bin2hex(random_bytes(4));
     $bytes = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL;
     if (@file_put_contents($temporary, $bytes, LOCK_EX) === false) {
@@ -459,21 +728,26 @@ function nexoraRuntimeRecoveryUsage(): string
 Nexora Runtime Recovery / Closure Orchestrator
 
 Read-only dry-run:
-  php scripts/runtime-recovery-orchestrator.php --target="D:\laragon\www\nexora"
+  php scripts/runtime-recovery-orchestrator.php --target="D:\\laragon\\www\\nexora"
 
-Authorized recovery + automatic verification/reconcile/login smoke:
-  php scripts/runtime-recovery-orchestrator.php --target="D:\laragon\www\nexora" --apply --confirm=RECOVER-RUNTIME
+Authorized recovery + automatic verification/reconcile/web identity/login smoke:
+  php scripts/runtime-recovery-orchestrator.php --target="D:\\laragon\\www\\nexora" --apply --confirm=RECOVER-RUNTIME
 
 The final HTTP smoke is bound to the target application's own bootstrapped
-config('app.url'). Arbitrary URL overrides are intentionally unsupported.
+config('app.url'). Before /login can PASS, the app.url web process must consume
+a fresh one-time challenge issued from the exact target and the local CLI must
+verify the same acknowledgement nonce/source/runtime generation.
+
+Arbitrary URL overrides are intentionally unsupported. The one-time challenge
+token is kept in-process only and is never written into the orchestrator receipt.
 
 Apply mode is single-writer serialized for the explicit target. Recovery receipts
 use unique identifiers so repeated runs cannot silently overwrite prior evidence.
 
 The orchestrator never upgrades/copies source, installs dependencies, runs
-migrations, or weakens TLS. Apply mode uses only an approved version-specific
-adapter, independently re-verifies compatibility/readiness, reconciles only the
-exact stale-receipt state, then requires target-owned /login HTTP 200.
+migrations, or weakens TLS. Apply mode uses only existing runtime identity and
+recovery primitives, independently re-verifies compatibility/readiness, reconciles
+only the exact stale-receipt state, then requires exact-target /login HTTP 200.
 TEXT;
 }
 
@@ -624,8 +898,8 @@ if (! nexoraRuntimeRecoveryCompatibilityPass($compatibility)) {
         'steps' => $steps,
         'mutation_performed' => false,
         'next_action' => $refreshObserved
-            ? 'Apply mode can reconcile the exact stale receipt, re-assert readiness and run target-owned /login smoke.'
-            : 'Apply mode will re-assert readiness and run target-owned /login smoke; no identity repair/reconcile is planned.',
+            ? 'Apply mode can reconcile the exact stale receipt, re-assert readiness, prove the app.url web process belongs to this target, and run /login smoke.'
+            : 'Apply mode will re-assert readiness, prove the app.url web process belongs to this target, and run /login smoke; no identity repair/reconcile is planned.',
     ]);
 }
 
@@ -678,19 +952,41 @@ $steps['readiness_final'] = [
 ];
 
 $targetAppUrl = nexoraRuntimeRecoveryResolveTargetAppUrl($target);
-$loginSmoke = $targetAppUrl === null
+$webIdentity = $targetAppUrl === null
     ? [
         'status' => 'blocked',
         'url' => '',
         'http_status' => null,
-        'error' => 'Unable to resolve target-owned config(app.url) for the final /login smoke.',
+        'challenge_issued' => false,
+        'nonce' => null,
+        'source_set_fingerprint' => null,
+        'runtime_class_fingerprint' => null,
+        'error' => 'Unable to resolve target-owned config(app.url) for exact web identity proof.',
     ]
-    : nexoraRuntimeRecoveryLoginSmoke($targetAppUrl);
+    : nexoraRuntimeRecoveryWebIdentityProof($target, $targetAppUrl);
+if (($webIdentity['challenge_issued'] ?? false) === true) {
+    $mutationPerformed = true;
+}
+$steps['web_identity_proof'] = $webIdentity;
+
+$loginSmoke = ($webIdentity['status'] ?? 'blocked') === 'pass' && is_string($targetAppUrl)
+    ? nexoraRuntimeRecoveryLoginSmoke($targetAppUrl)
+    : [
+        'status' => 'skipped',
+        'url' => is_string($targetAppUrl) ? rtrim($targetAppUrl, '/').'/login' : '',
+        'http_status' => null,
+        'error' => 'Login smoke is not authoritative until exact target-to-web identity proof passes.',
+    ];
 $steps['login_smoke'] = $loginSmoke;
 
-$overallStatus = match ($loginSmoke['status']) {
-    'pass' => 'pass',
+$overallStatus = match ($webIdentity['status'] ?? 'blocked') {
     'fail' => 'fail',
+    'blocked' => 'blocked',
+    'pass' => match ($loginSmoke['status']) {
+        'pass' => 'pass',
+        'fail' => 'fail',
+        default => 'blocked',
+    },
     default => 'blocked',
 };
 $overallExitCode = match ($overallStatus) {
@@ -699,9 +995,9 @@ $overallExitCode = match ($overallStatus) {
     default => 2,
 };
 $message = match ($overallStatus) {
-    'pass' => 'Runtime recovery closure passed: compatibility, readiness, current handoff receipt and target-owned /login HTTP smoke are all PASS.',
-    'fail' => 'Runtime compatibility/readiness passed, but target-owned /login returned an explicit failing HTTP/configuration result.',
-    default => 'Runtime compatibility/readiness passed, but target-owned /login transport/TLS reachability could not be certified automatically.',
+    'pass' => 'Runtime recovery closure passed: compatibility, readiness/current receipt, exact target-to-web identity proof and /login HTTP 200 are all PASS.',
+    'fail' => 'Runtime compatibility/readiness passed, but exact target-to-web identity or /login returned an explicit failing result.',
+    default => 'Runtime compatibility/readiness passed, but exact target-to-web identity and/or /login transport/TLS evidence could not be certified automatically.',
 };
 
 $receipt = nexoraRuntimeRecoveryWriteReceipt($target, [
