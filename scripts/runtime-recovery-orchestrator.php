@@ -50,10 +50,21 @@ function nexoraRuntimeRecoveryRun(array $command, string $cwd): array
         nexoraRuntimeRecoveryFail('Runtime recovery requires proc_open for shell-bypassed child execution.');
     }
 
-    $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+    // Keep only stdout on an anonymous pipe. Reading stdout to EOF before
+    // draining a second stderr pipe can deadlock when a child fills stderr,
+    // especially on Windows where anonymous process pipes are blocking. A
+    // transient regular file preserves stderr diagnostics without pipe
+    // back-pressure and is removed when the handle closes.
+    $stderrHandle = @tmpfile();
+    if (! is_resource($stderrHandle)) {
+        nexoraRuntimeRecoveryFail('Runtime recovery could not create transient stderr capture for child execution.');
+    }
+
+    $descriptors = [1 => ['pipe', 'w'], 2 => $stderrHandle];
     $pipes = [];
     $process = @proc_open($command, $descriptors, $pipes, $cwd, null, ['bypass_shell' => true]);
     if (! is_resource($process)) {
+        fclose($stderrHandle);
         nexoraRuntimeRecoveryFail('Unable to start a required recovery child process.', [
             'command' => $command,
             'cwd' => $cwd,
@@ -61,13 +72,18 @@ function nexoraRuntimeRecoveryRun(array $command, string $cwd): array
     }
 
     $stdout = is_resource($pipes[1] ?? null) ? (string) stream_get_contents($pipes[1]) : '';
-    $stderr = is_resource($pipes[2] ?? null) ? (string) stream_get_contents($pipes[2]) : '';
     foreach ($pipes as $pipe) {
         if (is_resource($pipe)) {
             fclose($pipe);
         }
     }
     $exitCode = proc_close($process);
+
+    $stderr = '';
+    if (@rewind($stderrHandle)) {
+        $stderr = (string) stream_get_contents($stderrHandle);
+    }
+    fclose($stderrHandle);
 
     return [
         'exit_code' => is_int($exitCode) ? $exitCode : 1,
