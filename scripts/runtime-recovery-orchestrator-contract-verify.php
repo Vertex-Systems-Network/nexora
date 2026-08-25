@@ -44,7 +44,7 @@ if ($errors === []) {
         "'acknowledged'",
         "'App\\\\Nexora\\\\Installation\\\\SourceActivationIdentity'",
         "'App\\\\Nexora\\\\Installation\\\\SourceActivationHandshake'",
-        "'issueCliActivation'",
+        "->issueCliActivation(\$source)",
         "'nexora:source:status'",
         "'--require-web-ack'",
         "'challenge_issued'",
