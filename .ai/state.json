@@ -41,19 +41,21 @@
     "readiness_before_reconcile": "receipt-refresh-required; runtime_ready=true; receipt_current=false",
     "receipt_reconcile": "PASS; new post-install receipt bound to repaired installation lock",
     "final_readiness": "PENDING fresh assert-ready after reconcile",
-    "login": "PENDING /login target evidence",
+    "web_identity": "PENDING fresh exact target-local CLI-to-web one-time challenge acknowledgement against the configured app.url origin",
+    "login": "PENDING /login target evidence on the same exact proven web origin",
     "reviewed_dependency_attestation": "missing; tracked separately from runtime identity compatibility",
-    "orchestrator_source_work": "PR #30 remains source work under SYS-RUNTIME-IDENTITY. The hardened orchestrator is dry-run-first, exact rc.93-adapter bounded, child-exit bound, target-app-url bound, TLS fail-closed, single-writer per target in apply mode, and emits unique non-overwriting recovery receipts. Final hardened-head exact-source CI and independent review remain required before merge."
+    "orchestrator_source_work": "PR #30 remains source work under SYS-RUNTIME-IDENTITY. The hardened orchestrator is dry-run-first, exact rc.93-adapter bounded, child-exit bound, TLS/redirect fail-closed, single-writer per target, emits unique receipts, and now refuses to treat app.url plus /login 200 as exact-target proof. Before /login can become authoritative it requires a fresh target-local SourceActivationHandshake token to be consumed by the configured web origin and independently reverified by the exact target CLI. Final hardened-head exact-source CI and independent review are required before merge."
   },
   "blocker": {
     "category": "runtime",
-    "summary": "The rc.93 four-plane identity mismatch is repaired and independent deep compatibility now passes. The guarded post-install receipt reconcile also passed. RUNTIME-CLOSURE-001 remains BLOCKED until a fresh final readiness assertion proves the receipt is current and /login target evidence passes. PR #30 adds a deterministic Runtime Recovery / Closure Orchestrator with exact-head CI binding, required recovery-contract verification, per-target apply serialization and unique evidence receipts; that source work still requires final hardened-head certification plus independent review before merge.",
-    "guardrail": "Do not overwrite rc.93 with rc.94 to close this stage. Do not advance from source/CI, a self-authored review, or a recovery receipt alone. Final real-target readiness + /login evidence remains mandatory."
+    "summary": "The rc.93 four-plane identity mismatch is repaired, independent deep compatibility passes, and guarded post-install receipt reconciliation passed. RUNTIME-CLOSURE-001 remains BLOCKED until a fresh final readiness assertion proves the receipt is current, the configured app.url web process proves it belongs to the exact target through a fresh one-time CLI-to-web challenge, and /login evidence passes on that same origin. PR #30 source work also remains unmergeable until its final hardened head has exact-head CI plus independent review.",
+    "guardrail": "Do not overwrite rc.93 with rc.94 to close this stage. Do not advance from source/CI, a self-authored review, app.url ownership, a bare /login 200, or a recovery receipt alone. Exact target-to-web proof, final readiness/current receipt, /login evidence, and independent exact-head review remain mandatory."
   },
   "next_actions": [
     "Complete exact-head certification and independent review for the final hardened Runtime Recovery / Closure Orchestrator head; merge only if controls remain fail-closed.",
-    "On the real target, obtain a fresh php artisan nexora:runtime:post-install-status --assert-ready result after the successful receipt reconcile and require status=pass, ready=true, runtime_ready=true, receipt_current=true, errors=[].",
-    "Obtain /login HTTP/browser evidence without runtime/tenant/bootstrap failure.",
+    "On the real target, run the merged runtime:recover closure path or otherwise obtain a fresh php artisan nexora:runtime:post-install-status --assert-ready result requiring status=pass, ready=true, runtime_ready=true, receipt_current=true, errors=[].",
+    "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and independently verify the same acknowledgement through the exact target CLI before treating HTTP evidence as authoritative.",
+    "Obtain /login HTTP/browser evidence on that same exact proven web origin without runtime/tenant/bootstrap failure.",
     "Only then update SYS-RUNTIME-IDENTITY evidence/status and advance to CORE-QA-001."
   ],
   "next_stage": {
@@ -184,5 +186,5 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-08-25T04:31:00+05:00"
+  "updated_at": "2026-08-25T04:57:00+05:00"
 }
