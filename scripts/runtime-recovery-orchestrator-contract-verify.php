@@ -36,6 +36,20 @@ if ($errors === []) {
         "'receipt_current'",
         "nexoraRuntimeRecoveryResolveTargetAppUrl(\$target)",
         "config(\"app.url\"",
+        "nexoraRuntimeRecoveryWebIdentityProof(\$target, \$targetAppUrl)",
+        "'/install/source-status'",
+        "'X-Nexora-Activation-Token: '.\$token",
+        "'X-Nexora-Source-Ack'",
+        "'token-required'",
+        "'acknowledged'",
+        "'App\\\\Nexora\\\\Installation\\\\SourceActivationIdentity'",
+        "'App\\\\Nexora\\\\Installation\\\\SourceActivationHandshake'",
+        "'issueCliActivation'",
+        "'nexora:source:status'",
+        "'--require-web-ack'",
+        "'challenge_issued'",
+        "unset(\$token, \$challenge['token'])",
+        "Login smoke is not authoritative until exact target-to-web identity proof passes.",
         "'follow_location' => 0",
         "'verify_peer' => true",
         "'verify_peer_name' => true",
@@ -62,6 +76,11 @@ if ($errors === []) {
     }
     if (substr_count($source, 'flock(') < 2) {
         $errors[] = 'apply-mode single-writer lock must be acquired and released explicitly';
+    }
+    if (strpos($source, "\$steps['web_identity_proof'] = \$webIdentity;") === false
+        || strpos($source, "\$steps['login_smoke'] = \$loginSmoke;") === false
+        || strpos($source, "\$steps['web_identity_proof'] = \$webIdentity;") > strpos($source, "\$steps['login_smoke'] = \$loginSmoke;")) {
+        $errors[] = 'exact target-to-web identity proof must precede authoritative login smoke';
     }
 
     $forbiddenSource = [
@@ -96,6 +115,9 @@ if ($errors === []) {
         '--apply --confirm=RECOVER-RUNTIME',
         "target application's own bootstrapped `config('app.url')`",
         'Arbitrary HTTP target overrides are intentionally unsupported',
+        'one-time',
+        'exact target',
+        'never written into the recovery receipt',
         'single-writer',
         'unique',
         'status=blocked',
@@ -115,4 +137,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, stale-receipt gate, target-owned /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
+fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, stale-receipt gate, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
