@@ -10,7 +10,7 @@ use Tests\TestCase;
 final class RuntimeRecoveryOrchestratorTest extends TestCase
 {
     #[Test]
-    public function orchestrator_is_dry_run_first_target_bound_serialized_and_fail_closed(): void
+    public function orchestrator_is_dry_run_first_exact_target_bound_serialized_and_fail_closed(): void
     {
         $path = base_path('scripts/runtime-recovery-orchestrator.php');
         self::assertFileExists($path);
@@ -29,13 +29,24 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
             'receipt-refresh-required',
             "'runtime_ready'",
             "'receipt_current'",
+            "'/install/source-status'",
             "'/login'",
+            'nexoraRuntimeRecoveryWebIdentityProof($target, $targetAppUrl)',
+            'SourceActivationIdentity',
+            'SourceActivationHandshake',
+            'issueCliActivation',
+            'nexora:source:status',
+            '--require-web-ack',
+            'X-Nexora-Activation-Token',
+            'X-Nexora-Source-Ack',
+            'token-required',
+            'acknowledged',
+            "'challenge_issued'",
             "'verify_peer' => true",
             "'verify_peer_name' => true",
             "'follow_location' => 0",
             "['bypass_shell' => true]",
             'nexoraRuntimeRecoveryResolveTargetAppUrl($target)',
-            'target-owned /login',
             'recovery-orchestrator',
             'target_verification_complete',
             'nexoraRuntimeRecoveryAppliedFailure',
@@ -71,6 +82,22 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
         // same second, preventing silent replacement of previous receipts.
         self::assertStringContainsString('$receiptId = bin2hex(random_bytes(6));', $source);
         self::assertStringContainsString("'-'.\$receiptId.'.json'", $source);
+
+        // app.url alone is not identity proof. A fresh target-local one-time
+        // challenge must be acknowledged by that web process and verified again
+        // by the exact target CLI before /login can become authoritative.
+        $webProofPosition = strpos($source, "$steps['web_identity_proof'] = $webIdentity;");
+        $loginPosition = strpos($source, "$steps['login_smoke'] = $loginSmoke;");
+        self::assertIsInt($webProofPosition);
+        self::assertIsInt($loginPosition);
+        self::assertLessThan($loginPosition, $webProofPosition);
+        self::assertStringContainsString("(\$webIdentity['status'] ?? 'blocked') === 'pass'", $source);
+        self::assertStringContainsString('Login smoke is not authoritative until exact target-to-web identity proof passes.', $source);
+
+        // The bearer challenge is in-process only. It is removed immediately
+        // after the acknowledgement request and must never enter the public step.
+        self::assertStringContainsString("unset(\$token, \$challenge['token']);", $source);
+        self::assertStringNotContainsString("\$steps['web_identity_proof']['token']", $source);
 
         // Explicit HTTP/configuration failure remains FAIL; transport/TLS
         // unreachability remains BLOCKED and cannot be downgraded/upgraded.
