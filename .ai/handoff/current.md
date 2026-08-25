@@ -39,7 +39,7 @@ Active unit:
 
 Status:
 
-**BLOCKED pending final real-target readiness + `/login` evidence.**
+**BLOCKED pending final real-target readiness + exact target-to-web `/login` evidence.**
 
 Do not start `CORE-QA-001` yet.
 
@@ -101,7 +101,8 @@ and received `status=pass` with a new receipt bound to the repaired installation
 Still missing for current-stage acceptance:
 
 1. a **fresh** `php artisan nexora:runtime:post-install-status --assert-ready` after that reconcile, proving `status=pass`, `ready=true`, `runtime_ready=true`, `receipt_current=true`, `errors=[]`;
-2. `/login` target evidence without runtime/tenant/bootstrap failure.
+2. fresh proof that the configured `app.url` web process belongs to this exact target;
+3. `/login` evidence on that same proven origin without runtime/tenant/bootstrap failure.
 
 ## Runtime Recovery / Closure Orchestrator — current source work
 
@@ -124,9 +125,13 @@ explicit target
 → independent compatibility re-check bound to child exit 0
 → readiness assertion bound to child exit 0
 → auto-reconcile only receipt-refresh-required + runtime_ready=true + receipt_current=false
-→ final readiness re-check
+→ final readiness re-check (source + deep deployment + compatibility + activation + sealed receipt)
 → resolve only target-owned bootstrapped config('app.url')
-→ verified TLS /login GET with redirects disabled
+→ preflight existing /install/source-status with TLS verify + no redirects
+→ issue fresh target-local one-time SourceActivationHandshake token
+→ configured web origin must consume token and return acknowledged nonce
+→ exact target CLI must reverify same nonce + source/runtime fingerprints with nexora:source:status --require-web-ack
+→ only then perform /login GET on the same origin
 → unique non-overwriting machine-readable recovery receipt
 → PASS / BLOCKED / FAIL
 ```
@@ -137,18 +142,23 @@ Mutation still requires:
 --apply --confirm=RECOVER-RUNTIME
 ```
 
+The one-time web acknowledgement token is held only in process memory/request headers. It is single-use and must never be written to the orchestrator receipt, public result, PR evidence, or logs.
+
 ### Hardenings completed before merge
 
 Adversarial review found and closed these source risks:
 
 1. JSON PASS could not override a non-zero child exit code.
 2. Explicit non-200 `/login` is FAIL; only no-HTTP transport/TLS inability is BLOCKED.
-3. Arbitrary `--base-url` override was removed; an unrelated host cannot satisfy target certification.
+3. Arbitrary `--base-url` override was removed.
 4. Unsupported readiness states fail closed instead of being described as successful planning.
 5. PR CI was checking a GitHub merge ref despite an “exact source” label; workflow now checks out the PR head SHA and explicitly asserts `git rev-parse HEAD == expected SHA`.
-6. The new runtime-recovery PHPUnit contract was not guaranteed to run in release CI; a dedicated required `runtime-recovery-orchestrator-contract-verify.php` gate plus PHP lint is now in the workflow.
+6. The runtime-recovery PHPUnit contract was not guaranteed to run in release CI; a dedicated required `runtime-recovery-orchestrator-contract-verify.php` gate plus PHP lint is now in the workflow.
 7. Concurrent apply-mode writers could race one sealed target; apply mode now requires `flock(LOCK_EX | LOCK_NB)` on a target-owned `.apply.lock` and a second writer fails closed.
 8. Timestamp-only final receipt names could overwrite same-second evidence; final recovery receipts now include a random unique identifier.
+9. **`app.url` ownership did not prove HTTP server identity.** A stale/misconfigured `app.url` could point at another reachable Nexora deployment and a bare `/login` 200 could falsely certify the wrong web target. The orchestrator now requires a fresh target-local one-time CLI→web challenge, matching web acknowledgement nonce, and independent local `--require-web-ack` source/runtime verification before `/login` is authoritative.
+
+The ninth hardening reuses existing Nexora trust primitives (`SourceActivationHandshake`, `/install/source-status`, `nexora:source:status --require-web-ack`). It adds no public endpoint, dependency, external destination, permission, migration, or product capability.
 
 Canonical PR #30 files include:
 
@@ -173,7 +183,7 @@ For PR events the release-certification workflow must:
 3. PASS certification preflight;
 4. PASS Source Guard;
 5. lint the orchestrator + contract verifier;
-6. PASS the dedicated Runtime Recovery control contract gate, including single-writer serialization and unique receipts;
+6. PASS the dedicated Runtime Recovery control contract gate, including exact target-to-web challenge ordering/secret handling, single-writer serialization and unique receipts;
 7. PASS unified source certification;
 8. PASS frontend typecheck, Vitest and production build.
 
@@ -185,11 +195,12 @@ Independent exact-head review remains mandatory because this is a critical recov
 
 Attempts made so far:
 
-- CodeRabbit review comments were posted on earlier heads but no CodeRabbit review was returned.
-- Local CodeRabbit/Fallow execution was unavailable in the current environment.
-- GitHub Copilot reviewer `copilot-pull-request-reviewer[bot]` was requested, but GitHub did not persist a requested reviewer or create a review object for this repository/account.
+- CodeRabbit review comments were posted on earlier heads but no review was returned.
+- CodeRabbit CLI could not reach GitHub from the current execution environment because DNS resolution failed.
+- GitHub Copilot reviewer `copilot-pull-request-reviewer[bot]` was requested using the documented reviewer identity, but GitHub did not persist a requested reviewer or create a review object for this repository/account.
+- A final bounded CodeRabbit GitHub-app request was made on the previously frozen head; no review submission appeared before the later wrong-host hardening changed the head, so that request/evidence is stale regardless.
 
-Absence of review comments is **not** a review PASS. The authoring agent must not self-approve and call that independent evidence.
+Absence of review comments is **not** a review PASS. The authoring agent must not self-approve and call that independent evidence. After the final hardened head freezes and CI passes, request one fresh exact-head independent review; do not loop failed reviewer strategies indefinitely.
 
 ## Current source-work acceptance requirements
 
@@ -215,10 +226,13 @@ Because this target is already repaired and reconciled, the orchestrator should:
 - skip identity repair;
 - assert final readiness;
 - skip reconcile if the receipt is already current;
-- run target-owned `/login` smoke;
-- write a unique recovery outcome receipt.
+- preflight the configured source-status endpoint;
+- issue and consume a fresh one-time target-local web identity challenge;
+- independently verify the same acknowledgement through the exact target CLI;
+- run `/login` only after that proof passes;
+- write a unique recovery outcome receipt with no bearer token material.
 
-If HTTP smoke is blocked only by local TLS trust/client reachability while runtime readiness passes, preserve `BLOCKED`; do not disable TLS verification or point to another host to force green.
+If source-status or `/login` is blocked only by local TLS trust/client reachability while runtime readiness passes, preserve `BLOCKED`; do not disable TLS verification or point to another host to force green. If a reachable origin rejects or mismatches the exact challenge, that is `FAIL`, not `BLOCKED`.
 
 ## Next stage after genuine closure
 
@@ -232,4 +246,4 @@ Then canonical sequence remains:
 
 ## Completion warning
 
-Do not infer final target PASS from successful repair, compatibility output, reconcile output, source CI, an orchestrator receipt, or self-review. Final readiness/current-receipt + target `/login` evidence remain mandatory for the active stage, and PR #30 still requires independent exact-head review before merge.
+Do not infer final target PASS from successful repair, compatibility output, reconcile output, source CI, `app.url`, a bare `/login` 200, an orchestrator receipt, or self-review. Final readiness/current-receipt + fresh exact target-to-web proof + `/login` evidence remain mandatory for the active stage, and PR #30 still requires independent exact-head review before merge.
