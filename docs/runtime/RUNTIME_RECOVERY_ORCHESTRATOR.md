@@ -16,6 +16,8 @@ Dry-run is the default. Apply mode requires:
 
 Apply mode is **single-writer per target**. The orchestrator acquires a non-blocking exclusive target lock before any apply-mode compatibility/recovery/reconcile work. A second concurrent apply attempt fails closed instead of racing sealed runtime identity, handoff receipts, source/web acknowledgement evidence, or recovery evidence generation.
 
+**Windows-safe child process capture** keeps only child stdout on an anonymous pipe. Child stderr is captured in a unique transient regular file and read after the child closes, so a verbose failing command cannot fill an unread stderr pipe while the parent is waiting for stdout EOF. The transient stderr file is closed after capture and is not a target/runtime evidence artifact.
+
 The orchestrator:
 
 1. inspects the explicit target with `nexora:runtime:compatibility-status --deep`;
@@ -48,6 +50,7 @@ The orchestrator does not:
 - change the target version;
 - ignore unrelated compatibility mismatches;
 - accept JSON PASS from a child command that exited non-zero;
+- use a second anonymous child pipe for stderr that can deadlock under back-pressure;
 - allow concurrent apply-mode writers for the same target;
 - reuse a timestamp-only receipt filename that can silently replace previous evidence;
 - treat `app.url` plus an arbitrary `/login` 200 as exact-target proof;
