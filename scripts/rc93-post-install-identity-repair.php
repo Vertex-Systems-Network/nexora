@@ -43,6 +43,138 @@ function nexoraRc93RepairFail(string $message, array $context = []): never
     ], 1);
 }
 
+function nexoraRc93RepairNormalizeFilesystemPath(string $path): string
+{
+    $normalized = rtrim(str_replace('\\', '/', $path), '/');
+    if ($normalized === '') {
+        $normalized = '/';
+    }
+
+    return PHP_OS_FAMILY === 'Windows' ? strtolower($normalized) : $normalized;
+}
+
+function nexoraRc93RepairTargetFile(string $target, string $relative): ?string
+{
+    $resolvedTarget = realpath($target);
+    if (! is_string($resolvedTarget) || ! is_dir($resolvedTarget)) {
+        return null;
+    }
+
+    $relative = trim(str_replace('\\', '/', $relative), '/');
+    $segments = array_values(array_filter(explode('/', $relative), static fn (string $segment): bool => $segment !== ''));
+    if ($segments === [] || in_array('.', $segments, true) || in_array('..', $segments, true)) {
+        return null;
+    }
+
+    $targetPath = nexoraRc93RepairNormalizeFilesystemPath($resolvedTarget);
+    $targetPrefix = $targetPath === '/' ? '/' : $targetPath.'/';
+    $current = $resolvedTarget;
+    $lastIndex = count($segments) - 1;
+
+    foreach ($segments as $index => $segment) {
+        $candidate = $current.DIRECTORY_SEPARATOR.$segment;
+        if (is_link($candidate)) {
+            return null;
+        }
+
+        $isLast = $index === $lastIndex;
+        if ($isLast ? ! is_file($candidate) : ! is_dir($candidate)) {
+            return null;
+        }
+
+        $resolved = realpath($candidate);
+        if (! is_string($resolved)) {
+            return null;
+        }
+
+        $candidatePath = nexoraRc93RepairNormalizeFilesystemPath($candidate);
+        $resolvedPath = nexoraRc93RepairNormalizeFilesystemPath($resolved);
+        if (! hash_equals($candidatePath, $resolvedPath) || ! str_starts_with($resolvedPath, $targetPrefix)) {
+            return null;
+        }
+
+        $current = $resolved;
+    }
+
+    return is_file($current) ? $current : null;
+}
+
+/** @param list<string> $segments */
+function nexoraRc93RepairTargetDirectory(string $target, array $segments, bool $create): ?string
+{
+    $resolvedTarget = realpath($target);
+    if (! is_string($resolvedTarget) || ! is_dir($resolvedTarget) || $segments === []) {
+        return null;
+    }
+
+    $targetPath = nexoraRc93RepairNormalizeFilesystemPath($resolvedTarget);
+    $targetPrefix = $targetPath === '/' ? '/' : $targetPath.'/';
+    $current = $resolvedTarget;
+
+    foreach ($segments as $segment) {
+        if ($segment === '' || $segment === '.' || $segment === '..' || str_contains($segment, '/') || str_contains($segment, '\\')) {
+            return null;
+        }
+
+        $candidate = $current.DIRECTORY_SEPARATOR.$segment;
+        if (is_link($candidate)) {
+            return null;
+        }
+
+        if (file_exists($candidate)) {
+            if (! is_dir($candidate)) {
+                return null;
+            }
+        } else {
+            if (! $create || (! @mkdir($candidate, 0700) && ! is_dir($candidate))) {
+                return null;
+            }
+            @chmod($candidate, 0700);
+        }
+
+        if (is_link($candidate)) {
+            return null;
+        }
+        $resolved = realpath($candidate);
+        if (! is_string($resolved) || ! is_dir($resolved)) {
+            return null;
+        }
+
+        $candidatePath = nexoraRc93RepairNormalizeFilesystemPath($candidate);
+        $resolvedPath = nexoraRc93RepairNormalizeFilesystemPath($resolved);
+        if (! hash_equals($candidatePath, $resolvedPath) || ! str_starts_with($resolvedPath, $targetPrefix)) {
+            return null;
+        }
+
+        $current = $resolved;
+    }
+
+    return $current;
+}
+
+function nexoraRc93RepairContainedExistingFile(string $target, string $path): ?string
+{
+    if (is_link($path) || ! is_file($path)) {
+        return null;
+    }
+
+    $resolvedTarget = realpath($target);
+    $resolved = realpath($path);
+    if (! is_string($resolvedTarget) || ! is_string($resolved) || ! is_file($resolved)) {
+        return null;
+    }
+
+    $targetPath = nexoraRc93RepairNormalizeFilesystemPath($resolvedTarget);
+    $targetPrefix = $targetPath === '/' ? '/' : $targetPath.'/';
+    $pathNormalized = nexoraRc93RepairNormalizeFilesystemPath($path);
+    $resolvedPath = nexoraRc93RepairNormalizeFilesystemPath($resolved);
+    if (! hash_equals($pathNormalized, $resolvedPath) || ! str_starts_with($resolvedPath, $targetPrefix)) {
+        return null;
+    }
+
+    return $resolved;
+}
+
 function nexoraRc93RepairHash(string $value): string
 {
     return hash('sha256', $value);
@@ -174,14 +306,16 @@ if (! is_string($target) || ! is_dir($target)) {
     ]);
 }
 
+$runtimeFiles = [];
 foreach (['artisan', 'vendor/autoload.php', 'bootstrap/app.php'] as $relative) {
-    $path = $target.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
-    if (! is_file($path) || is_link($path)) {
-        nexoraRc93RepairFail('Target is missing a required regular Nexora runtime file.', [
+    $path = nexoraRc93RepairTargetFile($target, $relative);
+    if ($path === null) {
+        nexoraRc93RepairFail('Target is missing or redirects a required regular Nexora runtime file.', [
             'missing_or_unsafe' => $relative,
             'target' => $target,
         ]);
     }
+    $runtimeFiles[$relative] = $path;
 }
 
 $previousCwd = getcwd();
@@ -190,8 +324,8 @@ if (! @chdir($target)) {
 }
 
 try {
-    require $target.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php';
-    $app = require $target.DIRECTORY_SEPARATOR.'bootstrap'.DIRECTORY_SEPARATOR.'app.php';
+    require $runtimeFiles['vendor/autoload.php'];
+    $app = require $runtimeFiles['bootstrap/app.php'];
 
     if (! is_object($app) || ! method_exists($app, 'make')) {
         nexoraRc93RepairFail('Target bootstrap did not return a Laravel application container.');
@@ -275,11 +409,13 @@ try {
     }
 
     $lockPath = $installation->lockPath();
-    if (! is_string($lockPath) || ! is_file($lockPath) || is_link($lockPath)) {
-        nexoraRc93RepairFail('Installed-state lock path is missing or unsafe. No mutation was performed.', [
+    $containedLockPath = is_string($lockPath) ? nexoraRc93RepairContainedExistingFile($target, $lockPath) : null;
+    if ($containedLockPath === null) {
+        nexoraRc93RepairFail('Installed-state lock path is missing, redirected, or outside the exact target. No mutation was performed.', [
             'lock_path' => is_string($lockPath) ? $lockPath : null,
         ]);
     }
+    $lockPath = $containedLockPath;
     $lockBytes = @file_get_contents($lockPath);
     if (! is_string($lockBytes) || $lockBytes === '') {
         nexoraRc93RepairFail('Unable to read the sealed installation lock. No mutation was performed.');
@@ -382,7 +518,15 @@ try {
         ]);
     }
 
-    $backupDirectory = $target.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'.DIRECTORY_SEPARATOR.'repair-backups';
+    $backupDirectory = nexoraRc93RepairTargetDirectory($target, ['storage', 'app', 'nexora', 'repair-backups'], true);
+    if ($backupDirectory === null) {
+        nexoraRc93RepairFail('Repair backup directory is redirected or outside the exact target. Installation metadata was not changed.');
+    }
+    $receiptDirectory = nexoraRc93RepairTargetDirectory($target, ['storage', 'app', 'nexora', 'runtime', 'repair-receipts'], true);
+    if ($receiptDirectory === null) {
+        nexoraRc93RepairFail('Repair receipt directory is redirected or outside the exact target. Installation metadata was not changed.');
+    }
+
     $stamp = gmdate('Ymd\\THis\\Z');
     $backupPath = $backupDirectory.DIRECTORY_SEPARATOR.'installed-lock-rc93-'.$stamp.'-'.$lockShaBefore.'.json';
     $atomic->write($backupPath, $lockBytes, 0700, 0600);
@@ -456,7 +600,6 @@ try {
         $receiptForHash,
         JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
     ));
-    $receiptDirectory = $target.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'.DIRECTORY_SEPARATOR.'runtime'.DIRECTORY_SEPARATOR.'repair-receipts';
     $receiptPath = $receiptDirectory.DIRECTORY_SEPARATOR.'rc93-post-install-'.$stamp.'.json';
     $atomic->write(
         $receiptPath,
