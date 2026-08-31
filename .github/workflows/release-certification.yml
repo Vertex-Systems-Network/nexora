@@ -21,6 +21,18 @@ jobs:
     steps:
       - name: Checkout exact source
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout identity
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          echo "Exact source checkout verified: $ACTUAL_SHA"
 
       - name: PHP 8.4
         uses: shivammathur/setup-php@v2
@@ -40,6 +52,23 @@ jobs:
 
       - name: Source Guard
         run: php scripts/source-guard.php --source-only
+
+      - name: Runtime recovery control contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l scripts/runtime-recovery-orchestrator.php
+          php -l scripts/rc93-post-install-identity-repair.php
+          php -l scripts/runtime-recovery-orchestrator-contract-verify.php
+          php -l scripts/runtime-recovery-readiness-exit-contract-verify.php
+          php -l scripts/runtime-recovery-target-file-containment-contract-verify.php
+          php -l scripts/rc93-repair-path-containment-contract-verify.php
+          php -l scripts/runtime-recovery-mutation-evidence-contract-verify.php
+          php scripts/runtime-recovery-orchestrator-contract-verify.php
+          php scripts/runtime-recovery-readiness-exit-contract-verify.php
+          php scripts/runtime-recovery-target-file-containment-contract-verify.php
+          php scripts/rc93-repair-path-containment-contract-verify.php
+          php scripts/runtime-recovery-mutation-evidence-contract-verify.php
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
