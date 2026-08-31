@@ -58,7 +58,9 @@ if ($errors === []) {
         "default => 'blocked'",
         "nexoraRuntimeRecoveryAppliedFailure",
         "nexoraRuntimeRecoveryAppliedFailureContext()",
-        "nexoraRuntimeRecoverySetAppliedFailureContext(static function () use (\$target, &\$steps, &\$mutationPerformed): array",
+        "nexoraRuntimeRecoverySetAppliedFailureContext(static function () use (\$target, &\$steps, &\$mutationAttempted, &\$mutationPerformed, &\$mutationMayHaveOccurred): array",
+        "'mutation_attempted' => \$mutationAttempted",
+        "'mutation_may_have_occurred' => \$mutationMayHaveOccurred",
         "'failure_context' => \$context",
         "'evidence_write_status' => \$receipt === null ? 'fail' : 'pass'",
         "nexoraRuntimeRecoveryDirectory(\$target, true)",
@@ -102,7 +104,7 @@ if ($errors === []) {
     $applyLockStep = strpos($source, "\$steps['apply_lock'] = ['status' => 'pass', 'mode' => 'exclusive-nonblocking'];");
     $applyFailureContext = strpos(
         $source,
-        'nexoraRuntimeRecoverySetAppliedFailureContext(static function () use ($target, &$steps, &$mutationPerformed): array',
+        'nexoraRuntimeRecoverySetAppliedFailureContext(static function () use ($target, &$steps, &$mutationAttempted, &$mutationPerformed, &$mutationMayHaveOccurred): array',
     );
     if ($applyLockStep === false || $applyFailureContext === false || $applyLockStep > $applyFailureContext) {
         $errors[] = 'receipt-aware generic failure context must activate only after the validated target apply lock is owned';
@@ -162,6 +164,8 @@ if ($errors === []) {
         'unique',
         'post-lock apply failures',
         'evidence_write_status',
+        'mutation_attempted',
+        'mutation_may_have_occurred',
         'symlink/junction',
         'filesystem redirection',
         'Windows-safe child process capture',
@@ -282,7 +286,9 @@ if ($errors === []) {
                         if (($payload['status'] ?? null) !== 'fail'
                             || ($payload['mode'] ?? null) !== 'applied'
                             || ($payload['target_verification_complete'] ?? true) !== false
+                            || ($payload['mutation_attempted'] ?? true) !== false
                             || ($payload['mutation_performed'] ?? true) !== false
+                            || ($payload['mutation_may_have_occurred'] ?? true) !== false
                             || ($payload['steps']['apply_lock']['status'] ?? null) !== 'pass'
                             || ($payload['evidence_write_status'] ?? null) !== 'pass'
                             || ($payload['failure_context']['exit_code'] ?? null) !== 9
@@ -311,6 +317,9 @@ if ($errors === []) {
                             || ($receipt['status'] ?? null) !== 'fail'
                             || ($receipt['mode'] ?? null) !== 'applied'
                             || ($receipt['target_verification_complete'] ?? true) !== false
+                            || ($receipt['mutation_attempted'] ?? true) !== false
+                            || ($receipt['mutation_performed'] ?? true) !== false
+                            || ($receipt['mutation_may_have_occurred'] ?? true) !== false
                             || ($receipt['steps']['apply_lock']['status'] ?? null) !== 'pass'
                             || ($receipt['failure_context']['exit_code'] ?? null) !== 9) {
                             $errors[] = 'post-lock apply-failure probe #'.($index + 1).' receipt payload is incomplete or not fail-closed';
@@ -408,4 +417,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, Windows-safe child stdout/stderr capture, stale-receipt gate, behaviorally verified post-lock apply-failure evidence receipts, fail-closed recovery-storage symlink/junction redirection controls, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
+fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, Windows-safe child stdout/stderr capture, stale-receipt gate, behaviorally verified post-lock apply-failure evidence receipts, conservative mutation-state evidence, fail-closed recovery-storage symlink/junction redirection controls, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
