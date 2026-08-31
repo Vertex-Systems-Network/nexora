@@ -125,6 +125,56 @@ function nexoraRuntimeRecoveryDirectory(string $target, bool $create): ?string
     return $current;
 }
 
+function nexoraRuntimeRecoveryTargetRuntimeFile(string $target, string $relative): ?string
+{
+    $resolvedTarget = realpath($target);
+    if (! is_string($resolvedTarget) || ! is_dir($resolvedTarget)) {
+        return null;
+    }
+
+    $normalizedRelative = trim(str_replace('\\', '/', $relative), '/');
+    $segments = array_values(array_filter(explode('/', $normalizedRelative), static fn (string $segment): bool => $segment !== ''));
+    if ($segments === [] || in_array('..', $segments, true) || in_array('.', $segments, true)) {
+        return null;
+    }
+
+    $targetPath = nexoraRuntimeRecoveryNormalizeFilesystemPath($resolvedTarget);
+    $targetPrefix = $targetPath === '/' ? '/' : $targetPath.'/';
+    $current = $resolvedTarget;
+    $lastIndex = count($segments) - 1;
+
+    foreach ($segments as $index => $segment) {
+        $candidate = $current.DIRECTORY_SEPARATOR.$segment;
+        if (is_link($candidate)) {
+            return null;
+        }
+
+        $isLast = $index === $lastIndex;
+        if ($isLast ? ! is_file($candidate) : ! is_dir($candidate)) {
+            return null;
+        }
+
+        $resolved = realpath($candidate);
+        if (! is_string($resolved)) {
+            return null;
+        }
+
+        $candidatePath = nexoraRuntimeRecoveryNormalizeFilesystemPath($candidate);
+        $resolvedPath = nexoraRuntimeRecoveryNormalizeFilesystemPath($resolved);
+        if (! hash_equals($candidatePath, $resolvedPath)
+            || ! str_starts_with($resolvedPath, $targetPrefix)) {
+            // This catches parent-directory symlink/junction/reparse escapes as
+            // well as a redirected final file. Exact target execution must not
+            // load Composer/bootstrap code from outside the explicit target.
+            return null;
+        }
+
+        $current = $resolved;
+    }
+
+    return is_file($current) ? $current : null;
+}
+
 /** @param array<string,mixed> $payload */
 function nexoraRuntimeRecoveryEmit(array $payload, int $exitCode = 0): never
 {
@@ -950,9 +1000,9 @@ if (! is_string($target) || ! is_dir($target)) {
     nexoraRuntimeRecoveryFail('Target path does not resolve to an existing directory.', ['target' => $targetInput]);
 }
 foreach (['artisan', 'vendor/autoload.php', 'bootstrap/app.php'] as $relative) {
-    $path = $target.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
-    if (! is_file($path) || is_link($path)) {
-        nexoraRuntimeRecoveryFail('Target is missing a required regular runtime file.', [
+    $path = nexoraRuntimeRecoveryTargetRuntimeFile($target, $relative);
+    if ($path === null) {
+        nexoraRuntimeRecoveryFail('Target is missing or redirects a required regular runtime file.', [
             'target' => $target,
             'missing_or_unsafe' => $relative,
         ]);
