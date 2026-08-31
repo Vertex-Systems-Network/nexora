@@ -22,6 +22,8 @@ Apply mode is **single-writer per target**. Before creating or opening the apply
 
 After target validation and successful apply-lock acquisition, all **post-lock apply failures** also write a unique protected machine-readable failure outcome receipt with the accumulated steps, mutation state, and non-secret failure context. Argument, target-validation, confirmation, recovery-storage containment, and lock-acquisition failures remain receipt-free because apply ownership has not been established. If the protected receipt itself cannot be written or its directory no longer resolves safely inside the target, the result remains FAIL and exposes `evidence_write_status=fail` without masking the original failure.
 
+Mutation evidence is conservative rather than optimistic. Before the orchestrator starts an authorized mutating child such as the rc.93 repair adapter or post-install receipt reconciliation, it records `mutation_attempted=true` and `mutation_may_have_occurred=true`. Only a definitive successful child result clears that uncertainty; confirmed mutations additionally set `mutation_performed=true`. Therefore a child that changes target state and then exits non-zero cannot leave behind a failure receipt that falsely claims a clean no-mutation outcome. CI behaviorally exercises this with a disposable reconcile child that writes a target marker before exiting `9`.
+
 **Windows-safe child process capture** keeps only child stdout on an anonymous pipe. Child stderr is captured in a unique transient regular file and read after the child closes, so a verbose failing command cannot fill an unread stderr pipe while the parent is waiting for stdout EOF. The transient stderr file is closed after capture and is not a target/runtime evidence artifact.
 
 The orchestrator:
@@ -31,15 +33,16 @@ The orchestrator:
 3. inspects the explicit target with `nexora:runtime:compatibility-status --deep`;
 4. if compatibility already passes, it does not run an identity repair;
 5. if the target is exactly `1.0.0-rc.93` and the only mismatches are `environment`, `activation`, `service`, `process`, it delegates to the version-pinned rc.93 repair adapter, whose own runtime/lock/backup/receipt paths are independently target-contained;
-6. independently re-runs deep compatibility after any repair and requires both exit code `0` and the expected PASS payload;
-7. runs `nexora:runtime:post-install-status --assert-ready` and binds readiness PASS to exit code `0`; the handoff implementation itself re-verifies source, deep deployment identity, runtime compatibility, activation identity and the current sealed handoff receipt;
-8. automatically runs `nexora:runtime:post-install-reconcile --confirm=RECONCILE` only when the readiness child returns the command's expected not-ready exit code `1` **and** the payload is the exact stale-receipt state: `receipt-refresh-required`, `ready=false`, `runtime_ready=true`, and `receipt_current=false`. Stale-shaped JSON from any abnormal child exit is a hard failure and cannot authorize reconciliation;
-9. re-runs the readiness assertion after reconciliation;
-10. resolves the target application's own bootstrapped `config('app.url')`;
-11. preflights that origin's existing `/install/source-status` contract with TLS verification enabled and redirects disabled;
-12. issues a fresh target-local **one-time** `SourceActivationHandshake` challenge only after the preflight is reachable, sends the secret only in the in-process `X-Nexora-Activation-Token` request header, requires the web process to acknowledge the exact nonce, then independently runs local `nexora:source:status --require-web-ack` to prove that the acknowledgement belongs to the exact target source/runtime generation;
-13. only after that exact target-to-web identity proof passes, performs verified HTTP(S) `GET /login` on the same target-owned origin;
-14. writes a machine-readable apply-mode outcome receipt under the revalidated protected target runtime storage path using a unique per-run identifier so rapid sequential runs cannot overwrite previous evidence.
+6. marks mutating repair/reconcile operations as attempted before child execution so abnormal exits preserve mutation uncertainty;
+7. independently re-runs deep compatibility after any repair and requires both exit code `0` and the expected PASS payload;
+8. runs `nexora:runtime:post-install-status --assert-ready` and binds readiness PASS to exit code `0`; the handoff implementation itself re-verifies source, deep deployment identity, runtime compatibility, activation identity and the current sealed handoff receipt;
+9. automatically runs `nexora:runtime:post-install-reconcile --confirm=RECONCILE` only when the readiness child returns the command's expected not-ready exit code `1` **and** the payload is the exact stale-receipt state: `receipt-refresh-required`, `ready=false`, `runtime_ready=true`, and `receipt_current=false`. Stale-shaped JSON from any abnormal child exit is a hard failure and cannot authorize reconciliation;
+10. re-runs the readiness assertion after reconciliation;
+11. resolves the target application's own bootstrapped `config('app.url')`;
+12. preflights that origin's existing `/install/source-status` contract with TLS verification enabled and redirects disabled;
+13. issues a fresh target-local **one-time** `SourceActivationHandshake` challenge only after the preflight is reachable, sends the secret only in the in-process `X-Nexora-Activation-Token` request header, requires the web process to acknowledge the exact nonce, then independently runs local `nexora:source:status --require-web-ack` to prove that the acknowledgement belongs to the exact target source/runtime generation;
+14. only after that exact target-to-web identity proof passes, performs verified HTTP(S) `GET /login` on the same target-owned origin;
+15. writes a machine-readable apply-mode outcome receipt under the revalidated protected target runtime storage path using a unique per-run identifier so rapid sequential runs cannot overwrite previous evidence.
 
 Arbitrary HTTP target overrides are intentionally unsupported. `config('app.url')` ownership alone is **not** treated as proof that the HTTP server belongs to the target directory: a different Nexora deployment could otherwise return `/login` HTTP 200. The fresh one-time CLI→web acknowledgement closes that false-PASS path.
 
@@ -61,6 +64,7 @@ The recovery controls do not:
 - ignore unrelated compatibility mismatches;
 - accept JSON PASS from a child command that exited non-zero;
 - authorize stale-receipt reconciliation from payload shape alone or from an abnormal readiness child exit;
+- report `mutation_performed=false` as if it proved no mutation when an authorized mutating child was attempted but failed without a definitive outcome;
 - use a second anonymous child pipe for stderr that can deadlock under back-pressure;
 - allow concurrent apply-mode writers for the same target;
 - follow symlink/junction/filesystem redirection for recovery lock or receipt storage;
@@ -94,6 +98,8 @@ The same redirected-parent case is behaviorally exercised against the standalone
 
 If the protected recovery-storage path resolves through a symlink/junction or outside the exact target, apply fails before lock ownership and writes nothing through the redirected path. If another apply-mode recovery already owns the valid target lock, the second run also fails closed. Do not delete, redirect, or bypass the lock to force progress; first establish the target filesystem state and whether another operator/process is still active.
 
+When a mutating child is attempted, interpret the three mutation fields together: `mutation_attempted` says a mutating operation was started, `mutation_performed` means mutation is positively confirmed, and `mutation_may_have_occurred` flags an unresolved partial-mutation possibility after abnormal child failure. A failure with `mutation_attempted=true`, `mutation_performed=false`, `mutation_may_have_occurred=true` requires target inspection before retry; it is not evidence that the target was untouched.
+
 The exact target-to-web challenge is issued only in apply mode, after final CLI readiness and a reachable source-status preflight. It updates the existing protected source-activation handshake evidence and consumes its one-time token through the web process. This is counted as target evidence mutation in the final recovery receipt.
 
 If target-owned `config('app.url')` is missing/invalid, source-status cannot be reached with verified transport, the exact target web process rejects the one-time challenge, or its HTTPS connection cannot be verified by the PHP runtime, automated HTTP certification remains `BLOCKED`/`FAIL` as appropriate. Do not supply an alternate host or disable TLS merely to obtain green status; repair the target URL/web mapping/trust configuration or provide separate authorized evidence.
@@ -102,6 +108,6 @@ If target-owned `config('app.url')` is missing/invalid, source-status cannot be 
 
 - `status=pass` / exit `0`: deep compatibility, final readiness/current receipt, exact target-to-web one-time challenge proof, and `/login` HTTP 200 all passed.
 - `status=blocked` / exit `2`: runtime compatibility/readiness passed but exact target-to-web and/or `/login` transport/TLS evidence could not be certified automatically. A source-status transport failure before challenge issuance does not mutate handshake evidence.
-- `status=fail` / exit `1`: a target runtime-file containment, rc.93 repair path-containment, recovery-storage/lock, recovery/compatibility/readiness invariant failed, including an unexpected readiness child exit even when its JSON resembles the stale-receipt state; the reachable web origin did not satisfy the expected source-status contract or rejected/mismatched the exact challenge; an explicit HTTP/configuration failure occurred; another apply run already owns the target lock; or required evidence could not be safely produced. Post-lock failures include their protected `evidence_receipt` when writable and always report `evidence_write_status` when the receipt-aware apply context is active. Do not bypass the failing control.
+- `status=fail` / exit `1`: a target runtime-file containment, rc.93 repair path-containment, recovery-storage/lock, recovery/compatibility/readiness invariant failed, including an unexpected readiness child exit even when its JSON resembles the stale-receipt state; the reachable web origin did not satisfy the expected source-status contract or rejected/mismatched the exact challenge; an explicit HTTP/configuration failure occurred; another apply run already owns the target lock; a mutating child may have partially changed target state before failing; or required evidence could not be safely produced. Post-lock failures include their protected `evidence_receipt` when writable and report `mutation_attempted`, `mutation_performed`, `mutation_may_have_occurred`, plus `evidence_write_status` when the receipt-aware apply context is active. Do not bypass the failing control.
 
 Project state is advanced only after the real target evidence is reviewed and canonical `.ai` state is updated.
