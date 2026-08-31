@@ -57,6 +57,10 @@ if ($errors === []) {
         "'fail' => 1",
         "default => 'blocked'",
         "nexoraRuntimeRecoveryAppliedFailure",
+        "nexoraRuntimeRecoveryAppliedFailureContext()",
+        "nexoraRuntimeRecoverySetAppliedFailureContext(static function () use (\$target, &\$steps, &\$mutationPerformed): array",
+        "'failure_context' => \$context",
+        "'evidence_write_status' => \$receipt === null ? 'fail' : 'pass'",
         "'target_verification_complete' => \$overallStatus === 'pass'",
         "['bypass_shell' => true]",
         "\$stderrHandle = @tmpfile()",
@@ -81,6 +85,19 @@ if ($errors === []) {
     if (substr_count($source, 'flock(') < 2) {
         $errors[] = 'apply-mode single-writer lock must be acquired and released explicitly';
     }
+    if (substr_count($source, "'evidence_write_status' => \$receipt === null ? 'fail' : 'pass'") < 2) {
+        $errors[] = 'both generic post-lock apply failures and explicit applied failures must expose evidence-write status';
+    }
+
+    $applyLockStep = strpos($source, "\$steps['apply_lock'] = ['status' => 'pass', 'mode' => 'exclusive-nonblocking'];");
+    $applyFailureContext = strpos(
+        $source,
+        'nexoraRuntimeRecoverySetAppliedFailureContext(static function () use ($target, &$steps, &$mutationPerformed): array',
+    );
+    if ($applyLockStep === false || $applyFailureContext === false || $applyLockStep > $applyFailureContext) {
+        $errors[] = 'receipt-aware generic failure context must activate only after the validated target apply lock is owned';
+    }
+
     if (strpos($source, "\$steps['web_identity_proof'] = \$webIdentity;") === false
         || strpos($source, "\$steps['login_smoke'] = \$loginSmoke;") === false
         || strpos($source, "\$steps['web_identity_proof'] = \$webIdentity;") > strpos($source, "\$steps['login_smoke'] = \$loginSmoke;")) {
@@ -133,6 +150,8 @@ if ($errors === []) {
         'never written into the recovery receipt',
         'single-writer',
         'unique',
+        'post-lock apply failures',
+        'evidence_write_status',
         'Windows-safe child process capture',
         'status=blocked',
         'status=fail',
@@ -151,4 +170,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, Windows-safe child stdout/stderr capture, stale-receipt gate, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
+fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, Windows-safe child stdout/stderr capture, stale-receipt gate, post-lock apply-failure evidence receipts, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");

@@ -54,6 +54,10 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
             'recovery-orchestrator',
             'target_verification_complete',
             'nexoraRuntimeRecoveryAppliedFailure',
+            'nexoraRuntimeRecoverySetAppliedFailureContext',
+            'nexoraRuntimeRecoveryAppliedFailureContext',
+            "'evidence_write_status'",
+            "'failure_context'",
             'LOCK_EX | LOCK_NB',
             "'.apply.lock'",
             "'exclusive-nonblocking'",
@@ -91,6 +95,18 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
         self::assertStringContainsString('nexoraRuntimeRecoveryAcquireApplyLock($target)', $source);
         self::assertStringContainsString('LOCK_EX | LOCK_NB', $source);
         self::assertStringContainsString('Another apply-mode runtime recovery is already active for this target.', $source);
+
+        // Once the validated apply target lock is owned, generic terminal failures
+        // must inherit the live step/mutation context and write protected evidence.
+        $lockStepPosition = strpos($source, "\$steps['apply_lock'] = ['status' => 'pass', 'mode' => 'exclusive-nonblocking'];");
+        $failureContextPosition = strpos(
+            $source,
+            'nexoraRuntimeRecoverySetAppliedFailureContext(static function () use ($target, &$steps, &$mutationPerformed): array',
+        );
+        self::assertIsInt($lockStepPosition);
+        self::assertIsInt($failureContextPosition);
+        self::assertLessThan($failureContextPosition, $lockStepPosition);
+        self::assertStringContainsString("'evidence_write_status' => \$receipt === null ? 'fail' : 'pass'", $source);
 
         // Evidence filenames are unique even for rapid sequential runs in the
         // same second, preventing silent replacement of previous receipts.
@@ -145,6 +161,85 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
     }
 
     #[Test]
+    public function apply_mode_post_lock_failures_write_unique_protected_outcome_receipts(): void
+    {
+        self::assertTrue(function_exists('proc_open'), 'The certification runtime must expose proc_open.');
+
+        $target = sys_get_temp_dir().DIRECTORY_SEPARATOR.'nexora-runtime-recovery-test-'.bin2hex(random_bytes(6));
+        self::assertTrue(@mkdir($target.DIRECTORY_SEPARATOR.'vendor', 0700, true));
+        self::assertTrue(@mkdir($target.DIRECTORY_SEPARATOR.'bootstrap', 0700, true));
+        self::assertNotFalse(file_put_contents(
+            $target.DIRECTORY_SEPARATOR.'artisan',
+            "<?php\nfwrite(STDOUT, \"not-json\\n\");\nexit(9);\n",
+        ));
+        self::assertNotFalse(file_put_contents($target.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'autoload.php', "<?php\n"));
+        self::assertNotFalse(file_put_contents($target.DIRECTORY_SEPARATOR.'bootstrap'.DIRECTORY_SEPARATOR.'app.php', "<?php\n"));
+
+        try {
+            $first = $this->runInvalidCompatibilityApply($target);
+            $second = $this->runInvalidCompatibilityApply($target);
+
+            $receipts = [];
+            foreach ([$first, $second] as $result) {
+                self::assertSame(1, $result['exit_code']);
+                self::assertSame('', $result['stdout']);
+
+                $payload = json_decode($result['stderr'], true, 512, JSON_THROW_ON_ERROR);
+                self::assertSame('fail', $payload['status'] ?? null);
+                self::assertSame('applied', $payload['mode'] ?? null);
+                self::assertSame(realpath($target), $payload['target'] ?? null);
+                self::assertFalse($payload['target_verification_complete'] ?? true);
+                self::assertFalse($payload['mutation_performed'] ?? true);
+                self::assertSame('pass', $payload['steps']['apply_lock']['status'] ?? null);
+                self::assertSame('pass', $payload['evidence_write_status'] ?? null);
+                self::assertSame(9, $payload['failure_context']['exit_code'] ?? null);
+                self::assertSame('not-json', $payload['failure_context']['stdout'] ?? null);
+
+                $receiptPath = $payload['evidence_receipt'] ?? null;
+                self::assertIsString($receiptPath);
+                self::assertFileExists($receiptPath);
+                self::assertStringStartsWith(
+                    realpath($target).DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'
+                        .DIRECTORY_SEPARATOR.'runtime'.DIRECTORY_SEPARATOR.'recovery-orchestrator'.DIRECTORY_SEPARATOR,
+                    $receiptPath,
+                );
+
+                $receipt = json_decode((string) file_get_contents($receiptPath), true, 512, JSON_THROW_ON_ERROR);
+                self::assertSame('fail', $receipt['status'] ?? null);
+                self::assertSame('applied', $receipt['mode'] ?? null);
+                self::assertFalse($receipt['target_verification_complete'] ?? true);
+                self::assertFalse($receipt['mutation_performed'] ?? true);
+                self::assertSame('pass', $receipt['steps']['apply_lock']['status'] ?? null);
+                self::assertSame(9, $receipt['failure_context']['exit_code'] ?? null);
+                self::assertSame('not-json', $receipt['failure_context']['stdout'] ?? null);
+
+                $storedSeal = $receipt['receipt_sha256'] ?? null;
+                self::assertIsString($storedSeal);
+                unset($receipt['receipt_sha256']);
+                ksort($receipt, SORT_STRING);
+                self::assertSame(
+                    $storedSeal,
+                    hash('sha256', json_encode($receipt, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR)),
+                );
+
+                $receipts[] = $receiptPath;
+            }
+
+            self::assertNotSame($receipts[0], $receipts[1]);
+            self::assertCount(2, array_values(array_filter(
+                glob(
+                    realpath($target).DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'
+                        .DIRECTORY_SEPARATOR.'runtime'.DIRECTORY_SEPARATOR.'recovery-orchestrator'.DIRECTORY_SEPARATOR
+                        .'runtime-recovery-*.json',
+                ) ?: [],
+                'is_file',
+            )));
+        } finally {
+            $this->removeDirectoryTree($target);
+        }
+    }
+
+    #[Test]
     public function package_json_exposes_one_operator_recovery_entrypoint(): void
     {
         $package = json_decode((string) file_get_contents(base_path('package.json')), true, 512, JSON_THROW_ON_ERROR);
@@ -152,5 +247,61 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
             'php scripts/runtime-recovery-orchestrator.php',
             $package['scripts']['runtime:recover'] ?? null,
         );
+    }
+
+    /** @return array{exit_code:int,stdout:string,stderr:string} */
+    private function runInvalidCompatibilityApply(string $target): array
+    {
+        $stderrHandle = tmpfile();
+        self::assertIsResource($stderrHandle);
+        $pipes = [];
+        $process = proc_open([
+            PHP_BINARY,
+            base_path('scripts/runtime-recovery-orchestrator.php'),
+            '--target='.$target,
+            '--apply',
+            '--confirm=RECOVER-RUNTIME',
+        ], [
+            1 => ['pipe', 'w'],
+            2 => $stderrHandle,
+        ], $pipes, base_path(), null, ['bypass_shell' => true]);
+        self::assertIsResource($process);
+
+        $stdout = is_resource($pipes[1] ?? null) ? trim((string) stream_get_contents($pipes[1])) : '';
+        if (is_resource($pipes[1] ?? null)) {
+            fclose($pipes[1]);
+        }
+        $exitCode = proc_close($process);
+
+        self::assertTrue(rewind($stderrHandle));
+        $stderr = trim((string) stream_get_contents($stderrHandle));
+        fclose($stderrHandle);
+
+        return [
+            'exit_code' => is_int($exitCode) ? $exitCode : 1,
+            'stdout' => $stdout,
+            'stderr' => $stderr,
+        ];
+    }
+
+    private function removeDirectoryTree(string $root): void
+    {
+        if (! is_dir($root)) {
+            return;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST,
+        );
+        foreach ($iterator as $item) {
+            $path = $item->getPathname();
+            if ($item->isLink() || $item->isFile()) {
+                @unlink($path);
+            } else {
+                @rmdir($path);
+            }
+        }
+        @rmdir($root);
     }
 }

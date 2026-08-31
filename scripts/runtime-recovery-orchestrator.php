@@ -21,6 +21,46 @@ const NEXORA_RUNTIME_RECOVERY_RC93_ALLOWED_MISMATCHES = [
     'service',
 ];
 
+/**
+ * @param (callable():array{target:string,steps:array<string,mixed>,mutation_performed:bool})|null $resolver
+ */
+function nexoraRuntimeRecoverySetAppliedFailureContext(?callable $resolver): void
+{
+    if ($resolver === null) {
+        unset($GLOBALS['nexora_runtime_recovery_applied_failure_context']);
+
+        return;
+    }
+
+    $GLOBALS['nexora_runtime_recovery_applied_failure_context'] = $resolver;
+}
+
+/** @return array{target:string,steps:array<string,mixed>,mutation_performed:bool}|null */
+function nexoraRuntimeRecoveryAppliedFailureContext(): ?array
+{
+    $resolver = $GLOBALS['nexora_runtime_recovery_applied_failure_context'] ?? null;
+    if (! is_callable($resolver)) {
+        return null;
+    }
+
+    try {
+        $context = $resolver();
+    } catch (Throwable) {
+        return null;
+    }
+    if (! is_array($context)
+        || ! is_string($context['target'] ?? null)
+        || ! is_array($context['steps'] ?? null)) {
+        return null;
+    }
+
+    return [
+        'target' => $context['target'],
+        'steps' => $context['steps'],
+        'mutation_performed' => ($context['mutation_performed'] ?? false) === true,
+    ];
+}
+
 /** @param array<string,mixed> $payload */
 function nexoraRuntimeRecoveryEmit(array $payload, int $exitCode = 0): never
 {
@@ -36,6 +76,32 @@ function nexoraRuntimeRecoveryEmit(array $payload, int $exitCode = 0): never
 /** @param array<string,mixed> $context */
 function nexoraRuntimeRecoveryFail(string $message, array $context = []): never
 {
+    $applied = nexoraRuntimeRecoveryAppliedFailureContext();
+    if ($applied !== null) {
+        $receipt = nexoraRuntimeRecoveryWriteReceipt($applied['target'], [
+            'status' => 'fail',
+            'mode' => 'applied',
+            'target' => $applied['target'],
+            'steps' => $applied['steps'],
+            'mutation_performed' => $applied['mutation_performed'],
+            'target_verification_complete' => false,
+            'failure_context' => $context,
+        ]);
+
+        nexoraRuntimeRecoveryEmit([
+            'status' => 'fail',
+            'mode' => 'applied',
+            'message' => $message,
+            'target' => $applied['target'],
+            'steps' => $applied['steps'],
+            'mutation_performed' => $applied['mutation_performed'],
+            'target_verification_complete' => false,
+            'evidence_receipt' => $receipt,
+            'evidence_write_status' => $receipt === null ? 'fail' : 'pass',
+            'failure_context' => $context,
+        ], 1);
+    }
+
     nexoraRuntimeRecoveryEmit([
         'status' => 'fail',
         'message' => $message,
@@ -274,7 +340,7 @@ function nexoraRuntimeRecoveryResolveTargetAppUrl(string $target): ?string
     $code = '$target='.$targetLiteral.';'
         .'require $target.DIRECTORY_SEPARATOR."vendor".DIRECTORY_SEPARATOR."autoload.php";'
         .'$app=require $target.DIRECTORY_SEPARATOR."bootstrap".DIRECTORY_SEPARATOR."app.php";'
-        .'$kernel=$app->make("Illuminate\\\\Contracts\\\\Console\\\\Kernel");'
+        .'$kernel=$app->make("Illuminate\\Contracts\\Console\\Kernel");'
         .'$kernel->bootstrap();'
         .'fwrite(STDOUT,json_encode(["app_url"=>trim((string) config("app.url",""))],JSON_UNESCAPED_SLASHES));';
     $result = nexoraRuntimeRecoveryRun([PHP_BINARY, '-r', $code], $target);
@@ -734,6 +800,7 @@ function nexoraRuntimeRecoveryAppliedFailure(
         'mutation_performed' => $mutationPerformed,
         'target_verification_complete' => false,
         'evidence_receipt' => $receipt,
+        'evidence_write_status' => $receipt === null ? 'fail' : 'pass',
         ...$context,
     ], 1);
 }
@@ -759,6 +826,8 @@ token is kept in-process only and is never written into the orchestrator receipt
 
 Apply mode is single-writer serialized for the explicit target. Recovery receipts
 use unique identifiers so repeated runs cannot silently overwrite prior evidence.
+Once the target lock is owned, terminal apply failures also write a protected
+outcome receipt; pre-lock argument/target/lock-acquisition failures remain receipt-free.
 
 The orchestrator never upgrades/copies source, installs dependencies, runs
 migrations, or weakens TLS. Apply mode uses only existing runtime identity and
@@ -810,6 +879,13 @@ $mutationPerformed = false;
 if ($apply) {
     nexoraRuntimeRecoveryAcquireApplyLock($target);
     $steps['apply_lock'] = ['status' => 'pass', 'mode' => 'exclusive-nonblocking'];
+    nexoraRuntimeRecoverySetAppliedFailureContext(static function () use ($target, &$steps, &$mutationPerformed): array {
+        return [
+            'target' => $target,
+            'steps' => $steps,
+            'mutation_performed' => $mutationPerformed,
+        ];
+    });
 }
 
 $compatibility = nexoraRuntimeRecoveryCompatibility($target);
@@ -1042,6 +1118,7 @@ nexoraRuntimeRecoveryEmit([
     'target_app_url' => $targetAppUrl,
     'steps' => $steps,
     'evidence_receipt' => $receipt,
+    'evidence_write_status' => 'pass',
     'mutation_performed' => $mutationPerformed,
     'target_verification_complete' => $overallStatus === 'pass',
 ], $overallExitCode);

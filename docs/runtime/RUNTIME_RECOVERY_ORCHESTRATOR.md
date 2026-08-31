@@ -16,6 +16,8 @@ Dry-run is the default. Apply mode requires:
 
 Apply mode is **single-writer per target**. The orchestrator acquires a non-blocking exclusive target lock before any apply-mode compatibility/recovery/reconcile work. A second concurrent apply attempt fails closed instead of racing sealed runtime identity, handoff receipts, source/web acknowledgement evidence, or recovery evidence generation.
 
+After target validation and successful apply-lock acquisition, all **post-lock apply failures** also write a unique protected machine-readable failure outcome receipt with the accumulated steps, mutation state, and non-secret failure context. Argument, target-validation, confirmation, and lock-acquisition failures remain receipt-free because apply ownership has not been established. If the protected receipt itself cannot be written, the result remains FAIL and exposes `evidence_write_status=fail` without masking the original failure.
+
 **Windows-safe child process capture** keeps only child stdout on an anonymous pipe. Child stderr is captured in a unique transient regular file and read after the child closes, so a verbose failing command cannot fill an unread stderr pipe while the parent is waiting for stdout EOF. The transient stderr file is closed after capture and is not a target/runtime evidence artifact.
 
 The orchestrator:
@@ -53,6 +55,7 @@ The orchestrator does not:
 - use a second anonymous child pipe for stderr that can deadlock under back-pressure;
 - allow concurrent apply-mode writers for the same target;
 - reuse a timestamp-only receipt filename that can silently replace previous evidence;
+- allow a post-lock apply failure to disappear without a protected outcome receipt when evidence storage is writable;
 - treat `app.url` plus an arbitrary `/login` 200 as exact-target proof;
 - run `/login` as authoritative evidence before the fresh target-to-web challenge is acknowledged and verified locally;
 - persist the one-time acknowledgement token in recovery evidence;
@@ -85,6 +88,6 @@ If target-owned `config('app.url')` is missing/invalid, source-status cannot be 
 
 - `status=pass` / exit `0`: deep compatibility, final readiness/current receipt, exact target-to-web one-time challenge proof, and `/login` HTTP 200 all passed.
 - `status=blocked` / exit `2`: runtime compatibility/readiness passed but exact target-to-web and/or `/login` transport/TLS evidence could not be certified automatically. A source-status transport failure before challenge issuance does not mutate handshake evidence.
-- `status=fail` / exit `1`: a recovery/compatibility/readiness invariant failed; the reachable web origin did not satisfy the expected source-status contract or rejected/mismatched the exact challenge; an explicit HTTP/configuration failure occurred; another apply run already owns the target lock; or required evidence could not be safely produced. Do not bypass the failing control.
+- `status=fail` / exit `1`: a recovery/compatibility/readiness invariant failed; the reachable web origin did not satisfy the expected source-status contract or rejected/mismatched the exact challenge; an explicit HTTP/configuration failure occurred; another apply run already owns the target lock; or required evidence could not be safely produced. Post-lock failures include their protected `evidence_receipt` when writable and always report `evidence_write_status` when the receipt-aware apply context is active. Do not bypass the failing control.
 
 Project state is advanced only after the real target evidence is reviewed and canonical `.ai` state is updated.
