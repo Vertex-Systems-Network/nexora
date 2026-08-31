@@ -162,6 +162,178 @@ if ($errors === []) {
     }
 }
 
+$removeTree = static function (string $path): void {
+    if (! is_dir($path)) {
+        return;
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST,
+    );
+    foreach ($iterator as $item) {
+        $itemPath = $item->getPathname();
+        if ($item->isLink() || $item->isFile()) {
+            @unlink($itemPath);
+        } else {
+            @rmdir($itemPath);
+        }
+    }
+    @rmdir($path);
+};
+
+/** @return array{exit_code:int,stdout:string,stderr:string} */
+$runApplyFailureProbe = static function (string $target) use ($orchestratorPath, $root): array {
+    $stderrHandle = @tmpfile();
+    if (! is_resource($stderrHandle)) {
+        return ['exit_code' => 127, 'stdout' => '', 'stderr' => 'unable to create probe stderr capture'];
+    }
+
+    $pipes = [];
+    $process = @proc_open([
+        PHP_BINARY,
+        $orchestratorPath,
+        '--target='.$target,
+        '--apply',
+        '--confirm=RECOVER-RUNTIME',
+    ], [
+        1 => ['pipe', 'w'],
+        2 => $stderrHandle,
+    ], $pipes, $root, null, ['bypass_shell' => true]);
+    if (! is_resource($process)) {
+        fclose($stderrHandle);
+
+        return ['exit_code' => 127, 'stdout' => '', 'stderr' => 'unable to start orchestrator probe'];
+    }
+
+    $stdout = is_resource($pipes[1] ?? null) ? trim((string) stream_get_contents($pipes[1])) : '';
+    if (is_resource($pipes[1] ?? null)) {
+        fclose($pipes[1]);
+    }
+    $exitCode = proc_close($process);
+
+    $stderr = '';
+    if (@rewind($stderrHandle)) {
+        $stderr = trim((string) stream_get_contents($stderrHandle));
+    }
+    fclose($stderrHandle);
+
+    return [
+        'exit_code' => is_int($exitCode) ? $exitCode : 1,
+        'stdout' => $stdout,
+        'stderr' => $stderr,
+    ];
+};
+
+if ($errors === []) {
+    if (! function_exists('proc_open')) {
+        $errors[] = 'behavioral apply-failure evidence probe requires proc_open';
+    } else {
+        $probeTarget = sys_get_temp_dir().DIRECTORY_SEPARATOR.'nexora-runtime-recovery-contract-'.bin2hex(random_bytes(6));
+        try {
+            $vendorDirectory = $probeTarget.DIRECTORY_SEPARATOR.'vendor';
+            $bootstrapDirectory = $probeTarget.DIRECTORY_SEPARATOR.'bootstrap';
+            if ((! @mkdir($vendorDirectory, 0700, true) && ! is_dir($vendorDirectory))
+                || (! @mkdir($bootstrapDirectory, 0700, true) && ! is_dir($bootstrapDirectory))) {
+                $errors[] = 'unable to create behavioral runtime-recovery probe target';
+            } else {
+                $artisan = $probeTarget.DIRECTORY_SEPARATOR.'artisan';
+                $autoload = $vendorDirectory.DIRECTORY_SEPARATOR.'autoload.php';
+                $app = $bootstrapDirectory.DIRECTORY_SEPARATOR.'app.php';
+                if (@file_put_contents($artisan, "<?php\nfwrite(STDOUT, \"not-json\\n\");\nexit(9);\n") === false
+                    || @file_put_contents($autoload, "<?php\n") === false
+                    || @file_put_contents($app, "<?php\n") === false) {
+                    $errors[] = 'unable to populate behavioral runtime-recovery probe target';
+                } else {
+                    $receipts = [];
+                    foreach ([$runApplyFailureProbe($probeTarget), $runApplyFailureProbe($probeTarget)] as $index => $probe) {
+                        if ($probe['exit_code'] !== 1 || $probe['stdout'] !== '') {
+                            $errors[] = 'post-lock apply-failure probe #'.($index + 1).' did not fail closed with exit 1 and empty stdout';
+                            continue;
+                        }
+
+                        try {
+                            $payload = json_decode($probe['stderr'], true, 512, JSON_THROW_ON_ERROR);
+                        } catch (Throwable) {
+                            $payload = null;
+                        }
+                        if (! is_array($payload)) {
+                            $errors[] = 'post-lock apply-failure probe #'.($index + 1).' did not emit parseable JSON failure evidence';
+                            continue;
+                        }
+
+                        if (($payload['status'] ?? null) !== 'fail'
+                            || ($payload['mode'] ?? null) !== 'applied'
+                            || ($payload['target_verification_complete'] ?? true) !== false
+                            || ($payload['mutation_performed'] ?? true) !== false
+                            || ($payload['steps']['apply_lock']['status'] ?? null) !== 'pass'
+                            || ($payload['evidence_write_status'] ?? null) !== 'pass'
+                            || ($payload['failure_context']['exit_code'] ?? null) !== 9
+                            || ($payload['failure_context']['stdout'] ?? null) !== 'not-json') {
+                            $errors[] = 'post-lock apply-failure probe #'.($index + 1).' did not preserve the required failure/lock/evidence context';
+                            continue;
+                        }
+
+                        $receiptPath = $payload['evidence_receipt'] ?? null;
+                        $expectedPrefix = realpath($probeTarget).DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'
+                            .DIRECTORY_SEPARATOR.'nexora'.DIRECTORY_SEPARATOR.'runtime'.DIRECTORY_SEPARATOR.'recovery-orchestrator'
+                            .DIRECTORY_SEPARATOR;
+                        if (! is_string($receiptPath)
+                            || ! str_starts_with($receiptPath, $expectedPrefix)
+                            || ! is_file($receiptPath)) {
+                            $errors[] = 'post-lock apply-failure probe #'.($index + 1).' did not create a protected target-owned receipt';
+                            continue;
+                        }
+
+                        try {
+                            $receipt = json_decode((string) file_get_contents($receiptPath), true, 512, JSON_THROW_ON_ERROR);
+                        } catch (Throwable) {
+                            $receipt = null;
+                        }
+                        if (! is_array($receipt)
+                            || ($receipt['status'] ?? null) !== 'fail'
+                            || ($receipt['mode'] ?? null) !== 'applied'
+                            || ($receipt['target_verification_complete'] ?? true) !== false
+                            || ($receipt['steps']['apply_lock']['status'] ?? null) !== 'pass'
+                            || ($receipt['failure_context']['exit_code'] ?? null) !== 9) {
+                            $errors[] = 'post-lock apply-failure probe #'.($index + 1).' receipt payload is incomplete or not fail-closed';
+                            continue;
+                        }
+
+                        $storedSeal = $receipt['receipt_sha256'] ?? null;
+                        unset($receipt['receipt_sha256']);
+                        ksort($receipt, SORT_STRING);
+                        $calculatedSeal = hash(
+                            'sha256',
+                            json_encode($receipt, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+                        );
+                        if (! is_string($storedSeal) || ! hash_equals($storedSeal, $calculatedSeal)) {
+                            $errors[] = 'post-lock apply-failure probe #'.($index + 1).' receipt integrity seal is invalid';
+                            continue;
+                        }
+
+                        $receipts[] = $receiptPath;
+                    }
+
+                    if (count($receipts) === 2 && hash_equals($receipts[0], $receipts[1])) {
+                        $errors[] = 'sequential post-lock apply failures overwrote/reused the same receipt path';
+                    }
+                    $diskReceipts = glob(
+                        $probeTarget.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'
+                            .DIRECTORY_SEPARATOR.'runtime'.DIRECTORY_SEPARATOR.'recovery-orchestrator'.DIRECTORY_SEPARATOR
+                            .'runtime-recovery-*.json',
+                    );
+                    if (count(array_values(array_filter(is_array($diskReceipts) ? $diskReceipts : [], 'is_file'))) !== 2) {
+                        $errors[] = 'behavioral post-lock apply-failure probe did not preserve exactly two unique receipts';
+                    }
+                }
+            }
+        } finally {
+            $removeTree($probeTarget);
+        }
+    }
+}
+
 if ($errors !== []) {
     fwrite(STDERR, "[Nexora Runtime Recovery Contracts] FAIL\n");
     foreach (array_values(array_unique($errors)) as $error) {
@@ -170,4 +342,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, Windows-safe child stdout/stderr capture, stale-receipt gate, post-lock apply-failure evidence receipts, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
+fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, Windows-safe child stdout/stderr capture, stale-receipt gate, behaviorally verified post-lock apply-failure evidence receipts, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
