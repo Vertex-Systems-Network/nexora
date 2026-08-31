@@ -28,7 +28,7 @@ The orchestrator:
 4. if the target is exactly `1.0.0-rc.93` and the only mismatches are `environment`, `activation`, `service`, `process`, it delegates to the version-pinned rc.93 repair adapter;
 5. independently re-runs deep compatibility after any repair and requires both exit code `0` and the expected PASS payload;
 6. runs `nexora:runtime:post-install-status --assert-ready` and binds readiness PASS to exit code `0`; the handoff implementation itself re-verifies source, deep deployment identity, runtime compatibility, activation identity and the current sealed handoff receipt;
-7. automatically runs `nexora:runtime:post-install-reconcile --confirm=RECONCILE` only when the target reports the exact stale-receipt state: `receipt-refresh-required`, `runtime_ready=true`, and `receipt_current=false`;
+7. automatically runs `nexora:runtime:post-install-reconcile --confirm=RECONCILE` only when the readiness child returns the command's expected not-ready exit code `1` **and** the payload is the exact stale-receipt state: `receipt-refresh-required`, `ready=false`, `runtime_ready=true`, and `receipt_current=false`. Stale-shaped JSON from any abnormal child exit is a hard failure and cannot authorize reconciliation;
 8. re-runs the readiness assertion after reconciliation;
 9. resolves the target application's own bootstrapped `config('app.url')`;
 10. preflights that origin's existing `/install/source-status` contract with TLS verification enabled and redirects disabled;
@@ -53,6 +53,7 @@ The orchestrator does not:
 - change the target version;
 - ignore unrelated compatibility mismatches;
 - accept JSON PASS from a child command that exited non-zero;
+- authorize stale-receipt reconciliation from payload shape alone or from an abnormal readiness child exit;
 - use a second anonymous child pipe for stderr that can deadlock under back-pressure;
 - allow concurrent apply-mode writers for the same target;
 - follow symlink/junction/filesystem redirection for recovery lock or receipt storage;
@@ -90,6 +91,6 @@ If target-owned `config('app.url')` is missing/invalid, source-status cannot be 
 
 - `status=pass` / exit `0`: deep compatibility, final readiness/current receipt, exact target-to-web one-time challenge proof, and `/login` HTTP 200 all passed.
 - `status=blocked` / exit `2`: runtime compatibility/readiness passed but exact target-to-web and/or `/login` transport/TLS evidence could not be certified automatically. A source-status transport failure before challenge issuance does not mutate handshake evidence.
-- `status=fail` / exit `1`: a target/recovery-storage/lock, recovery/compatibility/readiness invariant failed; the reachable web origin did not satisfy the expected source-status contract or rejected/mismatched the exact challenge; an explicit HTTP/configuration failure occurred; another apply run already owns the target lock; or required evidence could not be safely produced. Post-lock failures include their protected `evidence_receipt` when writable and always report `evidence_write_status` when the receipt-aware apply context is active. Do not bypass the failing control.
+- `status=fail` / exit `1`: a target/recovery-storage/lock, recovery/compatibility/readiness invariant failed, including an unexpected readiness child exit even when its JSON resembles the stale-receipt state; the reachable web origin did not satisfy the expected source-status contract or rejected/mismatched the exact challenge; an explicit HTTP/configuration failure occurred; another apply run already owns the target lock; or required evidence could not be safely produced. Post-lock failures include their protected `evidence_receipt` when writable and always report `evidence_write_status` when the receipt-aware apply context is active. Do not bypass the failing control.
 
 Project state is advanced only after the real target evidence is reviewed and canonical `.ai` state is updated.
