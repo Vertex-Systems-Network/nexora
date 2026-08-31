@@ -340,9 +340,13 @@ function nexoraRuntimeRecoveryReady(array $result): bool
         && array_values((array) ($payload['errors'] ?? [])) === [];
 }
 
-function nexoraRuntimeRecoveryNeedsReceiptRefresh(array $payload): bool
+/** @param array{exit_code:int,payload:array<string,mixed>} $result */
+function nexoraRuntimeRecoveryNeedsReceiptRefresh(array $result): bool
 {
-    return ($payload['status'] ?? null) === 'receipt-refresh-required'
+    $payload = $result['payload'];
+
+    return $result['exit_code'] === 1
+        && ($payload['status'] ?? null) === 'receipt-refresh-required'
         && ($payload['ready'] ?? true) === false
         && ($payload['runtime_ready'] ?? false) === true
         && ($payload['receipt_current'] ?? true) === false;
@@ -1046,7 +1050,7 @@ if (! nexoraRuntimeRecoveryCompatibilityPass($compatibility)) {
 } elseif (! $apply) {
     $readinessObserved = nexoraRuntimeRecoveryPostInstallStatus($target, false);
     $readyObserved = nexoraRuntimeRecoveryReady($readinessObserved);
-    $refreshObserved = nexoraRuntimeRecoveryNeedsReceiptRefresh($readinessObserved['payload']);
+    $refreshObserved = nexoraRuntimeRecoveryNeedsReceiptRefresh($readinessObserved);
     $steps['readiness_observed'] = [
         'exit_code' => $readinessObserved['exit_code'],
         'status' => $readinessObserved['payload']['status'] ?? null,
@@ -1086,7 +1090,7 @@ $steps['readiness_before_reconcile'] = [
 ];
 
 if (! nexoraRuntimeRecoveryReady($readiness)) {
-    if (! nexoraRuntimeRecoveryNeedsReceiptRefresh($readiness['payload'])) {
+    if (! nexoraRuntimeRecoveryNeedsReceiptRefresh($readiness)) {
         nexoraRuntimeRecoveryAppliedFailure(
             $target,
             'Runtime recovery did not reach an approved readiness state.',
