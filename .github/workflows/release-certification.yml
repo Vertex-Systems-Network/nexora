@@ -60,8 +60,10 @@ jobs:
           php -l scripts/runtime-recovery-orchestrator.php
           php -l scripts/runtime-recovery-orchestrator-contract-verify.php
           php -l scripts/runtime-recovery-readiness-exit-contract-verify.php
+          php -l scripts/runtime-recovery-target-file-containment-contract-verify.php
           php scripts/runtime-recovery-orchestrator-contract-verify.php
           php scripts/runtime-recovery-readiness-exit-contract-verify.php
+          php scripts/runtime-recovery-target-file-containment-contract-verify.php
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
