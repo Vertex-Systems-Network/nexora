@@ -58,12 +58,15 @@ jobs:
         run: |
           set -euo pipefail
           php -l scripts/runtime-recovery-orchestrator.php
+          php -l scripts/rc93-post-install-identity-repair.php
           php -l scripts/runtime-recovery-orchestrator-contract-verify.php
           php -l scripts/runtime-recovery-readiness-exit-contract-verify.php
           php -l scripts/runtime-recovery-target-file-containment-contract-verify.php
+          php -l scripts/rc93-repair-path-containment-contract-verify.php
           php scripts/runtime-recovery-orchestrator-contract-verify.php
           php scripts/runtime-recovery-readiness-exit-contract-verify.php
           php scripts/runtime-recovery-target-file-containment-contract-verify.php
+          php scripts/rc93-repair-path-containment-contract-verify.php
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
