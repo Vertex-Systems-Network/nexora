@@ -61,6 +61,70 @@ function nexoraRuntimeRecoveryAppliedFailureContext(): ?array
     ];
 }
 
+function nexoraRuntimeRecoveryNormalizeFilesystemPath(string $path): string
+{
+    $normalized = rtrim(str_replace('\\', '/', $path), '/');
+    if ($normalized === '') {
+        $normalized = '/';
+    }
+
+    return PHP_OS_FAMILY === 'Windows' ? strtolower($normalized) : $normalized;
+}
+
+function nexoraRuntimeRecoveryDirectory(string $target, bool $create): ?string
+{
+    $resolvedTarget = realpath($target);
+    if (! is_string($resolvedTarget) || ! is_dir($resolvedTarget)) {
+        return null;
+    }
+
+    $targetPath = nexoraRuntimeRecoveryNormalizeFilesystemPath($resolvedTarget);
+    $targetPrefix = $targetPath === '/' ? '/' : $targetPath.'/';
+    $current = $resolvedTarget;
+
+    foreach (['storage', 'app', 'nexora', 'runtime', 'recovery-orchestrator'] as $segment) {
+        $candidate = $current.DIRECTORY_SEPARATOR.$segment;
+        if (is_link($candidate)) {
+            return null;
+        }
+
+        if (file_exists($candidate)) {
+            if (! is_dir($candidate)) {
+                return null;
+            }
+        } else {
+            if (! $create || (! @mkdir($candidate, 0700) && ! is_dir($candidate))) {
+                return null;
+            }
+            @chmod($candidate, 0700);
+        }
+
+        // Re-check after creation/existence resolution so a race that replaces a
+        // component with a symlink cannot be silently accepted.
+        if (is_link($candidate)) {
+            return null;
+        }
+
+        $resolved = realpath($candidate);
+        if (! is_string($resolved) || ! is_dir($resolved)) {
+            return null;
+        }
+
+        $candidatePath = nexoraRuntimeRecoveryNormalizeFilesystemPath($candidate);
+        $resolvedPath = nexoraRuntimeRecoveryNormalizeFilesystemPath($resolved);
+        if (! hash_equals($candidatePath, $resolvedPath)
+            || ! str_starts_with($resolvedPath, $targetPrefix)) {
+            // realpath divergence catches symlink/junction/reparse redirection,
+            // including Windows junctions that are not reported by is_link().
+            return null;
+        }
+
+        $current = $resolved;
+    }
+
+    return $current;
+}
+
 /** @param array<string,mixed> $payload */
 function nexoraRuntimeRecoveryEmit(array $payload, int $exitCode = 0): never
 {
@@ -690,19 +754,34 @@ function nexoraRuntimeRecoveryAcquireApplyLock(string $target)
         nexoraRuntimeRecoveryFail('Apply-mode runtime recovery requires flock for single-writer serialization.');
     }
 
-    $directory = $target.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'
+    $expectedDirectory = $target.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'
         .DIRECTORY_SEPARATOR.'runtime'.DIRECTORY_SEPARATOR.'recovery-orchestrator';
-    if (! is_dir($directory) && ! @mkdir($directory, 0700, true) && ! is_dir($directory)) {
-        nexoraRuntimeRecoveryFail('Unable to create the protected runtime-recovery lock directory.', [
+    $directory = nexoraRuntimeRecoveryDirectory($target, true);
+    if ($directory === null) {
+        nexoraRuntimeRecoveryFail('Unable to establish a protected target-owned runtime-recovery directory without filesystem redirection.', [
             'target' => $target,
-            'directory' => $directory,
+            'directory' => $expectedDirectory,
         ]);
     }
 
     $path = $directory.DIRECTORY_SEPARATOR.'.apply.lock';
+    if (is_link($path) || (file_exists($path) && ! is_file($path))) {
+        nexoraRuntimeRecoveryFail('Apply-mode recovery lock path is redirected or not a regular file.', [
+            'target' => $target,
+            'lock_path' => $path,
+        ]);
+    }
+
     $handle = @fopen($path, 'c+');
     if (! is_resource($handle)) {
         nexoraRuntimeRecoveryFail('Unable to open the apply-mode recovery lock.', [
+            'target' => $target,
+            'lock_path' => $path,
+        ]);
+    }
+    if (is_link($path)) {
+        fclose($handle);
+        nexoraRuntimeRecoveryFail('Apply-mode recovery lock became redirected while it was being opened.', [
             'target' => $target,
             'lock_path' => $path,
         ]);
@@ -743,9 +822,8 @@ function nexoraRuntimeRecoveryAcquireApplyLock(string $target)
 /** @param array<string,mixed> $payload */
 function nexoraRuntimeRecoveryWriteReceipt(string $target, array $payload): ?string
 {
-    $directory = $target.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'
-        .DIRECTORY_SEPARATOR.'runtime'.DIRECTORY_SEPARATOR.'recovery-orchestrator';
-    if (! is_dir($directory) && ! @mkdir($directory, 0700, true) && ! is_dir($directory)) {
+    $directory = nexoraRuntimeRecoveryDirectory($target, true);
+    if ($directory === null) {
         return null;
     }
 
@@ -824,10 +902,13 @@ verify the same acknowledgement nonce/source/runtime generation.
 Arbitrary URL overrides are intentionally unsupported. The one-time challenge
 token is kept in-process only and is never written into the orchestrator receipt.
 
-Apply mode is single-writer serialized for the explicit target. Recovery receipts
-use unique identifiers so repeated runs cannot silently overwrite prior evidence.
-Once the target lock is owned, terminal apply failures also write a protected
-outcome receipt; pre-lock argument/target/lock-acquisition failures remain receipt-free.
+Apply mode is single-writer serialized for the explicit target. Lock/receipt
+storage must resolve component-by-component to the exact target-owned path;
+symlink/junction/filesystem redirection fails before lock ownership. Recovery
+receipts use unique identifiers so repeated runs cannot silently overwrite prior
+evidence. Once the target lock is owned, terminal apply failures also write a
+protected outcome receipt; pre-lock argument/target/storage/lock-acquisition
+failures remain receipt-free.
 
 The orchestrator never upgrades/copies source, installs dependencies, runs
 migrations, or weakens TLS. Apply mode uses only existing runtime identity and

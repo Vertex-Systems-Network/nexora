@@ -61,6 +61,10 @@ if ($errors === []) {
         "nexoraRuntimeRecoverySetAppliedFailureContext(static function () use (\$target, &\$steps, &\$mutationPerformed): array",
         "'failure_context' => \$context",
         "'evidence_write_status' => \$receipt === null ? 'fail' : 'pass'",
+        "nexoraRuntimeRecoveryDirectory(\$target, true)",
+        "realpath(\$candidate)",
+        "hash_equals(\$candidatePath, \$resolvedPath)",
+        "is_link(\$candidate)",
         "'target_verification_complete' => \$overallStatus === 'pass'",
         "['bypass_shell' => true]",
         "\$stderrHandle = @tmpfile()",
@@ -87,6 +91,12 @@ if ($errors === []) {
     }
     if (substr_count($source, "'evidence_write_status' => \$receipt === null ? 'fail' : 'pass'") < 2) {
         $errors[] = 'both generic post-lock apply failures and explicit applied failures must expose evidence-write status';
+    }
+
+    $directoryValidation = strpos($source, '$directory = nexoraRuntimeRecoveryDirectory($target, true);');
+    $lockOpen = strpos($source, "$handle = @fopen($path, 'c+');");
+    if ($directoryValidation === false || $lockOpen === false || $directoryValidation > $lockOpen) {
+        $errors[] = 'recovery-storage containment must be validated before the apply lock file is opened';
     }
 
     $applyLockStep = strpos($source, "\$steps['apply_lock'] = ['status' => 'pass', 'mode' => 'exclusive-nonblocking'];");
@@ -152,6 +162,8 @@ if ($errors === []) {
         'unique',
         'post-lock apply failures',
         'evidence_write_status',
+        'symlink/junction',
+        'filesystem redirection',
         'Windows-safe child process capture',
         'status=blocked',
         'status=fail',
@@ -163,6 +175,11 @@ if ($errors === []) {
 }
 
 $removeTree = static function (string $path): void {
+    if (is_link($path)) {
+        @unlink($path);
+
+        return;
+    }
     if (! is_dir($path)) {
         return;
     }
@@ -334,6 +351,55 @@ if ($errors === []) {
     }
 }
 
+if ($errors === [] && PHP_OS_FAMILY !== 'Windows' && function_exists('symlink') && function_exists('proc_open')) {
+    $redirectTarget = sys_get_temp_dir().DIRECTORY_SEPARATOR.'nexora-runtime-recovery-redirect-target-'.bin2hex(random_bytes(6));
+    $outsideDirectory = sys_get_temp_dir().DIRECTORY_SEPARATOR.'nexora-runtime-recovery-redirect-outside-'.bin2hex(random_bytes(6));
+    try {
+        $vendorDirectory = $redirectTarget.DIRECTORY_SEPARATOR.'vendor';
+        $bootstrapDirectory = $redirectTarget.DIRECTORY_SEPARATOR.'bootstrap';
+        $runtimeDirectory = $redirectTarget.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'nexora'
+            .DIRECTORY_SEPARATOR.'runtime';
+        if ((! @mkdir($vendorDirectory, 0700, true) && ! is_dir($vendorDirectory))
+            || (! @mkdir($bootstrapDirectory, 0700, true) && ! is_dir($bootstrapDirectory))
+            || (! @mkdir($runtimeDirectory, 0700, true) && ! is_dir($runtimeDirectory))
+            || (! @mkdir($outsideDirectory, 0700, true) && ! is_dir($outsideDirectory))) {
+            $errors[] = 'unable to create filesystem-redirection behavioral probe directories';
+        } else {
+            $artisan = $redirectTarget.DIRECTORY_SEPARATOR.'artisan';
+            $autoload = $vendorDirectory.DIRECTORY_SEPARATOR.'autoload.php';
+            $app = $bootstrapDirectory.DIRECTORY_SEPARATOR.'app.php';
+            $redirectPath = $runtimeDirectory.DIRECTORY_SEPARATOR.'recovery-orchestrator';
+            if (@file_put_contents($artisan, "<?php\nfwrite(STDOUT, \"should-not-run\\n\");\nexit(9);\n") === false
+                || @file_put_contents($autoload, "<?php\n") === false
+                || @file_put_contents($app, "<?php\n") === false
+                || ! @symlink($outsideDirectory, $redirectPath)) {
+                $errors[] = 'unable to populate filesystem-redirection behavioral probe';
+            } else {
+                $probe = $runApplyFailureProbe($redirectTarget);
+                try {
+                    $payload = json_decode($probe['stderr'], true, 512, JSON_THROW_ON_ERROR);
+                } catch (Throwable) {
+                    $payload = null;
+                }
+                $outsideEntries = array_values(array_diff((array) @scandir($outsideDirectory), ['.', '..']));
+                if ($probe['exit_code'] !== 1
+                    || $probe['stdout'] !== ''
+                    || ! is_array($payload)
+                    || ($payload['status'] ?? null) !== 'fail'
+                    || ! str_contains((string) ($payload['message'] ?? ''), 'protected target-owned runtime-recovery directory')
+                    || array_key_exists('mode', $payload)
+                    || array_key_exists('evidence_receipt', $payload)
+                    || $outsideEntries !== []) {
+                    $errors[] = 'filesystem-redirection probe did not fail before lock ownership without writing through the redirected path';
+                }
+            }
+        }
+    } finally {
+        $removeTree($redirectTarget);
+        $removeTree($outsideDirectory);
+    }
+}
+
 if ($errors !== []) {
     fwrite(STDERR, "[Nexora Runtime Recovery Contracts] FAIL\n");
     foreach (array_values(array_unique($errors)) as $error) {
@@ -342,4 +408,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, Windows-safe child stdout/stderr capture, stale-receipt gate, behaviorally verified post-lock apply-failure evidence receipts, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
+fwrite(STDOUT, "[Nexora Runtime Recovery Contracts] PASS — dry-run/confirmation, exact rc.93 adapter, child-exit binding, Windows-safe child stdout/stderr capture, stale-receipt gate, behaviorally verified post-lock apply-failure evidence receipts, fail-closed recovery-storage symlink/junction redirection controls, exact target-to-web one-time challenge proof before /login, TLS verification, single-writer apply serialization, unique receipts and forbidden mutation boundaries are enforced.\n");
