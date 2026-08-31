@@ -22,7 +22,7 @@ const NEXORA_RUNTIME_RECOVERY_RC93_ALLOWED_MISMATCHES = [
 ];
 
 /**
- * @param (callable():array{target:string,steps:array<string,mixed>,mutation_performed:bool})|null $resolver
+ * @param (callable():array{target:string,steps:array<string,mixed>,mutation_attempted:bool,mutation_performed:bool,mutation_may_have_occurred:bool})|null $resolver
  */
 function nexoraRuntimeRecoverySetAppliedFailureContext(?callable $resolver): void
 {
@@ -35,7 +35,7 @@ function nexoraRuntimeRecoverySetAppliedFailureContext(?callable $resolver): voi
     $GLOBALS['nexora_runtime_recovery_applied_failure_context'] = $resolver;
 }
 
-/** @return array{target:string,steps:array<string,mixed>,mutation_performed:bool}|null */
+/** @return array{target:string,steps:array<string,mixed>,mutation_attempted:bool,mutation_performed:bool,mutation_may_have_occurred:bool}|null */
 function nexoraRuntimeRecoveryAppliedFailureContext(): ?array
 {
     $resolver = $GLOBALS['nexora_runtime_recovery_applied_failure_context'] ?? null;
@@ -57,7 +57,9 @@ function nexoraRuntimeRecoveryAppliedFailureContext(): ?array
     return [
         'target' => $context['target'],
         'steps' => $context['steps'],
+        'mutation_attempted' => ($context['mutation_attempted'] ?? false) === true,
         'mutation_performed' => ($context['mutation_performed'] ?? false) === true,
+        'mutation_may_have_occurred' => ($context['mutation_may_have_occurred'] ?? false) === true,
     ];
 }
 
@@ -197,7 +199,9 @@ function nexoraRuntimeRecoveryFail(string $message, array $context = []): never
             'mode' => 'applied',
             'target' => $applied['target'],
             'steps' => $applied['steps'],
+            'mutation_attempted' => $applied['mutation_attempted'],
             'mutation_performed' => $applied['mutation_performed'],
+            'mutation_may_have_occurred' => $applied['mutation_may_have_occurred'],
             'target_verification_complete' => false,
             'failure_context' => $context,
         ]);
@@ -208,7 +212,9 @@ function nexoraRuntimeRecoveryFail(string $message, array $context = []): never
             'message' => $message,
             'target' => $applied['target'],
             'steps' => $applied['steps'],
+            'mutation_attempted' => $applied['mutation_attempted'],
             'mutation_performed' => $applied['mutation_performed'],
+            'mutation_may_have_occurred' => $applied['mutation_may_have_occurred'],
             'target_verification_complete' => false,
             'evidence_receipt' => $receipt,
             'evidence_write_status' => $receipt === null ? 'fail' : 'pass',
@@ -912,13 +918,17 @@ function nexoraRuntimeRecoveryAppliedFailure(
     array $steps,
     bool $mutationPerformed,
     array $context = [],
+    bool $mutationAttempted = false,
+    bool $mutationMayHaveOccurred = false,
 ): never {
     $receipt = nexoraRuntimeRecoveryWriteReceipt($target, [
         'status' => 'fail',
         'mode' => 'applied',
         'target' => $target,
         'steps' => $steps,
+        'mutation_attempted' => $mutationAttempted,
         'mutation_performed' => $mutationPerformed,
+        'mutation_may_have_occurred' => $mutationMayHaveOccurred,
         'target_verification_complete' => false,
         'failure_context' => $context,
     ]);
@@ -929,7 +939,9 @@ function nexoraRuntimeRecoveryAppliedFailure(
         'message' => $message,
         'target' => $target,
         'steps' => $steps,
+        'mutation_attempted' => $mutationAttempted,
         'mutation_performed' => $mutationPerformed,
+        'mutation_may_have_occurred' => $mutationMayHaveOccurred,
         'target_verification_complete' => false,
         'evidence_receipt' => $receipt,
         'evidence_write_status' => $receipt === null ? 'fail' : 'pass',
@@ -961,8 +973,10 @@ storage must resolve component-by-component to the exact target-owned path;
 symlink/junction/filesystem redirection fails before lock ownership. Recovery
 receipts use unique identifiers so repeated runs cannot silently overwrite prior
 evidence. Once the target lock is owned, terminal apply failures also write a
-protected outcome receipt; pre-lock argument/target/storage/lock-acquisition
-failures remain receipt-free.
+protected outcome receipt. Mutating child operations are marked attempted before
+execution; if such a child fails before a definitive success result, evidence
+reports mutation_may_have_occurred=true rather than claiming no mutation.
+Pre-lock argument/target/storage/lock-acquisition failures remain receipt-free.
 
 The orchestrator never upgrades/copies source, installs dependencies, runs
 migrations, or weakens TLS. Apply mode uses only existing runtime identity and
@@ -1010,15 +1024,19 @@ foreach (['artisan', 'vendor/autoload.php', 'bootstrap/app.php'] as $relative) {
 }
 
 $steps = [];
+$mutationAttempted = false;
 $mutationPerformed = false;
+$mutationMayHaveOccurred = false;
 if ($apply) {
     nexoraRuntimeRecoveryAcquireApplyLock($target);
     $steps['apply_lock'] = ['status' => 'pass', 'mode' => 'exclusive-nonblocking'];
-    nexoraRuntimeRecoverySetAppliedFailureContext(static function () use ($target, &$steps, &$mutationPerformed): array {
+    nexoraRuntimeRecoverySetAppliedFailureContext(static function () use ($target, &$steps, &$mutationAttempted, &$mutationPerformed, &$mutationMayHaveOccurred): array {
         return [
             'target' => $target,
             'steps' => $steps,
+            'mutation_attempted' => $mutationAttempted,
             'mutation_performed' => $mutationPerformed,
+            'mutation_may_have_occurred' => $mutationMayHaveOccurred,
         ];
     });
 }
@@ -1057,7 +1075,20 @@ if (! nexoraRuntimeRecoveryCompatibilityPass($compatibility)) {
         ]);
     }
 
+    if ($apply) {
+        $mutationAttempted = true;
+        $mutationMayHaveOccurred = true;
+        $steps['repair_adapter'] = [
+            'status' => 'attempted',
+            'mutation_performed' => false,
+        ];
+    }
     $repair = nexoraRuntimeRecoveryRc93Repair($target, $apply);
+    if ($apply) {
+        $repairMutationPerformed = ($repair['mutation_performed'] ?? false) === true;
+        $mutationPerformed = $mutationPerformed || $repairMutationPerformed;
+        $mutationMayHaveOccurred = false;
+    }
     $steps['repair_adapter'] = [
         'status' => 'pass',
         'mode' => $repair['mode'] ?? null,
@@ -1079,7 +1110,6 @@ if (! nexoraRuntimeRecoveryCompatibilityPass($compatibility)) {
         ]);
     }
 
-    $mutationPerformed = ($repair['mutation_performed'] ?? false) === true;
     $compatibility = nexoraRuntimeRecoveryCompatibility($target);
     if (! nexoraRuntimeRecoveryCompatibilityPass($compatibility)) {
         nexoraRuntimeRecoveryAppliedFailure(
@@ -1088,6 +1118,8 @@ if (! nexoraRuntimeRecoveryCompatibilityPass($compatibility)) {
             $steps,
             $mutationPerformed,
             ['compatibility_exit_code' => $compatibility['exit_code'], 'compatibility' => $compatibility['payload']],
+            $mutationAttempted,
+            $mutationMayHaveOccurred,
         );
     }
     $payload = $compatibility['payload'];
@@ -1147,13 +1179,23 @@ if (! nexoraRuntimeRecoveryReady($readiness)) {
             $steps,
             $mutationPerformed,
             ['readiness_exit_code' => $readiness['exit_code'], 'readiness' => $readiness['payload']],
+            $mutationAttempted,
+            $mutationMayHaveOccurred,
         );
     }
 
+    $mutationAttempted = true;
+    $mutationMayHaveOccurred = true;
+    $steps['receipt_reconcile'] = [
+        'status' => 'attempted',
+        'mutation_performed' => false,
+    ];
     $reconcile = nexoraRuntimeRecoveryReconcileReceipt($target);
     $mutationPerformed = true;
+    $mutationMayHaveOccurred = false;
     $steps['receipt_reconcile'] = [
         'status' => 'pass',
+        'mutation_performed' => true,
         'receipt_sha256' => $reconcile['receipt_sha256'] ?? null,
         'installation_lock_sha256' => $reconcile['installation_lock_sha256'] ?? null,
     ];
@@ -1166,6 +1208,8 @@ if (! nexoraRuntimeRecoveryReady($readiness)) {
             $steps,
             $mutationPerformed,
             ['readiness_exit_code' => $readiness['exit_code'], 'readiness' => $readiness['payload']],
+            $mutationAttempted,
+            $mutationMayHaveOccurred,
         );
     }
 }
@@ -1192,7 +1236,9 @@ $webIdentity = $targetAppUrl === null
     ]
     : nexoraRuntimeRecoveryWebIdentityProof($target, $targetAppUrl);
 if (($webIdentity['challenge_issued'] ?? false) === true) {
+    $mutationAttempted = true;
     $mutationPerformed = true;
+    $mutationMayHaveOccurred = false;
 }
 $steps['web_identity_proof'] = $webIdentity;
 
@@ -1234,7 +1280,9 @@ $receipt = nexoraRuntimeRecoveryWriteReceipt($target, [
     'target_app_url' => $targetAppUrl,
     'runtime_version' => $payload['runtime']['current_version'] ?? null,
     'steps' => $steps,
+    'mutation_attempted' => $mutationAttempted,
     'mutation_performed' => $mutationPerformed,
+    'mutation_may_have_occurred' => $mutationMayHaveOccurred,
     'target_verification_complete' => $overallStatus === 'pass',
 ]);
 if ($receipt === null) {
@@ -1254,6 +1302,8 @@ nexoraRuntimeRecoveryEmit([
     'steps' => $steps,
     'evidence_receipt' => $receipt,
     'evidence_write_status' => 'pass',
+    'mutation_attempted' => $mutationAttempted,
     'mutation_performed' => $mutationPerformed,
+    'mutation_may_have_occurred' => $mutationMayHaveOccurred,
     'target_verification_complete' => $overallStatus === 'pass',
 ], $overallExitCode);
