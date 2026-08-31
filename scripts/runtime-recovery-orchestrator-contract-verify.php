@@ -94,7 +94,7 @@ if ($errors === []) {
     }
 
     $directoryValidation = strpos($source, '$directory = nexoraRuntimeRecoveryDirectory($target, true);');
-    $lockOpen = strpos($source, "$handle = @fopen($path, 'c+');");
+    $lockOpen = strpos($source, "\$handle = @fopen(\$path, 'c+');");
     if ($directoryValidation === false || $lockOpen === false || $directoryValidation > $lockOpen) {
         $errors[] = 'recovery-storage containment must be validated before the apply lock file is opened';
     }
