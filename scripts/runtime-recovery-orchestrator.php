@@ -177,6 +177,18 @@ function nexoraRuntimeRecoveryTargetRuntimeFile(string $target, string $relative
     return is_file($current) ? $current : null;
 }
 
+function nexoraRuntimeRecoveryAssertTargetRuntimeFiles(string $target): void
+{
+    foreach (['artisan', 'vendor/autoload.php', 'bootstrap/app.php'] as $relative) {
+        if (nexoraRuntimeRecoveryTargetRuntimeFile($target, $relative) === null) {
+            nexoraRuntimeRecoveryFail('Target is missing or redirects a required regular runtime file.', [
+                'target' => $target,
+                'missing_or_unsafe' => $relative,
+            ]);
+        }
+    }
+}
+
 /** @param array<string,mixed> $payload */
 function nexoraRuntimeRecoveryEmit(array $payload, int $exitCode = 0): never
 {
@@ -278,6 +290,17 @@ function nexoraRuntimeRecoveryRun(array $command, string $cwd): array
     ];
 }
 
+/** @param list<string> $command @return array{exit_code:int,stdout:string,stderr:string} */
+function nexoraRuntimeRecoveryRunTarget(array $command, string $target): array
+{
+    // Revalidate immediately before every target-owned PHP child. The initial
+    // target check is not a durable trust decision: another process could replace
+    // vendor/bootstrap with a symlink/junction after the first check.
+    nexoraRuntimeRecoveryAssertTargetRuntimeFiles($target);
+
+    return nexoraRuntimeRecoveryRun($command, $target);
+}
+
 /** @return array<string,mixed>|null */
 function nexoraRuntimeRecoveryExtractJson(string ...$streams): ?array
 {
@@ -327,7 +350,7 @@ function nexoraRuntimeRecoveryMismatches(array $payload): array
 /** @return array{exit_code:int,payload:array<string,mixed>} */
 function nexoraRuntimeRecoveryCompatibility(string $target): array
 {
-    $result = nexoraRuntimeRecoveryRun([
+    $result = nexoraRuntimeRecoveryRunTarget([
         PHP_BINARY,
         $target.DIRECTORY_SEPARATOR.'artisan',
         'nexora:runtime:compatibility-status',
@@ -370,7 +393,7 @@ function nexoraRuntimeRecoveryPostInstallStatus(string $target, bool $assertRead
         $command[] = '--assert-ready';
     }
 
-    $result = nexoraRuntimeRecoveryRun($command, $target);
+    $result = nexoraRuntimeRecoveryRunTarget($command, $target);
     $payload = nexoraRuntimeRecoveryExtractJson($result['stdout'], $result['stderr']);
     if (! is_array($payload)) {
         nexoraRuntimeRecoveryFail('Post-install readiness command did not return a parseable JSON payload.', [
@@ -411,7 +434,7 @@ function nexoraRuntimeRecoveryNeedsReceiptRefresh(array $result): bool
 /** @return array<string,mixed> */
 function nexoraRuntimeRecoveryReconcileReceipt(string $target): array
 {
-    $result = nexoraRuntimeRecoveryRun([
+    $result = nexoraRuntimeRecoveryRunTarget([
         PHP_BINARY,
         $target.DIRECTORY_SEPARATOR.'artisan',
         'nexora:runtime:post-install-reconcile',
@@ -467,7 +490,7 @@ function nexoraRuntimeRecoveryResolveTargetAppUrl(string $target): ?string
         .'$kernel=$app->make("Illuminate\\Contracts\\Console\\Kernel");'
         .'$kernel->bootstrap();'
         .'fwrite(STDOUT,json_encode(["app_url"=>trim((string) config("app.url",""))],JSON_UNESCAPED_SLASHES));';
-    $result = nexoraRuntimeRecoveryRun([PHP_BINARY, '-r', $code], $target);
+    $result = nexoraRuntimeRecoveryRunTarget([PHP_BINARY, '-r', $code], $target);
     $payload = nexoraRuntimeRecoveryExtractJson($result['stdout'], $result['stderr']);
     if ($result['exit_code'] !== 0 || ! is_array($payload)) {
         return null;
@@ -568,7 +591,7 @@ function nexoraRuntimeRecoveryIssueWebIdentityChallenge(string $target): array
         .'"runtime_class_fingerprint"=>$source["runtime_class_fingerprint"]??null'
         .'],JSON_UNESCAPED_SLASHES));';
 
-    $result = nexoraRuntimeRecoveryRun([PHP_BINARY, '-r', $code], $target);
+    $result = nexoraRuntimeRecoveryRunTarget([PHP_BINARY, '-r', $code], $target);
     $payload = nexoraRuntimeRecoveryExtractJson($result['stdout'], $result['stderr']);
     if ($result['exit_code'] !== 0 || ! is_array($payload) || ($payload['status'] ?? null) !== 'pass') {
         return [
@@ -718,7 +741,7 @@ function nexoraRuntimeRecoveryWebIdentityProof(string $target, string $targetApp
         ];
     }
 
-    $local = nexoraRuntimeRecoveryRun([
+    $local = nexoraRuntimeRecoveryRunTarget([
         PHP_BINARY,
         $target.DIRECTORY_SEPARATOR.'artisan',
         'nexora:source:status',
@@ -970,13 +993,16 @@ token is kept in-process only and is never written into the orchestrator receipt
 
 Apply mode is single-writer serialized for the explicit target. Lock/receipt
 storage must resolve component-by-component to the exact target-owned path;
-symlink/junction/filesystem redirection fails before lock ownership. Recovery
-receipts use unique identifiers so repeated runs cannot silently overwrite prior
-evidence. Once the target lock is owned, terminal apply failures also write a
-protected outcome receipt. Mutating child operations are marked attempted before
-execution; if such a child fails before a definitive success result, evidence
-reports mutation_may_have_occurred=true rather than claiming no mutation.
-Pre-lock argument/target/storage/lock-acquisition failures remain receipt-free.
+symlink/junction/filesystem redirection fails before lock ownership. Required
+target runtime files are revalidated immediately before every target-owned PHP
+child so an initial containment check cannot become stale through a later
+symlink/junction replacement. Recovery receipts use unique identifiers so
+repeated runs cannot silently overwrite prior evidence. Once the target lock is
+owned, terminal apply failures also write a protected outcome receipt. Mutating
+child operations are marked attempted before execution; if such a child fails
+before a definitive success result, evidence reports mutation_may_have_occurred=true
+rather than claiming no mutation. Pre-lock argument/target/storage/lock-acquisition
+failures remain receipt-free.
 
 The orchestrator never upgrades/copies source, installs dependencies, runs
 migrations, or weakens TLS. Apply mode uses only existing runtime identity and
@@ -1013,15 +1039,7 @@ $target = realpath($targetInput);
 if (! is_string($target) || ! is_dir($target)) {
     nexoraRuntimeRecoveryFail('Target path does not resolve to an existing directory.', ['target' => $targetInput]);
 }
-foreach (['artisan', 'vendor/autoload.php', 'bootstrap/app.php'] as $relative) {
-    $path = nexoraRuntimeRecoveryTargetRuntimeFile($target, $relative);
-    if ($path === null) {
-        nexoraRuntimeRecoveryFail('Target is missing or redirects a required regular runtime file.', [
-            'target' => $target,
-            'missing_or_unsafe' => $relative,
-        ]);
-    }
-}
+nexoraRuntimeRecoveryAssertTargetRuntimeFiles($target);
 
 $steps = [];
 $mutationAttempted = false;
