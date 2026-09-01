@@ -2,112 +2,97 @@
 
 ## Resume instruction
 
-Begin with `AGENTS.md`, `.ai/README.md`, `.ai/state.json`, this handoff, `.ai/roadmap/legacy-aliases.md`, the relevant registry entries, `.ai/plans/active.md`, `NEXORA_PROGRESS.md`, and the current GitHub PR/head state. Never resume from historical chat or stale runtime-closure prose when current repository evidence is available.
+Begin with `AGENTS.md`, `.ai/README.md`, `.ai/state.json`, this handoff, `.ai/roadmap/legacy-aliases.md`, `.ai/registry/development-units.json`, `.ai/plans/active.md`, `NEXORA_PROGRESS.md`, and the current GitHub PR/head state. Never resume from historical chat or stale target prose when repository evidence is available.
 
-## Current source / integration context
+## Current source / governance context
 
 - Long-lived engineering branch: `dev/n1-0b-core-functional-qa` / PR #1.
-- Current certified/main control-plane lineage integrated from: `6d0bb2cf7f92777b8f5f7f4f84ae0f041069124a`.
-- Last exact dev source already proven by hosted `governance`: `43314a111405245f151ec66c01e9261af675c992` via run `32672492494`.
-- N1.10 state-only dev head before main-control-plane reconciliation: `f4b8daa94781907ae78649cbc3ac1bfe26380803`.
-- Resolved true two-parent integration commit: `1e5994362720b2d4ec17b003af305335b44d05e5`, with parents `f4b8daa94781907ae78649cbc3ac1bfe26380803` and `6d0bb2cf7f92777b8f5f7f4f84ae0f041069124a`.
-- Current integration branch includes the merged `.ai/**` governance system, rc.93 repair-pack lineage, dev W3C/Web Standards commands, `dev:target-qa`, and the main `repair:rc93` alias.
-- `.ai/state.json` has been reconciled after the integration to control-plane revision 8. Exact-head governance on the final reconciled integration head is still required before N1.11 execution.
+- Current product source before the state-only N1.11 closure apply: `2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829`.
+- That source is exact-head governance-green via Development Execution QA run `33545705598`.
+- Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
+- The N1.11 closure/N1.12 cursor commit is control-plane/documentation only. Its resulting exact head must pass `governance` before it becomes the N1.12 frozen source.
 
 ## Evidence precedence
 
-`.ai/state.json` is the canonical active stage/unit cursor. `NEXORA_PROGRESS.md` is the detailed live target/release evidence dashboard for the long-lived dev program and must agree with it. `NEXORA_AI_PROJECT_STATE.md` is historical evidence. If active cursor and detailed dashboard conflict, stop and reconcile rather than silently choosing one.
+`.ai/state.json` is the canonical active stage/unit cursor. `NEXORA_PROGRESS.md` is the detailed live target/release evidence dashboard and must agree with it. `NEXORA_AI_PROJECT_STATE.md` is historical evidence.
 
-`SOURCE_DONE != TARGET_VERIFIED`. Bounded target acceptance does not imply broader provider, database, HA, recovery, accessibility or final-release certification.
+`SOURCE_DONE != TARGET_VERIFIED`. A bounded target PASS does not imply broader provider, dependency-graph, database, HA, recovery, accessibility or final-release certification.
 
 ## Accepted bounded target evidence
 
 ### Runtime replacement recovery
 
-Issue #2 is CLOSED via the approved **separate disposable current-source rc.94 replacement recovery acceptance**. The preserved rc.93 installation remains historical evidence and is not reclassified as an in-place PASS.
-
-Accepted run: `32667462959`; exact dev source `a6b6462954edddbe138bc26577625bac2a8bddd2`; carrier PR #17 remains CLOSED + UNMERGED; artifact `9500449768`; digest `sha256:1ac7ccf409181322e74ca1444bfd2ed3cca1539875eba398ad0d98a06e7e4aba`.
-
-The newly integrated rc.93 repair pack from main is preserved as historical/control tooling. Its older `.ai` cursor that described runtime closure as BLOCKED is superseded by the later accepted replacement evidence; do not reopen Issue #2 merely because that historical control-plane lineage was integrated.
+Issue #2 CLOSED via approved disposable current-source rc.94 replacement acceptance. PR #17 CLOSED + UNMERGED. Run `32667462959`; artifact `9500449768`; digest `sha256:1ac7ccf409181322e74ca1444bfd2ed3cca1539875eba398ad0d98a06e7e4aba`.
 
 ### N1.9 Marketplace
 
-Issue #20 CLOSED completed; PR #21 CLOSED + UNMERGED. Accepted run `32671245015` on source `8e359f07dc6b608b0d09468386fca13f066337a1`; artifact `9501470648`; digest `sha256:b26036aa0ad8c7ac075f1a60e213163ce10121e2ff3f606cdd06406ce3fb6aed`.
-
-This certifies only the bounded current Marketplace source → sync → stage/Sentinel → owning Extension-engine workflow. It does not certify later `MARKETPLACE-200` hardening.
+Issue #20 CLOSED completed; PR #21 CLOSED + UNMERGED. Source `8e359f07dc6b608b0d09468386fca13f066337a1`; run `32671245015`; artifact `9501470648`; digest `sha256:b26036aa0ad8c7ac075f1a60e213163ce10121e2ff3f606cdd06406ce3fb6aed`.
 
 ### N1.10 Commerce
 
-Issue #32 CLOSED completed; PR #33 CLOSED + UNMERGED. Frozen source `43314a111405245f151ec66c01e9261af675c992`.
+Issue #32 CLOSED completed; PR #33 CLOSED + UNMERGED. Frozen source `43314a111405245f151ec66c01e9261af675c992`. Primary run `33540575198`, artifact `9813554570`, digest `sha256:68e8e9cefcb32a49a6d9912b5a3b1a4f7eaf0b3ac94850ec8418262c82cad882`. Provider supplement run `33540575159`, artifact `9813440996`, digest `sha256:1af3fd58308e92e1f90431588a045ecc7810d1de96bc7152bed4e9a0c0bcd330`.
 
-Primary Windows real-target run `33540575198` PASS; artifact `9813554570`; digest `sha256:68e8e9cefcb32a49a6d9912b5a3b1a4f7eaf0b3ac94850ec8418262c82cad882`.
+### N1.11 Customer Portal / CRM / Membership
 
-Provider persistence/idempotency supplement run `33540575159` PASS; artifact `9813440996`; digest `sha256:1af3fd58308e92e1f90431588a045ecc7810d1de96bc7152bed4e9a0c0bcd330`.
+**BOUNDED TARGET VERIFIED.** Issue #39 CLOSED completed; diagnostic PR #40 CLOSED + UNMERGED.
 
-Accepted evidence covers fresh rc.94 install/reconcile, real HTTP Commerce workspaces and order/invoice path, historical line-item snapshot integrity, 13 Commerce tests / 91 assertions, deterministic provider-contract payment/refund/subscription persistence and retry/failure behavior. It does **not** certify Stripe/PayPal/live gateways, PCI, external webhooks or provider-specific production behavior.
+- Frozen product source: `2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829`.
+- Governance run: `33545705598` PASS.
+- Carrier head: `b1481c4064bbad96b79cf13d40ac5d07be10a434` (workflow-only instrumentation; never product source).
+- Target run `33550851207` / job `99999628418`: SUCCESS.
+- Artifact `9817460169`.
+- GitHub digest and independently downloaded ZIP SHA-256 both: `b973ffdc424daf3e5b0987d75bff2c6a79b94f1c5e3530a7058091b1af08e1c8`.
+- Frozen feature suite: `10 tests / 64 assertions PASS` with warning-hard execution.
+- Real HTTP: guest `/account` 302→`/login`; verified user login 302→`/account`; authenticated `/account` 200; ordinary user `/admin` 403.
+- Portal/tenant isolation: current linked customer + membership visible; other tenant/customer/member undisclosed; cross-tenant CRM Commerce link, Membership Commerce reference and lead-pipeline conversion fail closed.
+- Fresh installer/reconcile and both Customer Portal + CRM/Membership product-contract verifiers PASS.
+
+Carrier failures were harness-only defects (temporary generated-PHP BOM, login CSRF extraction, verified-user seed mass assignment) and were fixed without changing frozen product/runtime source or weakening assertions.
+
+Explicit non-claims: Helpdesk, `PORTAL-200`, external providers/connectors, remaining five-engine DB matrix, N1.12+, HA/recovery/C5/C6/final release.
 
 ## Current active stage
 
-Stable semantic stage:
+Stable semantic stage: `SEARCH-200`.
 
-`CRM-MEMBERSHIP-HELPDESK-CLOSURE-001`
+Registered unit: `SYS-SEARCH`.
 
-Registered active unit:
+Legacy execution alias: `N1.12 — Search 2.0`.
 
-`SYS-CRM-MEMBERSHIP-HELPDESK`
+Status: **PARTIAL — source exists; bounded real-target acceptance pending.**
 
-Legacy execution alias being continued by explicit user priority:
-
-`N1.11 — CRM / Membership / Customer Portal`
-
-Status:
-
-**PARTIAL — source exists; bounded real-target acceptance not yet executed.**
-
-The legacy alias maps to `CRM-MEMBERSHIP-HELPDESK-CLOSURE-001`, with broader Customer/Member Portal product expansion later represented by `PORTAL-200`. The bounded N1.11 acceptance must verify current existing portal/CRM/membership behavior without silently claiming `PORTAL-200` product-expansion certification or satisfying unrelated canonical dependency stages by implication.
+Legacy N1.12 resolves directly to `SEARCH-200`. The registry defines Search 2.0 as facets, provider abstraction and advanced indexing/querying, while canonical data remains authoritative. Its canonical dependencies remain separate product/verification claims; the user-authorized legacy target-QA order does not silently certify them.
 
 ## Current blocker
 
-The latest `main` control-plane lineage diverged after prior dev governance, which made PR #1 merge-conflicted and prevented GitHub from creating a new `pull_request` governance run for state-only head `f4b8daa…`. A temporary same-head carrier also could not run for the same reason.
+The N1.11 closure and N1.12 cursor are being applied as a state-only canonical dev commit. Before any N1.12 target carrier:
 
-A semantic two-parent integration is now being completed on isolated branch `ops-main-ai-integration-resolved`. Before any N1.11 diagnostic target carrier:
+1. obtain exact-head GitHub-hosted `governance` PASS on that resulting dev head;
+2. audit current Search implementation, routes/services/models/provider/index abstractions, tenant/permission boundaries, migrations, tests and `scripts/search-product-contract-verify.php`;
+3. freeze one exact-source acceptance tracker from source truth;
+4. only then execute the disposable real-target carrier.
 
-1. finish `.ai` state/handoff/active-plan reconciliation;
-2. prove the resolved integration branch is mergeable and run the GitHub-hosted exact-head `governance` workflow;
-3. inspect its artifact/result rather than treating workflow existence as PASS;
-4. merge the reviewed integration to dev only if governance is green;
-5. ensure PR #1 is again mergeable and its resulting exact head is governed.
+Do not weaken governance, tests, tenant scopes or product contracts to move the cursor.
 
-Do not weaken the workflow or create a fake status to bypass this gate.
+## N1.12 target-QA intent
 
-## N1.11 target-QA intent
-
-After exact-head governance is green:
-
-- audit current Customer Portal, CRM and Membership source, routes, policies, tenant scoping, tests and existing product-contract scripts;
-- freeze a bounded acceptance tracker against that exact governed source;
-- use a disposable real target and canonical application routes/services;
-- verify guest/auth boundaries, customer/member identity isolation, tenant isolation, CRM lifecycle, membership plan/entitlement lifecycle, Commerce↔CRM/Membership link consistency where already implemented, and current portal data exposure/authorization;
-- capture exact-source binding, target/toolchain identity, HTTP evidence, target database state, audit/event evidence and applicable executable tests;
-- independently inspect artifact bytes/digests before acceptance;
+- verify only Search behavior already implemented on the exact governed source;
+- prove canonical data remains authoritative over any index/projection;
+- verify create/update/delete/reindex convergence, replay/idempotency, query/filter/facet/sort/pagination behavior where implemented;
+- verify tenant/private-resource isolation and applicable auth/permission boundaries;
+- verify provider default/selection/fail-closed behavior only where an abstraction is actually implemented;
+- do not fabricate an external-provider certification if current source has no real provider integration;
+- capture exact source/carrier/toolchain binding, installer/reconcile evidence, executable verifier/tests, HTTP/state/database/log evidence and explicit exclusions;
+- independently download and hash the artifact before acceptance;
 - keep any diagnostic carrier DRAFT + UNMERGED;
-- on failure, distinguish product defect from carrier defect and fix only the bounded prerequisite.
+- distinguish product defects from carrier defects and fix only bounded prerequisites.
 
-Do not add new portal-builder features to make N1.11 pass. `PORTAL-200` remains a later product stage.
+## Remaining boundaries after N1.12
 
-## Remaining boundaries after N1.11
-
-Continue the explicit legacy target-QA order N1.12–N1.26 while keeping canonical semantic dependency/product-expansion claims separate. Still required globally:
-
-- real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix;
-- controlled provider/identity/API/import/observability/Sentinel/Marketplace evidence where applicable;
-- real HA/multi-node evidence;
-- disposable backup/restore + upgrade rehearsal;
-- C5 W3C HTML/CSS, WAVE, Chrome/Edge/Firefox, responsive/RTL/themes, assistive technology, HTTP/security/latency and Web Vitals;
-- C6 reviewed dependency locks, provenance, final operations and release evidence.
+Continue explicit legacy target-QA order N1.13–N1.26 while keeping canonical semantic dependency/product-expansion claims separate. Still required globally: five-engine DB matrix; controlled provider/identity/API/import/observability/Sentinel/Marketplace evidence; HA; backup/restore + upgrade rehearsal; C5 browser/W3C/WAVE/AT/HTTP/Web-Vitals evidence; C6 reviewed dependency locks/provenance/final operations/release evidence.
 
 Project/Source/Target/Release power remains `76.5% / 99.0% / 50.0% / 25.0%` until broader evidence explicitly justifies a change.
 
 ## Exact next action
 
-**Complete and govern the reconciled main→dev control-plane integration. Only then freeze and execute N1.11 bounded target acceptance.**
+**Require exact-head governance on the synchronized N1.11 closure/N1.12 cursor commit. Then audit and freeze the bounded Search 2.0 acceptance contract; do not start target execution before that PASS.**

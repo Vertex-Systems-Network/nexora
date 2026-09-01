@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 8,
+  "control_plane_revision": 9,
   "control_plane_branch": "dev/n1-0b-core-functional-qa",
   "base_branch": "main",
   "base_sha": "6d0bb2cf7f92777b8f5f7f4f84ae0f041069124a",
-  "last_verified_source_sha": "43314a111405245f151ec66c01e9261af675c992",
+  "last_verified_source_sha": "2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
   "source_generation": "n1-v5.29",
@@ -13,12 +13,12 @@
   "target_status": "PARTIAL",
   "canonical_stage_count": 75,
   "current_stage": {
-    "id": "CRM-MEMBERSHIP-HELPDESK-CLOSURE-001",
-    "name": "CRM, Membership & Customer Portal bounded target closure",
+    "id": "SEARCH-200",
+    "name": "Search 2.0 bounded target verification",
     "status": "PARTIAL",
-    "legacy_aliases": ["N1.11"]
+    "legacy_aliases": ["N1.12"]
   },
-  "active_development_units": ["SYS-CRM-MEMBERSHIP-HELPDESK"],
+  "active_development_units": ["SYS-SEARCH"],
   "completed_control_stages": [
     {
       "id": "AI-GOV-001",
@@ -30,7 +30,7 @@
     "environment": "Disposable exact-source target QA, with preserved rc.93 legacy evidence kept separate",
     "source_release": "1.0.0-rc.94",
     "preserved_legacy_target": "1.0.0-rc.93 historical evidence only",
-    "next_bounded_slice": "N1.11 CRM / Membership / Customer Portal"
+    "next_bounded_slice": "N1.12 Search 2.0"
   },
   "accepted_bounded_target_evidence": {
     "runtime_recovery": {
@@ -65,9 +65,26 @@
       "provider_run_id": 33540575159,
       "provider_artifact_id": 9813440996,
       "provider_artifact_digest": "sha256:1af3fd58308e92e1f90431588a045ecc7810d1de96bc7152bed4e9a0c0bcd330"
+    },
+    "n1_11_crm_membership_portal": {
+      "status": "TARGET_VERIFIED",
+      "scope": "Bounded current Customer Portal + CRM + Membership exact-source workflow; Helpdesk and PORTAL-200 expansion explicitly excluded",
+      "issue": 39,
+      "carrier_pr": 40,
+      "source_sha": "2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829",
+      "carrier_sha": "b1481c4064bbad96b79cf13d40ac5d07be10a434",
+      "governance_run_id": 33545705598,
+      "target_run_id": 33550851207,
+      "target_job_id": 99999628418,
+      "artifact_id": 9817460169,
+      "artifact_digest": "sha256:b973ffdc424daf3e5b0987d75bff2c6a79b94f1c5e3530a7058091b1af08e1c8",
+      "tests": "10 tests / 64 assertions PASS",
+      "http_boundary": "guest /account -> 302 /login; verified user login -> 302 /account; authenticated /account -> 200; ordinary user /admin -> 403",
+      "tenant_boundary": "linked current-user customer/membership visible; other-tenant customer/membership undisclosed; cross-tenant CRM Commerce link, Membership Commerce reference and lead-pipeline conversion fail closed"
     }
   },
   "uncertified_boundaries": [
+    "Helpdesk and PORTAL-200 customer/member self-service expansion",
     "external payment gateway/provider-specific production behavior and PCI scope",
     "real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix",
     "later provider/identity/API/import/observability/Sentinel/Marketplace 2.0 controlled evidence",
@@ -78,20 +95,21 @@
   ],
   "blocker": {
     "category": "governance",
-    "summary": "Current main AI-control-plane lineage has been semantically integrated on an isolated two-parent merge, but the post-integration exact head must pass the GitHub-hosted governance gate before any N1.11 target carrier is accepted or executed.",
-    "guardrail": "Do not reinterpret the older main runtime BLOCKED cursor as current target truth, do not erase preserved rc.93 history, and do not start N1.11 execution until the reconciled integration head is exact-head governance green."
+    "summary": "N1.11 bounded target acceptance is complete. This state-only transition to SEARCH-200 must itself obtain exact-head GitHub-hosted governance before its head can be used as the N1.12 frozen source.",
+    "guardrail": "Do not treat this documentation/control-plane commit as new product evidence, do not merge diagnostic PR #40, and do not execute N1.12 target acceptance until the canonical dev head is governance-green and the Search 2.0 contract is frozen from source truth."
   },
   "next_actions": [
-    "Complete semantic main-to-development control-plane integration and keep .ai state, handoff, active plan and NEXORA_PROGRESS synchronized.",
-    "Require GitHub-hosted exact-head governance PASS on the reconciled post-integration development head.",
-    "Freeze and execute bounded N1.11 CRM / Membership / Customer Portal real-target acceptance against that exact governed source; do not silently certify broader PORTAL-200 product expansion.",
-    "After N1.11 acceptance, continue the user-authorized legacy N1.12-N1.26 target/product QA sequence while preserving canonical semantic dependency claims as separate evidence boundaries.",
-    "Then complete the five-engine database matrix, controlled provider/identity/API/import/observability/Sentinel/Marketplace evidence, HA, recovery, C5 and C6 final release gates."
+    "Require exact-head GitHub-hosted governance PASS on the N1.11-closure/N1.12-cursor state commit.",
+    "Audit current Search 2.0 routes, services, models, provider/index abstractions, tenant/permission boundaries, migrations, tests and scripts/search-product-contract-verify.php on that exact governed source.",
+    "Freeze one bounded N1.12 acceptance tracker with exact inclusions/exclusions and source binding; do not silently certify unmet canonical SEARCH-200 dependency/product-expansion work.",
+    "Execute the N1.12 disposable real-target carrier, independently review artifact bytes/digest, close the tracker only if every frozen gate passes, and close the carrier unmerged.",
+    "Then continue the user-authorized legacy N1.13-N1.26 target/product QA sequence while preserving canonical semantic dependency claims as separate evidence boundaries.",
+    "Complete the five-engine database matrix, controlled provider/identity/API/import/observability/Sentinel/Marketplace evidence, HA, recovery, C5 and C6 final release gates."
   ],
   "next_stage": {
-    "id": "SEARCH-200",
-    "name": "Search 2.0 bounded target verification",
-    "advance_when": "The bounded legacy N1.11 target acceptance is complete under the user-authorized N1.9-N1.26 verification order. This sequencing does not certify or skip unmet canonical PORTAL-200 or other dependency-graph product-expansion requirements."
+    "id": "COLLAB-200",
+    "name": "Collaboration bounded target verification",
+    "advance_when": "The bounded legacy N1.12 Search 2.0 target acceptance is complete under the user-authorized N1.9-N1.26 verification order. This sequencing does not certify or skip unmet canonical dependency-graph product-expansion requirements."
   },
   "governance": {
     "development_unit_registry_required": true,
@@ -165,5 +183,5 @@
     "ARCHITECTURE.md",
     "SECURITY.md"
   ],
-  "updated_at": "2026-09-01T23:20:00+05:00"
+  "updated_at": "2026-09-02T19:00:00+05:00"
 }
