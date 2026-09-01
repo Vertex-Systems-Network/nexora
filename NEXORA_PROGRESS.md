@@ -10,12 +10,13 @@
 
 - Date: `2026-09-02` (Asia/Karachi).
 - Canonical long-lived engineering branch: `dev/n1-0b-core-functional-qa` / PR #1, still **DRAFT + OPEN**.
-- Canonical product source used for N1.11 acceptance: **`2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829`**.
-- Exact-head Development Execution QA run `33545705598` on that source: **PASS**; artifact `9815511346`; independently verified digest `sha256:9bb63c3cf2c5a90b1b333b4a1014923f38358ad356b8ae87620ebedb0756bd58`.
-- N1.11 Customer Portal / CRM / Membership real-target acceptance is now **BOUNDED TARGET VERIFIED** under Issue #39; diagnostic PR #40 is CLOSED + UNMERGED.
-- Accepted N1.11 run `33550851207` / job `99999628418`; artifact `9817460169`; GitHub digest and independently downloaded ZIP SHA-256 exactly match at `sha256:b973ffdc424daf3e5b0987d75bff2c6a79b94f1c5e3530a7058091b1af08e1c8`.
-- The N1.11 closure/N1.12 cursor apply is state/control-plane only. It does not alter or newly certify product runtime bytes.
-- Active target-QA cursor advances to **N1.12 / `SEARCH-200` / `SYS-SEARCH`** after the synchronized state commit is exact-head governance-green.
+- N1.12 accepted frozen product source: **`78976e9f44e290155b119ae722a77fb37fd59018`**.
+- Exact-head Development Execution QA on that source: run `33553824752` / job `100009648131` **PASS**; artifact `9818655365`; digest `sha256:471949869471e6db95dcf0fd0da0f47b65e062ce8f196f2105145741fd8a8fa4`.
+- N1.12 Search 2.0 is **BOUNDED TARGET VERIFIED** under Issue #41; diagnostic PR #45 is **CLOSED + DRAFT + UNMERGED**.
+- Certified N1.12 carrier is exactly `449ea9b3d5c0d2ad176031a1849ed80c349e0023`; later PR #45 tree-equivalent/no-content heads are not acceptance evidence.
+- Accepted N1.12 run `33563871904` / job `100042466730`; artifact `9822383456`; GitHub digest and independently downloaded ZIP SHA-256 exactly match at `sha256:6d298f5d60c5dc7a0423aec8d73d107de79888662cc919d62d53824b0e723731`.
+- The N1.12 closure/N1.13 cursor apply is state/control-plane only. It does not alter or newly certify product/runtime bytes.
+- Active target-QA cursor advances to **N1.13 / `COLLAB-200` / `SYS-COLLABORATION`** after this synchronized state commit is exact-head governance-green.
 - Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
 - Source `composer.lock` remains intentionally absent. Hosted dependency resolution remains development evidence only; reviewed release locks are a later C6 boundary.
 - W3C Nu HTML + W3C CSS + WAVE tooling is source-wired, but final accessibility/browser certification still requires real target evidence.
@@ -44,17 +45,21 @@ Vitest + TypeScript noEmit + production Vite build
 Development Readiness evidence artifact
 ```
 
-Last exact product source governed before this state-only apply:
+Last exact bounded-target accepted source before this state-only apply:
 
 ```text
-Head: 2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829
-Run: 33545705598
+Head: 78976e9f44e290155b119ae722a77fb37fd59018
+Governance run: 33553824752
+Governance job: 100009648131
 Conclusion: SUCCESS
-Artifact: 9815511346
-Digest: sha256:9bb63c3cf2c5a90b1b333b4a1014923f38358ad356b8ae87620ebedb0756bd58
+Governance artifact: 9818655365
+Governance digest: sha256:471949869471e6db95dcf0fd0da0f47b65e062ce8f196f2105145741fd8a8fa4
+N1.12 target run: 33563871904
+N1.12 target artifact: 9822383456
+N1.12 target digest: sha256:6d298f5d60c5dc7a0423aec8d73d107de79888662cc919d62d53824b0e723731
 ```
 
-The resulting state-only head must receive its own exact-head governance PASS before it is frozen for N1.12.
+The resulting N1.12-closure/N1.13-cursor state-only head must receive its own exact-head governance PASS before it is frozen for N1.13.
 
 ---
 
@@ -132,22 +137,47 @@ Independent downloaded ZIP SHA-256: MATCH
 Frozen feature contract: 10 tests / 64 assertions PASS
 ```
 
+Reviewed target gates include fresh install/reconcile, Customer Portal + CRM/Membership product contracts, real `/account` guest/auth boundaries, linked current-user customer/membership visibility, tenant-member isolation and cross-tenant CRM/Membership/Commerce references failing closed.
+
+**Explicit exclusions:** Helpdesk, `PORTAL-200`, external providers/connectors, remaining five-engine DB matrix, later stages, HA/recovery/C5/C6/final release.
+
+### N1.12 Search 2.0
+
+**BOUNDED TARGET VERIFIED.**
+
+```text
+Issue: #41 CLOSED completed
+Carrier: PR #45 CLOSED + DRAFT + UNMERGED
+Frozen exact product source: 78976e9f44e290155b119ae722a77fb37fd59018
+Certified carrier head: 449ea9b3d5c0d2ad176031a1849ed80c349e0023
+Target run: 33563871904
+Job: 100042466730
+Artifact: 9822383456
+Digest: sha256:6d298f5d60c5dc7a0423aec8d73d107de79888662cc919d62d53824b0e723731
+Independent downloaded ZIP SHA-256: MATCH
+```
+
 Reviewed target gates:
 
-- Windows x64 / PHP `8.3.33` / Composer `2.10.3` / Node `22.23.2` / npm `10.9.8` source and toolchain binding recorded.
-- Fresh disposable install PASS; HTTP 302→`/install/runtime-handoff`; `installed.lock=true`.
-- Guarded post-install reconcile PASS with lock still sealed.
-- `customer-portal-product-contract-verify.php` PASS.
-- `crm-membership-product-contract-verify.php` PASS.
-- Guest `/account` 302→`/login`; ordinary verified-user login 302→`/account`; authenticated `/account` 200; ordinary user `/admin` 403.
-- Current linked Commerce customer + Membership visible; other customer/membership undisclosed.
-- Repeatable tenant-scoped plan/pipeline identities pass; primary member directory excludes other-tenant user.
-- Cross-tenant CRM Commerce link, Membership Commerce reference and lead-pipeline conversion all fail closed.
-- Accepted server evidence contains no hidden runtime exception during the reviewed flow.
+- exact frozen source/carrier/toolchain binding;
+- fresh disposable rc.94 install and guarded post-install reconcile;
+- Search product-contract verifier + warning-hard frozen isolation test;
+- document/media index create/update/delete/restore behavior and single-projection idempotency;
+- SEO-derived URL refresh;
+- stale projection removal and repeatable rebuild convergence;
+- deterministic bounded local ranking/query normalization/type/limit behavior;
+- tenant isolation for indexed document/media and tenant member discovery;
+- public Search document-only/private-membership visibility boundary;
+- real browser-equivalent Admin Search with required deployment-generation header;
+- global RBAC plus tenant-local EnterpriseRole authorization path;
+- `search.use`, `documents.view`, `media.view`, `search.index.manage` permission boundaries;
+- GPC/DNT opt-out requests do not create query-log evidence;
+- authorized reindex records audit evidence;
+- accepted server logs contain no hidden fatal/uncaught runtime failure.
 
-Carrier defect iterations were harness-only: generated-PHP UTF-8 BOM, CSRF extraction from the Inertia root meta tag, and explicit verified-user seeding because `email_verified_at` is intentionally not mass assignable. Frozen product/runtime source did not change and assertions were not weakened.
+Only carrier `449ea9b3d5c0d2ad176031a1849ed80c349e0023` / run `33563871904` is certified. Later PR #45 tree-equivalent/no-content heads are explicitly excluded.
 
-**Explicit exclusions:** Helpdesk, `PORTAL-200`, external providers/connectors, remaining five-engine DB matrix, N1.12+, HA/recovery/C5/C6/final release.
+**Explicit exclusions:** external Search providers; distributed indexing/replication/HA; unimplemented facets; Search performance/scale/relevance SLOs; broader `PORTAL-200`; remaining five-engine DB matrix; N1.13+; HA/recovery/C5/C6/final release.
 
 ---
 
@@ -156,15 +186,15 @@ Carrier defect iterations were harness-only: generated-PHP UTF-8 BOM, CSRF extra
 `.ai/state.json` and this dashboard agree:
 
 ```text
-Stable stage: SEARCH-200
-Registered unit: SYS-SEARCH
-Legacy alias: N1.12 — Search 2.0
+Stable stage: COLLAB-200
+Registered unit: SYS-COLLABORATION
+Legacy alias: N1.13 — Collaboration
 Status: PARTIAL (source exists; bounded real-target verification pending)
 ```
 
-Historical N1.12 resolves directly to canonical `SEARCH-200`. The registry defines `SYS-SEARCH` as facets, provider abstraction and advanced indexing/querying while canonical data remains authoritative.
+Canonical dependencies: `SITE-BUILDER-200`, `RELEASE-WORKFLOW-200`, `PORTAL-200`. They remain distinct evidence/product claims and are not silently satisfied by the user-authorized legacy target-QA execution order.
 
-The user-authorized N1.9–N1.26 target-QA order may continue, but execution priority does **not** silently certify or skip unmet canonical semantic dependencies/product-expansion stages.
+Registry local contracts include `App\Nexora\Collaboration\CollaborationRepository`, `App\Nexora\Collaboration\ApprovalWorkflow`, and `App\Nexora\Collaboration\LockManager`. The bounded pass must verify only behavior actually implemented in the exact governed source.
 
 Current source state table:
 
@@ -175,8 +205,9 @@ Current source state table:
 | N1.9 Marketplace | SOURCE DONE | **BOUNDED TARGET VERIFIED** |
 | N1.10 Commerce | SOURCE DONE | **BOUNDED TARGET VERIFIED** |
 | N1.11 CRM / Membership / Customer Portal | SOURCE DONE for frozen bounded workflow | **BOUNDED TARGET VERIFIED** |
-| N1.12 Search 2.0 | SOURCE DONE for current implemented workflow | **ACTIVE NEXT TARGET-QA SLICE after exact-head governance** |
-| N1.13–N1.21 | SOURCE DONE for bounded workflows | target execution pending |
+| N1.12 Search 2.0 | SOURCE DONE for current implemented workflow | **BOUNDED TARGET VERIFIED** |
+| N1.13 Collaboration | SOURCE DONE for current implemented workflow | **ACTIVE NEXT TARGET-QA SLICE after exact-head governance** |
+| N1.14–N1.21 | SOURCE DONE for bounded workflows | target execution pending |
 | N1.22 Sentinel 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | controlled target evidence pending |
 | N1.23 Marketplace 2.0 | SOURCE DONE FOR CURRENT WORKFLOW | hardening/negative target matrix pending |
 | N1.24 Cloud / HA | SOURCE DONE FOR CURRENT WORKFLOW | real multi-node evidence pending |
@@ -186,54 +217,56 @@ Current source state table:
 
 ---
 
-## 4. N1.12 bounded target-QA boundary
+## 4. N1.13 bounded target-QA boundary
 
-Do **not** freeze the final N1.12 issue checklist until this state-only transition head is exact-head governance-green and current Search source/tests have been audited.
+Do **not** freeze the final N1.13 issue checklist until this state-only transition head is exact-head governance-green and current Collaboration source/tests have been audited.
 
 After governance, inspect current implementations for:
 
-- Search routes/controllers and any public/admin Search surfaces;
-- index/query/search services and provider abstraction;
-- canonical-resource projections and ownership/source-of-truth relationships;
-- create/update/delete/reindex/replay behavior;
-- filters/facets/sort/pagination where implemented;
-- tenant/global scopes/authorization/visibility;
-- Search migrations/index constraints;
-- audit/event/queue behavior where implemented;
-- existing Search feature/unit/architecture tests;
-- `scripts/search-product-contract-verify.php`.
+- `CollaborationRepository`, `ApprovalWorkflow`, `LockManager` and concrete models/services;
+- comments/threads/replies and collaboration history where implemented;
+- lock acquire/conflict/refresh/release/expiry and ownership semantics where implemented;
+- approval states/transitions, actor authorization and invalid-transition rejection;
+- tenant/organization/member/resource scopes and permission boundaries;
+- collaboration migrations, uniqueness/concurrency constraints and TTL/timestamp fields;
+- audit/events/queue/cache coordination where actually implemented;
+- HTTP/API/admin UI routes/controllers/request validation;
+- existing Collaboration feature/unit/architecture tests and source-contract verifier scripts;
+- installer/upgrade/reconcile behavior relevant to Collaboration state.
 
-Candidate target dimensions include exact source/target binding, fresh install/reconcile, frozen Search verifier/tests, real HTTP/auth boundaries where exposed, tenant/private-result isolation, canonical-source authority, index convergence/idempotency, deterministic query/filter/facet/sort/pagination behavior, provider default/fail-closed behavior where implemented, target DB/state evidence and independently reviewed artifact bytes/digest.
+Candidate target dimensions include exact source/carrier/toolchain binding, fresh install/reconcile, frozen verifier/tests, comment/history visibility and ownership, tenant isolation, lock lifecycle/conflict/concurrency, approval authorization/state transitions, retry/idempotency where claimed, real HTTP/API/UI auth boundaries, audit/log safety and independently reviewed artifact bytes/digest.
 
-Do not fabricate an external search-provider claim. If current source is internal/database-backed only, freeze that narrower boundary and explicitly leave external provider certification pending.
+Do not fabricate realtime, WebSocket, CRDT, distributed Redis/lock coordination or external-provider certification. If those are not implemented and target-proven, keep them explicit non-claims.
 
 ---
 
 ## 5. Preserved evidence / safety rules
 
 1. Preserve rc.93 historical evidence; Issue #2 stays closed.
-2. Keep PR #17, #21, #33 and #40 closed + unmerged; diagnostic code is evidence only, never accepted product source.
+2. Keep PR #17, #21, #33, #40 and #45 closed + unmerged; diagnostic code is evidence only, never accepted product source.
 3. N1.9 does not certify N1.23 Marketplace 2.0.
 4. N1.10 deterministic provider-contract evidence does not certify an external gateway or PCI.
 5. N1.11 does not certify Helpdesk or `PORTAL-200`.
-6. Hosted source CI never substitutes for real target/database/provider/HA/recovery/browser/a11y evidence.
-7. Do not weaken tests, middleware, tenant scopes or acceptance assertions to obtain green.
-8. Every target acceptance artifact must bind exact source and be independently reviewed; workflow green alone is insufficient.
-9. The state-only closure/cursor commit does not become new product evidence merely because its Git SHA changes.
-10. Keep PR #1 DRAFT until all applicable target/release gates genuinely pass.
+6. N1.12 does not certify external Search providers, distributed Search, facets or Search scale/relevance SLOs.
+7. Hosted source CI never substitutes for real target/database/provider/HA/recovery/browser/a11y evidence.
+8. Do not weaken tests, middleware, tenant scopes, lock semantics, approval rules or acceptance assertions to obtain green.
+9. Every target acceptance artifact must bind exact source and be independently reviewed; workflow green alone is insufficient.
+10. The state-only closure/cursor commit does not become new product evidence merely because its Git SHA changes.
+11. Canonical `COLLAB-200` dependencies remain separate evidence claims even while legacy N1.13 target QA proceeds.
+12. Keep PR #1 DRAFT until all applicable target/release gates genuinely pass.
 
 ---
 
 ## 6. Remaining broader target / release sequence
 
 ```text
-1. obtain exact-head governance PASS on the synchronized N1.11-closure/N1.12-cursor dev head
-2. audit current Search source/tests/contracts on that exact governed head
-3. freeze one bounded N1.12 acceptance tracker with exact inclusions/exclusions and source binding
-4. execute bounded N1.12 disposable real-target/product QA on an unmerged diagnostic carrier
+1. obtain exact-head governance PASS on the synchronized N1.12-closure/N1.13-cursor dev head
+2. audit current Collaboration source/tests/contracts on that exact governed head
+3. freeze one bounded N1.13 acceptance tracker with exact inclusions/exclusions and source binding
+4. execute bounded N1.13 disposable real-target/product QA on an unmerged diagnostic carrier
 5. independently review artifact bytes/digest; close tracker only if complete; close carrier unmerged
 6. reconcile .ai + this dashboard and require exact-head governance
-7. continue legacy N1.13–N1.26 target/product QA in the explicit user-priority order without converting that order into false canonical dependency certification
+7. continue legacy N1.14–N1.26 target/product QA in explicit user-priority order without false canonical dependency certification
 8. run real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix
 9. complete controlled provider/connector/identity/API/import/observability/Sentinel/Marketplace evidence
 10. prove real HA/multi-node operations
@@ -287,7 +320,7 @@ TARGET POWER    50.0%
 RELEASE POWER   25.0%
 ```
 
-**No score change.** N1.11 adds a bounded exact-source target slice but does not justify broad Target/Release promotion while the five-engine/provider/HA/recovery/C5/C6 boundaries remain open.
+**No score change.** N1.12 adds another bounded exact-source target slice but does not justify broad Target/Release promotion while canonical dependencies, five-engine/provider/HA/recovery/C5/C6 boundaries remain open.
 
 ---
 
@@ -302,16 +335,17 @@ RELEASE POWER   25.0%
 | 093 | 2026-09-01 | governance run `33542987240` on `73270099…` | full product/runtime QA green; isolated six failures to legacy governance/progress source-contract markers; restored compatibility wording without changing product/runtime/verifier source | scores unchanged |
 | 094 | 2026-09-01 | governed integration merged to dev at `2f5eb3b9…`; governance run `33545705598` | canonical dev exact head green; froze N1.11 product source | scores unchanged |
 | 095 | 2026-09-02 | Issue #39; PR #40; target run `33550851207`; artifact `9817460169`; digest `b973ffdc…e1c8` | independently reviewed bounded N1.11 Customer Portal / CRM / Membership acceptance; carrier closed unmerged; advanced active cursor to N1.12 Search 2.0 | scores unchanged |
+| 096 | 2026-09-02 | Issue #41; PR #45; governed source `78976e9…`; certified carrier `449ea9b3…`; run `33563871904`; artifact `9822383456`; digest `6d298f5d…23731` | independently reviewed bounded N1.12 Search 2.0 acceptance; carrier closed unmerged; advanced active cursor to N1.13 Collaboration | scores unchanged |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-A. Require GitHub-hosted governance PASS on the synchronized N1.11-closure/N1.12-cursor dev head.
-B. Audit current Search 2.0 source, tests, tenant/permission/data-flow boundaries and scripts/search-product-contract-verify.php on that exact governed head.
-C. Freeze one exact N1.12 acceptance tracker derived from source truth; explicitly exclude missing external-provider or canonical expansion work rather than fabricating it.
-D. Execute the disposable N1.12 real-target carrier only after the tracker is frozen; keep the carrier DRAFT + DO NOT MERGE.
+A. Require GitHub-hosted governance PASS on the synchronized N1.12-closure/N1.13-cursor dev head.
+B. Audit current Collaboration source, tests, comments/locks/approvals/history, tenant/permission/data-flow boundaries and registered local contracts on that exact governed head.
+C. Freeze one exact N1.13 acceptance tracker derived from source truth; explicitly exclude missing distributed/realtime/provider or canonical dependency expansion work rather than fabricating it.
+D. Execute the disposable N1.13 real-target carrier only after the tracker is frozen; keep the carrier DRAFT + DO NOT MERGE.
 E. Independently review artifact bytes/digest and close the tracker only if every bounded gate passes; close the carrier unmerged.
 F. Keep Project/Source/Target/Release at 76.5% / 99.0% / 50.0% / 25.0% until broader evidence justifies change.
 G. Keep PR #1 DRAFT until final target/release closure.

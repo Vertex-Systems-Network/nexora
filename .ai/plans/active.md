@@ -1,158 +1,168 @@
-# Active Plan — SEARCH-200
+# Active Plan — COLLAB-200
 
 ## Identity
 
-- Stable stage: `SEARCH-200 — Search 2.0`
-- Registered development unit: `SYS-SEARCH`
-- Legacy execution alias: `N1.12 — Search 2.0`
-- Release train: `builder-beta`
+- Stable stage: `COLLAB-200 — Collaboration`
+- Registered development unit: `SYS-COLLABORATION`
+- Legacy execution alias: `N1.13 — Collaboration`
+- Release train: `platform`
 - Status: `PARTIAL` — source exists; bounded real-target verification pending
 - Current source release: `1.0.0-rc.94`
-- Last exact product source governed and bounded-target accepted for N1.11: `2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829`
-- Method: verification/control of existing Search behavior. No feature expansion is authorized by this plan.
+- Last exact bounded-target accepted source: `78976e9f44e290155b119ae722a77fb37fd59018`
+- Method: verification/control of existing Collaboration behavior. No feature expansion is authorized by this plan.
 
 ## Accepted prerequisite closure
 
-N1.11 Customer Portal / CRM / Membership is **BOUNDED TARGET VERIFIED** and Issue #39 is CLOSED completed. Diagnostic PR #40 is CLOSED + UNMERGED.
+N1.12 Search 2.0 is **BOUNDED TARGET VERIFIED**. Issue #41 is CLOSED completed and diagnostic PR #45 is CLOSED + DRAFT + UNMERGED.
 
 Accepted evidence:
 
-- frozen product source `2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829`;
-- exact-head development governance run `33545705598` PASS;
-- target run `33550851207` / job `99999628418` SUCCESS;
-- artifact `9817460169`;
-- GitHub and independently downloaded ZIP digest both `sha256:b973ffdc424daf3e5b0987d75bff2c6a79b94f1c5e3530a7058091b1af08e1c8`;
-- frozen feature contract `10 tests / 64 assertions PASS`;
-- real HTTP and tenant/customer/member isolation gates PASS.
+- frozen source `78976e9f44e290155b119ae722a77fb37fd59018`;
+- exact-head governance run `33553824752` / job `100009648131` PASS;
+- certified carrier `449ea9b3d5c0d2ad176031a1849ed80c349e0023`;
+- target run `33563871904` / job `100042466730` SUCCESS;
+- artifact `9822383456`;
+- GitHub and independently downloaded ZIP digest both `sha256:6d298f5d60c5dc7a0423aec8d73d107de79888662cc919d62d53824b0e723731`;
+- fresh install/reconcile, frozen Search verifier/tests, index lifecycle/rebuild/idempotency, tenant isolation, dual RBAC, real HTTP permission/privacy boundaries and reindex audit PASS.
 
-Carrier iterations fixed only diagnostic-harness defects (generated-PHP BOM, CSRF extraction, verified-user seed mass assignment). Frozen product/runtime source was not changed and assertions were not weakened.
+Only the certified carrier SHA/run above is acceptance evidence. Later PR #45 no-content/tree-equivalent heads are excluded.
 
-Explicit N1.11 non-claims remain: Helpdesk, `PORTAL-200`, external providers/connectors, remaining five-engine database matrix, N1.12+, HA/recovery/C5/C6/final release.
+N1.12 explicit non-claims remain: external Search providers, distributed indexing/HA, unimplemented facets, Search scale/relevance SLOs, broader `PORTAL-200`, five-engine database matrix, N1.13+, HA/recovery/C5/C6/final release.
 
 ## Scope boundary
 
-The historical alias map resolves N1.12 to canonical `SEARCH-200`. The registry defines `SYS-SEARCH` as facets, provider abstraction and advanced indexing/querying, with canonical data remaining authoritative.
+Legacy N1.13 resolves to canonical `COLLAB-200` and registered unit `SYS-COLLABORATION`.
 
-This plan continues the explicitly authorized legacy N1.9–N1.26 **target/product QA sequence**. Execution order is not a claim that all canonical SEARCH-200 dependencies (`CONTENT-MODEL-200`, `TAXONOMY-200`, `QUERY-ENGINE-200`) are product-complete or target-certified. The bounded pass must verify only Search behavior that already exists in the frozen source.
+Canonical roadmap dependencies are `SITE-BUILDER-200`, `RELEASE-WORKFLOW-200`, and `PORTAL-200`. The explicitly authorized N1.9–N1.26 target-QA sequence is an execution priority only; it does **not** certify, skip or satisfy these canonical dependency claims. If the bounded Collaboration acceptance truly requires an unfinished dependency, stop and classify that dependency instead of manufacturing evidence.
 
-No new provider, external search service, dependency, schema, migration, permission, network destination, API, feature or UI expansion is authorized merely to obtain N1.12 acceptance. If source truth shows that a historical "Search 2.0" roadmap expectation is not implemented, record it as an explicit exclusion/future canonical requirement rather than fabricating evidence.
+Registry local contracts include:
+
+- `App\Nexora\Collaboration\CollaborationRepository`;
+- `App\Nexora\Collaboration\ApprovalWorkflow`;
+- `App\Nexora\Collaboration\LockManager`.
+
+No new collaboration provider, cache/lock backend, queue, schema, migration, permission, network destination, API or UI expansion is authorized merely to obtain N1.13 acceptance.
 
 ## Governance gate before freeze
 
-The N1.11 closure and N1.12 cursor are being synchronized as a state-only commit. That exact canonical dev head must pass GitHub-hosted `governance` before it can be frozen as N1.12 product evidence.
+This N1.12 closure/N1.13 cursor synchronization is a state-only commit. Its exact canonical dev head must pass GitHub-hosted `governance` before it may be frozen as N1.13 source evidence.
 
-The state-only commit itself does not become new product acceptance. If the exact-head governance run fails, fix only the governance/documentation defect unless the failure reveals a genuine product regression.
+The state-only commit itself is not new product acceptance. If exact-head governance fails, classify the failure and fix only the relevant governance/documentation defect unless the run exposes a genuine product regression.
 
 ## Pre-execution source audit
 
-After exact-head governance PASS, inspect at minimum the current equivalents of:
+After exact-head governance PASS, inspect the current source equivalents of:
 
-- public/admin search routes and controllers;
-- query/index/search services and provider abstractions;
-- searchable resource/document projection models and canonical source-of-truth links;
-- indexing/reindex/delete/update paths and idempotency behavior;
-- filters/facets/sort/pagination behavior where implemented;
-- tenant context, permission/global-scope and resource visibility boundaries;
-- migrations/index constraints relevant to search identities and tenant isolation;
-- audit/events/queue behavior relevant to indexing where implemented;
-- existing Search feature/unit/architecture tests;
-- `scripts/search-product-contract-verify.php`;
-- any existing operational target guidance used by the current search implementation.
+- Collaboration repository/service contracts and concrete models;
+- comment/thread/reply creation, update/delete and visibility behavior where implemented;
+- lock acquire/conflict/heartbeat/refresh/release/expiry paths where implemented;
+- approval workflow states, transitions, actor authorization and invalid-transition rejection;
+- collaboration history/audit/event provenance;
+- HTTP/API/admin UI routes/controllers and request validation;
+- tenant context, organization/member resolution, global scopes, authorization policies/middleware;
+- persistence tables/migrations, uniqueness/concurrency constraints and timestamps/TTLs;
+- queue/cache/lock backend behavior only where the source actually uses it;
+- existing Collaboration feature/unit/architecture tests and product-contract verifier scripts;
+- installer/upgrade/reconcile effects on Collaboration state.
 
-Do not assume an external provider exists because `SEARCH-200` includes provider abstraction. If current source is internal/database-backed only, freeze that narrower implementation boundary and explicitly exclude external-provider certification.
+Do not infer distributed collaboration, Redis coordination, presence, realtime/WebSocket delivery, conflict-free editing or external providers merely from stage naming. Freeze only behavior that current source implements and can prove.
 
 ## Provisional target acceptance dimensions
 
-The final issue checklist must be derived from the governed source audit, but candidate dimensions are:
+The final issue checklist must be derived from the governed source audit. Candidate dimensions are:
 
 1. exact canonical source + carrier/toolchain binding;
-2. fresh disposable rc.94 install/bootstrap and accepted post-install reconcile where required;
-3. frozen Search product-contract verifier PASS;
-4. frozen Search feature/unit contract PASS with warnings fail-hard;
-5. real HTTP/search endpoint authorization and guest/admin boundaries where exposed;
-6. tenant/resource visibility isolation and no cross-tenant result leakage;
-7. canonical-source authority: index/search projection cannot become an alternate writable truth store;
-8. create/update/delete/reindex convergence and duplicate/idempotency behavior where implemented;
-9. deterministic query/filter/sort/facet/pagination behavior where implemented;
-10. provider-selection/default/fail-closed behavior where implemented, without claiming an untested external provider;
-11. target database/state evidence and applicable audit/event evidence with secrets/PII minimized;
-12. artifact includes exact source binding, install/reconcile, verifier/tests, HTTP/state evidence, logs, summary and explicit exclusions;
-13. green workflow alone is insufficient — downloaded artifact digest and contents require independent review.
+2. fresh disposable rc.94 install/bootstrap and accepted post-install reconcile;
+3. frozen Collaboration source-contract verifier/tests PASS warning-hard;
+4. installed-target collaboration state uses canonical product services rather than direct manufactured truth;
+5. comment/history creation, ownership, ordering and visibility where implemented;
+6. tenant/organization isolation with no cross-tenant actor/resource/history disclosure;
+7. lock acquire/conflict/refresh/release/expiry semantics where implemented;
+8. competing writers cannot steal or bypass an active lock and stale ownership fails closed;
+9. approval workflow valid transitions succeed only for authorized actors and invalid/unauthorized transitions fail closed;
+10. replay/retry/idempotency and duplicate protection where the current implementation claims them;
+11. real HTTP/API/UI auth and permission boundaries where exposed;
+12. audit/history evidence is attributable and cannot be silently accepted as mutable authoritative truth when the source defines append/history semantics;
+13. target logs contain no hidden fatal/uncaught runtime exception in the accepted flow;
+14. evidence artifact includes exact binding, install/reconcile, tests, state/concurrency/auth/tenant evidence, logs, summary and explicit exclusions;
+15. green workflow alone is insufficient — downloaded artifact digest/content require independent review;
+16. diagnostic carrier remains DRAFT / DO NOT MERGE and is closed unmerged after acceptance or abandonment.
 
 ## Security / privacy / data-flow boundary
 
-Risk is `moderate` in the registry, but data-leak impact can become high if tenant/private resources are indexed incorrectly.
+Collaboration data can expose user identity, document/resource activity and approval history. Required controls:
 
-Required controls:
-
-- search never broadens canonical authorization/tenant visibility;
-- index/projected data is derived and rebuildable from authoritative canonical data;
-- filters/provider names/resource IDs are validated rather than passed to unsafe dynamic SQL or shell execution;
-- evidence avoids raw credentials, tokens and unnecessary PII;
-- diagnostic carriers may seed deterministic `.test` data but must exercise canonical Search services/routes for the behavior being accepted;
-- any cross-tenant/private-result disclosure is a product blocker, not a reason to weaken the harness.
+- tenant and resource authorization remain fail closed;
+- comments/history/approvals never broaden canonical resource visibility;
+- actor/member identifiers are resolved through tenant-aware paths where required;
+- lock tokens/owners cannot be forged or transferred by a weaker permission path;
+- evidence minimizes PII and excludes credentials, session secrets and raw lock/auth tokens;
+- diagnostic fixtures may use deterministic `.test` identities but must exercise canonical services/routes;
+- any cross-tenant disclosure, lock theft, approval bypass or history tampering is a product blocker, not a reason to weaken the harness.
 
 No new external network or secret capability is planned.
 
 ## Quality / reliability method
 
-This is verification/control of existing behavior, not a new Search design. Broad VOC/market research and DMADV are `NOT_APPLICABLE` to this bounded target-QA pass.
+This is verification/control of existing behavior, not a new Collaboration design. Broad VOC/market research and DMADV are `NOT_APPLICABLE` to this bounded target-QA pass.
 
 Use DMAIC-style control only when a reproducible defect is found. FMEA focus:
 
-- stale index after canonical update/delete;
-- duplicate projection/index rows on replay;
-- cross-tenant/private resource leak;
-- facet/filter/sort mismatch between source and indexed representation;
-- unsupported provider silently falling back in a way that changes data visibility;
-- target harness bypassing the owning Search service;
+- cross-tenant comment/history disclosure;
+- stale lock surviving expiry/release incorrectly;
+- competing writer steals or bypasses a lock;
+- lock refresh accepts wrong owner/token;
+- approval privilege escalation or invalid state transition;
+- duplicate comment/history/approval action on retry;
+- history/audit evidence detached from the canonical actor/resource;
+- target fixture bypasses production authorization or tenant context;
+- distributed/cache semantics are claimed without real backend evidence;
 - diagnostic carrier accidentally merged as product source.
 
-Performance claims are out of scope unless the current frozen acceptance explicitly measures them. `SEARCH-200` performance/provider scale remains a separate evidence boundary if not already implemented and measured.
+Performance/realtime/distributed claims are out of scope unless current source implements and the frozen acceptance explicitly measures them.
 
 ## Execution chunks
 
-### N12-A — state transition + source acceptance freeze
+### N13-A — state transition + source acceptance freeze
 
-- [x] Record independently reviewed N1.11 bounded target acceptance.
-- [x] Close Issue #39 and diagnostic PR #40 unmerged.
-- [x] Resolve N1.12 to stable stage `SEARCH-200` and registered unit `SYS-SEARCH`.
-- [ ] Commit synchronized `.ai/state.json`, `.ai/plans/active.md`, `.ai/handoff/current.md` and `NEXORA_PROGRESS.md` as state-only change.
-- [ ] Obtain exact-head GitHub-hosted `governance` PASS on that state commit.
-- [ ] Audit current Search source/tests/contracts on the exact governed head.
+- [x] Record independently reviewed N1.12 bounded target acceptance.
+- [x] Close Issue #41 and diagnostic PR #45 unmerged.
+- [x] Resolve N1.13 to `COLLAB-200` / `SYS-COLLABORATION`.
+- [ ] Commit synchronized `.ai/state.json`, `.ai/plans/active.md`, `.ai/handoff/current.md` and `NEXORA_PROGRESS.md` as one state-only change.
+- [ ] Obtain exact-head GitHub-hosted `governance` PASS.
+- [ ] Audit current Collaboration source/tests/contracts on that exact governed head.
 - [ ] Freeze one acceptance tracker with exact inclusions/exclusions and source binding.
 
-### N12-B — real target carrier
+### N13-B — real target carrier
 
-- [ ] Create isolated DRAFT / DO NOT MERGE diagnostic carrier if required.
+- [ ] Create isolated DRAFT / DO NOT MERGE diagnostic carrier only after the tracker is frozen.
 - [ ] Check out the tracker-frozen canonical source, not carrier source as product evidence.
 - [ ] Fresh disposable target install/reconcile.
-- [ ] Run applicable frozen Search source contracts/tests on target toolchain.
-- [ ] Exercise canonical real HTTP/Search/state/tenant flows.
+- [ ] Run applicable frozen Collaboration source contracts/tests on target toolchain.
+- [ ] Exercise canonical state/concurrency/auth/tenant/HTTP flows that exist in source.
 - [ ] Upload bounded evidence artifact.
 
-### N12-C — independent evidence review / closure
+### N13-C — independent evidence review / closure
 
 - [ ] Download artifact independently.
 - [ ] Verify GitHub artifact digest against downloaded ZIP bytes.
-- [ ] Inspect source binding, summary, HTTP/state/test evidence and explicit exclusions.
-- [ ] Classify any failure as product vs carrier defect and fix only the bounded prerequisite.
+- [ ] Inspect source binding, summary, state/concurrency/auth/tenant/test/log evidence and exclusions.
+- [ ] Classify each failure as product vs carrier defect; fix only the bounded prerequisite.
 - [ ] Close tracker only after evidence is complete; close carrier unmerged.
-- [ ] Reconcile `.ai` + `NEXORA_PROGRESS.md`, require exact-head governance, then advance to N1.13 / `COLLAB-200`.
+- [ ] Reconcile `.ai` + `NEXORA_PROGRESS.md`, require exact-head governance, then advance to N1.14 / `AUTO-200`.
 
 ## Rollback / stop conditions
 
 Stop rather than advance if:
 
-- state/progress/handoff disagree on the active stage or accepted N1.11 evidence;
+- state/progress/handoff disagree on active stage or N1.12 accepted evidence;
 - exact-head governance is absent/failing;
-- N1.12 requires silently implementing missing canonical Search 2.0 expansion;
-- evidence demonstrates tenant/private-result leakage or authorization bypass;
-- index state is accepted as authoritative over canonical product data;
+- N1.13 requires silently implementing missing Collaboration expansion or an unmet canonical dependency;
+- evidence shows cross-tenant disclosure, authorization bypass, lock theft, invalid approval escalation or hidden runtime failure;
 - tests can be made green only by weakening assertions/scopes/policies;
 - source binding is ambiguous;
 - a diagnostic carrier changes product/runtime source without a separately justified bounded defect fix.
 
 ## Exact next action
 
-Commit this synchronized state-only transition, require exact-head GitHub-hosted `governance`, then audit and freeze the bounded N1.12 Search 2.0 acceptance contract from the governed source. Do not start target execution before that PASS.
+Commit this synchronized state-only transition, require exact-head GitHub-hosted `governance`, then audit and freeze the bounded N1.13 Collaboration acceptance contract from source truth. Do not start target execution before that PASS.

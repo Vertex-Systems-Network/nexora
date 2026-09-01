@@ -5,7 +5,7 @@
   "control_plane_branch": "dev/n1-0b-core-functional-qa",
   "base_branch": "main",
   "base_sha": "6d0bb2cf7f92777b8f5f7f4f84ae0f041069124a",
-  "last_verified_source_sha": "2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829",
+  "last_verified_source_sha": "78976e9f44e290155b119ae722a77fb37fd59018",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
   "source_generation": "n1-v5.29",
@@ -13,12 +13,12 @@
   "target_status": "PARTIAL",
   "canonical_stage_count": 75,
   "current_stage": {
-    "id": "SEARCH-200",
-    "name": "Search 2.0 bounded target verification",
+    "id": "COLLAB-200",
+    "name": "Collaboration bounded target verification",
     "status": "PARTIAL",
-    "legacy_aliases": ["N1.12"]
+    "legacy_aliases": ["N1.13"]
   },
-  "active_development_units": ["SYS-SEARCH"],
+  "active_development_units": ["SYS-COLLABORATION"],
   "completed_control_stages": [
     {
       "id": "AI-GOV-001",
@@ -30,7 +30,7 @@
     "environment": "Disposable exact-source target QA, with preserved rc.93 legacy evidence kept separate",
     "source_release": "1.0.0-rc.94",
     "preserved_legacy_target": "1.0.0-rc.93 historical evidence only",
-    "next_bounded_slice": "N1.12 Search 2.0"
+    "next_bounded_slice": "N1.13 Collaboration"
   },
   "accepted_bounded_target_evidence": {
     "runtime_recovery": {
@@ -81,11 +81,31 @@
       "tests": "10 tests / 64 assertions PASS",
       "http_boundary": "guest /account -> 302 /login; verified user login -> 302 /account; authenticated /account -> 200; ordinary user /admin -> 403",
       "tenant_boundary": "linked current-user customer/membership visible; other-tenant customer/membership undisclosed; cross-tenant CRM Commerce link, Membership Commerce reference and lead-pipeline conversion fail closed"
+    },
+    "n1_12_search_2_0": {
+      "status": "TARGET_VERIFIED",
+      "scope": "Bounded database-backed derived Search 2.0 workflow on exact governed source; document/media indexing, lifecycle, tenant/privacy/auth boundaries and real HTTP behavior only",
+      "issue": 41,
+      "carrier_pr": 45,
+      "source_sha": "78976e9f44e290155b119ae722a77fb37fd59018",
+      "carrier_sha": "449ea9b3d5c0d2ad176031a1849ed80c349e0023",
+      "governance_run_id": 33553824752,
+      "target_run_id": 33563871904,
+      "target_job_id": 100042466730,
+      "artifact_id": 9822383456,
+      "artifact_digest": "sha256:6d298f5d60c5dc7a0423aec8d73d107de79888662cc919d62d53824b0e723731",
+      "independent_artifact_digest_verified": true,
+      "authorization_model": "global RBAC Role plus tenant-local EnterpriseRole",
+      "http_boundary": "public /search 200; disabled public search 404; guest admin search 302; authorized admin search 200; missing search.use and search.index.manage fail 403; document/media result visibility is permission-derived",
+      "tenant_privacy_boundary": "cross-tenant indexed document/media/member evidence undisclosed; membership-protected public document undisclosed; GPC/DNT searches served without query-log persistence; authorized reindex audit recorded",
+      "carrier_history_guardrail": "Only carrier SHA 449ea9b3d5c0d2ad176031a1849ed80c349e0023 and run 33563871904 are certified. Later tree-equivalent/no-content PR #45 heads are explicitly excluded."
     }
   },
   "uncertified_boundaries": [
     "Helpdesk and PORTAL-200 customer/member self-service expansion",
     "external payment gateway/provider-specific production behavior and PCI scope",
+    "external Search providers, distributed Search indexing/replication/HA, unimplemented facets and Search scale/relevance SLOs",
+    "canonical COLLAB-200 dependencies SITE-BUILDER-200, RELEASE-WORKFLOW-200 and PORTAL-200 remain separate evidence claims",
     "real disposable SQLite/MySQL/MariaDB/PostgreSQL/SQL Server matrix",
     "later provider/identity/API/import/observability/Sentinel/Marketplace 2.0 controlled evidence",
     "real HA/multi-node operations",
@@ -95,21 +115,22 @@
   ],
   "blocker": {
     "category": "governance",
-    "summary": "N1.11 bounded target acceptance is complete. This state-only transition to SEARCH-200 must itself obtain exact-head GitHub-hosted governance before its head can be used as the N1.12 frozen source.",
-    "guardrail": "Do not treat this documentation/control-plane commit as new product evidence, do not merge diagnostic PR #40, and do not execute N1.12 target acceptance until the canonical dev head is governance-green and the Search 2.0 contract is frozen from source truth."
+    "summary": "N1.12 bounded Search 2.0 target acceptance is complete. This state-only transition to COLLAB-200 must itself obtain exact-head GitHub-hosted governance before its resulting head can be frozen for N1.13 target QA.",
+    "guardrail": "Do not treat this documentation/control-plane commit as new product evidence. Keep N1.12 acceptance frozen to source 78976e9f44e290155b119ae722a77fb37fd59018 / carrier 449ea9b3d5c0d2ad176031a1849ed80c349e0023. Do not silently certify unmet COLLAB-200 dependencies such as PORTAL-200 and do not start an N1.13 diagnostic carrier until exact-head governance is green and Collaboration source truth is audited."
   },
   "next_actions": [
-    "Require exact-head GitHub-hosted governance PASS on the N1.11-closure/N1.12-cursor state commit.",
-    "Audit current Search 2.0 routes, services, models, provider/index abstractions, tenant/permission boundaries, migrations, tests and scripts/search-product-contract-verify.php on that exact governed source.",
-    "Freeze one bounded N1.12 acceptance tracker with exact inclusions/exclusions and source binding; do not silently certify unmet canonical SEARCH-200 dependency/product-expansion work.",
-    "Execute the N1.12 disposable real-target carrier, independently review artifact bytes/digest, close the tracker only if every frozen gate passes, and close the carrier unmerged.",
-    "Then continue the user-authorized legacy N1.13-N1.26 target/product QA sequence while preserving canonical semantic dependency claims as separate evidence boundaries.",
+    "Require exact-head GitHub-hosted governance PASS on the N1.12-closure/N1.13-cursor state commit.",
+    "Audit current Collaboration comments, locks, approvals, history, routes/controllers, models, tenant/permission boundaries, migrations, tests and registered local contracts on that exact governed source.",
+    "Freeze one bounded N1.13 acceptance tracker with exact inclusions/exclusions and source binding; do not convert legacy execution priority into false canonical dependency completion.",
+    "Execute an isolated disposable N1.13 real-target carrier only after the tracker is frozen; independently review artifact bytes/digest and close the carrier unmerged.",
+    "Then continue the user-authorized legacy N1.14-N1.26 target/product QA sequence while preserving canonical semantic dependency claims as separate evidence boundaries.",
     "Complete the five-engine database matrix, controlled provider/identity/API/import/observability/Sentinel/Marketplace evidence, HA, recovery, C5 and C6 final release gates."
   ],
   "next_stage": {
-    "id": "COLLAB-200",
-    "name": "Collaboration bounded target verification",
-    "advance_when": "The bounded legacy N1.12 Search 2.0 target acceptance is complete under the user-authorized N1.9-N1.26 verification order. This sequencing does not certify or skip unmet canonical dependency-graph product-expansion requirements."
+    "id": "AUTO-200",
+    "name": "Automation 2.0 bounded target verification",
+    "legacy_aliases": ["N1.14"],
+    "advance_when": "The bounded legacy N1.13 Collaboration target acceptance is complete under the user-authorized N1.9-N1.26 verification order. This sequencing does not certify or skip unmet canonical dependency-graph requirements."
   },
   "governance": {
     "development_unit_registry_required": true,
@@ -183,5 +204,5 @@
     "ARCHITECTURE.md",
     "SECURITY.md"
   ],
-  "updated_at": "2026-09-02T19:00:00+05:00"
+  "updated_at": "2026-09-02T03:28:00+05:00"
 }
