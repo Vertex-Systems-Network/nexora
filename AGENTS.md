@@ -39,6 +39,16 @@ Every AI agent, coding agent, reviewer, planner or automation working in this re
 - PR #1 or a successor long-lived development PR remains draft until its required source CI plus applicable real-target/release evidence is genuinely complete. Do not mark a target-unverified or failing PR ready merely because source/static checks are green.
 - W3C/WAVE closure remains fail-closed: required routes cannot be removed to hide failures; W3C HTML/CSS require zero validation errors; WAVE requires zero Errors/Contrast Errors plus human Alert review; real browser/AT evidence remains separate and mandatory.
 
+### Legacy development-program compatibility rules
+
+These sentences preserve the existing development-program source contracts while `.ai/state.json` remains the canonical active cursor:
+
+- Read `NEXORA_PROGRESS.md` in full before continuing the long-lived development program.
+- After every meaningful development-program apply, update `NEXORA_PROGRESS.md` immediately together with the canonical `.ai` state/handoff/active-plan surfaces.
+- Never increase Target Power from source CI alone; Target Power requires evidence from the applicable real target boundary.
+- Never merge a target-unverified or failing PR.
+- Only after all required exact-head source governance and applicable target/release evidence genuinely pass, mark it Ready for review and merge it without waiting for a separate merge confirmation.
+
 ## Mandatory pre-planning rule
 
 **Do not start implementation for an unregistered system/module/feature/extension/app/integration/studio-pack/theme/AI tool/AI agent/migration adapter/ops capability/security control.**
