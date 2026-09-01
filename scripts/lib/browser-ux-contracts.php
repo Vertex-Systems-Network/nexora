@@ -20,6 +20,7 @@ function nexoraAnalyzeBrowserUxContracts(string $root): array
     $css = $read('resources/css/app.css');
     $tokens = $read('resources/css/admin/tokens.css');
     $modal = $read('resources/js/admin/ui/untitled/modal.tsx');
+    $accessibilityTest = $read('resources/js/admin/ui/untitled/accessibility.test.tsx');
     $input = $read('resources/js/admin/ui/untitled/input.tsx');
     $textarea = $read('resources/js/admin/ui/untitled/textarea.tsx');
     $iconButton = $read('resources/js/admin/ui/untitled/icon-button.tsx');
@@ -43,7 +44,8 @@ function nexoraAnalyzeBrowserUxContracts(string $root): array
         'light tokens' => str_contains($tokens, ':root {'),
         'dark tokens' => str_contains($tokens, ':root.dark'),
         'modal dialog semantics' => str_contains($modal, 'role="dialog"') && str_contains($modal, 'aria-modal="true"') && str_contains($modal, 'aria-labelledby={titleId}'),
-        'modal keyboard/focus restoration' => str_contains($modal, 'e.key==="Escape"') && str_contains($modal, 'previous?.focus()'),
+        'modal keyboard/focus trap/restore' => str_contains($modal, 'e.key==="Escape"') && str_contains($modal, 'e.key!=="Tab"') && str_contains($modal, 'document.activeElement===first') && str_contains($modal, 'document.activeElement===last') && str_contains($modal, 'previous?.focus()'),
+        'modal executable focus containment regression' => str_contains($accessibilityTest, 'traps tab focus inside an open modal') && str_contains($accessibilityTest, 'expect(first).toHaveFocus()'),
         'input accessible descriptions' => str_contains($input, 'aria-describedby=') && str_contains($input, 'aria-errormessage=') && str_contains($input, 'role="alert"'),
         'textarea accessible descriptions' => str_contains($textarea, 'aria-describedby=') && str_contains($textarea, 'aria-errormessage=') && str_contains($textarea, 'role="alert"'),
         'icon button label + tooltip' => str_contains($iconButton, 'aria-label={label}') && str_contains($iconButton, '<Tooltip content={label}'),

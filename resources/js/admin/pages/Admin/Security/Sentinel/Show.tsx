@@ -10,14 +10,16 @@ import { Badge, Button, Card } from "@nexora/admin-ui";
 
 type Finding = { id: number; rule_id: string; severity: "critical" | "high" | "medium" | "low" | "info"; category: string; title: string; message: string; file_path: string | null; line_start: number | null; line_end: number | null; excerpt: string | null; hard_block: boolean; metadata: Record<string, unknown> | null };
 type Scan = { id: string; source_name: string; source_sha256: string; engine_version: string; status: string; decision: "allow" | "review" | "block" | "pending"; risk_score: number; manifest: Record<string, unknown>; summary: { severity?: Record<string, number>; metrics?: Record<string, number>; finding_count?: number }; error: string | null; requested_by: { name: string; email: string } | null; started_at: string | null; completed_at: string | null; package: { id: string; name: string; status: string; size_bytes: number; sha256: string } | null };
-type SupplyChain={id:string;signature_status:string;provenance_status:string;trust_tier:string;sandbox_profile:string;components_count:number;content_sha256:string;verification_error:string|null;publisher:{name:string;key_id:string;trust_tier:string;status:string}|null};
-type Props = { scan: Scan; findings: Paginator<Finding>; filters: { severity: string }; supplyChain:SupplyChain|null; canRescan: boolean; canDelete: boolean };
+type SupplyChain = { id: string; signature_status: string; provenance_status: string; trust_tier: string; sandbox_profile: string; components_count: number; content_sha256: string; verification_error: string | null; publisher: { name: string; key_id: string; trust_tier: string; status: string } | null };
+type Promotion = { kind: "theme" | "extension"; label: string; url: string; payload: Record<string, string> };
+type Props = { scan: Scan; findings: Paginator<Finding>; filters: { severity: string }; supplyChain: SupplyChain | null; promotion: Promotion | null; canRescan: boolean; canDelete: boolean };
 
 const tone = (value: string): "success" | "warning" | "danger" | "neutral" => value === "allow" || value === "low" || value === "info" ? "success" : value === "review" || value === "medium" ? "warning" : value === "block" || value === "critical" || value === "high" ? "danger" : "neutral";
 
-export default function SentinelShow({ scan, findings, filters, supplyChain, canRescan, canDelete }: Props) {
+export default function SentinelShow({ scan, findings, filters, supplyChain, promotion, canRescan, canDelete }: Props) {
     const [rescanning, setRescanning] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [promoting, setPromoting] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const counts = scan.summary?.severity ?? {};
     const metrics = scan.summary?.metrics ?? {};
@@ -32,6 +34,11 @@ export default function SentinelShow({ scan, findings, filters, supplyChain, can
         setRescanning(true);
         router.post(`/admin/security/sentinel/packages/${scan.package.id}/rescan`, {}, { onFinish: () => setRescanning(false) });
     };
+    const promote = () => {
+        if (!promotion) return;
+        setPromoting(true);
+        router.post(promotion.url, promotion.payload, { onFinish: () => setPromoting(false) });
+    };
     const destroy = () => {
         if (!scan.package) return;
         setDeleting(true);
@@ -41,7 +48,7 @@ export default function SentinelShow({ scan, findings, filters, supplyChain, can
 
     return <AdminLayout>
         <Head title={`Sentinel · ${scan.source_name}`} />
-        <PageHeader eyebrow="Sentinel report" title={scan.source_name} description="Source-level security findings are preserved with exact rule, file and line context before any package activation is permitted." actions={<div className="flex gap-2"><Button variant="secondary" onClick={() => router.visit("/admin/security/sentinel")}>All scans</Button>{canRescan && scan.package && <Button variant="secondary" onClick={rescan} loading={rescanning} leadingIcon={<Icon name="refresh" className="h-4 w-4" />}>Rescan</Button>}{canDelete && scan.package && <Button variant="danger" onClick={() => setConfirmDelete(true)} leadingIcon={<Icon name="trash" className="h-4 w-4" />}>Delete package</Button>}</div>} />
+        <PageHeader eyebrow="Sentinel report" title={scan.source_name} description="Source-level security findings are preserved with exact rule, file and line context before any package activation is permitted." actions={<div className="flex flex-wrap gap-2">{promotion && <Button onClick={promote} loading={promoting} leadingIcon={<Icon name="package-check" className="h-4 w-4" />}>{promotion.label}</Button>}<Button variant="secondary" onClick={() => router.visit("/admin/security/sentinel")}>All scans</Button>{canRescan && scan.package && <Button variant="secondary" onClick={rescan} loading={rescanning} leadingIcon={<Icon name="refresh" className="h-4 w-4" />}>Rescan</Button>}{canDelete && scan.package && <Button variant="danger" onClick={() => setConfirmDelete(true)} leadingIcon={<Icon name="trash" className="h-4 w-4" />}>Delete package</Button>}</div>} />
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Card className="p-5"><p className="text-sm font-medium text-[var(--nx-text-muted)]">Decision</p><div className="mt-3"><Badge tone={tone(scan.decision)}>{scan.decision}</Badge></div><p className="mt-3 text-xs text-[var(--nx-text-muted)]">Sentinel {scan.engine_version}</p></Card>
@@ -51,6 +58,8 @@ export default function SentinelShow({ scan, findings, filters, supplyChain, can
         </div>
 
         {scan.error && <Card className="border-red-300 p-5"><div className="flex gap-3"><Icon name="alert" className="mt-0.5 h-5 w-5 text-red-600"/><div><h2 className="font-semibold text-[var(--nx-text)]">Scan failed closed</h2><p className="mt-1 text-sm text-[var(--nx-text-secondary)]">{scan.error}</p><p className="mt-2 text-xs text-[var(--nx-text-muted)]">Package remains quarantined and blocked because Sentinel could not fully inspect it.</p></div></div></Card>}
+
+        {promotion && <Card className="border-[var(--nx-brand-200)] p-5 sm:p-6"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--nx-brand-600)]">Approved promotion</p><h2 className="mt-2 font-semibold text-[var(--nx-text)]">Sentinel ALLOW is complete</h2><p className="mt-1 text-sm leading-6 text-[var(--nx-text-secondary)]">Promotion is explicit. The quarantined package is passed to the owning {promotion.kind === "theme" ? "Theme Engine" : "Extension Engine"}; Sentinel never activates package code directly.</p></div><Button onClick={promote} loading={promoting} leadingIcon={<Icon name="package-check" className="h-4 w-4" />}>{promotion.label}</Button></div></Card>}
 
         {supplyChain && <Card className="p-5 sm:p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--nx-text-muted)]">Supply-chain trust</p><div className="mt-3 flex flex-wrap gap-2"><Badge tone={tone(supplyChain.signature_status)}>{`Signature: ${supplyChain.signature_status}`}</Badge><Badge tone={tone(supplyChain.provenance_status)}>{`Provenance: ${supplyChain.provenance_status}`}</Badge><Badge tone={tone(supplyChain.trust_tier)}>{`Trust: ${supplyChain.trust_tier}`}</Badge></div><p className="mt-3 text-sm text-[var(--nx-text-secondary)]">{supplyChain.components_count} dependency components inventoried · execution profile: <strong className="text-[var(--nx-text)]">{supplyChain.sandbox_profile.replaceAll("-"," ")}</strong></p>{supplyChain.publisher&&<p className="mt-1 text-xs text-[var(--nx-text-muted)]">Publisher: {supplyChain.publisher.name} · {supplyChain.publisher.key_id}</p>}{supplyChain.verification_error&&<p className="mt-2 text-xs leading-5 text-[var(--nx-text-muted)]">{supplyChain.verification_error}</p>}</div><Button variant="secondary" onClick={()=>router.visit("/admin/security/supply-chain")} leadingIcon={<Icon name="package-check" className="h-4 w-4"/>}>Supply Chain</Button></div></Card>}
 

@@ -38,6 +38,8 @@
         "certify:n1-c3": "php scripts/n1-c3-database-matrix-certify.php",
         "certify:n1-c4": "php scripts/n1-c4-operations-certify.php",
         "certify:n1-c5": "php scripts/n1-c5-browser-performance-certify.php",
+        "certify:web-standards": "php scripts/n1-c5-web-standards-certify.php",
+        "verify:web-standards-evidence": "php scripts/n1-c5-web-standards-evidence-verify.php",
         "prepare:n1-c5-evidence": "php scripts/n1-c5-evidence-prepare.php",
         "diagnostics:n1-c1:frontend": "php scripts/n1-c1-frontend-build-doctor.php --run --write --json",
         "refresh:locks": "php scripts/dependency-lock-refresh.php --confirm=REFRESH",
@@ -57,7 +59,8 @@
         "verify:npm-bundled-integrity": "php scripts/n1-target-npm-bundled-integrity-contract-verify.php",
         "verify:semantic-lock-reproducibility": "php scripts/n1-target-semantic-lock-reproducibility-contract-verify.php",
         "verify:typescript-depth": "php scripts/n1-target-typescript-depth-contract-verify.php",
-        "dev:check": "php scripts/development-readiness.php --full"
+        "dev:check": "php scripts/development-readiness.php --full",
+        "dev:target-qa": "php scripts/development-readiness.php --full --tests --evidence"
     },
     "dependencies": {
         "@inertiajs/react": "^3.6.1",

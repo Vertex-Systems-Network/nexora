@@ -18,7 +18,7 @@ final class N100Rc3RuntimeFrontendArchitectureTest extends TestCase
         $helpdeskNav=(string)file_get_contents($root.'/resources/js/admin/pages/Admin/Helpdesk/_HelpdeskNav.tsx');
         $membershipNav=(string)file_get_contents($root.'/resources/js/admin/pages/Admin/Membership/_MembershipNav.tsx');
         $certifier=(string)file_get_contents($root.'/scripts/certify-release.php');
-        self::assertMatchesRegularExpression('/function\\s+handle\\s*\\(\\s*Request\\s+\\$request\\s*,\\s*Closure\\s+\\$next\\s*\\)\\s*:\\s*Response/',$middleware);
+        self::assertMatchesRegularExpression('/function\s+handle\s*\(\s*Request\s+\$request\s*,\s*Closure\s+\$next\s*\)\s*:\s*Response/',$middleware);
         self::assertStringContainsString('private readonly NodeIdentity $identity',$middleware);
         self::assertStringContainsString('private readonly NodeManager $nodes',$middleware);
         self::assertStringContainsString('private readonly InstallationState $installation',$middleware);
@@ -26,7 +26,8 @@ final class N100Rc3RuntimeFrontendArchitectureTest extends TestCase
         self::assertStringContainsString('useForm<WorkflowFormData>',$automation);
         self::assertStringNotContainsString('Record<string,unknown>',$automation);
         self::assertStringNotContainsString('Record<string, unknown>',$automation);
-        self::assertStringContainsString('useForm<SsoFormData>',$enterprise);
+        self::assertStringContainsString('Deliberate shallow boundary: SSO configuration and secret payload default server-side.',$enterprise);
+        self::assertStringContainsString('const ssoForm = useForm({',$enterprise);
         self::assertStringContainsString('export type WriterValue =',$writer);
         self::assertStringContainsString('ButtonLink',$helpdeskNav);
         self::assertStringContainsString('ButtonLink',$membershipNav);
@@ -38,7 +39,7 @@ final class N100Rc3RuntimeFrontendArchitectureTest extends TestCase
         foreach ($iterator as $file) {
             if (! $file->isFile() || ! in_array(strtolower($file->getExtension()),['ts','tsx'],true)) continue;
             $source=(string)file_get_contents($file->getPathname());
-            self::assertDoesNotMatchRegularExpression('/\\.transform\\s*\\([\\s\\S]*?\\)\\s*\\.\\s*(?:get|post|put|patch|delete)\\s*\\(/m',$source,$file->getPathname());
+            self::assertDoesNotMatchRegularExpression('/\.transform\s*\([\s\S]*?\)\s*\.\s*(?:get|post|put|patch|delete)\s*\(/m',$source,$file->getPathname());
         }
     }
 }

@@ -23,13 +23,10 @@ final class DeliverWebhookJob implements ShouldQueue
 
     public function handle(WebhookDeliveryService $service, TenantExecutionScope $tenantScope): void
     {
-        $tenantId = WebhookDelivery::query()
-            ->withoutGlobalScope('nexora_tenant')
-            ->whereKey($this->deliveryId)
-            ->value('tenant_id');
+        $tenantId = $this->tenantId();
 
         $tenantScope->runRequired(
-            is_string($tenantId) ? $tenantId : null,
+            $tenantId,
             "webhook delivery {$this->deliveryId}",
             function () use ($service): void {
                 $delivery = WebhookDelivery::query()->findOrFail($this->deliveryId);
@@ -43,10 +40,26 @@ final class DeliverWebhookJob implements ShouldQueue
 
     public function failed(?Throwable $exception): void
     {
-        WebhookDelivery::query()->whereKey($this->deliveryId)->where('status', '!=', 'delivered')->update([
-            'status' => 'failed',
-            'error' => mb_substr($exception?->getMessage() ?? 'Webhook delivery failed after retries.', 0, 4000),
-            'updated_at' => now(),
-        ]);
+        app(TenantExecutionScope::class)->runRequired(
+            $this->tenantId(),
+            "failed webhook delivery {$this->deliveryId}",
+            function () use ($exception): void {
+                WebhookDelivery::query()->whereKey($this->deliveryId)->where('status', '!=', 'delivered')->update([
+                    'status' => 'failed',
+                    'error' => mb_substr($exception?->getMessage() ?? 'Webhook delivery failed after retries.', 0, 4000),
+                    'updated_at' => now(),
+                ]);
+            },
+        );
+    }
+
+    private function tenantId(): ?string
+    {
+        $tenantId = WebhookDelivery::query()
+            ->withoutGlobalScope('nexora_tenant')
+            ->whereKey($this->deliveryId)
+            ->value('tenant_id');
+
+        return is_string($tenantId) ? $tenantId : null;
     }
 }

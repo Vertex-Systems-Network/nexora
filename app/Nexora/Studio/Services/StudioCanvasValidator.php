@@ -110,7 +110,7 @@ final readonly class StudioCanvasValidator
             elseif ($key === 'target') $clean[$key] = in_array($value, ['_self', '_blank'], true) ? $value : '_self';
             elseif ($key === 'href') {
                 $href = trim((string) $value);
-                $clean[$key] = preg_match('#^(https?://|/|#)#i', $href) === 1 ? mb_substr($href, 0, 1000) : '#';
+                $clean[$key] = preg_match('~^(https?://|/|#)~i', $href) === 1 ? mb_substr($href, 0, 1000) : '#';
             } else $clean[$key] = mb_substr((string) $value, 0, $key === 'text' ? 20_000 : 255);
         }
         return $clean;

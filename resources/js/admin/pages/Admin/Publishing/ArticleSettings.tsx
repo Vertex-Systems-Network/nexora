@@ -10,6 +10,7 @@ import {
     Select,
 } from "@nexora/admin-ui";
 import { Icon } from "@admin/components/Icon";
+import { MediaPicker, type MediaPickerSelection } from "@admin/components/MediaPicker";
 import { PageHeader } from "@admin/components/PageHeader";
 import { AdminLayout } from "@admin/layout/AdminLayout";
 
@@ -23,12 +24,6 @@ type Term = SimpleOption & {
     taxonomy: string;
 };
 
-type MediaOption = {
-    id: number;
-    name: string;
-    url: string;
-};
-
 type Document = {
     id: number;
     title: string;
@@ -40,6 +35,7 @@ type Document = {
     featured_until: string;
     hero_image_url: string;
     hero_media_id: number | null;
+    hero_media: MediaPickerSelection | null;
     source_url: string;
     allow_comments: boolean;
     is_sponsored: boolean;
@@ -54,10 +50,9 @@ type Props = {
     authors: SimpleOption[];
     terms: Term[];
     series: SimpleOption[];
-    media: MediaOption[];
 };
 
-export default function ArticleSettings({ document, authors, terms, series, media }: Props) {
+export default function ArticleSettings({ document, authors, terms, series }: Props) {
     const form = useForm({
         scheduled_at: document.scheduled_at,
         is_featured: document.is_featured,
@@ -88,10 +83,6 @@ export default function ArticleSettings({ document, authors, terms, series, medi
         return groups;
     }, {});
 
-    const selectedMedia = media.find(
-        (item) => String(item.id) === form.data.hero_media_id,
-    );
-
     const submit = () => {
         form.transform((data) => ({
             ...data,
@@ -108,7 +99,7 @@ export default function ArticleSettings({ document, authors, terms, series, medi
                 title={document.title}
                 description="Manage bylines, taxonomy, series, scheduling and article presentation without duplicating Writer or SEO settings."
                 actions={(
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <ButtonLink
                             href={`/admin/documents/${document.id}/edit`}
                             variant="secondary"
@@ -172,12 +163,18 @@ export default function ArticleSettings({ document, authors, terms, series, medi
                     </Card>
 
                     <Card className="p-5 sm:p-6">
-                        <h2 className="font-semibold text-[var(--nx-text)]">Categories, topics & tags</h2>
+                        <h2 className="font-semibold text-[var(--nx-text)]">
+                            Categories, topics & tags
+                        </h2>
                         <div className="mt-4 grid gap-5 md:grid-cols-3">
                             {["category", "topic", "tag"].map((group) => (
                                 <div key={group}>
                                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--nx-text-muted)]">
-                                        {group === "category" ? "Categories" : group === "topic" ? "Topics" : "Tags"}
+                                        {group === "category"
+                                            ? "Categories"
+                                            : group === "topic"
+                                              ? "Topics"
+                                              : "Tags"}
                                     </p>
                                     <div className="grid gap-2">
                                         {(groupedTerms[group] ?? []).map((term) => (
@@ -214,29 +211,35 @@ export default function ArticleSettings({ document, authors, terms, series, medi
                                 value={form.data.featured_until}
                                 onChange={(value) => form.setData("featured_until", value)}
                             />
-                            <Select
-                                label="Hero image from Media Library"
-                                value={form.data.hero_media_id}
-                                onChange={(value) => form.setData("hero_media_id", value)}
-                                options={[
-                                    { value: "", label: "No Media Library image" },
-                                    ...media.map((item) => ({
-                                        value: String(item.id),
-                                        label: item.name,
-                                    })),
-                                ]}
-                            />
-                            {selectedMedia && (
-                                <div className="overflow-hidden rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)]">
-                                    <img
-                                        src={selectedMedia.url}
-                                        alt=""
-                                        className="aspect-[16/9] w-full object-cover"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
+
+                            <div className="grid gap-2">
+                                <div>
+                                    <p className="text-sm font-medium text-[var(--nx-text)]">
+                                        Hero image from Media Library
+                                    </p>
+                                    <p className="mt-1 text-xs text-[var(--nx-text-muted)]">
+                                        Search the complete tenant library. Nexora stores the canonical asset ID rather than a stale generated URL.
+                                    </p>
                                 </div>
-                            )}
+                                <MediaPicker
+                                    value={document.hero_media?.url ?? undefined}
+                                    selection={document.hero_media}
+                                    type="image"
+                                    showSelection
+                                    allowClear
+                                    buttonLabel="Choose hero image"
+                                    onChange={(_url, asset) => {
+                                        form.setData("hero_media_id", String(asset.id));
+                                    }}
+                                    onClear={() => form.setData("hero_media_id", "")}
+                                />
+                                {form.errors.hero_media_id && (
+                                    <p className="text-xs text-[var(--nx-danger)]">
+                                        {form.errors.hero_media_id}
+                                    </p>
+                                )}
+                            </div>
+
                             <Input
                                 label="External hero image URL"
                                 value={form.data.hero_image_url}
@@ -248,7 +251,7 @@ export default function ArticleSettings({ document, authors, terms, series, medi
                                 label="Original source URL"
                                 value={form.data.source_url}
                                 onChange={(event) => form.setData("source_url", event.target.value)}
-                                placeholder="Optional canonical source reference"
+                                placeholder="Optional source reference"
                             />
                             <Checkbox
                                 checked={form.data.allow_comments}

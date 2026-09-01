@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Crm;
 
-use App\Nexora\Enterprise\Validation\TenantExists;
 use App\Http\Controllers\Controller;
 use App\Models\CrmContact;
 use App\Models\CrmOrganization;
-use App\Models\User;
 use App\Nexora\Automation\Contracts\AutomationEventBusContract;
 use App\Nexora\Crm\Contracts\CrmTimelineContract;
+use App\Nexora\Enterprise\Services\TenantMemberDirectory;
+use App\Nexora\Enterprise\Validation\TenantExists;
+use App\Nexora\Enterprise\Validation\TenantMemberExists;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,7 +19,7 @@ use Inertia\Response;
 
 final class ContactController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, TenantMemberDirectory $members): Response
     {
         $q=trim((string)$request->query('q',''));
         $query=CrmContact::query()->with(['organization:id,name','owner:id,name'])->withCount(['opportunities','commerceLinks'])->latest();
@@ -27,7 +28,7 @@ final class ContactController extends Controller
             'id'=>$c->id,'display_name'=>$c->display_name,'email'=>$c->email,'phone'=>$c->phone,'job_title'=>$c->job_title,'organization'=>$c->organization?->name,'lifecycle_stage'=>$c->lifecycle_stage,
             'owner'=>$c->owner?->name,'opportunities_count'=>$c->opportunities_count,'commerce_links_count'=>$c->commerce_links_count,'created_at'=>$c->created_at?->toIso8601String(),
         ]);
-        return Inertia::render('Admin/Crm/Contacts',['contacts'=>$contacts,'filters'=>['q'=>$q],'organizations'=>$this->organizations(),'owners'=>$this->owners(),'canManage'=>$request->user()?->hasPermission('crm.contacts.manage')??false]);
+        return Inertia::render('Admin/Crm/Contacts',['contacts'=>$contacts,'filters'=>['q'=>$q],'organizations'=>$this->organizations(),'owners'=>$members->options(),'canManage'=>$request->user()?->hasPermission('crm.contacts.manage')??false]);
     }
 
     public function store(Request $request, CrmTimelineContract $timeline, AutomationEventBusContract $automation): RedirectResponse
@@ -35,7 +36,7 @@ final class ContactController extends Controller
         $data=$request->validate([
             'organization_id'=>['nullable','uuid',new TenantExists('nx_crm_organizations')],'first_name'=>['required','string','max:120'],'last_name'=>['nullable','string','max:120'],'email'=>['nullable','email','max:255'],
             'phone'=>['nullable','string','max:80'],'mobile'=>['nullable','string','max:80'],'job_title'=>['nullable','string','max:160'],'lifecycle_stage'=>['required','in:lead,prospect,customer,partner,inactive'],
-            'source'=>['nullable','string','max:120'],'owner_id'=>['nullable','integer','exists:users,id'],
+            'source'=>['nullable','string','max:120'],'owner_id'=>['nullable','integer',new TenantMemberExists()],
         ]);
         $data['display_name']=trim($data['first_name'].' '.($data['last_name']??''));
         $contact=CrmContact::query()->create($data);
@@ -60,5 +61,4 @@ final class ContactController extends Controller
     }
 
     private function organizations(): array { return CrmOrganization::query()->orderBy('name')->get(['id','name'])->map(fn($o)=>['id'=>$o->id,'name'=>$o->name])->all(); }
-    private function owners(): array { return User::query()->where('status','active')->orderBy('name')->get(['id','name'])->map(fn($u)=>['id'=>$u->id,'name'=>$u->name])->all(); }
 }

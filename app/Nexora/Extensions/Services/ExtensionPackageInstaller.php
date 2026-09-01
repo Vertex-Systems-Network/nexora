@@ -11,6 +11,7 @@ use App\Models\ExtensionVersion;
 use App\Models\SupplyChainArtifact;
 use App\Nexora\Foundation\Filesystem\PortablePath;
 use App\Nexora\Foundation\Transfers\TransferSafety;
+use App\Nexora\Security\Sentinel\Support\SentinelApprovalGuard;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -19,13 +20,18 @@ use ZipArchive;
 
 final readonly class ExtensionPackageInstaller
 {
-    public function __construct(private ExtensionManifestValidator $manifests, private TransferSafety $transfers) {}
+    public function __construct(
+        private ExtensionManifestValidator $manifests,
+        private TransferSafety $transfers,
+        private SentinelApprovalGuard $approval,
+    ) {}
 
     public function install(SupplyChainArtifact $artifact, ?int $actorId): ExtensionVersion
     {
         $artifact->loadMissing(['scan','package','publisher']);
         if (! $artifact->scan || $artifact->scan->decision !== 'allow') throw new RuntimeException('Sentinel must return ALLOW before an extension can be installed.');
         if (! $artifact->package || ! is_file($artifact->package->path)) throw new RuntimeException('The quarantined package archive is no longer available.');
+        $this->approval->assertCurrent($artifact->package, $artifact->scan);
         $manifest = $this->manifests->validate((array) $artifact->scan->manifest);
         if ($artifact->package_identifier && $artifact->package_identifier !== $manifest->identifier) throw new RuntimeException('Supply-chain package identity does not match the Sentinel manifest.');
         if ($artifact->content_sha256 === '') throw new RuntimeException('Supply-chain content digest is required before installation.');

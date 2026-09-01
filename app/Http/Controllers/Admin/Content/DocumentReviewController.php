@@ -21,6 +21,7 @@ final class DocumentReviewController extends Controller
     {
         $validated = $request->validate(['body' => ['required', 'string', 'max:5000']]);
         $comment = $document->reviewComments()->create([
+            'tenant_id' => $document->tenant_id,
             'revision_id' => $document->revisions()->latest('revision')->value('id'),
             'user_id' => $request->user()?->id,
             'body' => trim((string) $validated['body']),

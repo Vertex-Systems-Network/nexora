@@ -11,6 +11,10 @@ use App\Nexora\Commerce\Data\SubscriptionRequest;
 
 interface PaymentProviderContract
 {
+    public const CAPABILITY_PAYMENTS = 'payments';
+    public const CAPABILITY_REFUNDS = 'refunds';
+    public const CAPABILITY_SUBSCRIPTIONS = 'subscriptions';
+
     public function key(): string;
     public function label(): string;
     /** @return list<string> */

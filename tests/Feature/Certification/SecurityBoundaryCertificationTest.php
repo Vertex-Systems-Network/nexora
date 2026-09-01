@@ -33,14 +33,16 @@ final class SecurityBoundaryCertificationTest extends TestCase
     public function test_suspended_user_cannot_sign_in(): void
     {
         $user = User::factory()->create(['password' => 'Password!123', 'status' => 'suspended']);
-        $this->post('/login', ['email' => $user->email, 'password' => 'Password!123'])
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.77'])
+            ->post('/login', ['email' => $user->email, 'password' => 'Password!123'])
             ->assertSessionHasErrors('email');
         $this->assertGuest();
     }
 
     public function test_unknown_password_reset_email_gets_same_public_response_shape(): void
     {
-        $this->post('/forgot-password', ['email' => 'does-not-exist@nexora.test'])
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.78'])
+            ->post('/forgot-password', ['email' => 'does-not-exist@nexora.test'])
             ->assertSessionHas('status')
             ->assertSessionDoesntHaveErrors('email');
     }

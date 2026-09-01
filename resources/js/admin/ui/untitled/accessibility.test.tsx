@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { UntitledInput } from "./input";
 import { UntitledTextarea } from "./textarea";
@@ -33,5 +33,28 @@ describe("Nexora accessibility primitives", () => {
         expect(dialog).toHaveAttribute("aria-modal", "true");
         fireEvent.keyDown(window, { key: "Escape" });
         expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it("traps tab focus inside an open modal", () => {
+        render(
+            <Modal open title="Edit record" onClose={() => undefined}>
+                <button type="button">First action</button>
+                <button type="button">Second action</button>
+            </Modal>,
+        );
+
+        const dialog = screen.getByRole("dialog", { name: "Edit record" });
+        const dialogQueries = within(dialog);
+        const first = dialogQueries.getByRole("button", { name: "First action" });
+        const close = dialogQueries.getByRole("button", { name: "Close dialog" });
+
+        for (const element of Array.from(dialog.querySelectorAll<HTMLElement>('button,[tabindex]'))) {
+            Object.defineProperty(element, "offsetParent", { configurable: true, get: () => dialog });
+        }
+
+        close.focus();
+        expect(close).toHaveFocus();
+        fireEvent.keyDown(window, { key: "Tab" });
+        expect(first).toHaveFocus();
     });
 });

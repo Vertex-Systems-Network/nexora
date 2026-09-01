@@ -23,6 +23,31 @@ Every AI agent, coding agent, reviewer, planner or automation working in this re
 17. Read AI architecture/design contracts when relevant.
 18. Read relevant capability matrices/addenda and system/future-system registries.
 19. Inspect current Git HEAD and relevant source/tests before trusting historical completion claims.
+20. On the long-lived development branch, also read `NEXORA_PROGRESS.md`, `NEXORA_AI_PROJECT_STATE.md`, and `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` before continuing target/release work.
+
+## Canonical active state and legacy evidence compatibility
+
+- `.ai/state.json` is the canonical active stage/unit/control-plane cursor.
+- `.ai/handoff/current.md` is the canonical concise cross-agent handoff and `.ai/plans/active.md` is the canonical active execution plan.
+- `NEXORA_PROGRESS.md` remains the detailed live evidence dashboard for the existing `dev/n1-0b-core-functional-qa` target/release program and MUST stay synchronized with the `.ai` active cursor when that branch is in use.
+- `NEXORA_AI_PROJECT_STATE.md` remains append-only historical/cross-session evidence; do not destructively rewrite history to match current policy.
+- `NEXORA_ACCESSIBILITY_CERTIFICATION_PLAN.md` remains mandatory for W3C Nu HTML, W3C CSS, WAVE, browser, WCAG/manual and assistive-technology closure.
+- If `.ai/state.json` and `NEXORA_PROGRESS.md` disagree on the active task/evidence boundary, treat the divergence as a governance blocker and reconcile it before substantive implementation. Do not silently choose whichever file is more convenient.
+- `SOURCE_DONE` is never `TARGET_VERIFIED`. Bounded target evidence never implies broader database/provider/HA/recovery/accessibility/release certification.
+- After every meaningful implementation, fix, audit closure, CI correction, packaging change, target verification, issue closure or release/certification apply on the development program, update `.ai/state.json`, `.ai/handoff/current.md`, `.ai/plans/active.md`, affected registries when applicable, and `NEXORA_PROGRESS.md`.
+- Development PR execution QA uses the GitHub-hosted `governance` workflow recorded in `NEXORA_PROGRESS.md`; do not substitute historical local/self-hosted evidence for that required exact-head source gate.
+- PR #1 or a successor long-lived development PR remains draft until its required source CI plus applicable real-target/release evidence is genuinely complete. Do not mark a target-unverified or failing PR ready merely because source/static checks are green.
+- W3C/WAVE closure remains fail-closed: required routes cannot be removed to hide failures; W3C HTML/CSS require zero validation errors; WAVE requires zero Errors/Contrast Errors plus human Alert review; real browser/AT evidence remains separate and mandatory.
+
+### Legacy development-program compatibility rules
+
+These sentences preserve the existing development-program source contracts while `.ai/state.json` remains the canonical active cursor:
+
+- Read `NEXORA_PROGRESS.md` in full before continuing the long-lived development program.
+- After every meaningful development-program apply, update `NEXORA_PROGRESS.md` immediately together with the canonical `.ai` state/handoff/active-plan surfaces.
+- Never increase Target Power from source CI alone; Target Power requires evidence from the applicable real target boundary.
+- Never merge a target-unverified or failing PR.
+- Only after all required exact-head source governance and applicable target/release evidence genuinely pass, mark it Ready for review and merge it without waiting for a separate merge confirmation.
 
 ## Mandatory pre-planning rule
 

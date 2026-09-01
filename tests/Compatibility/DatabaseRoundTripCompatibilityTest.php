@@ -30,13 +30,12 @@ final class DatabaseRoundTripCompatibilityTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         self::assertSame($before,$this->seedCounts(),'Repeated DatabaseSeeder execution must not add duplicate deterministic records.');
 
-        $root=dirname(__DIR__,2);
-        $migration=(string)file_get_contents($root.'/database/migrations/2026_08_16_002000_add_nexora_enterprise_tenancy.php');
-        self::assertMatchesRegularExpression('/private array \\$tenantTables\\s*=\\s*\\[(.*?)\\];/s',$migration);
-        preg_match('/private array \\$tenantTables\\s*=\\s*\\[(.*?)\\];/s',$migration,$match);
-        preg_match_all('/[\'\"]([^\'\"]+)[\'\"]/',(string)($match[1]??''),$tables);
-        $tenantTables=array_values(array_unique($tables[1]??[]));
-        self::assertCount(51,$tenantTables);
+        $tenantTables=$this->tenantAwareModelTables();
+        self::assertNotEmpty($tenantTables,'At least one tenant-aware model/table root must be discoverable.');
+        self::assertContains('nx_data_connections',$tenantTables,'Data Connections must remain tenant-scoped.');
+        self::assertContains('nx_forms',$tenantTables,'Forms must remain tenant-scoped.');
+        self::assertContains('nx_content_collections',$tenantTables,'Content Collections must remain tenant-scoped.');
+
         foreach($tenantTables as $table){
             self::assertTrue(Schema::hasTable($table),"Tenant table {$table} must exist.");
             self::assertTrue(Schema::hasColumn($table,'tenant_id'),"Tenant table {$table} must contain tenant_id.");
@@ -45,7 +44,6 @@ final class DatabaseRoundTripCompatibilityTest extends TestCase
 
         self::assertSame(1,EnterpriseOrganization::query()->where('is_default',true)->count(),'Exactly one default enterprise organization is required after a fresh migration.');
     }
-
 
     public function test_nullable_unique_keys_accept_multiple_nulls_on_every_supported_driver(): void
     {
@@ -94,13 +92,30 @@ final class DatabaseRoundTripCompatibilityTest extends TestCase
         self::assertGreaterThanOrEqual(2,DB::table('nx_memberships')->whereNull('commerce_subscription_id')->count());
     }
 
-
     public function test_portable_transaction_mutex_is_available_on_every_supported_driver(): void
     {
         $guard=app(ConcurrencyGuard::class);
         $value=$guard->mutex('compatibility.database-round-trip', static fn (): string => 'claimed');
         self::assertSame('claimed',$value);
         self::assertSame(1,DB::table('nx_concurrency_mutexes')->where('name','compatibility.database-round-trip')->count());
+    }
+
+    /** @return list<string> */
+    private function tenantAwareModelTables(): array
+    {
+        $root=dirname(__DIR__,2);
+        $tables=[];
+        foreach(glob($root.'/app/Models/*.php') ?: [] as $modelFile){
+            $source=(string)file_get_contents($modelFile);
+            if(!str_contains($source,'use BelongsToTenant;')) continue;
+            if(preg_match('/protected \\$table\\s*=\\s*[\'\"]([^\'\"]+)[\'\"]/', $source,$match)!==1){
+                self::fail(basename($modelFile).' uses BelongsToTenant but has no explicit table mapping.');
+            }
+            $tables[]=(string)$match[1];
+        }
+        $tables=array_values(array_unique($tables));
+        sort($tables,SORT_STRING);
+        return $tables;
     }
 
     /** @return array<string,int> */

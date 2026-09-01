@@ -11,14 +11,16 @@ export function Modal({ open, title, description, children, onClose, footer }: {
    const onKey=(e:KeyboardEvent)=>{
      if(e.key==="Escape"){e.preventDefault();onClose();return}
      if(e.key!=="Tab"||!panel.current)return;
-     const items=(Array.from(panel.current.querySelectorAll(focusableSelector)) as HTMLElement[]).filter(el=>el.offsetParent!==null);
+     const items=(Array.from(panel.current.querySelectorAll(focusableSelector)) as HTMLElement[])
+       .filter(el=>!el.hidden&&el.getAttribute("aria-hidden")!=="true");
      if(items.length===0){e.preventDefault();panel.current.focus();return}
      const first=items[0],last=items[items.length-1];
      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
    };
    window.addEventListener("keydown",onKey);
-   requestAnimationFrame(()=>panel.current?.querySelector<HTMLElement>(focusableSelector)?.focus()??panel.current?.focus());
+   const first=panel.current?.querySelector<HTMLElement>(focusableSelector);
+   if(first) first.focus(); else panel.current?.focus();
    return()=>{window.removeEventListener("keydown",onKey);previous?.focus()};
  },[open,onClose]);
  if(!open) return null;

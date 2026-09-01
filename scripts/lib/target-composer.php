@@ -22,10 +22,9 @@ function nexoraLocateTargetComposer(string $root): array
         $candidates[] = ['path' => $path, 'source' => $source, 'command' => $command];
     };
 
-    // An explicit offline handoff is preferred after PATH when the operator provides one.
-    // The bootstrap command validates/copies it before normal discovery; this locator only
-    // recognizes the canonical local copy so arbitrary external PHARs are never executed here.
     // PATH is preferred because it represents the operator's selected Composer.
+    // Windows Composer installers commonly expose a .bat/.cmd shim; the shared
+    // command normalizer resolves that shim to an executable or adjacent PHAR.
     $pathCommand = ['composer', '--version', '--no-ansi'];
     $pathProbe = nexoraRunTargetCommand($pathCommand, $root, $env);
     if ($pathProbe['exit_code'] === 0) {
@@ -41,11 +40,14 @@ function nexoraLocateTargetComposer(string $root): array
         ];
     }
 
+    // The bootstrap command validates/copies an explicit offline handoff before
+    // normal discovery; this locator recognizes only the canonical local copy.
     $localComposer = $root.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'app'
         .DIRECTORY_SEPARATOR.'nexora'.DIRECTORY_SEPARATOR.'tools'.DIRECTORY_SEPARATOR.'composer'
         .DIRECTORY_SEPARATOR.'composer.phar';
     $add($localComposer, 'Nexora-local');
 
+    // Laragon is an optional Windows local-server adapter, never a platform requirement.
     foreach (NexoraBootstrapProcessEnvironment::laragonRoots($root) as $laragon) {
         $base = $laragon.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'composer';
         if (! is_dir($base)) continue;
@@ -58,11 +60,11 @@ function nexoraLocateTargetComposer(string $root): array
                 if (! $file->isFile()) continue;
                 $name = strtolower($file->getFilename());
                 if (in_array($name, ['composer', 'composer.bat', 'composer.cmd', 'composer.exe', 'composer.phar'], true)) {
-                    $add($file->getPathname(), 'Laragon');
+                    $add($file->getPathname(), 'Laragon-adapter');
                 }
             }
         } catch (Throwable) {
-            // An unreadable optional Laragon tool directory must not become a fatal bootstrap error.
+            // An unreadable optional local-server adapter directory is non-fatal.
         }
     }
 
@@ -104,14 +106,14 @@ function nexoraLocateTargetComposer(string $root): array
     ];
 }
 
-
 /**
- * Resolve a Windows command to an executable-only argv where possible.
+ * Resolve Windows command shims to executable-only argv where possible.
  *
- * Windows npm/npx launchers are .cmd files. proc_open() with bypass_shell=true
- * cannot execute them directly. For npm/npx we resolve the Node executable and
- * invoke the corresponding JS CLI directly, keeping argument boundaries intact
- * and avoiding cmd.exe quoting/injection ambiguity.
+ * npm/npx and Composer are commonly exposed through .cmd/.bat launchers.
+ * proc_open() with bypass_shell=true cannot execute those shims directly. npm/npx
+ * are mapped to their Node CLI files; Composer shims are mapped to an adjacent
+ * composer.phar (or composer.exe when available). This preserves argument
+ * boundaries without introducing cmd.exe quoting/injection ambiguity.
  *
  * @param list<string> $command
  * @return list<string>
@@ -123,12 +125,6 @@ function nexoraNormalizeTargetCommand(array $command, string $root, ?array $env 
 
     $env ??= NexoraBootstrapProcessEnvironment::build($root, $_ENV);
     $program = strtolower(basename(str_replace('\\', '/', $command[0])));
-    $npmLike = match ($program) {
-        'npm', 'npm.cmd', 'npm.bat' => ['launcher' => 'npm', 'cli' => 'npm-cli.js'],
-        'npx', 'npx.cmd', 'npx.bat' => ['launcher' => 'npx', 'cli' => 'npx-cli.js'],
-        default => null,
-    };
-    if ($npmLike === null) return $command;
 
     $findExecutable = static function (string $name) use ($root, $env): ?string {
         $proc = @proc_open(
@@ -150,6 +146,43 @@ function nexoraNormalizeTargetCommand(array $command, string $root, ?array $env 
         }
         return null;
     };
+
+    if (in_array($program, ['composer', 'composer.exe', 'composer.cmd', 'composer.bat', 'composer.phar'], true)) {
+        $explicit = $command[0];
+        $launcher = is_file($explicit) ? $explicit : (
+            $findExecutable('composer.exe')
+            ?? $findExecutable('composer.cmd')
+            ?? $findExecutable('composer.bat')
+            ?? $findExecutable('composer')
+        );
+        if (! is_string($launcher)) return $command;
+
+        $launcherName = strtolower(basename($launcher));
+        if ($launcherName === 'composer.exe') {
+            return array_merge([$launcher], array_slice($command, 1));
+        }
+        if ($launcherName === 'composer.phar') {
+            return array_merge([PHP_BINARY, $launcher], array_slice($command, 1));
+        }
+
+        foreach ([
+            dirname($launcher).DIRECTORY_SEPARATOR.'composer.phar',
+            dirname(dirname($launcher)).DIRECTORY_SEPARATOR.'composer.phar',
+        ] as $phar) {
+            if (is_file($phar)) {
+                return array_merge([PHP_BINARY, $phar], array_slice($command, 1));
+            }
+        }
+
+        return $command;
+    }
+
+    $npmLike = match ($program) {
+        'npm', 'npm.cmd', 'npm.bat' => ['launcher' => 'npm', 'cli' => 'npm-cli.js'],
+        'npx', 'npx.cmd', 'npx.bat' => ['launcher' => 'npx', 'cli' => 'npx-cli.js'],
+        default => null,
+    };
+    if ($npmLike === null) return $command;
 
     $node = $findExecutable('node.exe') ?? $findExecutable('node');
     $launcher = null;

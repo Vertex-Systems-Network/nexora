@@ -2,248 +2,106 @@
 
 ## Resume instruction
 
-Always begin with `AGENTS.md`, `.ai/state.json`, this handoff, the canonical roadmap/registries, and `.ai/plans/active.md`. Then inspect current `main` HEAD, open PRs, exact active unit and exact target evidence before implementation.
+Begin with `AGENTS.md`, `.ai/README.md`, `.ai/state.json`, this handoff, `.ai/roadmap/legacy-aliases.md`, `.ai/registry/development-units.json`, `.ai/plans/active.md`, `NEXORA_PROGRESS.md`, and the current GitHub PR/head state. Never resume from historical chat or stale target prose when repository evidence is available.
 
-## Current source context
+## Current source / governance context
 
-- Canonical branch: `main`
-- Baseline at start of current orchestration pass: `dffb238e655a1c474f4f7ce7e75c6eda004c0c32`
-- Documented source release: `1.0.0-rc.94`
-- Installer protocol: `v5.29`
-- Source generation: `n1-v5.29`
-- Control-plane revision: `7`
-- Canonical stage count: `75`
-- Existing canonical rc.93 repair tooling originated in PR #26
-- Current source-work carrier: PR #30, `feat/runtime-recovery-orchestrator`
+- Long-lived engineering branch: `dev/n1-0b-core-functional-qa` / PR #1, DRAFT + OPEN.
+- N1.12 accepted frozen source: `78976e9f44e290155b119ae722a77fb37fd59018`.
+- That source passed exact-head GitHub-hosted governance via run `33553824752` / job `100009648131`; development-readiness artifact `9818655365`, digest `sha256:471949869471e6db95dcf0fd0da0f47b65e062ce8f196f2105145741fd8a8fa4`.
+- Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
+- The N1.12 closure/N1.13 cursor commit is control-plane/documentation only. Its resulting exact head must pass `governance` before it becomes the N1.13 frozen source.
 
-Historical SHAs are evidence references. Always re-read current HEAD before relying on this handoff.
+## Evidence precedence
 
-## Governance invariants
+`.ai/state.json` is the canonical active stage/unit cursor. `NEXORA_PROGRESS.md` is the detailed live target/release evidence dashboard and must agree with it. `NEXORA_AI_PROJECT_STATE.md` is historical evidence.
 
-- No future stage starts before the active stage is genuinely accepted.
-- Source/CI evidence and real-target evidence remain separate.
-- Existing defects use DMAIC/control evidence; high/critical work keeps FMEA/threat controls.
-- AI-authored PASS prose or a self-authored receipt is not runtime proof.
-- Critical changes require exact-head independent review in addition to authoring tests/CI.
-- No test/security/governance weakening merely to obtain PASS.
-- Dependency, migration, permission, network, secret, trust-boundary or destructive scope deltas require re-plan before implementation.
-- System Graph evidence classes remain distinct; static/inferred evidence is never runtime truth.
+`SOURCE_DONE != TARGET_VERIFIED`. A bounded target PASS does not imply broader provider, dependency-graph, database, HA, recovery, accessibility or final-release certification.
 
-## Active stage
+## Accepted bounded target evidence
 
-`RUNTIME-CLOSURE-001 — Installation + Runtime Closure`
+### Runtime replacement recovery
 
-Active unit:
+Issue #2 CLOSED via approved disposable current-source rc.94 replacement acceptance. PR #17 CLOSED + UNMERGED. Run `32667462959`; artifact `9500449768`; digest `sha256:1ac7ccf409181322e74ca1444bfd2ed3cca1539875eba398ad0d98a06e7e4aba`.
 
-`SYS-RUNTIME-IDENTITY`
+### N1.9 Marketplace
 
-Status:
+Issue #20 CLOSED completed; PR #21 CLOSED + UNMERGED. Source `8e359f07dc6b608b0d09468386fca13f066337a1`; run `32671245015`; artifact `9501470648`; digest `sha256:b26036aa0ad8c7ac075f1a60e213163ce10121e2ff3f606cdd06406ce3fb6aed`.
 
-**BLOCKED pending final real-target readiness + exact target-to-web `/login` evidence.**
+### N1.10 Commerce
 
-Do not start `CORE-QA-001` yet.
+Issue #32 CLOSED completed; PR #33 CLOSED + UNMERGED. Frozen source `43314a111405245f151ec66c01e9261af675c992`. Primary run `33540575198`, artifact `9813554570`, digest `sha256:68e8e9cefcb32a49a6d9912b5a3b1a4f7eaf0b3ac94850ec8418262c82cad882`. Provider supplement run `33540575159`, artifact `9813440996`, digest `sha256:1af3fd58308e92e1f90431588a045ecc7810d1de96bc7152bed4e9a0c0bcd330`.
 
-## Real target
+### N1.11 Customer Portal / CRM / Membership
 
-```text
-D:\laragon\www\nexora
-installed release: 1.0.0-rc.93
-```
+Issue #39 CLOSED completed; diagnostic PR #40 CLOSED + UNMERGED. Frozen source `2f5eb3b9dcf1c146f4e647fb3441318c4bf2c829`; carrier `b1481c4064bbad96b79cf13d40ac5d07be10a434`; run `33550851207` / job `99999628418`; artifact `9817460169`; independently verified digest `sha256:b973ffdc424daf3e5b0987d75bff2c6a79b94f1c5e3530a7058091b1af08e1c8`.
 
-## Live target evidence received on 2026-08-25
+### N1.12 Search 2.0
 
-### rc.93 repair dry-run — PASS
+**BOUNDED TARGET VERIFIED.** Issue #41 CLOSED completed; diagnostic PR #45 CLOSED + DRAFT + UNMERGED.
 
-- exact running/installed `1.0.0-rc.93`;
-- only `activation`, `environment`, `process`, `service` mismatched;
-- dry-run performed no mutation.
+- Frozen product source: `78976e9f44e290155b119ae722a77fb37fd59018`.
+- Exact-head governance run: `33553824752` / job `100009648131` PASS.
+- Certified carrier head: `449ea9b3d5c0d2ad176031a1849ed80c349e0023`.
+- Target run: `33563871904` / job `100042466730` SUCCESS.
+- Artifact: `9822383456`.
+- GitHub digest and independently downloaded ZIP SHA-256 both: `6d298f5d60c5dc7a0423aec8d73d107de79888662cc919d62d53824b0e723731`.
+- Fresh disposable rc.94 install + guarded post-install reconcile PASS.
+- Search product-contract verifier and warning-hard `SearchProductIsolationTest` PASS.
+- Installed-target document/media index lifecycle, SEO refresh, stale rebuild cleanup, repeat rebuild/idempotency, deterministic exact-title ranking and tenant isolation PASS.
+- Product dual authorization path was exercised: global RBAC `Role` plus tenant-local `EnterpriseRole`; no super-admin bypass was used.
+- Real HTTP: public Search 200; protected document/media public non-disclosure; disabled Search 404; guest Admin Search 302; authorized Admin Search 200; missing `search.use` 403; document/media result visibility follows respective permissions; missing `search.index.manage` reindex 403; authorized reindex succeeds and records audit evidence.
+- GPC and DNT requests were served normally but did not persist Search query-log evidence.
+- Server evidence contained no hidden fatal/uncaught Search runtime failure in the accepted flow.
 
-### rc.93 bounded repair apply — PASS
+Only carrier SHA `449ea9b3d5c0d2ad176031a1849ed80c349e0023` / run `33563871904` is certified. Later PR #45 tree-equivalent/no-content heads are explicitly excluded from the acceptance record.
 
-- only the four approved planes repaired;
-- sealed installation lock changed from SHA-256 `5db5fbf7f33a5d901146544463547800a114acad80bb62053d17c7e88e069d88` to `1576c4212323c11dbb591a45a27988afa6e5c55a62982808af738e918828022a`;
-- protected backup + repair receipt paths emitted;
-- mutation completed through the approved bounded repair path.
+Explicit non-claims: external Search providers, distributed indexing/replication/HA, unimplemented facets, Search performance/scale/relevance SLOs, broader `PORTAL-200`, five-engine DB matrix, N1.13+, HA/recovery/C5/C6/final release.
 
-### Independent deep compatibility — PASS
+## Current active stage
 
-```text
-status=pass
-mismatches=[]
-runtime.compatible=true
-runtime.mode=installed-data-plane
-deployment_drift.status=pass
-```
+Stable semantic stage: `COLLAB-200`.
 
-Environment, activation, service and process now match. Immutable/source/deployment/framework/data-plane/storage/host/resource/policy/dependency compatibility remained PASS.
+Registered unit: `SYS-COLLABORATION`.
 
-The dependency runtime fingerprint is compatible. `reviewed dependency-lock attestation = missing` remains a separate release/dependency-governance item and must not be confused with the closed four-plane identity mismatch.
+Legacy execution alias: `N1.13 — Collaboration`.
 
-### Post-install handoff
+Status: **PARTIAL — source exists; bounded real-target acceptance pending.**
 
-First readiness assertion correctly reported:
+Canonical roadmap dependencies are `SITE-BUILDER-200`, `RELEASE-WORKFLOW-200`, and `PORTAL-200`. They remain separate product/evidence claims. The user-authorized N1.9–N1.26 target-QA order may continue but does not silently satisfy, skip or certify those dependencies.
 
-```text
-status=receipt-refresh-required
-ready=false
-runtime_ready=true
-receipt_current=false
-```
+Registry source truth identifies Collaboration local contracts including `App\Nexora\Collaboration\CollaborationRepository`, `ApprovalWorkflow`, and `LockManager`. Distributed coordination semantics, if source-implemented/enabled, require explicit evidence; they are not inferred from stage naming.
 
-The operator then ran:
+## Current blocker
 
-```text
-php artisan nexora:runtime:post-install-reconcile --confirm=RECONCILE
-```
+The N1.12 closure and N1.13 cursor are being applied as one state-only canonical dev commit. Before any N1.13 target carrier:
 
-and received `status=pass` with a new receipt bound to the repaired installation lock.
+1. obtain exact-head GitHub-hosted `governance` PASS on that resulting dev head;
+2. audit current Collaboration comments, locks, approvals, history, routes/controllers/models, tenant/permission boundaries, migrations, tests and registered local contracts;
+3. freeze one exact-source bounded acceptance tracker from source truth;
+4. only then execute the disposable real-target carrier.
 
-Still missing for current-stage acceptance:
+Do not weaken governance, tests, authorization, tenant scopes, lock semantics or approval rules to move the cursor.
 
-1. a **fresh** `php artisan nexora:runtime:post-install-status --assert-ready` after that reconcile, proving `status=pass`, `ready=true`, `runtime_ready=true`, `receipt_current=true`, `errors=[]`;
-2. fresh proof that the configured `app.url` web process belongs to this exact target;
-3. `/login` evidence on that same proven origin without runtime/tenant/bootstrap failure.
+## N1.13 target-QA intent
 
-## Runtime Recovery / Closure Orchestrator — current source work
+- verify only Collaboration behavior already implemented on the exact governed source;
+- verify comment/history ownership and visibility boundaries;
+- verify lock acquire/conflict/refresh/release/expiry semantics only where implemented, including concurrency behavior without lock theft or stale-writer acceptance;
+- verify approval state transitions, authorization and invalid-transition rejection where implemented;
+- verify tenant/organization isolation across collaboration records and actor/member references;
+- verify history/audit provenance and fail-closed behavior;
+- verify retry/idempotency only where the source claims it;
+- exercise existing real HTTP/API/UI boundaries where exposed;
+- independently download and hash the evidence artifact before acceptance;
+- keep any diagnostic carrier DRAFT + DO NOT MERGE and close it unmerged.
 
-PR #30 closes the observed operator-control gap without introducing a new roadmap stage or upgrade engine.
+## Remaining boundaries after N1.13
 
-Intended operator command after source acceptance:
+Continue explicit legacy target-QA order N1.14–N1.26 while keeping canonical semantic dependency/product-expansion claims separate. Still required globally: five-engine DB matrix; controlled provider/identity/API/import/observability/Sentinel/Marketplace evidence; HA; backup/restore + upgrade rehearsal; C5 browser/W3C/WAVE/AT/HTTP/Web-Vitals evidence; C6 reviewed dependency locks/provenance/final operations/release evidence.
 
-```bat
-npm run runtime:recover -- --target="D:\laragon\www\nexora" --apply --confirm=RECOVER-RUNTIME
-```
+Project/Source/Target/Release power remains `76.5% / 99.0% / 50.0% / 25.0%` until broader evidence explicitly justifies a change.
 
-Current fail-closed contract:
+## Exact next action
 
-```text
-explicit target
-→ apply-mode single-writer target lock
-→ deep compatibility
-→ if compatible, skip identity repair
-→ else only exact rc.93 four-plane adapter is eligible
-→ independent compatibility re-check bound to child exit 0
-→ readiness assertion bound to child exit 0
-→ auto-reconcile only receipt-refresh-required + runtime_ready=true + receipt_current=false
-→ final readiness re-check (source + deep deployment + compatibility + activation + sealed receipt)
-→ resolve only target-owned bootstrapped config('app.url')
-→ preflight existing /install/source-status with TLS verify + no redirects
-→ issue fresh target-local one-time SourceActivationHandshake token
-→ configured web origin must consume token and return acknowledged nonce
-→ exact target CLI must reverify same nonce + source/runtime fingerprints with nexora:source:status --require-web-ack
-→ only then perform /login GET on the same origin
-→ unique non-overwriting machine-readable recovery receipt
-→ PASS / BLOCKED / FAIL
-```
-
-Mutation still requires:
-
-```text
---apply --confirm=RECOVER-RUNTIME
-```
-
-The one-time web acknowledgement token is held only in process memory/request headers. It is single-use and must never be written to the orchestrator receipt, public result, PR evidence, or logs.
-
-### Hardenings completed before merge
-
-Adversarial review found and closed these source risks:
-
-1. JSON PASS could not override a non-zero child exit code.
-2. Explicit non-200 `/login` is FAIL; only no-HTTP transport/TLS inability is BLOCKED.
-3. Arbitrary `--base-url` override was removed.
-4. Unsupported readiness states fail closed instead of being described as successful planning.
-5. PR CI was checking a GitHub merge ref despite an “exact source” label; workflow now checks out the PR head SHA and explicitly asserts `git rev-parse HEAD == expected SHA`.
-6. The runtime-recovery PHPUnit contract was not guaranteed to run in release CI; a dedicated required `runtime-recovery-orchestrator-contract-verify.php` gate plus PHP lint is now in the workflow.
-7. Concurrent apply-mode writers could race one sealed target; apply mode now requires `flock(LOCK_EX | LOCK_NB)` on a target-owned `.apply.lock` and a second writer fails closed.
-8. Timestamp-only final receipt names could overwrite same-second evidence; final recovery receipts now include a random unique identifier.
-9. **`app.url` ownership did not prove HTTP server identity.** A stale/misconfigured `app.url` could point at another reachable Nexora deployment and a bare `/login` 200 could falsely certify the wrong web target. The orchestrator now requires a fresh target-local one-time CLI→web challenge, matching web acknowledgement nonce, and independent local `--require-web-ack` source/runtime verification before `/login` is authoritative.
-
-The ninth hardening reuses existing Nexora trust primitives (`SourceActivationHandshake`, `/install/source-status`, `nexora:source:status --require-web-ack`). It adds no public endpoint, dependency, external destination, permission, migration, or product capability.
-
-Canonical PR #30 files include:
-
-- `scripts/runtime-recovery-orchestrator.php`
-- `scripts/runtime-recovery-orchestrator-contract-verify.php`
-- `tests/Unit/Certification/RuntimeRecoveryOrchestratorTest.php`
-- `docs/runtime/RUNTIME_RECOVERY_ORCHESTRATOR.md`
-- `package.json` → `runtime:recover`
-- `.github/workflows/release-certification.yml`
-- `.ai/state.json`
-- `.ai/plans/active.md`
-- this handoff
-
-No migrations, dependency versions, product modules, business features or roadmap stages are added.
-
-## Exact-head CI contract
-
-For PR events the release-certification workflow must:
-
-1. checkout `${{ github.event.pull_request.head.sha }}` rather than the generated merge ref;
-2. assert the actual checkout SHA equals the expected PR head SHA;
-3. PASS certification preflight;
-4. PASS Source Guard;
-5. lint the orchestrator + contract verifier;
-6. PASS the dedicated Runtime Recovery control contract gate, including exact target-to-web challenge ordering/secret handling, single-writer serialization and unique receipts;
-7. PASS unified source certification;
-8. PASS frontend typecheck, Vitest and production build.
-
-Any head change makes prior CI evidence stale.
-
-## Independent review status
-
-Independent exact-head review remains mandatory because this is a critical recovery-control change.
-
-Attempts made so far:
-
-- CodeRabbit review comments were posted on earlier heads but no review was returned.
-- CodeRabbit CLI could not reach GitHub from the current execution environment because DNS resolution failed.
-- GitHub Copilot reviewer `copilot-pull-request-reviewer[bot]` was requested using the documented reviewer identity, but GitHub did not persist a requested reviewer or create a review object for this repository/account.
-- A final bounded CodeRabbit GitHub-app request was made on the previously frozen head; no review submission appeared before the later wrong-host hardening changed the head, so that request/evidence is stale regardless.
-
-Absence of review comments is **not** a review PASS. The authoring agent must not self-approve and call that independent evidence. After the final hardened head freezes and CI passes, request one fresh exact-head independent review; do not loop failed reviewer strategies indefinitely.
-
-## Current source-work acceptance requirements
-
-Before merging PR #30:
-
-1. final hardened head exact-checkout identity PASS;
-2. certification preflight PASS;
-3. Source Guard PASS;
-4. Runtime Recovery control contract + lint PASS;
-5. unified source certification PASS;
-6. frontend dependency/type/test/build compatibility PASS;
-7. exact-head independent review for the critical recovery-control change;
-8. no scope expansion outside `SYS-RUNTIME-IDENTITY`.
-
-Source merge does **not** advance the runtime stage by itself.
-
-## Exact target continuation after source closure
-
-Because this target is already repaired and reconciled, the orchestrator should:
-
-- acquire the target single-writer apply lock;
-- observe compatibility PASS;
-- skip identity repair;
-- assert final readiness;
-- skip reconcile if the receipt is already current;
-- preflight the configured source-status endpoint;
-- issue and consume a fresh one-time target-local web identity challenge;
-- independently verify the same acknowledgement through the exact target CLI;
-- run `/login` only after that proof passes;
-- write a unique recovery outcome receipt with no bearer token material.
-
-If source-status or `/login` is blocked only by local TLS trust/client reachability while runtime readiness passes, preserve `BLOCKED`; do not disable TLS verification or point to another host to force green. If a reachable origin rejects or mismatches the exact challenge, that is `FAIL`, not `BLOCKED`.
-
-## Next stage after genuine closure
-
-Only after `RUNTIME-CLOSURE-001` becomes `TARGET_VERIFIED`:
-
-`CORE-QA-001 — Super Admin + Core Application Functional QA`
-
-Then canonical sequence remains:
-
-`AI-GOV-AUTOMATION-100 → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ADMIN-UX-CLOSURE-001 → SECURITY-BASELINE-200 → ARCH-BOUNDARY-100`.
-
-## Completion warning
-
-Do not infer final target PASS from successful repair, compatibility output, reconcile output, source CI, `app.url`, a bare `/login` 200, an orchestrator receipt, or self-review. Final readiness/current-receipt + fresh exact target-to-web proof + `/login` evidence remain mandatory for the active stage, and PR #30 still requires independent exact-head review before merge.
+**Require exact-head governance on this synchronized N1.12 closure/N1.13 cursor commit. Then audit and freeze the bounded Collaboration acceptance contract; do not start target execution before that PASS.**

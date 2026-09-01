@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Crm;
 
-use App\Nexora\Enterprise\Validation\TenantMemberExists;
-use App\Nexora\Enterprise\Validation\TenantExists;
 use App\Http\Controllers\Controller;
 use App\Models\CrmContact;
 use App\Models\CrmOpportunity;
@@ -13,21 +11,23 @@ use App\Models\CrmOpportunityStageHistory;
 use App\Models\CrmOrganization;
 use App\Models\CrmPipeline;
 use App\Models\CrmPipelineStage;
-use App\Models\User;
 use App\Nexora\Automation\Contracts\AutomationEventBusContract;
 use App\Nexora\Commerce\Services\CurrencyManager;
 use App\Nexora\Crm\Contracts\CrmOpportunityManagerContract;
 use App\Nexora\Crm\Contracts\CrmTimelineContract;
+use App\Nexora\Enterprise\Services\TenantMemberDirectory;
+use App\Nexora\Enterprise\Validation\TenantExists;
+use App\Nexora\Enterprise\Validation\TenantMemberExists;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use InvalidArgumentException;
-use Illuminate\Validation\ValidationException;
 
 final class OpportunityController extends Controller
 {
-    public function index(Request $request, CurrencyManager $currencies): Response
+    public function index(Request $request, CurrencyManager $currencies, TenantMemberDirectory $members): Response
     {
         $query=CrmOpportunity::query()->with(['pipeline:id,name','stage:id,name','organization:id,name','contact:id,display_name','owner:id,name'])->latest();
         $status=(string)$request->query('status',''); if ($status!=='') $query->where('status',$status);
@@ -37,7 +37,7 @@ final class OpportunityController extends Controller
             'amount'=>$o->currency?$currencies->format((int)$o->amount_minor,$o->currency):'—','probability'=>$o->probability,'expected_close_at'=>$o->expected_close_at?->format('Y-m-d\\TH:i'),'updated_at'=>$o->updated_at?->toIso8601String(),
         ]);
         return Inertia::render('Admin/Crm/Opportunities',[
-            'opportunities'=>$opportunities,'filters'=>['status'=>$status,'pipeline'=>$pipelineId],'pipelines'=>$this->pipelines(),'organizations'=>$this->organizations(),'contacts'=>$this->contacts(),'owners'=>$this->owners(),
+            'opportunities'=>$opportunities,'filters'=>['status'=>$status,'pipeline'=>$pipelineId],'pipelines'=>$this->pipelines(),'organizations'=>$this->organizations(),'contacts'=>$this->contacts(),'owners'=>$members->options(),
             'defaultCurrency'=>$currencies->defaultCode(),'canManage'=>$request->user()?->hasPermission('crm.opportunities.manage')??false,
         ]);
     }
@@ -88,5 +88,4 @@ final class OpportunityController extends Controller
     private function pipelines(): array { return CrmPipeline::query()->with('stages')->where('active',true)->orderByDesc('is_default')->get()->map(fn($p)=>['id'=>$p->id,'name'=>$p->name,'stages'=>$p->stages->map(fn($s)=>['id'=>$s->id,'name'=>$s->name,'probability'=>$s->probability,'is_won'=>$s->is_won,'is_lost'=>$s->is_lost])->values()])->all(); }
     private function organizations(): array { return CrmOrganization::query()->orderBy('name')->get(['id','name'])->map(fn($o)=>['id'=>$o->id,'name'=>$o->name])->all(); }
     private function contacts(): array { return CrmContact::query()->orderBy('display_name')->get(['id','display_name'])->map(fn($c)=>['id'=>$c->id,'name'=>$c->display_name])->all(); }
-    private function owners(): array { return User::query()->where('status','active')->orderBy('name')->get(['id','name'])->map(fn($u)=>['id'=>$u->id,'name'=>$u->name])->all(); }
 }

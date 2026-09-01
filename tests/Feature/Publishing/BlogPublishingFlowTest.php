@@ -7,6 +7,7 @@ namespace Tests\Feature\Publishing;
 use App\Models\AuthorProfile;
 use App\Models\ContentSeries;
 use App\Models\Document;
+use App\Models\MembershipAccessPolicy;
 use App\Models\Role;
 use App\Models\SeoEntry;
 use App\Models\TaxonomyTerm;
@@ -65,6 +66,7 @@ final class BlogPublishingFlowTest extends TestCase
             'is_featured' => true,
             'featured_until' => null,
             'hero_image_url' => '',
+            'hero_media_id' => null,
             'source_url' => '',
             'allow_comments' => false,
             'is_sponsored' => false,
@@ -93,5 +95,41 @@ final class BlogPublishingFlowTest extends TestCase
         self::assertNotNull($fresh->published_at);
         self::assertSame(2, (int) $fresh->lock_version);
         self::assertSame(1, $fresh->revisions()->count());
+    }
+
+    public function test_membership_protected_published_content_is_not_leaked_in_public_home_or_blog_archives(): void
+    {
+        $public = Document::factory()->create([
+            'type' => 'blog_post',
+            'status' => 'published',
+            'published_at' => now()->subMinute(),
+            'title' => 'Public publishing story',
+            'slug' => 'public-publishing-story',
+        ]);
+        $protected = Document::factory()->create([
+            'type' => 'blog_post',
+            'status' => 'published',
+            'published_at' => now(),
+            'title' => 'Members only publishing story',
+            'slug' => 'members-only-publishing-story',
+        ]);
+        MembershipAccessPolicy::query()->create([
+            'name' => 'Members only archive gate',
+            'resource_type' => 'document',
+            'resource_id' => (string) $protected->id,
+            'evaluation' => 'all',
+            'required_plan_ids' => [],
+            'required_entitlements' => ['content.members-only'],
+            'active' => true,
+        ]);
+
+        $this->get('/blog')
+            ->assertOk()
+            ->assertSee($public->title)
+            ->assertDontSee($protected->title);
+        $this->get('/')
+            ->assertOk()
+            ->assertSee($public->title)
+            ->assertDontSee($protected->title);
     }
 }

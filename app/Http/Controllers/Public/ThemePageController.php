@@ -8,12 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\SeoEntry;
 use App\Nexora\Foundation\Contracts\SettingsContract;
+use App\Nexora\Membership\Contracts\MembershipAccessContract;
+use App\Nexora\Publishing\Services\PublicDocumentVisibility;
+use App\Nexora\Publishing\Services\RelatedContentService;
 use App\Nexora\Seo\Contracts\SeoManagerContract;
+use App\Nexora\Studio\Services\StudioCanvasRenderer;
 use App\Nexora\Themes\Contracts\ThemeRendererContract;
 use App\Nexora\Themes\Services\DocumentHtmlRenderer;
-use App\Nexora\Studio\Services\StudioCanvasRenderer;
-use App\Nexora\Publishing\Services\RelatedContentService;
-use App\Nexora\Membership\Contracts\MembershipAccessContract;
 use Illuminate\Http\Response;
 
 final class ThemePageController extends Controller
@@ -26,23 +27,30 @@ final class ThemePageController extends Controller
         private StudioCanvasRenderer $studio,
         private RelatedContentService $related,
         private MembershipAccessContract $membershipAccess,
+        private PublicDocumentVisibility $visibility,
     ) {
     }
 
     public function home(): Response
     {
         $siteName = (string) $this->settings->get('seo.site_name', $this->settings->get('app.name', 'Nexora'));
-        $featured = Document::query()
+        $featuredQuery = Document::query()
             ->whereIn('type', ['article', 'blog_post'])
             ->where('status', 'published')
             ->whereHas('articleMetadata', fn ($query) => $query->where('is_featured', true)->where(function ($expiry): void {
                 $expiry->whereNull('featured_until')->orWhere('featured_until', '>', now());
             }))
             ->with('articleMetadata')
-            ->latest('published_at')->limit(3)->get(['id', 'type', 'title', 'slug', 'excerpt', 'published_at']);
-        $latest = Document::query()->where('status', 'published')
+            ->latest('published_at')
+            ->limit(3);
+        $featured = $this->visibility->apply($featuredQuery)->get(['nx_documents.id', 'type', 'title', 'slug', 'excerpt', 'published_at']);
+
+        $latestQuery = Document::query()
+            ->where('status', 'published')
             ->when($featured->isNotEmpty(), fn ($query) => $query->whereNotIn('id', $featured->pluck('id')))
-            ->latest('published_at')->limit(6)->get(['id', 'type', 'title', 'slug', 'excerpt', 'published_at']);
+            ->latest('published_at')
+            ->limit(6);
+        $latest = $this->visibility->apply($latestQuery)->get(['nx_documents.id', 'type', 'title', 'slug', 'excerpt', 'published_at']);
 
         $content = '';
         if ($featured->isNotEmpty()) {
@@ -75,7 +83,6 @@ final class ThemePageController extends Controller
         return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
     }
 
-
     public function resolve(string $path): Response
     {
         $normalized = '/'.ltrim($path, '/');
@@ -83,13 +90,10 @@ final class ThemePageController extends Controller
             ->where('resource_type', 'document')
             ->where('url_path', $normalized)
             ->first();
-        if ($entry === null) {
-            abort(404);
-        }
+        if ($entry === null) abort(404);
+
         $document = Document::query()->find($entry->resource_id);
-        if ($document === null) {
-            abort(404);
-        }
+        if ($document === null) abort(404);
         return $this->document($document);
     }
 
@@ -97,16 +101,15 @@ final class ThemePageController extends Controller
     {
         abort_unless($document->status === 'published', 404);
         $this->membershipAccess->assertCanAccess(auth()->user(), 'document', (string) $document->id);
+
         $payload = $this->seo->documentPayload($document, app()->getLocale());
         $metadata = (array) $payload['metadata'];
         $schema = (array) $payload['schema'];
+        $social = (array) ($payload['social'] ?? []);
         $title = (string) ($metadata['title'] ?? $document->title);
         $description = $metadata['description'] ?? $document->excerpt;
-        $canonical = $metadata['canonical_url'] ?: url('/content/'.$document->slug);
-        $robots = ((bool) ($metadata['robots']['index'] ?? true) ? 'index' : 'noindex').','.((bool) ($metadata['robots']['follow'] ?? true) ? 'follow' : 'nofollow');
-        $head = '<title>'.e($title).'</title>';
-        if ($description) $head .= '<meta name="description" content="'.e((string) $description).'">';
-        $head .= '<link rel="canonical" href="'.e((string) $canonical).'"><meta name="robots" content="'.e($robots).'">';
+        $canonical = (string) ($metadata['canonical_url'] ?: url($this->documentUrl($document)));
+        $head = $this->documentHead($title, $description ? (string) $description : null, $canonical, (array) ($metadata['robots'] ?? []), $social);
         $schemaJson = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         $schemaTag = is_string($schemaJson) ? '<script type="application/ld+json">'.$schemaJson.'</script>' : '';
         $siteName = (string) $this->settings->get('seo.site_name', $this->settings->get('app.name', 'Nexora'));
@@ -148,7 +151,8 @@ final class ThemePageController extends Controller
 
             $series = $document->series->first();
             if ($series) {
-                $items = $series->documents()->where('status', 'published')->get(['nx_documents.id', 'type', 'title', 'slug']);
+                $seriesQuery = $series->documents()->where('status', 'published');
+                $items = $this->visibility->apply($seriesQuery)->get(['nx_documents.id', 'type', 'title', 'slug']);
                 $current = $items->search(static fn (Document $item): bool => (int) $item->id === (int) $document->id);
                 $body .= '<nav class="nx-series-nav" aria-label="Series navigation"><strong>'.e((string) $series->name).'</strong>';
                 if ($current !== false && $current > 0) {
@@ -165,9 +169,7 @@ final class ThemePageController extends Controller
             $related = $this->related->forDocument($document);
             if ($related->isNotEmpty()) {
                 $body .= '<aside class="nx-related"><h2>Related content</h2><ul>';
-                foreach ($related as $item) {
-                    $body .= '<li><a href="'.e($this->documentUrl($item)).'">'.e((string) $item->title).'</a></li>';
-                }
+                foreach ($related as $item) $body .= '<li><a href="'.e($this->documentUrl($item)).'">'.e((string) $item->title).'</a></li>';
                 $body .= '</ul></aside>';
             }
         }
@@ -181,6 +183,37 @@ final class ThemePageController extends Controller
             'nx_content' => $body,
         ]);
         return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
+    }
+
+    /** @param array<string,mixed> $robots @param array<string,mixed> $social */
+    private function documentHead(string $title, ?string $description, string $canonical, array $robots, array $social): string
+    {
+        $directives = [
+            (bool) ($robots['index'] ?? true) ? 'index' : 'noindex',
+            (bool) ($robots['follow'] ?? true) ? 'follow' : 'nofollow',
+            ...array_values(array_filter(array_map('strval', (array) ($robots['directives'] ?? [])))),
+        ];
+        $directives = array_values(array_unique($directives));
+        $socialTitle = trim((string) ($social['title'] ?? '')) ?: $title;
+        $socialDescription = trim((string) ($social['description'] ?? '')) ?: $description;
+        $socialType = trim((string) ($social['type'] ?? '')) ?: 'website';
+        $socialImage = trim((string) ($social['image'] ?? ''));
+        $twitterCard = trim((string) ($social['twitter_card'] ?? '')) ?: ($socialImage !== '' ? 'summary_large_image' : 'summary');
+
+        $head = '<title>'.e($title).'</title>';
+        if ($description) $head .= '<meta name="description" content="'.e($description).'">';
+        $head .= '<link rel="canonical" href="'.e($canonical).'">';
+        $head .= '<meta name="robots" content="'.e(implode(',', $directives)).'">';
+        $head .= '<meta property="og:title" content="'.e($socialTitle).'">';
+        $head .= '<meta property="og:type" content="'.e($socialType).'">';
+        $head .= '<meta property="og:url" content="'.e($canonical).'">';
+        if ($socialDescription) $head .= '<meta property="og:description" content="'.e($socialDescription).'">';
+        if ($socialImage !== '') $head .= '<meta property="og:image" content="'.e($socialImage).'">';
+        $head .= '<meta name="twitter:card" content="'.e($twitterCard).'">';
+        $head .= '<meta name="twitter:title" content="'.e($socialTitle).'">';
+        if ($socialDescription) $head .= '<meta name="twitter:description" content="'.e($socialDescription).'">';
+        if ($socialImage !== '') $head .= '<meta name="twitter:image" content="'.e($socialImage).'">';
+        return $head;
     }
 
     private function documentUrl(Document $document): string

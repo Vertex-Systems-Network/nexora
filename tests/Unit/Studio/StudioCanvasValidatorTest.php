@@ -9,7 +9,7 @@ use App\Nexora\Studio\Services\StudioBindingRegistry;
 use App\Nexora\Studio\Services\StudioCanvasValidator;
 use App\Nexora\Studio\Services\StudioElementRegistry;
 use Illuminate\Validation\ValidationException;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 final class StudioCanvasValidatorTest extends TestCase
 {

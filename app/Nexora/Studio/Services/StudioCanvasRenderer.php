@@ -37,7 +37,13 @@ final readonly class StudioCanvasRenderer
         $children = is_array($canvas->content['children'] ?? null) ? $canvas->content['children'] : [];
         $tablet = [];
         $mobile = [];
-        $html = implode('', array_map(fn ($node) => is_array($node) ? $this->node($node, $context, $tablet, $mobile) : '', $children));
+        $htmlParts = [];
+        foreach ($children as $node) {
+            if (is_array($node)) {
+                $htmlParts[] = $this->node($node, $context, $tablet, $mobile);
+            }
+        }
+        $html = implode('', $htmlParts);
         $responsive = $this->responsiveCss($tablet, $mobile);
         return $responsive.'<div class="nx-studio-page">'.$html.'</div>';
     }
@@ -61,7 +67,13 @@ final readonly class StudioCanvasRenderer
         if ($mobileStyle !== []) $mobile[$class] = $this->style($mobileStyle, $type);
         $style = $this->style($base, $type);
         $children = is_array($node['children'] ?? null) ? $node['children'] : [];
-        $childHtml = implode('', array_map(fn ($child) => is_array($child) ? $this->node($child, $context, $tablet, $mobile) : '', $children));
+        $childParts = [];
+        foreach ($children as $child) {
+            if (is_array($child)) {
+                $childParts[] = $this->node($child, $context, $tablet, $mobile);
+            }
+        }
+        $childHtml = implode('', $childParts);
         $text = htmlspecialchars((string) ($props['text'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $classAttr = ' class="'.$class.'"';
         $styleAttr = $style !== '' ? ' style="'.$style.'"' : '';
