@@ -441,12 +441,16 @@ jobs:
           @'
           <?php
           declare(strict_types=1);
+          use App\Models\EnterpriseOrganization;
+          use App\Nexora\Enterprise\Services\TenantContext;
           use App\Nexora\Foundation\Contracts\SettingsContract;
           use Illuminate\Contracts\Console\Kernel;
           $root=(string)$argv[1];
           require $root.'/vendor/autoload.php';
           $app=require $root.'/bootstrap/app.php';
           $app->make(Kernel::class)->bootstrap();
+          $primary=EnterpriseOrganization::query()->where('is_default',true)->firstOrFail();
+          app(TenantContext::class)->set($primary);
           app(SettingsContract::class)->set((string)$argv[2], filter_var((string)$argv[3], FILTER_VALIDATE_BOOL));
           '@ | Set-Content -Encoding Ascii $toggle
 
