@@ -326,8 +326,8 @@ jobs:
             & curl.exe -sS -c $cookies "$env:BASE_URL/login" -o $loginPage
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             $html = Get-Content -Raw $loginPage
-            $csrf = ([regex]::Match($html, 'name="_token"\s+value="([^"]+)"')).Groups[1].Value
-            if (-not $csrf) { throw 'Unable to extract login CSRF token.' }
+            $csrf = ([regex]::Match($html, '<meta\s+name="csrf-token"\s+content="([^"]+)"')).Groups[1].Value
+            if (-not $csrf) { throw 'Unable to extract login CSRF token from Inertia root document.' }
             $loginHeaders = Join-Path $env:RUNNER_TEMP 'n111-login.headers.txt'
             $loginStatus = (& curl.exe -sS -b $cookies -c $cookies -D $loginHeaders -o NUL -w '%{http_code}' -X POST "$env:BASE_URL/login" `
               --data-urlencode "_token=$csrf" `
