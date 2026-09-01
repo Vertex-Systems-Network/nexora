@@ -1,0 +1,630 @@
+name: Nexora N1.12 Search 2.0 final target QA v2
+
+on:
+  pull_request:
+    branches:
+      - dev/n1-0b-core-functional-qa
+
+permissions:
+  contents: read
+
+jobs:
+  n112-final-v2:
+    name: n112-final-v2
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      BASE_URL: http://127.0.0.1:8000
+      EVIDENCE_DIR: storage/app/nexora/qa/n112-final-v2
+      FROZEN_SOURCE: 78976e9f44e290155b119ae722a77fb37fd59018
+
+    steps:
+      - name: Checkout exact governed development source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, dom, fileinfo, intl, mbstring, openssl, pdo, pdo_sqlite, sqlite3, tokenizer, xml, zip
+          ini-values: memory_limit=512M, post_max_size=64M, upload_max_filesize=64M, max_execution_time=120, max_input_time=60, max_input_vars=3000, max_file_uploads=20
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Guard source and prepare disposable target
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $source = (& git rev-parse HEAD).Trim()
+          $expected = '${{ github.event.pull_request.base.sha }}'
+          if ($source -ne $expected) { throw 'Checkout is not bound to exact PR base SHA.' }
+          if ($expected -ne $env:FROZEN_SOURCE) { throw "N1.12 is frozen against $env:FROZEN_SOURCE, not $expected." }
+
+          New-Item -ItemType Directory -Force -Path $env:EVIDENCE_DIR | Out-Null
+          $phpVersion = (& php -r "echo PHP_VERSION;").Trim()
+          $composerVersion = (& composer --version --no-ansi).Trim()
+          $nodeVersion = (& node -p "process.versions.node").Trim()
+          $npmVersion = (& npm.cmd --version).Trim()
+
+          & composer install --no-interaction --prefer-dist --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd install --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $dbNative = [System.IO.Path]::GetFullPath((Join-Path $env:RUNNER_TEMP 'nexora-n112-final-v2.sqlite'))
+          $db = $dbNative.Replace('\', '/')
+          if (Test-Path $dbNative) { Remove-Item -Force $dbNative }
+          New-Item -ItemType File -Path $dbNative | Out-Null
+          $key = (& php -r "echo 'base64:'.base64_encode(random_bytes(32));").Trim()
+          @"
+          APP_NAME="Nexora N1.12 Final QA v2"
+          APP_ENV=production
+          APP_KEY=$key
+          APP_DEBUG=false
+          APP_URL=$env:BASE_URL
+          APP_LOCALE=en
+          LOG_CHANNEL=stderr
+          DB_CONNECTION=sqlite
+          DB_DATABASE=$db
+          SESSION_DRIVER=file
+          CACHE_STORE=file
+          QUEUE_CONNECTION=sync
+          MAIL_MAILER=array
+          NEXORA_INSTALLER_BYPASS=false
+          "@ | Set-Content -Encoding UTF8 .env
+          $db | Set-Content -Encoding UTF8 (Join-Path $env:RUNNER_TEMP 'n112-final-v2-database-path.txt')
+
+          @{
+            schema = 4
+            evidence_kind = 'n1.12-search-2.0-final-v2-bounded-real-target'
+            source_sha = $source
+            expected_source_sha = $expected
+            carrier_sha = '${{ github.event.pull_request.head.sha }}'
+            runner_os = $env:RUNNER_OS
+            runner_arch = $env:RUNNER_ARCH
+            php = $phpVersion
+            composer = $composerVersion
+            node = $nodeVersion
+            npm = $npmVersion
+            base_url = $env:BASE_URL
+            implementation = 'database-backed-derived-index'
+            browser_generation_protocol = 'X-Nexora-Deployment-Generation'
+            resource_types = @('document','media')
+            external_search_provider_certified = $false
+            distributed_index_certified = $false
+            facets_certified = $false
+            performance_scale_certified = $false
+            five_engine_matrix_certified = $false
+          } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'source-binding.json')
+
+      - name: Commit real disposable install and reconcile runtime
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $serverOut = Join-Path $env:EVIDENCE_DIR 'install-server.out.log'
+          $serverErr = Join-Path $env:EVIDENCE_DIR 'install-server.err.log'
+          $docroot = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'public'))
+          $router = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php'))
+          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t',$docroot,$router) -WorkingDirectory $docroot -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+          try {
+            $ready = $false
+            for ($i = 0; $i -lt 60; $i++) {
+              if ($server.HasExited) { throw "Installer server exited early with code $($server.ExitCode)." }
+              $probeStatus = (& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/install").Trim()
+              if (($LASTEXITCODE -eq 0) -and ($probeStatus -eq '200')) { $ready = $true; break }
+              Start-Sleep -Seconds 1
+            }
+            if (-not $ready) { throw 'Disposable installer did not serve /install with HTTP 200.' }
+
+            $cookies = Join-Path $env:RUNNER_TEMP 'n112-final-v2-install-cookies.txt'
+            $htmlPath = Join-Path $env:RUNNER_TEMP 'n112-final-v2-install.html'
+            & curl.exe -sS -c $cookies "$env:BASE_URL/install" -o $htmlPath
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $html = Get-Content -Raw $htmlPath
+            $csrfMatch = [regex]::Match($html, 'name="_token"\s+value="([^"]+)"')
+            if (-not $csrfMatch.Success) { throw 'Unable to extract installer CSRF token.' }
+            $csrf = $csrfMatch.Groups[1].Value
+            $db = (Get-Content -Raw (Join-Path $env:RUNNER_TEMP 'n112-final-v2-database-path.txt')).Trim()
+            $password = 'Nx!'+[guid]::NewGuid().ToString('N')+'Aa1'
+            $headers = Join-Path $env:RUNNER_TEMP 'n112-final-v2-install.headers.txt'
+            $body = Join-Path $env:RUNNER_TEMP 'n112-final-v2-install.body.html'
+            $status = (& curl.exe -sS -b $cookies -c $cookies -D $headers -o $body -w '%{http_code}' -X POST "$env:BASE_URL/install" `
+              --data-urlencode "_token=$csrf" `
+              --data-urlencode 'app_name=Nexora N1.12 Final QA v2' `
+              --data-urlencode "$([string]'app_url=')$env:BASE_URL" `
+              --data-urlencode 'language=en' `
+              --data-urlencode 'db_driver=sqlite' `
+              --data-urlencode "db_database=$db" `
+              --data-urlencode 'db_create=1' `
+              --data-urlencode 'admin_name=N1.12 Final v2 Installer Administrator' `
+              --data-urlencode 'admin_email=n112-final-v2-installer-admin@example.test' `
+              --data-urlencode "admin_password=$password" `
+              --data-urlencode "admin_password_confirmation=$password" `
+              --data-urlencode 'terms=1').Trim()
+            if ($status -ne '302') { throw "Installer commit failed; HTTP $status." }
+            $location = ([regex]::Match((Get-Content -Raw $headers), '(?im)^Location:\s*(\S+)\s*$')).Groups[1].Value
+            if ($location -notmatch '/install/runtime-handoff$') { throw "Installer redirect was unexpected: $location" }
+            if (-not (Test-Path 'storage/app/nexora/installed.lock')) { throw 'Installer did not seal installed.lock.' }
+            @{ install_http=[int]$status; install_location='/install/runtime-handoff'; installed_lock=$true } |
+              ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'install-result.json')
+          }
+          finally {
+            & cmd.exe /d /c "taskkill /PID $($server.Id) /T /F >NUL 2>&1 || exit /b 0" | Out-Null
+          }
+
+          & php artisan nexora:runtime:post-install-reconcile --confirm=RECONCILE 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:EVIDENCE_DIR 'post-install-reconcile.txt')
+          if ($LASTEXITCODE -ne 0) { throw 'Guarded post-install reconcile failed.' }
+          & php artisan optimize:clear
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          @{ reconciled=$true; installed_lock=(Test-Path 'storage/app/nexora/installed.lock') } |
+            ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'runtime-result.json')
+
+      - name: Run frozen Search contracts on target toolchain
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & php scripts/search-product-contract-verify.php 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:EVIDENCE_DIR 'search-product-contract.txt')
+          if ($LASTEXITCODE -ne 0) { throw 'Search 2.0 product contract verifier failed.' }
+
+          $testDbNative = [System.IO.Path]::GetFullPath((Join-Path $env:RUNNER_TEMP 'n112-final-v2-contract-tests.sqlite'))
+          if (Test-Path $testDbNative) { Remove-Item -Force $testDbNative }
+          New-Item -ItemType File -Path $testDbNative | Out-Null
+          $env:DB_CONNECTION = 'sqlite'
+          $env:DB_DATABASE = $testDbNative.Replace('\', '/')
+          $env:APP_ENV = 'testing'
+          $env:NEXORA_INSTALLER_BYPASS = 'true'
+          & php artisan test tests/Feature/Discovery/SearchProductIsolationTest.php --display-warnings --fail-on-warning 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:EVIDENCE_DIR 'search-isolation-tests.txt')
+          if ($LASTEXITCODE -ne 0) { throw "Frozen Search executable contract failed with exit $LASTEXITCODE." }
+          Remove-Item Env:DB_CONNECTION -ErrorAction SilentlyContinue
+          Remove-Item Env:DB_DATABASE -ErrorAction SilentlyContinue
+          Remove-Item Env:APP_ENV -ErrorAction SilentlyContinue
+          Remove-Item Env:NEXORA_INSTALLER_BYPASS -ErrorAction SilentlyContinue
+          @{ verifier='pass'; frozen_feature_tests='pass'; database='disposable-sqlite' } |
+            ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'contract-result.json')
+
+      - name: Prove installed-target Search lifecycle and tenant isolation
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & php artisan optimize:clear
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = Join-Path $env:RUNNER_TEMP 'n112-final-v2-state.php'
+          @'
+          <?php
+          declare(strict_types=1);
+
+          use App\Models\Document;
+          use App\Models\EnterpriseOrganization;
+          use App\Models\EnterpriseOrganizationMember;
+          use App\Models\MediaAsset;
+          use App\Models\MembershipAccessPolicy;
+          use App\Models\Permission;
+          use App\Models\Role;
+          use App\Models\SearchIndexEntry;
+          use App\Models\SeoEntry;
+          use App\Models\User;
+          use App\Nexora\Discovery\Search\SearchIndexer;
+          use App\Nexora\Enterprise\Services\TenantContext;
+          use App\Nexora\Enterprise\Services\TenantMemberDirectory;
+          use App\Nexora\Foundation\Contracts\SettingsContract;
+          use Illuminate\Contracts\Console\Kernel;
+          use Illuminate\Support\Facades\Hash;
+          use Illuminate\Support\Str;
+
+          $root=(string)$argv[1];
+          require $root.'/vendor/autoload.php';
+          $app=require $root.'/bootstrap/app.php';
+          $app->make(Kernel::class)->bootstrap();
+          $context=app(TenantContext::class);
+          $indexer=app(SearchIndexer::class);
+          $settings=app(SettingsContract::class);
+          $primary=EnterpriseOrganization::query()->where('is_default',true)->firstOrFail();
+          $other=EnterpriseOrganization::query()->create(['name'=>'N1.12 Final v2 Other Organization','slug'=>'n112-final-v2-other','status'=>'active','is_default'=>false,'timezone'=>'UTC','locale'=>'en']);
+
+          $makeRole=static function(string $slug,array $permissions): Role {
+              $role=Role::query()->create(['name'=>$slug,'slug'=>$slug,'description'=>'N1.12 final v2 target QA role','is_system'=>false]);
+              $role->permissions()->sync(Permission::query()->whereIn('slug',$permissions)->pluck('id'));
+              return $role;
+          };
+          $roles=[
+              'admin'=>$makeRole('n112-final-v2-search-admin',['admin.access','search.use','search.index.manage','documents.view','media.view','users.view']),
+              'no_search'=>$makeRole('n112-final-v2-no-search',['admin.access','documents.view','media.view']),
+              'no_reindex'=>$makeRole('n112-final-v2-no-reindex',['admin.access','search.use','documents.view','media.view','users.view']),
+              'doc_only'=>$makeRole('n112-final-v2-doc-only',['admin.access','search.use','documents.view']),
+              'media_only'=>$makeRole('n112-final-v2-media-only',['admin.access','search.use','media.view']),
+          ];
+          $makeUser=static function(string $name,string $email,string $password,Role $role): User {
+              $user=User::query()->create(['name'=>$name,'email'=>$email,'password'=>Hash::make($password),'status'=>'active']);
+              $user->forceFill(['email_verified_at'=>now()])->save();
+              $user->roles()->attach($role->id);
+              return $user;
+          };
+          $users=[
+              'admin'=>$makeUser('N1.12 Final v2 Search Admin','n112-final-v2-admin@example.test','N112-FinalV2-Admin!1',$roles['admin']),
+              'no_search'=>$makeUser('N1.12 Final v2 No Search','n112-final-v2-no-search@example.test','N112-FinalV2-NoSearch!1',$roles['no_search']),
+              'no_reindex'=>$makeUser('N1.12 Final v2 No Reindex','n112-final-v2-no-reindex@example.test','N112-FinalV2-NoReindex!1',$roles['no_reindex']),
+              'doc_only'=>$makeUser('N1.12 Final v2 Document Only','n112-final-v2-doc-only@example.test','N112-FinalV2-DocOnly!1',$roles['doc_only']),
+              'media_only'=>$makeUser('N1.12 Final v2 Media Only','n112-final-v2-media-only@example.test','N112-FinalV2-MediaOnly!1',$roles['media_only']),
+          ];
+          foreach($users as $user){
+              EnterpriseOrganizationMember::query()->create(['organization_id'=>$primary->id,'user_id'=>$user->id,'role'=>'member','status'=>'active','joined_at'=>now()]);
+          }
+          $otherRole=$makeRole('n112-final-v2-other-role',['admin.access','search.use','documents.view','media.view','users.view']);
+          $otherUser=$makeUser('N112FinalV2 Other Member','n112-final-v2-other@example.test','N112-FinalV2-Other!1',$otherRole);
+          EnterpriseOrganizationMember::query()->create(['organization_id'=>$other->id,'user_id'=>$otherUser->id,'role'=>'member','status'=>'active','joined_at'=>now()]);
+
+          $context->set($primary);
+          $settings->set('search.public_enabled',true);
+          $settings->set('analytics.enabled',true);
+
+          $public=Document::query()->create([
+              'uuid'=>(string)Str::uuid(),'type'=>'page','status'=>'published','title'=>'N112FinalV2Alpha Primary Public','slug'=>'n112-final-v2-alpha-public',
+              'excerpt'=>'N112FinalV2Alpha public excerpt','content'=>['blocks'=>[['type'=>'paragraph','data'=>['text'=>'N112FinalV2Alpha searchable primary body']]]],
+              'metadata'=>[],'schema_version'=>1,'published_at'=>now(),
+          ]);
+          $protected=Document::query()->create([
+              'uuid'=>(string)Str::uuid(),'type'=>'page','status'=>'published','title'=>'N112FinalV2Alpha Primary Protected','slug'=>'n112-final-v2-alpha-protected',
+              'excerpt'=>'N112FinalV2Alpha protected excerpt','content'=>['blocks'=>[['type'=>'paragraph','data'=>['text'=>'N112FinalV2Alpha protected body']]]],
+              'metadata'=>[],'schema_version'=>1,'published_at'=>now(),
+          ]);
+          MembershipAccessPolicy::query()->create([
+              'name'=>'N1.12 final v2 protected search fixture','resource_type'=>'document','resource_id'=>(string)$protected->id,
+              'evaluation'=>'any','required_plan_ids'=>[],'required_entitlements'=>[],'unauthenticated_action'=>'deny','active'=>true,'metadata'=>[],
+          ]);
+          $media=MediaAsset::query()->create([
+              'uuid'=>(string)Str::uuid(),'disk'=>'public','visibility'=>'public','media_type'=>'image','mime_type'=>'image/png','extension'=>'png',
+              'original_name'=>'n112-final-v2-alpha.png','stored_name'=>'n112-final-v2-alpha.png','path'=>'n112/final-v2-alpha-primary.png','size_bytes'=>32,
+              'checksum_sha256'=>hash('sha256','n112-final-v2-alpha-primary'),'title'=>'N112FinalV2Alpha Primary Media','alt_text'=>'N112FinalV2Alpha media alt','caption'=>'N112FinalV2Alpha media caption','metadata'=>[],
+          ]);
+
+          $life=Document::query()->create([
+              'uuid'=>(string)Str::uuid(),'type'=>'page','status'=>'draft','title'=>'N112FinalV2Lifecycle','slug'=>'n112-final-v2-lifecycle',
+              'excerpt'=>'lifecycle','content'=>['blocks'=>[['type'=>'paragraph','data'=>['text'=>'N112FinalV2Lifecycle body one']]]],'metadata'=>[],'schema_version'=>1,
+          ]);
+          $lifeInitial=SearchIndexEntry::query()->where('resource_type','document')->where('resource_id',$life->id)->firstOrFail();
+          $hashOne=(string)$lifeInitial->content_hash;
+          $life->content=['blocks'=>[['type'=>'paragraph','data'=>['text'=>'N112FinalV2Lifecycle body two']]]];
+          $life->save();
+          $life->save();
+          $lifeUpdated=SearchIndexEntry::query()->where('resource_type','document')->where('resource_id',$life->id)->firstOrFail();
+          $documentUpdateChanged=$hashOne!==(string)$lifeUpdated->content_hash;
+          $documentSingle=SearchIndexEntry::query()->where('resource_type','document')->where('resource_id',$life->id)->where('locale','en')->count()===1;
+          $lifeId=(int)$life->id;
+          $life->delete();
+          $documentDeleteRemoved=!SearchIndexEntry::query()->where('resource_type','document')->where('resource_id',$lifeId)->exists();
+
+          $seo=SeoEntry::query()->create([
+              'resource_type'=>'document','resource_id'=>$public->id,'locale'=>'en','seo_title'=>'N112 Final v2 Alpha SEO','meta_description'=>'N1.12 final v2 Search QA',
+              'url_path'=>'n112-final-v2-custom-alpha','robots_index'=>true,'robots_follow'=>true,'schema_type'=>'WebPage','sitemap_include'=>true,'indexing_state'=>'eligible',
+          ]);
+          $seoSaveApplied=SearchIndexEntry::query()->where('resource_type','document')->where('resource_id',$public->id)->value('url_path')==='/n112-final-v2-custom-alpha';
+          $seo->delete();
+          $seoDeleteRefreshed=SearchIndexEntry::query()->where('resource_type','document')->where('resource_id',$public->id)->value('url_path')==='/content/n112-final-v2-alpha-public';
+
+          $mediaIndexed=SearchIndexEntry::query()->where('resource_type','media')->where('resource_id',$media->id)->exists();
+          $media->title='N112FinalV2Alpha Updated Primary Media';
+          $media->save();
+          $mediaUpdated=SearchIndexEntry::query()->where('resource_type','media')->where('resource_id',$media->id)->value('title')==='N112FinalV2Alpha Updated Primary Media';
+          $mediaSingle=SearchIndexEntry::query()->where('resource_type','media')->where('resource_id',$media->id)->where('locale','en')->count()===1;
+          $media->delete();
+          $mediaRemoved=!SearchIndexEntry::query()->where('resource_type','media')->where('resource_id',$media->id)->exists();
+          $media->restore();
+          $mediaRestored=SearchIndexEntry::query()->where('resource_type','media')->where('resource_id',$media->id)->exists();
+
+          $rankExact=Document::query()->create([
+              'uuid'=>(string)Str::uuid(),'type'=>'page','status'=>'draft','title'=>'N112FinalV2Rank','slug'=>'n112-final-v2-rank-exact',
+              'content'=>['blocks'=>[['type'=>'paragraph','data'=>['text'=>'ranking exact']]]],'metadata'=>[],'schema_version'=>1,
+          ]);
+          Document::query()->create([
+              'uuid'=>(string)Str::uuid(),'type'=>'page','status'=>'draft','title'=>'N112FinalV2Rank Extended','slug'=>'n112-final-v2-rank-prefix',
+              'content'=>['blocks'=>[['type'=>'paragraph','data'=>['text'=>'ranking prefix']]]],'metadata'=>[],'schema_version'=>1,
+          ]);
+          $ranked=$indexer->search('n112finalv2rank',false,20,'en',['document']);
+          $rankingExactFirst=(int)($ranked->first()['resource_id']??0)===(int)$rankExact->id;
+
+          SearchIndexEntry::query()->create([
+              'resource_type'=>'document','resource_id'=>2147483003,'locale'=>'en','status'=>'published','title'=>'N112 final v2 diagnostic stale projection',
+              'excerpt'=>null,'body_text'=>'diagnostic stale projection only','keywords'=>null,'url_path'=>'/n112-final-v2-stale',
+              'content_hash'=>hash('sha256','n112-final-v2-stale'),'published_at'=>now(),'indexed_at'=>now(),
+          ]);
+          $rebuildOne=$indexer->rebuild();
+          $staleRemoved=!SearchIndexEntry::query()->where('resource_type','document')->where('resource_id',2147483003)->exists();
+          $countOne=SearchIndexEntry::query()->count();
+          $rebuildTwo=$indexer->rebuild();
+          $countTwo=SearchIndexEntry::query()->count();
+          $rebuildIdempotent=$countOne===$countTwo;
+
+          $publicResults=$indexer->search('n112finalv2alpha',true,20,'en');
+          $publicTyped=$publicResults->map(fn(array $r):string=>$r['resource_type'].':'.(int)$r['resource_id'])->all();
+          $publicVisible=in_array('document:'.(int)$public->id,$publicTyped,true);
+          $protectedHidden=!in_array('document:'.(int)$protected->id,$publicTyped,true);
+          $publicDocumentOnly=$publicResults->every(fn(array $r):bool=>$r['resource_type']==='document');
+          $normalizedFinds=$indexer->search('  N112FINALV2ALPHA   PRIMARY  ',false,20,'en',['document'])->contains(fn(array $r):bool=>(int)$r['resource_id']===(int)$public->id);
+          $shortEmpty=$indexer->search('x',false,20,'en')->isEmpty();
+          $invalidTypeEmpty=$indexer->search('n112finalv2alpha',false,20,'en',['unsupported'])->isEmpty();
+          $limitOne=$indexer->search('n112finalv2alpha',false,1,'en')->count()<=1;
+
+          $context->set($other);
+          $otherDocument=Document::query()->create([
+              'uuid'=>(string)Str::uuid(),'type'=>'page','status'=>'published','title'=>'N112FinalV2Alpha Other Tenant','slug'=>'n112-final-v2-alpha-other',
+              'excerpt'=>'N112FinalV2Alpha other tenant','content'=>['blocks'=>[['type'=>'paragraph','data'=>['text'=>'N112FinalV2Alpha other tenant body']]]],
+              'metadata'=>[],'schema_version'=>1,'published_at'=>now(),
+          ]);
+          $otherMedia=MediaAsset::query()->create([
+              'uuid'=>(string)Str::uuid(),'disk'=>'public','visibility'=>'public','media_type'=>'image','mime_type'=>'image/png','extension'=>'png',
+              'original_name'=>'n112-final-v2-other.png','stored_name'=>'n112-final-v2-other.png','path'=>'n112/final-v2-alpha-other.png','size_bytes'=>32,
+              'checksum_sha256'=>hash('sha256','n112-final-v2-alpha-other'),'title'=>'N112FinalV2Alpha Other Media','alt_text'=>'N112FinalV2Alpha other media','metadata'=>[],
+          ]);
+          $otherTyped=$indexer->search('n112finalv2alpha',false,50,'en')->map(fn(array $r):string=>$r['resource_type'].':'.(int)$r['resource_id'])->all();
+          $otherOwnDoc=in_array('document:'.(int)$otherDocument->id,$otherTyped,true);
+          $otherOwnMedia=in_array('media:'.(int)$otherMedia->id,$otherTyped,true);
+          $otherExcludesPrimaryDoc=!in_array('document:'.(int)$public->id,$otherTyped,true);
+          $otherExcludesPrimaryMedia=!in_array('media:'.(int)$media->id,$otherTyped,true);
+
+          $context->set($primary);
+          $primaryTyped=$indexer->search('n112finalv2alpha',false,50,'en')->map(fn(array $r):string=>$r['resource_type'].':'.(int)$r['resource_id'])->all();
+          $primaryExcludesOtherDoc=!in_array('document:'.(int)$otherDocument->id,$primaryTyped,true);
+          $primaryExcludesOtherMedia=!in_array('media:'.(int)$otherMedia->id,$primaryTyped,true);
+          $directoryIds=array_map('strval',array_column(app(TenantMemberDirectory::class)->options(),'id'));
+          $directoryExcludesOther=!in_array((string)$otherUser->id,$directoryIds,true);
+          $allRows=SearchIndexEntry::query()->withoutGlobalScope('nexora_tenant')->count();
+          $primaryRows=SearchIndexEntry::query()->count();
+
+          $state=[
+              'primary_tenant_id'=>$primary->id,'other_tenant_id'=>$other->id,
+              'primary_document_id'=>$public->id,'protected_document_id'=>$protected->id,'primary_media_id'=>$media->id,
+              'other_document_id'=>$otherDocument->id,'other_media_id'=>$otherMedia->id,
+              'document_update_changed_hash'=>$documentUpdateChanged,'document_single_projection'=>$documentSingle,'document_delete_removed_projection'=>$documentDeleteRemoved,
+              'seo_save_applied_url'=>$seoSaveApplied,'seo_delete_refreshed_url'=>$seoDeleteRefreshed,
+              'media_indexed'=>$mediaIndexed,'media_updated'=>$mediaUpdated,'media_single_projection'=>$mediaSingle,'media_removed_on_delete'=>$mediaRemoved,'media_reindexed_on_restore'=>$mediaRestored,
+              'stale_projection_removed_by_rebuild'=>$staleRemoved,'first_rebuild'=>$rebuildOne,'second_rebuild'=>$rebuildTwo,'rebuild_idempotent'=>$rebuildIdempotent,
+              'deterministic_exact_title_ranked_first'=>$rankingExactFirst,
+              'public_document_visible'=>$publicVisible,'protected_document_hidden'=>$protectedHidden,'public_results_document_only'=>$publicDocumentOnly,
+              'normalized_query_finds_document'=>$normalizedFinds,'short_query_empty'=>$shortEmpty,'invalid_resource_type_empty'=>$invalidTypeEmpty,'limit_one_respected'=>$limitOne,
+              'other_tenant_sees_own_document'=>$otherOwnDoc,'other_tenant_sees_own_media'=>$otherOwnMedia,
+              'other_tenant_excludes_primary_document'=>$otherExcludesPrimaryDoc,'other_tenant_excludes_primary_media'=>$otherExcludesPrimaryMedia,
+              'primary_tenant_excludes_other_document'=>$primaryExcludesOtherDoc,'primary_tenant_excludes_other_media'=>$primaryExcludesOtherMedia,
+              'primary_member_directory_excludes_other_tenant_user'=>$directoryExcludesOther,
+              'primary_index_rows'=>$primaryRows,'all_tenant_index_rows'=>$allRows,
+          ];
+          $required=[
+              $documentUpdateChanged,$documentSingle,$documentDeleteRemoved,$seoSaveApplied,$seoDeleteRefreshed,
+              $mediaIndexed,$mediaUpdated,$mediaSingle,$mediaRemoved,$mediaRestored,$staleRemoved,$rebuildIdempotent,$rankingExactFirst,
+              $publicVisible,$protectedHidden,$publicDocumentOnly,$normalizedFinds,$shortEmpty,$invalidTypeEmpty,$limitOne,
+              $otherOwnDoc,$otherOwnMedia,$otherExcludesPrimaryDoc,$otherExcludesPrimaryMedia,$primaryExcludesOtherDoc,$primaryExcludesOtherMedia,$directoryExcludesOther,$allRows>$primaryRows,
+          ];
+          if(in_array(false,$required,true)){
+              fwrite(STDERR,json_encode($state,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL);
+              exit(2);
+          }
+          echo json_encode($state,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL;
+          '@ | Set-Content -Encoding Ascii $probe
+          & php $probe $env:GITHUB_WORKSPACE | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'search-state.json')
+          if ($LASTEXITCODE -ne 0) { throw 'Installed-target Search lifecycle/tenant isolation probe failed.' }
+
+      - name: Exercise browser-equivalent real HTTP Search permissions and privacy
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $toggle=Join-Path $env:RUNNER_TEMP 'n112-final-v2-toggle.php'
+          @'
+          <?php
+          declare(strict_types=1);
+          use App\Models\EnterpriseOrganization;
+          use App\Nexora\Enterprise\Services\TenantContext;
+          use App\Nexora\Foundation\Contracts\SettingsContract;
+          use Illuminate\Contracts\Console\Kernel;
+          $root=(string)$argv[1]; require $root.'/vendor/autoload.php'; $app=require $root.'/bootstrap/app.php'; $app->make(Kernel::class)->bootstrap();
+          $primary=EnterpriseOrganization::query()->where('is_default',true)->firstOrFail(); app(TenantContext::class)->set($primary);
+          app(SettingsContract::class)->set((string)$argv[2],filter_var((string)$argv[3],FILTER_VALIDATE_BOOL));
+          '@ | Set-Content -Encoding Ascii $toggle
+
+          $serverOut=Join-Path $env:EVIDENCE_DIR 'search-server.out.log'
+          $serverErr=Join-Path $env:EVIDENCE_DIR 'search-server.err.log'
+          $docroot=[System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'public'))
+          $router=[System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php'))
+          $server=Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t',$docroot,$router) -WorkingDirectory $docroot -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+
+          function Get-Csrf([string]$Html){
+            $m=[regex]::Match($Html,'<meta\s+name="csrf-token"\s+content="([^"]+)"')
+            if(-not $m.Success){throw 'Unable to extract CSRF token.'}
+            return $m.Groups[1].Value
+          }
+          function Login([string]$Email,[string]$Password,[string]$CookieFile){
+            & php artisan cache:clear | Out-Null
+            if($LASTEXITCODE -ne 0){throw 'Unable to isolate disposable auth throttle cache.'}
+            $page=Join-Path $env:RUNNER_TEMP ([guid]::NewGuid().ToString('N')+'.html')
+            & curl.exe -sS -c $CookieFile "$env:BASE_URL/login" -o $page
+            if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+            $csrf=Get-Csrf (Get-Content -Raw $page)
+            $status=(& curl.exe -sS -b $CookieFile -c $CookieFile -o NUL -w '%{http_code}' -X POST "$env:BASE_URL/login" --data-urlencode "_token=$csrf" --data-urlencode "email=$Email" --data-urlencode "password=$Password").Trim()
+            if($status -ne '302'){throw "Login failed for $Email with HTTP $status."}
+          }
+          function Get-DeploymentGeneration([string]$CookieFile,[string]$EvidenceName){
+            $headers=Join-Path $env:EVIDENCE_DIR $EvidenceName
+            $body=Join-Path $env:RUNNER_TEMP ([guid]::NewGuid().ToString('N')+'.html')
+            $status=(& curl.exe -sS -b $CookieFile -c $CookieFile -D $headers -o $body -w '%{http_code}' "$env:BASE_URL/admin").Trim()
+            if($status -ne '200'){throw "Unable to load authenticated Admin shell for deployment generation; HTTP $status."}
+            $raw=Get-Content -Raw $headers
+            $match=[regex]::Match($raw,'(?im)^X-Nexora-Deployment-Generation:\s*([^\r\n]+)')
+            if(-not $match.Success){throw 'Authenticated Admin shell did not expose X-Nexora-Deployment-Generation.'}
+            return $match.Groups[1].Value.Trim().ToLowerInvariant()
+          }
+          function Read-JsonResults([string]$Path,[string]$Status,[string]$Label){
+            if($Status -ne '200'){
+              $body=Get-Content -Raw $Path -ErrorAction SilentlyContinue
+              throw "$Label expected HTTP 200, got $Status. Body: $body"
+            }
+            try{$payload=Get-Content -Raw $Path | ConvertFrom-Json}
+            catch{throw "$Label returned invalid JSON despite HTTP 200: $($_.Exception.Message)"}
+            return @($payload.results)
+          }
+
+          try{
+            $ready=$false
+            for($i=0;$i -lt 60;$i++){
+              if($server.HasExited){throw "Search server exited early with code $($server.ExitCode)."}
+              $probeStatus=(& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/search").Trim()
+              if(($LASTEXITCODE -eq 0)-and($probeStatus -eq '200')){$ready=$true;break}
+              Start-Sleep -Seconds 1
+            }
+            if(-not $ready){throw 'Search server did not serve /search with HTTP 200.'}
+
+            $publicBody=Join-Path $env:EVIDENCE_DIR 'public-search.html'
+            $publicStatus=(& curl.exe -sS -o $publicBody -w '%{http_code}' "$env:BASE_URL/search?q=n112finalv2alpha").Trim()
+            $publicHtml=Get-Content -Raw $publicBody
+            $publicVisible=$publicHtml.Contains('N112FinalV2Alpha Primary Public')
+            $protectedLeak=$publicHtml.Contains('N112FinalV2Alpha Primary Protected')
+            $publicMediaLeak=$publicHtml.Contains('N112FinalV2Alpha Updated Primary Media')
+            $robots=$publicHtml.Contains('noindex,follow')
+            if($publicStatus -ne '200' -or -not $publicVisible -or $protectedLeak -or $publicMediaLeak -or -not $robots){throw 'Public Search HTTP visibility/robots boundary failed.'}
+
+            $shortStatus=(& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/search?q=x").Trim()
+            if($shortStatus -ne '302'){throw "Public Search min-length validation expected 302, got $shortStatus."}
+            & php $toggle $env:GITHUB_WORKSPACE 'search.public_enabled' 'false'
+            if($LASTEXITCODE -ne 0){throw 'Unable to disable public Search.'}
+            $disabledStatus=(& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/search?q=n112finalv2alpha").Trim()
+            if($disabledStatus -ne '404'){throw "Disabled public Search expected 404, got $disabledStatus."}
+            & php $toggle $env:GITHUB_WORKSPACE 'search.public_enabled' 'true'
+            if($LASTEXITCODE -ne 0){throw 'Unable to re-enable public Search.'}
+
+            $gpcStatus=(& curl.exe -sS -H 'Sec-GPC: 1' -o NUL -w '%{http_code}' "$env:BASE_URL/search?q=n112finalv2gpc").Trim()
+            $dntStatus=(& curl.exe -sS -H 'DNT: 1' -o NUL -w '%{http_code}' "$env:BASE_URL/search?q=n112finalv2dnt").Trim()
+            if($gpcStatus -ne '200' -or $dntStatus -ne '200'){throw 'Privacy opt-out Search requests were not served normally.'}
+
+            $guestStatus=(& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/admin/search?q=n112finalv2alpha").Trim()
+            if($guestStatus -ne '302'){throw "Guest Admin Search expected 302, got $guestStatus."}
+
+            $adminCookies=Join-Path $env:RUNNER_TEMP 'n112-final-v2-admin.cookies'
+            Login 'n112-final-v2-admin@example.test' 'N112-FinalV2-Admin!1' $adminCookies
+            $generation=Get-DeploymentGeneration $adminCookies 'admin-runtime.headers.txt'
+            $adminJson=Join-Path $env:EVIDENCE_DIR 'admin-search.json'
+            $adminStatus=(& curl.exe -sS -b $adminCookies -o $adminJson -w '%{http_code}' -H 'Accept: application/json' -H "X-Nexora-Deployment-Generation: $generation" "$env:BASE_URL/admin/search?q=n112finalv2alpha").Trim()
+            $adminResults=Read-JsonResults $adminJson $adminStatus 'Authorized Admin Search'
+            $adminTypes=@($adminResults | ForEach-Object { [string]$_.type })
+            $adminTitles=@($adminResults | ForEach-Object { [string]$_.title })
+            if($adminTypes -notcontains 'document' -or $adminTypes -notcontains 'media'){throw "Authorized Admin Search expected document+media; types=$($adminTypes -join ',')."}
+            if(($adminTitles -contains 'N112FinalV2Alpha Other Tenant') -or ($adminTitles -contains 'N112FinalV2Alpha Other Media') -or ($adminTitles -contains 'N112FinalV2 Other Member')){throw 'Authorized Admin Search disclosed another tenant.'}
+
+            $noSearchCookies=Join-Path $env:RUNNER_TEMP 'n112-final-v2-no-search.cookies'
+            Login 'n112-final-v2-no-search@example.test' 'N112-FinalV2-NoSearch!1' $noSearchCookies
+            $noSearchBody=Join-Path $env:EVIDENCE_DIR 'no-search-permission.txt'
+            $noSearchStatus=(& curl.exe -sS -b $noSearchCookies -o $noSearchBody -w '%{http_code}' -H 'Accept: application/json' -H "X-Nexora-Deployment-Generation: $generation" "$env:BASE_URL/admin/search?q=n112finalv2alpha").Trim()
+            if($noSearchStatus -ne '403'){throw "search.use permission expected 403, got $noSearchStatus. Body: $(Get-Content -Raw $noSearchBody -ErrorAction SilentlyContinue)"}
+
+            $docCookies=Join-Path $env:RUNNER_TEMP 'n112-final-v2-doc-only.cookies'
+            Login 'n112-final-v2-doc-only@example.test' 'N112-FinalV2-DocOnly!1' $docCookies
+            $docJson=Join-Path $env:EVIDENCE_DIR 'document-only-search.json'
+            $docStatus=(& curl.exe -sS -b $docCookies -o $docJson -w '%{http_code}' -H 'Accept: application/json' -H "X-Nexora-Deployment-Generation: $generation" "$env:BASE_URL/admin/search?q=n112finalv2alpha").Trim()
+            $docResults=Read-JsonResults $docJson $docStatus 'Document-only Search'
+            $docTypes=@($docResults | ForEach-Object { [string]$_.type })
+            if($docTypes -notcontains 'document' -or $docTypes -contains 'media'){throw "Document-only Search boundary failed; types=$($docTypes -join ',')."}
+
+            $mediaCookies=Join-Path $env:RUNNER_TEMP 'n112-final-v2-media-only.cookies'
+            Login 'n112-final-v2-media-only@example.test' 'N112-FinalV2-MediaOnly!1' $mediaCookies
+            $mediaJson=Join-Path $env:EVIDENCE_DIR 'media-only-search.json'
+            $mediaStatus=(& curl.exe -sS -b $mediaCookies -o $mediaJson -w '%{http_code}' -H 'Accept: application/json' -H "X-Nexora-Deployment-Generation: $generation" "$env:BASE_URL/admin/search?q=n112finalv2alpha").Trim()
+            $mediaResults=Read-JsonResults $mediaJson $mediaStatus 'Media-only Search'
+            $mediaTypes=@($mediaResults | ForEach-Object { [string]$_.type })
+            if($mediaTypes -contains 'document' -or $mediaTypes -notcontains 'media'){throw "Media-only Search boundary failed; types=$($mediaTypes -join ',')."}
+
+            $noReindexCookies=Join-Path $env:RUNNER_TEMP 'n112-final-v2-no-reindex.cookies'
+            Login 'n112-final-v2-no-reindex@example.test' 'N112-FinalV2-NoReindex!1' $noReindexCookies
+            $noReindexPage=Join-Path $env:RUNNER_TEMP 'n112-final-v2-no-reindex.html'
+            & curl.exe -sS -b $noReindexCookies -c $noReindexCookies "$env:BASE_URL/admin" -o $noReindexPage
+            if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+            $noReindexCsrf=Get-Csrf (Get-Content -Raw $noReindexPage)
+            $noReindexStatus=(& curl.exe -sS -b $noReindexCookies -o NUL -w '%{http_code}' -H "X-Nexora-Deployment-Generation: $generation" -X POST "$env:BASE_URL/admin/discovery/reindex" --data-urlencode "_token=$noReindexCsrf").Trim()
+            if($noReindexStatus -ne '403'){throw "search.index.manage permission expected 403, got $noReindexStatus."}
+
+            $adminPage=Join-Path $env:RUNNER_TEMP 'n112-final-v2-admin.html'
+            & curl.exe -sS -b $adminCookies -c $adminCookies "$env:BASE_URL/admin" -o $adminPage
+            if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+            $adminCsrf=Get-Csrf (Get-Content -Raw $adminPage)
+            $reindexStatus=(& curl.exe -sS -b $adminCookies -o NUL -w '%{http_code}' -H "X-Nexora-Deployment-Generation: $generation" -X POST "$env:BASE_URL/admin/discovery/reindex" --data-urlencode "_token=$adminCsrf").Trim()
+            if($reindexStatus -ne '302'){throw "Authorized reindex expected 302, got $reindexStatus."}
+
+            @{
+              deployment_generation=$generation; deployment_generation_header_sent=$true;
+              public_search_http=[int]$publicStatus; public_document_visible=$publicVisible; protected_document_disclosed=$protectedLeak; public_media_disclosed=$publicMediaLeak; robots_noindex_follow=$robots;
+              short_query_http=[int]$shortStatus; disabled_search_http=[int]$disabledStatus; gpc_search_http=[int]$gpcStatus; dnt_search_http=[int]$dntStatus;
+              guest_admin_search_http=[int]$guestStatus; authorized_admin_search_http=[int]$adminStatus; authorized_admin_types=$adminTypes;
+              no_search_permission_http=[int]$noSearchStatus; document_only_search_http=[int]$docStatus; document_only_types=$docTypes;
+              media_only_search_http=[int]$mediaStatus; media_only_types=$mediaTypes; no_reindex_permission_http=[int]$noReindexStatus; authorized_reindex_http=[int]$reindexStatus;
+              other_tenant_admin_search_disclosed=$false
+            } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'http-boundary.json')
+          }
+          finally{
+            & cmd.exe /d /c "taskkill /PID $($server.Id) /T /F >NUL 2>&1 || exit /b 0" | Out-Null
+          }
+
+          $verify=Join-Path $env:RUNNER_TEMP 'n112-final-v2-post-http.php'
+          @'
+          <?php
+          declare(strict_types=1);
+          use App\Models\AuditLog;
+          use App\Models\EnterpriseOrganization;
+          use App\Models\SearchQueryLog;
+          use App\Nexora\Enterprise\Services\TenantContext;
+          use Illuminate\Contracts\Console\Kernel;
+          $root=(string)$argv[1]; require $root.'/vendor/autoload.php'; $app=require $root.'/bootstrap/app.php'; $app->make(Kernel::class)->bootstrap();
+          $primary=EnterpriseOrganization::query()->where('is_default',true)->firstOrFail(); app(TenantContext::class)->set($primary);
+          $normal=SearchQueryLog::query()->where('normalized_query','n112finalv2alpha')->count();
+          $gpc=SearchQueryLog::query()->where('normalized_query','n112finalv2gpc')->count();
+          $dnt=SearchQueryLog::query()->where('normalized_query','n112finalv2dnt')->count();
+          $audit=AuditLog::query()->where('event','search.index.rebuilt')->exists();
+          $state=['normal_query_logs'=>$normal,'gpc_query_logs'=>$gpc,'dnt_query_logs'=>$dnt,'reindex_audit_recorded'=>$audit];
+          if($normal<1||$gpc!==0||$dnt!==0||!$audit){fwrite(STDERR,json_encode($state,JSON_PRETTY_PRINT).PHP_EOL);exit(2);}
+          echo json_encode($state,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL;
+          '@ | Set-Content -Encoding Ascii $verify
+          & php $verify $env:GITHUB_WORKSPACE | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'privacy-audit-state.json')
+          if($LASTEXITCODE -ne 0){throw 'Search query-log privacy or reindex audit verification failed.'}
+
+          $err=Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'search-server.err.log') -ErrorAction SilentlyContinue
+          if($err -match '(?i)(fatal error|uncaught|stack trace)'){throw 'Search server log contains a hidden fatal runtime failure.'}
+
+      - name: Write N1.12 final v2 evidence summary
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $binding=Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'source-binding.json') | ConvertFrom-Json
+          $install=Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'install-result.json') | ConvertFrom-Json
+          $runtime=Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'runtime-result.json') | ConvertFrom-Json
+          $state=Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'search-state.json') | ConvertFrom-Json
+          $http=Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'http-boundary.json') | ConvertFrom-Json
+          $privacy=Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'privacy-audit-state.json') | ConvertFrom-Json
+          @{
+            schema=4; status='pass'; stage='SEARCH-200'; legacy_alias='N1.12'; source_sha=$binding.source_sha; carrier_sha=$binding.carrier_sha;
+            fresh_install=$install.installed_lock; post_install_reconcile=$runtime.reconciled; frozen_contracts='pass'; lifecycle_target='pass'; tenant_isolation='pass';
+            browser_generation_protocol='pass'; deployment_generation=$http.deployment_generation;
+            public_http=$http.public_search_http; admin_http=$http.authorized_admin_search_http; search_use_boundary=$http.no_search_permission_http;
+            document_permission_boundary=$http.document_only_search_http; media_permission_boundary=$http.media_only_search_http;
+            reindex_permission_boundary=$http.no_reindex_permission_http; authorized_reindex=$http.authorized_reindex_http;
+            gpc_query_logs=$privacy.gpc_query_logs; dnt_query_logs=$privacy.dnt_query_logs; reindex_audit_recorded=$privacy.reindex_audit_recorded;
+            external_search_provider_certified=$false; distributed_index_certified=$false; facets_certified=$false; performance_scale_certified=$false; five_engine_matrix_certified=$false;
+          } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'summary.json')
+
+      - name: Upload N1.12 final v2 bounded target evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-n112-search-final-v2-${{ github.event.pull_request.base.sha }}-${{ github.run_id }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 14
