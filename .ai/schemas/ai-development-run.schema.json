@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexora.local/.ai/schemas/ai-development-run.schema.json",
+  "title": "Nexora AI Development Run Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "stage_id",
+    "development_unit_ids",
+    "base_branch",
+    "base_sha",
+    "active_plan_digest",
+    "policy_bundle_digest",
+    "risk_class",
+    "role",
+    "scope",
+    "capabilities",
+    "lease",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "pattern": "^AIRUN-[A-Z0-9-]+$"},
+    "stage_id": {"type": "string", "pattern": "^[A-Z0-9-]+$"},
+    "development_unit_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^(SYS|MOD|FEAT|EXT|APP|INT|SPK|THM|AIT|AIA|MIG|OPS|SEC)-[A-Z0-9-]+$"}
+    },
+    "base_branch": {"type": "string", "minLength": 1},
+    "base_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "head_sha": {"oneOf": [{"type": "null"}, {"type": "string", "pattern": "^[0-9a-f]{40}$"}]},
+    "active_plan_digest": {"type": "string", "minLength": 8},
+    "policy_bundle_digest": {"type": "string", "minLength": 8},
+    "architecture_digest": {"type": ["string", "null"]},
+    "security_digest": {"type": ["string", "null"]},
+    "risk_class": {"enum": ["low", "moderate", "high", "critical"]},
+    "role": {"type": "string", "minLength": 1},
+    "model": {
+      "type": "object",
+      "properties": {
+        "provider": {"type": ["string", "null"]},
+        "model": {"type": ["string", "null"]},
+        "revision": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "required": ["summary", "allowed_paths", "forbidden_paths"],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1},
+        "allowed_paths": {"type": "array", "items": {"type": "string"}},
+        "forbidden_paths": {"type": "array", "items": {"type": "string"}},
+        "logical_subsystems": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "capabilities": {
+      "type": "object",
+      "required": ["repository_write", "network", "secrets", "target_mutation", "governance_mutation"],
+      "properties": {
+        "repository_write": {"type": "boolean"},
+        "network": {"type": "array", "items": {"type": "string"}},
+        "secrets": {"enum": ["none", "reference-only", "approved-scoped"]},
+        "target_mutation": {"type": "boolean"},
+        "governance_mutation": {"type": "boolean"},
+        "package_install": {"type": "boolean"},
+        "repository_settings": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "tool_calls": {"type": ["integer", "null"], "minimum": 1},
+        "test_runs": {"type": ["integer", "null"], "minimum": 1},
+        "build_runs": {"type": ["integer", "null"], "minimum": 1},
+        "cost_units": {"type": ["number", "null"], "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "lease": {
+      "type": "object",
+      "required": ["lease_id", "owner_run_id", "expires_at"],
+      "properties": {
+        "lease_id": {"type": "string", "minLength": 1},
+        "owner_run_id": {"type": "string", "minLength": 1},
+        "expires_at": {"type": "string", "format": "date-time"},
+        "heartbeat_at": {"type": ["string", "null"], "format": "date-time"}
+      },
+      "additionalProperties": false
+    },
+    "review_policy": {
+      "type": "object",
+      "properties": {
+        "independent_review_required": {"type": "boolean"},
+        "security_review_required": {"type": "boolean"},
+        "human_approval_required": {"type": "boolean"},
+        "reviewed_head_sha": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "waiver_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "status": {"enum": ["PLANNED", "AUTHORIZED", "ACTIVE", "STALE", "BLOCKED", "VERIFYING", "ATTESTED", "PROMOTABLE", "COMPLETED", "ABORTED"]}
+  },
+  "additionalProperties": false
+}

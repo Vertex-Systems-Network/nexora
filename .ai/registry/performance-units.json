@@ -1,0 +1,230 @@
+{
+  "schema_version": "1.0",
+  "project": "Nexora",
+  "rule": "Performance-related implementation may not begin until its unit is active, its parent stage is current, and a reproducible budget/test profile is defined where runtime performance is applicable.",
+  "units": [
+    {
+      "id": "SYS-PERFORMANCE-FOUNDATION",
+      "type": "core-system",
+      "name": "Performance Measurement & Attribution Foundation",
+      "summary": "Provider-neutral frontend/RUM/backend profiling primitives with Admin/server traces, Theme/Extension attribution, budgets and regression baselines.",
+      "status": "PLANNED",
+      "parent_stage_id": "PERFORMANCE-FOUNDATION-200",
+      "release_train": "builder-beta",
+      "depends_on": ["FRONTEND-RUNTIME-200", "THEME-CONTRACT-200", "EXT-SDK-200", "SECURITY-BASELINE-200"],
+      "delivery": "core",
+      "architecture": {
+        "contracts_impacted": ["performance result schema", "test profile provider", "telemetry attribution", "performance budget policy", "package telemetry identity"],
+        "adr_required": true,
+        "boundary_notes": "Instrumentation must be provider-neutral and may not give profilers or packages privileged access around Nexora contracts/capabilities."
+      },
+      "data": {
+        "persistence_impact": "Performance profiles, baselines, aggregates, traces/findings and package attribution require bounded/versioned storage with retention policy.",
+        "migration_required": true,
+        "migration_policy": "Additive portable migrations only; raw trace storage may use adapter-backed external storage later.",
+        "rollback_notes": "Instrumentation can be disabled independently; schema rollback must not require destructive down migrations."
+      },
+      "authorization": {
+        "permissions": ["performance.view", "performance.run", "performance.manage", "performance.deep-profile"],
+        "runtime_capabilities": ["performance.measure", "performance.attribute"],
+        "tenant_impact": "All stored tests/RUM/budgets/traces are site/tenant scoped; cross-tenant comparison is denied by default."
+      },
+      "security": {
+        "risk": "high",
+        "threat_model_required": true,
+        "security_notes": "Deep profiling can expose sensitive request/SQL/runtime context. Redaction, sampling, access controls, bounded overhead and no-secret capture are mandatory."
+      },
+      "privacy": {
+        "personal_data": true,
+        "consent_impact": "RUM collection must integrate with PRIVACY-CONSENT-100 and respect applicable GPC/DNT/consent policy.",
+        "retention_impact": "Raw traces and RUM identifiers require short configurable retention and privacy-safe aggregation."
+      },
+      "surfaces": {
+        "admin_ui": true,
+        "public_ui": false,
+        "api": true,
+        "webhook": false,
+        "sdk": true,
+        "theme": true,
+        "studio": true,
+        "extension": true
+      },
+      "ai": {
+        "exposure": "read",
+        "tool_ids": [],
+        "approval_required": false
+      },
+      "testing": {
+        "unit": true,
+        "integration": true,
+        "architecture": true,
+        "security": true,
+        "browser": true,
+        "ai_evals": false
+      },
+      "verification": {
+        "real_target_required": true,
+        "evidence": ["frontend synthetic trace", "Admin/browser plus backend correlated trace", "database/cache attribution", "Theme/Extension attributed cost", "budget regression detection", "profiler overhead measurement"]
+      },
+      "rollback": "Profiling features and RUM intake can be disabled without disabling site rendering; bad instrumentation must fail open for availability but fail closed for claims/evidence integrity.",
+      "observability": ["instrumentation overhead", "dropped samples", "trace ingestion failures", "RUM sampling", "budget evaluation failures"],
+      "acceptance_criteria": [
+        "Frontend, Admin and backend requests can be measured with a canonical provider-neutral result model.",
+        "Theme/Extension/App execution and owned assets can be attributed without double-counting nested cost.",
+        "Versioned performance budgets and baseline comparisons can detect intentional frontend/backend/package regressions.",
+        "Sensitive trace/RUM data is redacted, scoped and retained according to policy."
+      ],
+      "out_of_scope": ["Final production Core Web Vitals certification", "Full multi-location public testing UI", "Autonomous AI optimization"],
+      "source_refs": [".ai/performance/performance-platform.md", ".ai/performance/performance-budget-template.md", ".ai/roadmap/capability-matrix-phase4-performance.md"]
+    },
+    {
+      "id": "SYS-CODE-QUALITY",
+      "type": "core-system",
+      "name": "Code Quality Intelligence",
+      "summary": "Core/Theme/Extension/App static and build quality analysis correlated with runtime performance evidence while remaining separate from Sentinel security trust.",
+      "status": "PLANNED",
+      "parent_stage_id": "CODE-QUALITY-200",
+      "release_train": "builder-beta",
+      "depends_on": ["ARCH-BOUNDARY-100", "EXT-SDK-200", "PERFORMANCE-FOUNDATION-200"],
+      "delivery": "core",
+      "architecture": {
+        "contracts_impacted": ["code quality provider", "finding schema", "source-to-runtime attribution", "package quality profile"],
+        "adr_required": true,
+        "boundary_notes": "Security findings remain owned by security/Sentinel; quality findings may warn/block only according to explicit quality policy."
+      },
+      "data": {
+        "persistence_impact": "Versioned findings, analyzer identity, source/build identity and package profiles.",
+        "migration_required": true,
+        "migration_policy": "Additive portable metadata tables; large analyzer artifacts remain externalizable.",
+        "rollback_notes": "Analyzer providers can be disabled/replaced without mutating package source."
+      },
+      "authorization": {
+        "permissions": ["quality.view", "quality.run", "quality.manage"],
+        "runtime_capabilities": ["quality.analyze"],
+        "tenant_impact": "Site/package quality results follow site/package visibility and publisher permissions."
+      },
+      "security": {
+        "risk": "high",
+        "threat_model_required": true,
+        "security_notes": "Analyzers process untrusted package source and build artifacts; analysis must not execute uploaded code outside the existing trust/isolation policy."
+      },
+      "privacy": {
+        "personal_data": false,
+        "consent_impact": "No RUM dependency for static quality findings.",
+        "retention_impact": "Findings follow package/source evidence retention."
+      },
+      "surfaces": {
+        "admin_ui": true,
+        "public_ui": false,
+        "api": true,
+        "webhook": false,
+        "sdk": true,
+        "theme": true,
+        "studio": true,
+        "extension": true
+      },
+      "ai": {
+        "exposure": "read",
+        "tool_ids": [],
+        "approval_required": false
+      },
+      "testing": {
+        "unit": true,
+        "integration": true,
+        "architecture": true,
+        "security": true,
+        "browser": false,
+        "ai_evals": false
+      },
+      "verification": {
+        "real_target_required": false,
+        "evidence": ["Core analysis", "Theme analysis", "Extension analysis", "intentional complexity/duplication/dead-code/bundle findings", "runtime/static correlation sample"]
+      },
+      "rollback": "Quality policies and analyzers are versioned; disabling a provider does not rewrite source history or security trust state.",
+      "observability": ["analyzer duration", "provider failures", "finding counts", "false-positive suppression audit"],
+      "acceptance_criteria": [
+        "Core and supported package source/builds produce reproducible quality findings with analyzer/version identity.",
+        "Quality results cover static/type/lint/complexity/duplication/dead-code/bundle dimensions where applicable.",
+        "Runtime performance evidence can link back to responsible source/package where attribution is available.",
+        "Quality verdicts remain distinct from Sentinel security decisions."
+      ],
+      "out_of_scope": ["Malware/security trust verdict", "Automatic rewriting of third-party source"],
+      "source_refs": [".ai/performance/performance-platform.md", ".ai/roadmap/capability-matrix-phase4-performance.md"]
+    },
+    {
+      "id": "SYS-PERFORMANCE-INTELLIGENCE",
+      "type": "core-system",
+      "name": "Nexora Performance Intelligence Center",
+      "summary": "PageSpeed/GTmetrix-class performance analysis and monitoring with field/lab data, waterfall, filmstrip/video, scripted profiles, frontend/backend/package attribution, history/alerts and AI-grounded recommendations.",
+      "status": "PLANNED",
+      "parent_stage_id": "PERFORMANCE-INTELLIGENCE-200",
+      "release_train": "pro",
+      "depends_on": ["PERFORMANCE-FOUNDATION-200", "CODE-QUALITY-200", "RELEASE-WORKFLOW-200", "API-PLATFORM-100", "AI-KERNEL-100"],
+      "delivery": "core",
+      "architecture": {
+        "contracts_impacted": ["synthetic runner provider", "field data provider", "report schema", "monitor/alert policy", "secure external URL runner", "AI performance tools"],
+        "adr_required": true,
+        "boundary_notes": "External browser runners are isolated workers. Provider-specific Lighthouse/CrUX/etc. data is normalized into Nexora result contracts."
+      },
+      "data": {
+        "persistence_impact": "Tests, profiles, reports, waterfalls, attachments, trends, alert state and comparison metadata.",
+        "migration_required": true,
+        "migration_policy": "Metadata is relational/portable; large traces/video/filmstrips use storage adapters.",
+        "rollback_notes": "Historical evidence remains readable when providers change; report schema versions are preserved."
+      },
+      "authorization": {
+        "permissions": ["performance.view", "performance.run", "performance.monitor", "performance.compare", "performance.external-test", "performance.override-budget"],
+        "runtime_capabilities": ["performance.test.public-url", "performance.monitor", "performance.ai.explain"],
+        "tenant_impact": "Reports/monitors/alerts are tenant/site scoped; external tests require explicit permission and rate limits."
+      },
+      "security": {
+        "risk": "critical",
+        "threat_model_required": true,
+        "security_notes": "Arbitrary URL/browser testing creates SSRF/open-proxy/browser-escape risk. Private/reserved networks, metadata endpoints, redirect rebinding and access to platform secrets/internal services must be prevented by isolated runners and egress policy."
+      },
+      "privacy": {
+        "personal_data": true,
+        "consent_impact": "Field/RUM views inherit PRIVACY-CONSENT-100; authenticated scripted flows require explicit operator configuration and secret-safe runner handling.",
+        "retention_impact": "Video, traces and RUM aggregates have configurable retention/redaction."
+      },
+      "surfaces": {
+        "admin_ui": true,
+        "public_ui": false,
+        "api": true,
+        "webhook": true,
+        "sdk": true,
+        "theme": true,
+        "studio": true,
+        "extension": true
+      },
+      "ai": {
+        "exposure": "draft",
+        "tool_ids": ["performance.report.read", "performance.regression.explain", "performance.remediation.plan"],
+        "approval_required": true
+      },
+      "testing": {
+        "unit": true,
+        "integration": true,
+        "architecture": true,
+        "security": true,
+        "browser": true,
+        "ai_evals": true
+      },
+      "verification": {
+        "real_target_required": true,
+        "evidence": ["mobile and desktop lab reports", "field/RUM report", "waterfall", "filmstrip/video or documented runner equivalent", "scripted user flow", "scheduled monitor/history/alert", "Theme/Extension comparison", "secure external public URL test", "AI explanation grounded in report evidence"]
+      },
+      "rollback": "Monitoring/runners/AI recommendations are independently disableable; report history and budget evidence remain immutable/auditable; release-budget override requires permission/reason/audit.",
+      "observability": ["runner queue", "runner health", "test duration", "browser failures", "provider failures", "RUM intake", "alert delivery", "storage growth", "external-test abuse signals"],
+      "acceptance_criteria": [
+        "Users can run reproducible mobile/desktop performance tests and inspect field/lab metrics, waterfall and frontend/backend/package evidence.",
+        "Reports can compare releases/branches/Theme or Extension versions and identify the responsible measured cost.",
+        "Scheduled monitoring/history/alerts detect intentional regressions.",
+        "External URL testing is isolated and cannot reach private/internal networks or act as an open proxy.",
+        "AI recommendations cite report evidence and cannot fabricate a performance PASS."
+      ],
+      "out_of_scope": ["Final N2 production certification", "Unrestricted arbitrary browser execution", "Autonomous production code/config changes"],
+      "source_refs": [".ai/performance/performance-platform.md", ".ai/performance/performance-budget-template.md", ".ai/roadmap/capability-matrix-phase4-performance.md"]
+    }
+  ]
+}
