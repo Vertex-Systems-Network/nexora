@@ -515,6 +515,9 @@ jobs:
             $guestStatus=(& curl.exe -sS -D $guestHeaders -o NUL -w '%{http_code}' "$env:BASE_URL/admin/search?q=n112alpha").Trim()
             if ($guestStatus -ne '302') { throw "Guest Admin Search expected auth redirect, got $guestStatus." }
 
+            & php artisan cache:clear | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw 'Unable to reset disposable rate-limit cache before login boundary.' }
+
             $adminCookies=Join-Path $env:RUNNER_TEMP 'n112-admin.cookies'
             Login 'n112-admin@example.test' 'N112-Admin-Password!1' $adminCookies
             $adminJson=Join-Path $env:RUNNER_TEMP 'n112-admin-search.json'
