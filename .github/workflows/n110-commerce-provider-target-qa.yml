@@ -1,0 +1,346 @@
+name: Nexora N1.10 Commerce provider target QA
+
+on:
+  pull_request:
+    branches:
+      - dev/n1-0b-core-functional-qa
+
+permissions:
+  contents: read
+
+jobs:
+  n110-commerce-provider-target:
+    name: n110-commerce-provider-target
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      EVIDENCE_DIR: storage/app/nexora/qa/n110-commerce-provider-target
+
+    steps:
+      - name: Checkout exact frozen development source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, dom, fileinfo, intl, mbstring, openssl, pdo, pdo_sqlite, sqlite3, tokenizer, xml, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Prepare exact-source disposable provider database
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $source = (& git rev-parse HEAD).Trim()
+          $expected = '${{ github.event.pull_request.base.sha }}'
+          if ($source -ne $expected) { throw 'N1.10 provider probe is not bound to the PR base SHA.' }
+          if ($expected -ne '43314a111405245f151ec66c01e9261af675c992') { throw "N1.10 provider acceptance was frozen against 43314a111405245f151ec66c01e9261af675c992, not $expected." }
+
+          New-Item -ItemType Directory -Force -Path $env:EVIDENCE_DIR | Out-Null
+          & composer install --no-interaction --prefer-dist --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $dbNative = [System.IO.Path]::GetFullPath((Join-Path $env:RUNNER_TEMP 'nexora-n110-provider.sqlite'))
+          $db = $dbNative.Replace('\', '/')
+          if (Test-Path $dbNative) { Remove-Item -Force $dbNative }
+          New-Item -ItemType File -Path $dbNative | Out-Null
+          $key = (& php -r "echo 'base64:'.base64_encode(random_bytes(32));").Trim()
+          @"
+          APP_NAME="Nexora N1.10 Provider QA"
+          APP_ENV=production
+          APP_KEY=$key
+          APP_DEBUG=false
+          APP_URL=http://127.0.0.1
+          APP_LOCALE=en
+          LOG_CHANNEL=stderr
+          DB_CONNECTION=sqlite
+          DB_DATABASE=$db
+          SESSION_DRIVER=file
+          CACHE_STORE=file
+          QUEUE_CONNECTION=sync
+          MAIL_MAILER=array
+          NEXORA_INSTALLER_BYPASS=true
+          "@ | Set-Content -Encoding UTF8 .env
+
+          & php artisan migrate:fresh --seed --force
+          if ($LASTEXITCODE -ne 0) { throw 'Disposable provider database migration/seed failed.' }
+
+          @{
+            schema = 1
+            evidence_kind = 'n1.10-commerce-provider-target-supplement'
+            source_sha = $source
+            expected_source_sha = $expected
+            carrier_sha = '${{ github.event.pull_request.head.sha }}'
+            runner_os = $env:RUNNER_OS
+            runner_arch = $env:RUNNER_ARCH
+            php = (& php -r "echo PHP_VERSION;").Trim()
+            composer = (& composer --version --no-ansi).Trim()
+            database = 'disposable-sqlite'
+            external_gateway_certified = $false
+            standalone_fresh_install_evidence = $false
+          } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'source-binding.json')
+
+      - name: Exercise provider billing persistence, idempotency and failure state
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $probe = Join-Path $env:RUNNER_TEMP 'n110-provider-probe.php'
+          @'
+          <?php
+          declare(strict_types=1);
+
+          use App\Models\CommerceBillingEvent;
+          use App\Models\CommerceCustomer;
+          use App\Models\CommercePaymentProviderConfig;
+          use App\Models\CommercePaymentTransaction;
+          use App\Models\CommercePrice;
+          use App\Models\CommerceProduct;
+          use App\Models\CommerceRefund;
+          use App\Models\CommerceSubscription;
+          use App\Nexora\Commerce\Contracts\PaymentProviderContract;
+          use App\Nexora\Commerce\Data\PaymentRequest;
+          use App\Nexora\Commerce\Data\ProviderTransactionResult;
+          use App\Nexora\Commerce\Data\RefundRequest;
+          use App\Nexora\Commerce\Data\SubscriptionRequest;
+          use App\Nexora\Commerce\Services\CommerceOrderService;
+          use App\Nexora\Commerce\Services\InvoiceService;
+          use App\Nexora\Commerce\Services\PaymentProviderRegistry;
+          use App\Nexora\Commerce\Services\ProviderBillingService;
+          use Illuminate\Contracts\Console\Kernel;
+          use InvalidArgumentException;
+          use RuntimeException;
+
+          $root = (string) $argv[1];
+          $output = (string) $argv[2];
+          require $root.'/vendor/autoload.php';
+          $app = require $root.'/bootstrap/app.php';
+          $app->make(Kernel::class)->bootstrap();
+
+          $expect = static function (bool $condition, string $message): void {
+              if (! $condition) throw new RuntimeException($message);
+          };
+
+          $provider = new class implements PaymentProviderContract {
+              public int $paymentCalls = 0;
+              public int $refundCalls = 0;
+              public int $subscriptionCalls = 0;
+              public int $cancelCalls = 0;
+              public bool $cancelSuccessful = true;
+
+              public function key(): string { return 'n110-diagnostic-provider'; }
+              public function label(): string { return 'N1.10 Diagnostic Provider'; }
+              public function capabilities(): array { return [self::CAPABILITY_PAYMENTS, self::CAPABILITY_REFUNDS, self::CAPABILITY_SUBSCRIPTIONS]; }
+              public function health(array $configuration = []): array { return ['ok' => true, 'message' => 'Diagnostic provider healthy.']; }
+              public function createPayment(PaymentRequest $request): ProviderTransactionResult {
+                  $this->paymentCalls++;
+                  return new ProviderTransactionResult(true, 'succeeded', 'n110-pay-'.$request->idempotencyKey, 'Diagnostic payment succeeded.');
+              }
+              public function refund(RefundRequest $request): ProviderTransactionResult {
+                  $this->refundCalls++;
+                  return new ProviderTransactionResult(true, 'refunded', 'n110-refund-'.$request->idempotencyKey, 'Diagnostic refund succeeded.');
+              }
+              public function createSubscription(SubscriptionRequest $request): ProviderTransactionResult {
+                  $this->subscriptionCalls++;
+                  return new ProviderTransactionResult(true, 'active', 'n110-sub-'.$request->idempotencyKey, 'Diagnostic subscription active.');
+              }
+              public function cancelSubscription(string $providerReference, array $context = []): ProviderTransactionResult {
+                  $this->cancelCalls++;
+                  if (! $this->cancelSuccessful) {
+                      return new ProviderTransactionResult(false, 'failed', $providerReference, 'Diagnostic cancellation failed.');
+                  }
+                  return new ProviderTransactionResult(true, 'cancelled', $providerReference, 'Diagnostic cancellation succeeded.');
+              }
+          };
+
+          $registry = $app->make(PaymentProviderRegistry::class);
+          $registry->register($provider);
+          CommercePaymentProviderConfig::query()->create([
+              'provider_key' => $provider->key(),
+              'display_name' => $provider->label(),
+              'enabled' => true,
+              'mode' => 'test',
+              'configuration' => [],
+              'secret_refs' => [],
+              'last_health_status' => 'healthy',
+          ]);
+
+          $product = CommerceProduct::query()->create([
+              'name' => 'N1.10 Provider Product',
+              'sku' => 'N110-PROVIDER-ONEOFF',
+              'slug' => 'n110-provider-oneoff',
+              'type' => 'product',
+              'status' => 'active',
+              'published_at' => now(),
+          ]);
+          $price = CommercePrice::query()->create([
+              'product_id' => $product->id,
+              'currency' => 'USD',
+              'amount_minor' => 2500,
+              'active' => true,
+          ]);
+          $orders = $app->make(CommerceOrderService::class);
+          $order = $orders->createDraft(null, 'USD', [['price_id' => $price->id, 'quantity' => 1]]);
+          $order = $orders->place($order);
+          $invoice = $app->make(InvoiceService::class)->createFromOrder($order);
+          $billing = $app->make(ProviderBillingService::class);
+
+          $paymentA = $billing->collectInvoice($invoice, $provider->key(), 'n110-payment-retry-1');
+          $paymentB = $billing->collectInvoice($invoice, $provider->key(), 'n110-payment-retry-1');
+          $expect($paymentA->id === $paymentB->id, 'Payment replay did not converge on one transaction.');
+          $expect($provider->paymentCalls === 1, 'Payment provider was called more than once for the same idempotency key.');
+          $expect(CommercePaymentTransaction::query()->where('idempotency_key', 'n110-payment-retry-1')->count() === 1, 'Payment idempotency persistence failed.');
+          $invoice->refresh();
+          $order->refresh();
+          $expect($invoice->status === 'paid' && (int) $invoice->amount_paid_minor === 2500, 'Invoice paid state is inconsistent.');
+          $expect($order->status === 'paid' && (int) $order->paid_minor === 2500, 'Order paid state is inconsistent.');
+
+          $refundA = $billing->refundPayment($paymentA, 1250, 'N1.10 partial refund', null, 'n110-refund-retry-1');
+          $refundB = $billing->refundPayment($paymentA, 1250, 'N1.10 partial refund', null, 'n110-refund-retry-1');
+          $expect($refundA->id === $refundB->id, 'Refund replay did not converge on one refund.');
+          $expect($provider->refundCalls === 1, 'Refund provider was called more than once for the same idempotency key.');
+          $expect(CommerceRefund::query()->where('idempotency_key', 'n110-refund-retry-1')->count() === 1, 'Refund idempotency persistence failed.');
+          $overRefundBlocked = false;
+          try {
+              $billing->refundPayment($paymentA, 2000, 'N1.10 excessive refund', null, 'n110-refund-too-large');
+          } catch (InvalidArgumentException) {
+              $overRefundBlocked = true;
+          }
+          $expect($overRefundBlocked, 'Excessive refund was not rejected.');
+          $expect($provider->refundCalls === 1, 'Excessive refund reached the provider unexpectedly.');
+          $order->refresh();
+          $expect((int) $order->refunded_minor === 1250, 'Order refunded total is inconsistent.');
+
+          $recurringProduct = CommerceProduct::query()->create([
+              'name' => 'N1.10 Recurring Product',
+              'sku' => 'N110-PROVIDER-RECURRING',
+              'slug' => 'n110-provider-recurring',
+              'type' => 'product',
+              'status' => 'active',
+              'published_at' => now(),
+          ]);
+          $recurringPrice = CommercePrice::query()->create([
+              'product_id' => $recurringProduct->id,
+              'currency' => 'USD',
+              'amount_minor' => 1500,
+              'billing_interval' => 'month',
+              'interval_count' => 1,
+              'active' => true,
+          ]);
+          $customerA = CommerceCustomer::query()->create(['name' => 'N1.10 Subscription Customer A', 'email' => 'n110-sub-a@example.test']);
+          $subA = $billing->createSubscription($customerA, $recurringPrice, $provider->key(), 'n110-sub-create-1');
+          $subAReplay = $billing->createSubscription($customerA, $recurringPrice, $provider->key(), 'n110-sub-create-1');
+          $expect($subA->id === $subAReplay->id, 'Subscription create replay did not converge.');
+          $expect($provider->subscriptionCalls === 1, 'Subscription provider was called more than once for create replay.');
+          $billing->cancelSubscription($subA, 'n110-sub-cancel-1');
+          $billing->cancelSubscription($subA, 'n110-sub-cancel-1');
+          $subA->refresh();
+          $expect($provider->cancelCalls === 1, 'Subscription cancel provider was called more than once for replay.');
+          $expect($subA->status === 'cancelled' && $subA->cancelled_at !== null, 'Subscription did not reach one cancelled terminal state.');
+
+          $customerB = CommerceCustomer::query()->create(['name' => 'N1.10 Subscription Customer B', 'email' => 'n110-sub-b@example.test']);
+          $subB = $billing->createSubscription($customerB, $recurringPrice, $provider->key(), 'n110-sub-create-failure-case');
+          $expect($provider->subscriptionCalls === 2, 'Second subscription create did not call provider exactly once.');
+          $provider->cancelSuccessful = false;
+          $billing->cancelSubscription($subB, 'n110-sub-cancel-failed-1');
+          $billing->cancelSubscription($subB, 'n110-sub-cancel-failed-1');
+          $subB->refresh();
+          $expect($provider->cancelCalls === 2, 'Failed cancellation replay duplicated the provider call.');
+          $expect($subB->status === 'active' && $subB->cancelled_at === null, 'Failed cancellation corrupted subscription state.');
+          $expect(data_get($subB->metadata, 'last_cancel_idempotency_key') === 'n110-sub-cancel-failed-1', 'Failed cancellation idempotency metadata was not retained.');
+          $expect(data_get($subB->metadata, 'last_cancel_provider_result.provider_successful') === false, 'Failed provider result was not retained.');
+
+          $eventCounts = CommerceBillingEvent::query()
+              ->whereIn('event_type', [
+                  'commerce.payment.succeeded',
+                  'commerce.refund.refunded',
+                  'commerce.subscription.updated',
+                  'commerce.subscription.cancel_failed',
+              ])
+              ->selectRaw('event_type, COUNT(*) as aggregate')
+              ->groupBy('event_type')
+              ->pluck('aggregate', 'event_type')
+              ->map(fn ($value) => (int) $value)
+              ->all();
+          $expect(($eventCounts['commerce.payment.succeeded'] ?? 0) === 1, 'Payment billing event count is not exactly one.');
+          $expect(($eventCounts['commerce.refund.refunded'] ?? 0) === 1, 'Refund billing event count is not exactly one.');
+          $expect(($eventCounts['commerce.subscription.updated'] ?? 0) === 3, 'Subscription updated billing event count is unexpected.');
+          $expect(($eventCounts['commerce.subscription.cancel_failed'] ?? 0) === 1, 'Failed-cancel billing event count is not exactly one.');
+
+          $result = [
+              'schema' => 1,
+              'provider_key' => $provider->key(),
+              'diagnostic_adapter' => true,
+              'external_gateway_certified' => false,
+              'payment' => [
+                  'provider_calls' => $provider->paymentCalls,
+                  'transaction_count' => CommercePaymentTransaction::query()->where('idempotency_key', 'n110-payment-retry-1')->count(),
+                  'status' => $paymentA->fresh()->status,
+                  'amount_minor' => (int) $paymentA->amount_minor,
+                  'invoice_status' => $invoice->fresh()->status,
+                  'order_status_after_payment' => CommercePaymentTransaction::query()->whereKey($paymentA->id)->firstOrFail()->order()->value('status'),
+              ],
+              'refund' => [
+                  'provider_calls' => $provider->refundCalls,
+                  'refund_count' => CommerceRefund::query()->where('idempotency_key', 'n110-refund-retry-1')->count(),
+                  'amount_minor' => (int) $refundA->amount_minor,
+                  'over_refund_blocked_before_provider' => $overRefundBlocked,
+                  'order_refunded_minor' => (int) $order->fresh()->refunded_minor,
+              ],
+              'subscription' => [
+                  'create_provider_calls' => $provider->subscriptionCalls,
+                  'cancel_provider_calls' => $provider->cancelCalls,
+                  'successful_cancel_status' => $subA->fresh()->status,
+                  'failed_cancel_status' => $subB->fresh()->status,
+                  'failed_cancel_cancelled_at_is_null' => $subB->fresh()->cancelled_at === null,
+                  'failed_cancel_replay_key_retained' => data_get($subB->fresh()->metadata, 'last_cancel_idempotency_key'),
+              ],
+              'billing_event_counts' => $eventCounts,
+          ];
+          file_put_contents($output, json_encode($result, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+          echo "N110_PROVIDER_TARGET_PROBE=PASS\n";
+          '@ | Set-Content -Encoding ASCII $probe
+
+          & php $probe $env:GITHUB_WORKSPACE (Join-Path $env:EVIDENCE_DIR 'provider-target-state.json')
+          if ($LASTEXITCODE -ne 0) { throw "N1.10 provider target probe failed with exit $LASTEXITCODE." }
+          $state = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'provider-target-state.json') | ConvertFrom-Json
+          if ($state.external_gateway_certified -ne $false) { throw 'Provider probe must never claim an external gateway certification.' }
+
+      - name: Seal provider supplement summary
+        if: success()
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $binding = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'source-binding.json') | ConvertFrom-Json
+          $state = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'provider-target-state.json') | ConvertFrom-Json
+          @{
+            schema = 1
+            evidence_kind = 'n1.10-commerce-provider-target-supplement-candidate'
+            source_sha = $binding.source_sha
+            carrier_sha = $binding.carrier_sha
+            provider_persistence_idempotency_failure_state = 'pass'
+            payment_provider_calls = [int]$state.payment.provider_calls
+            refund_provider_calls = [int]$state.refund.provider_calls
+            subscription_create_provider_calls = [int]$state.subscription.create_provider_calls
+            subscription_cancel_provider_calls = [int]$state.subscription.cancel_provider_calls
+            billing_event_counts = $state.billing_event_counts
+            external_gateway_provider = 'not-certified'
+            standalone_acceptance = $false
+            accepted = $false
+            review_required = $true
+            note = 'Supplement only. Combine with the fresh-install/real-HTTP N1.10 carrier artifact and independently review both before Issue #32 acceptance.'
+          } | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'summary.json')
+
+      - name: Upload N1.10 provider evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-n110-commerce-provider-${{ github.event.pull_request.base.sha }}-${{ github.run_id }}
+          path: storage/app/nexora/qa/n110-commerce-provider-target/
+          if-no-files-found: error
+          retention-days: 14
