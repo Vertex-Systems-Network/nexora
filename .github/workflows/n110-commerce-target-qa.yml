@@ -1,0 +1,392 @@
+name: Nexora N1.10 Commerce target QA
+
+on:
+  pull_request:
+    branches:
+      - dev/n1-0b-core-functional-qa
+
+permissions:
+  contents: read
+
+jobs:
+  n110-commerce-target:
+    name: n110-commerce-target
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      BASE_URL: http://127.0.0.1:8000
+      EVIDENCE_DIR: storage/app/nexora/qa/n110-commerce-target
+
+    steps:
+      - name: Checkout exact governed development source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          clean: true
+          fetch-depth: 1
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, dom, fileinfo, intl, mbstring, openssl, pdo, pdo_sqlite, sqlite3, tokenizer, xml, zip
+          ini-values: memory_limit=512M, post_max_size=64M, upload_max_filesize=64M, max_execution_time=120, max_input_time=60, max_input_vars=3000, max_file_uploads=20
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Guard source and prepare disposable target
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $source = (& git rev-parse HEAD).Trim()
+          $expected = '${{ github.event.pull_request.base.sha }}'
+          if ($source -ne $expected) { throw 'N1.10 target checkout is not bound to the exact PR base SHA.' }
+          if ($expected -ne '43314a111405245f151ec66c01e9261af675c992') { throw "N1.10 acceptance was frozen against 43314a111405245f151ec66c01e9261af675c992, not $expected." }
+
+          New-Item -ItemType Directory -Force -Path $env:EVIDENCE_DIR | Out-Null
+          $phpVersion = (& php -r "echo PHP_VERSION;").Trim()
+          $composerVersion = (& composer --version --no-ansi).Trim()
+          $nodeVersion = (& node -p "process.versions.node").Trim()
+          $npmVersion = (& npm.cmd --version).Trim()
+
+          & composer install --no-interaction --prefer-dist --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd install --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & npm.cmd run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $dbNative = [System.IO.Path]::GetFullPath((Join-Path $env:RUNNER_TEMP 'nexora-n110-commerce.sqlite'))
+          $db = $dbNative.Replace('\', '/')
+          if (Test-Path $dbNative) { Remove-Item -Force $dbNative }
+          New-Item -ItemType File -Path $dbNative | Out-Null
+          $key = (& php -r "echo 'base64:'.base64_encode(random_bytes(32));").Trim()
+          @"
+          APP_NAME="Nexora N1.10 Commerce QA"
+          APP_ENV=production
+          APP_KEY=$key
+          APP_DEBUG=false
+          APP_URL=$env:BASE_URL
+          APP_LOCALE=en
+          LOG_CHANNEL=stderr
+          DB_CONNECTION=sqlite
+          DB_DATABASE=$db
+          SESSION_DRIVER=file
+          CACHE_STORE=file
+          QUEUE_CONNECTION=sync
+          MAIL_MAILER=array
+          NEXORA_INSTALLER_BYPASS=false
+          "@ | Set-Content -Encoding UTF8 .env
+          $db | Set-Content -Encoding UTF8 (Join-Path $env:RUNNER_TEMP 'n110-database-path.txt')
+
+          @{
+            schema = 1
+            evidence_kind = 'n1.10-commerce-real-target'
+            source_sha = $source
+            expected_source_sha = $expected
+            carrier_sha = '${{ github.event.pull_request.head.sha }}'
+            runner_os = $env:RUNNER_OS
+            runner_arch = $env:RUNNER_ARCH
+            php = $phpVersion
+            composer = $composerVersion
+            node = $nodeVersion
+            npm = $npmVersion
+            base_url = $env:BASE_URL
+            external_gateway_certified = $false
+          } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'source-binding.json')
+
+      - name: Commit real disposable install and reconcile runtime
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $serverOut = Join-Path $env:EVIDENCE_DIR 'install-server.out.log'
+          $serverErr = Join-Path $env:EVIDENCE_DIR 'install-server.err.log'
+          $docroot = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'public'))
+          $router = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php'))
+          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t',$docroot,$router) -WorkingDirectory $docroot -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+          try {
+            $ready = $false
+            for ($i = 0; $i -lt 60; $i++) {
+              if ($server.HasExited) { throw "Installer server exited early with code $($server.ExitCode)." }
+              $probe = (& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/install").Trim()
+              if (($LASTEXITCODE -eq 0) -and ($probe -eq '200')) { $ready = $true; break }
+              Start-Sleep -Seconds 1
+            }
+            if (-not $ready) { throw 'Disposable installer did not serve /install with HTTP 200.' }
+
+            $cookies = Join-Path $env:RUNNER_TEMP 'n110-install-cookies.txt'
+            $htmlPath = Join-Path $env:RUNNER_TEMP 'n110-install.html'
+            & curl.exe -sS -c $cookies "$env:BASE_URL/install" -o $htmlPath
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $html = Get-Content -Raw $htmlPath
+            $csrfMatch = [regex]::Match($html, 'name="_token"\s+value="([^"]+)"')
+            if (-not $csrfMatch.Success) { throw 'Unable to extract installer CSRF token.' }
+            $csrf = $csrfMatch.Groups[1].Value
+            $db = (Get-Content -Raw (Join-Path $env:RUNNER_TEMP 'n110-database-path.txt')).Trim()
+            $password = 'Nx!'+[guid]::NewGuid().ToString('N')+'Aa1'
+            $password | Set-Content -Encoding UTF8 (Join-Path $env:RUNNER_TEMP 'n110-admin-password.txt')
+
+            $headers = Join-Path $env:RUNNER_TEMP 'n110-install.headers.txt'
+            $body = Join-Path $env:RUNNER_TEMP 'n110-install.body.html'
+            $status = (& curl.exe -sS -b $cookies -c $cookies -D $headers -o $body -w '%{http_code}' -X POST "$env:BASE_URL/install" `
+              --data-urlencode "_token=$csrf" `
+              --data-urlencode 'app_name=Nexora N1.10 Commerce QA' `
+              --data-urlencode "app_url=$env:BASE_URL" `
+              --data-urlencode 'language=en' `
+              --data-urlencode 'db_driver=sqlite' `
+              --data-urlencode "db_database=$db" `
+              --data-urlencode 'db_create=1' `
+              --data-urlencode 'admin_name=N1.10 QA Administrator' `
+              --data-urlencode 'admin_email=n110-admin@example.test' `
+              --data-urlencode "admin_password=$password" `
+              --data-urlencode "admin_password_confirmation=$password" `
+              --data-urlencode 'terms=1').Trim()
+            if ($status -ne '302') { throw "Installer commit failed; HTTP $status." }
+            $location = ([regex]::Match((Get-Content -Raw $headers), '(?im)^Location:\s*(\S+)\s*$')).Groups[1].Value
+            if ($location -notmatch '/install/runtime-handoff$') { throw "Installer redirect was unexpected: $location" }
+            if (-not (Test-Path 'storage/app/nexora/installed.lock')) { throw 'Installer did not seal installed.lock.' }
+            @{ install_http = [int]$status; install_location = '/install/runtime-handoff'; installed_lock = $true } | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'install-result.json')
+          }
+          finally {
+            & cmd.exe /d /c "taskkill /PID $($server.Id) /T /F >NUL 2>&1 || exit /b 0" | Out-Null
+          }
+
+          & php artisan nexora:runtime:post-install-reconcile --confirm=RECONCILE
+          if ($LASTEXITCODE -ne 0) { throw 'Accepted rc.94 guarded post-install reconcile failed on disposable N1.10 target.' }
+          & php artisan optimize:clear
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          @{ reconciled = $true; installed_lock = (Test-Path 'storage/app/nexora/installed.lock') } | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'runtime-result.json')
+
+      - name: Run frozen Commerce executable contract on target toolchain
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $testDbNative = [System.IO.Path]::GetFullPath((Join-Path $env:RUNNER_TEMP 'nexora-n110-contract-tests.sqlite'))
+          if (Test-Path $testDbNative) { Remove-Item -Force $testDbNative }
+          New-Item -ItemType File -Path $testDbNative | Out-Null
+          $env:DB_CONNECTION = 'sqlite'
+          $env:DB_DATABASE = $testDbNative.Replace('\', '/')
+          $env:APP_ENV = 'testing'
+          $env:NEXORA_INSTALLER_BYPASS = 'true'
+          & php artisan test tests/Unit/Commerce/CurrencyAndTaxTest.php tests/Unit/Commerce/PaymentProviderRegistryTest.php tests/Feature/Commerce/CommerceAdminFlowTest.php tests/Feature/Commerce/ProviderBillingFlowTest.php --display-warnings --fail-on-warning 2>&1 | Tee-Object -FilePath (Join-Path $env:EVIDENCE_DIR 'commerce-contract-tests.txt')
+          if ($LASTEXITCODE -ne 0) { throw "Frozen Commerce executable contract failed with exit $LASTEXITCODE." }
+          @{ frozen_contract_tests = 'pass'; database = 'disposable-sqlite'; external_gateway = 'not-claimed' } | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'contract-result.json')
+
+      - name: Exercise Commerce admin and order lifecycle over real HTTP
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Remove-Item Env:DB_CONNECTION -ErrorAction SilentlyContinue
+          Remove-Item Env:DB_DATABASE -ErrorAction SilentlyContinue
+          Remove-Item Env:APP_ENV -ErrorAction SilentlyContinue
+          Remove-Item Env:NEXORA_INSTALLER_BYPASS -ErrorAction SilentlyContinue
+          & php artisan optimize:clear
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $serverOut = Join-Path $env:EVIDENCE_DIR 'commerce-server.out.log'
+          $serverErr = Join-Path $env:EVIDENCE_DIR 'commerce-server.err.log'
+          $docroot = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'public'))
+          $router = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php'))
+          $server = Start-Process -FilePath 'php' -ArgumentList @('-S','127.0.0.1:8000','-t',$docroot,$router) -WorkingDirectory $docroot -RedirectStandardOutput $serverOut -RedirectStandardError $serverErr -PassThru
+
+          function Get-Csrf([string]$Url, [string]$Cookies, [string]$BodyPath) {
+            & curl.exe -sS -b $Cookies -c $Cookies $Url -o $BodyPath
+            if ($LASTEXITCODE -ne 0) { throw "GET failed while obtaining CSRF from $Url." }
+            $body = Get-Content -Raw $BodyPath
+            $m = [regex]::Match($body, '(?:name="_token"\s+value="|name="csrf-token"\s+content=")([^"]+)')
+            if (-not $m.Success) { throw "Unable to extract CSRF token from $Url." }
+            return $m.Groups[1].Value
+          }
+
+          $query = Join-Path $env:RUNNER_TEMP 'n110-commerce-query.php'
+          @'
+          <?php
+          declare(strict_types=1);
+          use App\Models\CommerceBillingEvent;
+          use App\Models\CommerceInvoice;
+          use App\Models\CommerceOrder;
+          use App\Models\CommerceOrderItem;
+          use App\Models\CommercePrice;
+          use App\Models\CommerceProduct;
+          use Illuminate\Contracts\Console\Kernel;
+          $root = (string) $argv[1];
+          require $root.'/vendor/autoload.php';
+          $app = require $root.'/bootstrap/app.php';
+          $app->make(Kernel::class)->bootstrap();
+          $mode = (string) ($argv[2] ?? '');
+          if ($mode === 'price') {
+              echo CommercePrice::query()->whereHas('product', fn ($q) => $q->where('sku', 'N110-HTTP-PRODUCT'))->value('id') ?: '';
+              exit;
+          }
+          if ($mode === 'order') {
+              echo CommerceOrder::query()->latest('created_at')->value('id') ?: '';
+              exit;
+          }
+          if ($mode === 'mutate-catalog') {
+              $product = CommerceProduct::query()->where('sku', 'N110-HTTP-PRODUCT')->firstOrFail();
+              $price = CommercePrice::query()->where('product_id', $product->id)->firstOrFail();
+              $product->update(['name' => 'N1.10 Mutated Catalog Name', 'sku' => 'N110-HTTP-MUTATED']);
+              $price->update(['amount_minor' => 9999]);
+              echo 'ok';
+              exit;
+          }
+          if ($mode === 'final') {
+              $order = CommerceOrder::query()->latest('created_at')->firstOrFail();
+              $item = CommerceOrderItem::query()->where('order_id', $order->id)->firstOrFail();
+              $invoiceCount = CommerceInvoice::query()->where('order_id', $order->id)->where('status', '!=', 'void')->count();
+              $placedEvents = CommerceBillingEvent::query()->where('event_type', 'commerce.order.placed')->where('resource_id', $order->id)->count();
+              $invoiceEvents = CommerceBillingEvent::query()->where('event_type', 'commerce.invoice.created')->count();
+              echo json_encode([
+                  'order_id' => $order->id,
+                  'order_status' => $order->status,
+                  'currency' => $order->currency,
+                  'subtotal_minor' => (int) $order->subtotal_minor,
+                  'tax_minor' => (int) $order->tax_minor,
+                  'total_minor' => (int) $order->total_minor,
+                  'snapshot_name' => $item->name,
+                  'snapshot_sku' => $item->sku,
+                  'snapshot_quantity' => (int) $item->quantity,
+                  'snapshot_unit_amount_minor' => (int) $item->unit_amount_minor,
+                  'active_invoice_count' => $invoiceCount,
+                  'order_placed_event_count' => $placedEvents,
+                  'invoice_created_event_count' => $invoiceEvents,
+              ], JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+              exit;
+          }
+          throw new RuntimeException('Unknown query mode.');
+          '@ | Set-Content -Encoding ASCII $query
+
+          try {
+            $ready = $false
+            for ($i = 0; $i -lt 60; $i++) {
+              if ($server.HasExited) { throw "Commerce server exited early with code $($server.ExitCode)." }
+              $probe = (& curl.exe -sS -o NUL -w '%{http_code}' "$env:BASE_URL/login").Trim()
+              if (($LASTEXITCODE -eq 0) -and ($probe -eq '200')) { $ready = $true; break }
+              Start-Sleep -Seconds 1
+            }
+            if (-not $ready) { throw 'Commerce target did not serve /login with HTTP 200.' }
+
+            $guestHeaders = Join-Path $env:RUNNER_TEMP 'n110-guest-commerce.headers.txt'
+            $guestStatus = (& curl.exe -sS -D $guestHeaders -o NUL -w '%{http_code}' "$env:BASE_URL/admin/commerce").Trim()
+            $guestLocation = ([regex]::Match((Get-Content -Raw $guestHeaders), '(?im)^Location:\s*(\S+)\s*$')).Groups[1].Value
+            if ($guestStatus -ne '302' -or $guestLocation -notmatch '/login$') { throw "Guest Commerce boundary failed: HTTP $guestStatus -> $guestLocation" }
+
+            $cookies = Join-Path $env:RUNNER_TEMP 'n110-admin-cookies.txt'
+            $loginBody = Join-Path $env:RUNNER_TEMP 'n110-admin-login.html'
+            $loginCsrf = Get-Csrf "$env:BASE_URL/login" $cookies $loginBody
+            $password = (Get-Content -Raw (Join-Path $env:RUNNER_TEMP 'n110-admin-password.txt')).Trim()
+            $loginHeaders = Join-Path $env:RUNNER_TEMP 'n110-admin-login.headers.txt'
+            $loginStatus = (& curl.exe -sS -b $cookies -c $cookies -D $loginHeaders -o NUL -w '%{http_code}' -X POST "$env:BASE_URL/login" `
+              --data-urlencode "_token=$loginCsrf" `
+              --data-urlencode 'email=n110-admin@example.test' `
+              --data-urlencode "password=$password").Trim()
+            if ($loginStatus -ne '302') { throw "Administrator login failed; HTTP $loginStatus." }
+
+            $workspaceResults = [ordered]@{}
+            foreach ($path in @('/admin/commerce','/admin/commerce/products','/admin/commerce/customers','/admin/commerce/orders','/admin/commerce/billing','/admin/commerce/settings')) {
+              $status = (& curl.exe -sS -b $cookies -c $cookies -o NUL -w '%{http_code}' "$env:BASE_URL$path").Trim()
+              if ($status -ne '200') { throw "Commerce workspace $path failed; HTTP $status." }
+              $workspaceResults[$path] = [int]$status
+            }
+            @{ guest_status = [int]$guestStatus; guest_location = '/login'; admin_login_status = [int]$loginStatus; workspaces = $workspaceResults } | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'http-boundary.json')
+
+            $productBody = Join-Path $env:RUNNER_TEMP 'n110-products.html'
+            $csrf = Get-Csrf "$env:BASE_URL/admin/commerce/products" $cookies $productBody
+            $productStatus = (& curl.exe -sS -b $cookies -c $cookies -o NUL -w '%{http_code}' -X POST "$env:BASE_URL/admin/commerce/products" `
+              --data-urlencode "_token=$csrf" `
+              --data-urlencode 'name=N1.10 HTTP Product' `
+              --data-urlencode 'sku=N110-HTTP-PRODUCT' `
+              --data-urlencode 'slug=n110-http-product' `
+              --data-urlencode 'type=product' `
+              --data-urlencode 'status=active' `
+              --data-urlencode 'description=' `
+              --data-urlencode 'tax_code=' `
+              --data-urlencode 'currency=USD' `
+              --data-urlencode 'amount=12.50' `
+              --data-urlencode 'billing_interval=').Trim()
+            if ($productStatus -ne '302') { throw "Commerce product creation failed; HTTP $productStatus." }
+            $priceId = (& php $query $env:GITHUB_WORKSPACE price).Trim()
+            if ([string]::IsNullOrWhiteSpace($priceId)) { throw 'Created Commerce price was not persisted.' }
+
+            $orderBody = Join-Path $env:RUNNER_TEMP 'n110-orders.html'
+            $csrf = Get-Csrf "$env:BASE_URL/admin/commerce/orders" $cookies $orderBody
+            $orderStatus = (& curl.exe -sS -b $cookies -c $cookies -o NUL -w '%{http_code}' -X POST "$env:BASE_URL/admin/commerce/orders" `
+              --data-urlencode "_token=$csrf" `
+              --data-urlencode 'customer_id=' `
+              --data-urlencode 'currency=USD' `
+              --data-urlencode "price_id=$priceId" `
+              --data-urlencode 'quantity=2').Trim()
+            if ($orderStatus -ne '302') { throw "Commerce order creation failed; HTTP $orderStatus." }
+            $orderId = (& php $query $env:GITHUB_WORKSPACE order).Trim()
+            if ([string]::IsNullOrWhiteSpace($orderId)) { throw 'Created Commerce order was not persisted.' }
+
+            $mutated = (& php $query $env:GITHUB_WORKSPACE mutate-catalog).Trim()
+            if ($mutated -ne 'ok') { throw 'Catalog mutation probe failed.' }
+
+            $csrf = Get-Csrf "$env:BASE_URL/admin/commerce/orders" $cookies $orderBody
+            foreach ($attempt in 1..2) {
+              $placeStatus = (& curl.exe -sS -b $cookies -c $cookies -o NUL -w '%{http_code}' -X POST "$env:BASE_URL/admin/commerce/orders/$orderId/place" --data-urlencode "_token=$csrf").Trim()
+              if ($placeStatus -ne '302') { throw "Commerce order place attempt $attempt failed at HTTP layer; HTTP $placeStatus." }
+            }
+            foreach ($attempt in 1..2) {
+              $invoiceStatus = (& curl.exe -sS -b $cookies -c $cookies -o NUL -w '%{http_code}' -X POST "$env:BASE_URL/admin/commerce/orders/$orderId/invoice" --data-urlencode "_token=$csrf").Trim()
+              if ($invoiceStatus -ne '302') { throw "Commerce invoice attempt $attempt failed at HTTP layer; HTTP $invoiceStatus." }
+            }
+
+            & php $query $env:GITHUB_WORKSPACE final | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'commerce-final-state.json')
+            $state = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'commerce-final-state.json') | ConvertFrom-Json
+            if ($state.order_status -ne 'pending_payment') { throw "Unexpected order status: $($state.order_status)" }
+            if ([int64]$state.total_minor -ne 2500) { throw "Historical order total changed: $($state.total_minor)" }
+            if ($state.snapshot_name -ne 'N1.10 HTTP Product' -or $state.snapshot_sku -ne 'N110-HTTP-PRODUCT' -or [int64]$state.snapshot_unit_amount_minor -ne 1250) { throw 'Historical order item snapshot changed after catalog mutation.' }
+            if ([int]$state.active_invoice_count -ne 1) { throw "Expected one active invoice, got $($state.active_invoice_count)." }
+            if ([int]$state.order_placed_event_count -ne 1) { throw "Expected one order.placed billing event, got $($state.order_placed_event_count)." }
+            if ([int]$state.invoice_created_event_count -ne 1) { throw "Expected one invoice.created billing event, got $($state.invoice_created_event_count)." }
+          }
+          finally {
+            & cmd.exe /d /c "taskkill /PID $($server.Id) /T /F >NUL 2>&1 || exit /b 0" | Out-Null
+          }
+
+      - name: Seal N1.10 candidate summary
+        if: success()
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          $binding = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'source-binding.json') | ConvertFrom-Json
+          $state = Get-Content -Raw (Join-Path $env:EVIDENCE_DIR 'commerce-final-state.json') | ConvertFrom-Json
+          @{
+            schema = 1
+            evidence_kind = 'n1.10-commerce-real-target-candidate'
+            source_sha = $binding.source_sha
+            carrier_sha = $binding.carrier_sha
+            fresh_install = 'pass'
+            runtime_reconcile = 'pass'
+            frozen_commerce_contract = 'pass'
+            real_http_commerce_admin = 'pass'
+            real_http_order_invoice_lifecycle = 'pass'
+            historical_snapshot = 'pass'
+            provider_contract_retry_failure_matrix = 'pass-via-frozen-feature-tests'
+            external_gateway_provider = 'not-certified'
+            five_engine_database_matrix = 'not-certified'
+            order_status = $state.order_status
+            order_total_minor = [int64]$state.total_minor
+            active_invoice_count = [int]$state.active_invoice_count
+            accepted = $false
+            review_required = $true
+            note = 'A green workflow is candidate evidence only. Artifact review is required before Issue #32 can be closed or N1.10 TARGET VERIFIED can be claimed.'
+          } | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'summary.json')
+
+      - name: Upload N1.10 evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-n110-commerce-${{ github.event.pull_request.base.sha }}-${{ github.run_id }}
+          path: storage/app/nexora/qa/n110-commerce-target/
+          if-no-files-found: error
+          retention-days: 14
