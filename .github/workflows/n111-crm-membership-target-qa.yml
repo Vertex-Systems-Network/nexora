@@ -236,8 +236,9 @@ jobs:
           $makeUser = static function (string $name, string $email) use ($roleId): User {
               $u = User::query()->create([
                   'name' => $name, 'email' => $email, 'password' => Hash::make('N111-Portal-Password!1'),
-                  'email_verified_at' => now(), 'status' => 'active',
+                  'status' => 'active',
               ]);
+              $u->forceFill(['email_verified_at' => now()])->save();
               if ($roleId) $u->roles()->attach($roleId);
               return $u;
           };
