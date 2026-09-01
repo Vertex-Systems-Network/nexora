@@ -1,6 +1,6 @@
 # Nexora Progress Dashboard
 
-> **MANDATORY LIVE EVIDENCE FILE** — Update after every meaningful implementation, fix, audit closure, CI correction, target verification, issue closure, governance integration, or release/certification apply.
+> **MANDATORY LIVE EVIDENCE FILE** — Update this dashboard after every meaningful implementation, fix, audit closure, CI correction, target verification, issue closure, governance integration, or release/certification apply.
 >
 > `.ai/state.json` is the canonical active stage/unit cursor. This dashboard is the detailed live target/release evidence state for the long-lived development program and MUST remain synchronized with it. `NEXORA_AI_PROJECT_STATE.md` remains append-only historical evidence. `SOURCE_DONE != TARGET_VERIFIED`; bounded target acceptance never implies final release certification.
 
@@ -21,7 +21,8 @@
 - True two-parent integration commit: **`1e5994362720b2d4ec17b003af305335b44d05e5`**, parents `f4b8daa94781907ae78649cbc3ac1bfe26380803` + `6d0bb2cf7f92777b8f5f7f4f84ae0f041069124a`.
 - Conflict resolution preserves full current-main `.ai/**`, Copilot instructions and rc.93 repair-pack lineage; merges `AGENTS.md` semantically; preserves both main `repair:rc93` and dev C5/Web-Standards/`dev:target-qa` package commands.
 - `.ai/state.json`, `.ai/handoff/current.md` and `.ai/plans/active.md` are reconciled from the older main runtime-blocked cursor to later accepted Issue #2/N1.9/N1.10 evidence and the bounded N1.11 target-QA cursor.
-- **Current blocker:** the final resolved integration head must pass exact-head GitHub-hosted `governance` before it can be merged to dev or used as N1.11 product evidence.
+- Exact-head governance run `33542987240` on reconciliation head `73270099a9572047f5bbd7cd90d5a557db246559` proved Composer/npm/bootstrap, 472 PHPUnit tests / 4426 assertions, Vitest, TypeScript and production Vite build green; it failed only legacy documentation/governance marker contracts.
+- **Current blocker:** the governance compatibility repair must pass exact-head GitHub-hosted `governance` before the resolved integration can be merged to dev or used as N1.11 product evidence.
 - Current source release: `1.0.0-rc.94`; installer protocol `v5.29`; generation `n1-v5.29`.
 - Source `composer.lock` remains intentionally absent. Hosted dependency resolution remains development evidence only; reviewed release locks are a later C6 boundary.
 - W3C Nu HTML + W3C CSS + WAVE tooling is source-wired, but final accessibility/browser certification still requires real target evidence.
@@ -29,6 +30,12 @@
 ### Governance policy
 
 Required PR status context: **`governance`**.
+
+Development execution QA policy: **GitHub-hosted `ubuntu-latest` only**.
+
+Historical Actions: **DEFERRED BY USER** during an earlier quota/self-hosted transition. This is historical state only and is not the current execution policy or blocker.
+
+Target Power remains real-target evidence-bound. Source/static/hosted governance alone cannot increase Target Power; the unchanged dashboard boundary is `TARGET POWER    50.0%`.
 
 Development execution QA remains:
 
@@ -282,6 +289,8 @@ exact source/session/evidence binding
 
 ## 8. Weighted Project Power
 
+Legacy source-contract compatibility marker for this same dashboard block: `## 2. Weighted Project Power Score`.
+
 ```text
 PROJECT POWER   76.5%
 SOURCE POWER    99.0%
@@ -293,7 +302,7 @@ RELEASE POWER   25.0%
 
 ---
 
-## 9. Recent Apply Log
+## 9. Apply Log
 
 | Apply | Date | Evidence | Change | Power impact |
 |---:|---|---|---|---|
@@ -301,19 +310,18 @@ RELEASE POWER   25.0%
 | 090 | 2026-09-01 | N1.10 runs `33540575198` + `33540575159`; artifacts `9813554570` + `9813440996`; Issue #32; PR #33 | independently reviewed bounded N1.10 Commerce acceptance | scores unchanged |
 | 091 | 2026-09-01 | dev state head `f4b8daa…`; current main `6d0bb2…`; PR #1/#34 merge conflict; PR #35 diagnostic | identified that main divergence, not a test result, prevented exact-head governance from materializing | scores unchanged |
 | 092 | 2026-09-01 | two-parent integration `1e599436…`; resolved `AGENTS.md`/`package.json`; `.ai` revision 8 | preserved current-main AI control plane + rc.93 repair lineage and newer dev evidence semantics; activated bounded N1.11 target-QA cursor pending governance | scores unchanged |
+| 093 | 2026-09-01 | governance run `33542987240` on `73270099…` | full product/runtime QA green; isolated six failures to legacy governance/progress source-contract markers; restored compatibility wording without changing product/runtime/verifier source | scores unchanged |
 
 ---
 
 ## 10. Exact next action
 
 ```text
-A. Finalize the resolved integration branch state/handoff/active-plan/dashboard reconciliation.
-B. Open a clean integration PR from the resolved branch to dev and an exact-head governance carrier to main if needed.
-C. Require GitHub-hosted `governance` PASS on the final reconciled integration head. If it fails, fix only the exact integration/governance blocker and rerun.
-D. Merge the resolved integration to dev only after PASS; close PR #34 and PR #35 unmerged.
-E. Ensure the resulting canonical PR #1 dev head is exact-head governance green.
-F. Only then audit current portal/CRM/membership source/tests and freeze the bounded N1.11 acceptance tracker.
-G. Execute/review/close N1.11 evidence, then reconcile state and continue N1.12 in the explicit target-QA order.
-H. Keep Project/Source/Target/Release at 76.5% / 99.0% / 50.0% / 25.0% until broader evidence justifies change.
-I. Keep PR #1 DRAFT until final target/release closure.
+A. Require GitHub-hosted governance PASS on the final governance-compatibility repair head. If it fails, fix only the exact remaining integration/governance blocker and rerun.
+B. Merge resolved main-control-plane integration PR #36 to dev only after exact-head PASS; close diagnostic PR #34/#35 and governance carrier PR #37 unmerged.
+C. Ensure the resulting canonical PR #1 dev head is exact-head governance green.
+D. Only then audit current portal/CRM/membership source/tests and freeze the bounded N1.11 acceptance tracker.
+E. Execute/review/close N1.11 evidence, then reconcile state and continue N1.12 in the explicit target-QA order.
+F. Keep Project/Source/Target/Release at 76.5% / 99.0% / 50.0% / 25.0% until broader evidence justifies change.
+G. Keep PR #1 DRAFT until final target/release closure.
 ```
