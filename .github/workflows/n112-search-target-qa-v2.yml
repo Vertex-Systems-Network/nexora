@@ -30,7 +30,7 @@ jobs:
         with:
           php-version: '8.3'
           extensions: bcmath, curl, dom, fileinfo, intl, mbstring, openssl, pdo, pdo_sqlite, sqlite3, tokenizer, xml, zip
-          ini-values: memory_limit=512M, post_max_size=64M, upload_max_filesize=64M, max_execution_time=120
+          ini-values: memory_limit=512M, post_max_size=64M, upload_max_filesize=64M, max_execution_time=120, max_input_time=60, max_input_vars=3000, max_file_uploads=20
           coverage: none
           tools: composer:v2
 
@@ -145,7 +145,7 @@ jobs:
             $status = (& curl.exe -sS -b $cookies -c $cookies -D $headers -o $body -w '%{http_code}' -X POST "$env:BASE_URL/install" `
               --data-urlencode "_token=$csrf" `
               --data-urlencode 'app_name=Nexora N1.12 QA' `
-              --data-urlencode "app_url=$env:BASE_URL" `
+              --data-urlencode "$([string]'app_url=')$env:BASE_URL" `
               --data-urlencode 'language=en' `
               --data-urlencode 'db_driver=sqlite' `
               --data-urlencode "db_database=$db" `
