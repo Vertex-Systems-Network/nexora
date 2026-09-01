@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexora.local/.ai/schemas/development-unit.schema.json",
+  "title": "Nexora Planned Development Unit",
+  "type": "object",
+  "required": ["id", "type", "name", "summary", "status", "parent_stage_id", "release_train", "depends_on", "security", "acceptance_criteria"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^(SYS|MOD|FEAT|EXT|APP|INT|SPK|THM|AIT|AIA|MIG|OPS|SEC)-[A-Z0-9-]+$"},
+    "type": {"enum": ["core-system", "module", "feature", "extension", "app", "integration", "studio-pack", "theme", "ai-tool", "ai-agent", "migration-adapter", "ops-capability", "security-control"]},
+    "name": {"type": "string", "minLength": 1},
+    "summary": {"type": "string", "minLength": 1},
+    "status": {"enum": ["IDEA", "PROPOSED", "PLANNED", "ACTIVE", "SOURCE_DONE", "TARGET_VERIFIED", "EXTERNAL", "DEFERRED", "BLOCKED", "REJECTED", "DEPRECATED"]},
+    "parent_stage_id": {"type": "string", "pattern": "^[A-Z0-9-]+$"},
+    "release_train": {"enum": ["builder-beta", "pro", "platform", "production", "external"]},
+    "depends_on": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "conflicts_with": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "delivery": {"enum": ["core", "first-party-package", "third-party-compatible-surface", "external"]},
+    "security_profile": {"enum": ["standard", "payment-provider", "identity-provider", "high-risk-data", "ai-execution", "infrastructure"]},
+    "research": {
+      "type": "object",
+      "properties": {
+        "brief": {"type": "string"},
+        "problem": {"type": "string"},
+        "voc_evidence": {"type": "array", "items": {"type": "string"}},
+        "baseline": {"type": "string"},
+        "confidence": {"enum": ["unknown", "low", "medium", "high"]},
+        "ctqs": {"type": "array", "items": {"type": "string"}},
+        "outcome": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "quality": {
+      "type": "object",
+      "properties": {
+        "method": {"enum": ["lightweight", "DMADV", "DMAIC"]},
+        "fmea_required": {"type": "boolean"},
+        "fmea_ref": {"type": "string"},
+        "control_plan": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "architecture": {
+      "type": "object",
+      "properties": {
+        "contracts_impacted": {"type": "array", "items": {"type": "string"}},
+        "adr_required": {"type": "boolean"},
+        "boundary_notes": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "data_flow_ref": {"type": "string"},
+        "authoritative_source": {"type": "string"},
+        "classifications": {"type": "array", "items": {"type": "string"}},
+        "tenant_scope": {"type": "string"},
+        "derived_stores": {"type": "array", "items": {"type": "string"}},
+        "persistence_impact": {"type": "string"},
+        "migration_required": {"type": "boolean"},
+        "migration_policy": {"type": "string"},
+        "retention_delete_export": {"type": "string"},
+        "rollback_notes": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "authorization": {
+      "type": "object",
+      "properties": {
+        "permissions": {"type": "array", "items": {"type": "string"}},
+        "runtime_capabilities": {"type": "array", "items": {"type": "string"}},
+        "tenant_impact": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "security": {
+      "type": "object",
+      "required": ["risk", "threat_model_required"],
+      "properties": {
+        "risk": {"enum": ["low", "moderate", "high", "critical"]},
+        "threat_model_required": {"type": "boolean"},
+        "threat_model_ref": {"type": "string"},
+        "security_notes": {"type": "string"},
+        "independent_review_required": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "privacy": {
+      "type": "object",
+      "properties": {
+        "personal_data": {"type": "boolean"},
+        "consent_impact": {"type": "string"},
+        "retention_impact": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "surfaces": {
+      "type": "object",
+      "properties": {
+        "admin_ui": {"type": "boolean"},
+        "public_ui": {"type": "boolean"},
+        "api": {"type": "boolean"},
+        "webhook": {"type": "boolean"},
+        "sdk": {"type": "boolean"},
+        "theme": {"type": "boolean"},
+        "studio": {"type": "boolean"},
+        "extension": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "exposure": {"enum": ["none", "read", "draft", "execute-with-approval", "execute-policy-bounded"]},
+        "tool_ids": {"type": "array", "items": {"type": "string"}},
+        "approval_required": {"type": "boolean"},
+        "excluded_data_classes": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "package": {
+      "type": ["object", "null"],
+      "properties": {
+        "family": {"enum": ["extension", "app", "integration", "studio-pack", "theme"]},
+        "runtime_mode": {"enum": ["declarative", "trusted-php"]},
+        "migration_policy": {"enum": ["none", "forward-only"]},
+        "compatibility_policy": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "applicable": {"type": "boolean"},
+        "budget_ids": {"type": "array", "items": {"type": "string"}},
+        "test_profiles": {"type": "array", "items": {"type": "string"}},
+        "baseline": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "reliability": {
+      "type": "object",
+      "properties": {
+        "applicable": {"type": "boolean"},
+        "sli_slo": {"type": "string"},
+        "timeout_policy": {"type": "string"},
+        "retry_idempotency": {"type": "string"},
+        "degradation_recovery": {"type": "string"},
+        "fault_tests": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "payment": {
+      "type": "object",
+      "properties": {
+        "flow_types": {"type": "array", "items": {"enum": ["redirect", "hosted-iframe", "hosted-fields", "tokenized-sdk"]}, "uniqueItems": true},
+        "account_data_access": {"enum": ["none", "token-only"]},
+        "provider_id": {"type": "string"},
+        "api_origins": {"type": "array", "items": {"type": "string"}},
+        "frontend_origins": {"type": "array", "items": {"type": "string"}},
+        "secret_slots": {"type": "array", "items": {"type": "string"}},
+        "supports_3ds": {"type": "boolean"},
+        "supports_sca": {"type": "boolean"},
+        "idempotency_contract": {"type": "string"},
+        "webhook_verification": {"type": "string"},
+        "sandbox_verification_required": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "testing": {
+      "type": "object",
+      "properties": {
+        "unit": {"type": "boolean"},
+        "integration": {"type": "boolean"},
+        "architecture": {"type": "boolean"},
+        "data_flow": {"type": "boolean"},
+        "security": {"type": "boolean"},
+        "browser": {"type": "boolean"},
+        "performance": {"type": "boolean"},
+        "reliability": {"type": "boolean"},
+        "payment_adversarial": {"type": "boolean"},
+        "ai_evals": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "real_target_required": {"type": "boolean"},
+        "provider_sandbox_required": {"type": "boolean"},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "rollback": {"type": "string"},
+    "observability": {"type": "array", "items": {"type": "string"}},
+    "cost_efficiency": {"type": "string"},
+    "acceptance_criteria": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "out_of_scope": {"type": "array", "items": {"type": "string"}},
+    "source_refs": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}
