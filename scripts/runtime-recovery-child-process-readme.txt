@@ -1,0 +1,1 @@
+This branch intentionally keeps the bounded child-process implementation isolated from parent PR #30 until the orchestrator runner is switched and the combined exact-head certification is green. See docs/runtime/RUNTIME_RECOVERY_CHILD_BOUNDS.md.
