@@ -141,27 +141,19 @@ $generate = static function (string $workspaceId) use (
     }
 
     if ($localErrors === []) {
-        // A package-lock-only resolution can omit platform-selected optional
-        // packages that a real install requires (for example native Rolldown
-        // bindings). Generate from an actual isolated install, then prove that
-        // the exact resulting lock replays via npm ci before it is reviewable.
-        $command = ['npm', 'install', '--ignore-scripts', '--no-audit', '--no-fund'];
+        // Candidate refresh is intentionally lock-only: it must not install the
+        // runtime graph. Explicit optional inclusion makes native/platform
+        // package choices part of the reviewed lock instead of depending on an
+        // installed node_modules tree. Clean npm-ci replay is a later gate.
+        $command = [
+            'npm', 'install', '--package-lock-only', '--include=optional',
+            '--ignore-scripts', '--no-audit', '--no-fund',
+        ];
         $result = nexoraRunTargetCommand($command, $workspace, $environment);
         $record($workspaceId, 'npm-candidate-lock', $command, $result);
         if ($result['exit_code'] !== 0) {
             $detail = trim($result['stderr'] !== '' ? $result['stderr'] : $result['stdout']);
             $localErrors[] = 'npm candidate generation failed in workspace '
-                .$workspaceId.($detail !== '' ? ': '.substr($detail, 0, 1200) : '.');
-        }
-    }
-
-    if ($localErrors === []) {
-        $command = ['npm', 'ci', '--ignore-scripts', '--no-audit', '--no-fund'];
-        $result = nexoraRunTargetCommand($command, $workspace, $environment);
-        $record($workspaceId, 'npm-candidate-lock-replay', $command, $result);
-        if ($result['exit_code'] !== 0) {
-            $detail = trim($result['stderr'] !== '' ? $result['stderr'] : $result['stdout']);
-            $localErrors[] = 'npm candidate lock clean replay failed in workspace '
                 .$workspaceId.($detail !== '' ? ': '.substr($detail, 0, 1200) : '.');
         }
     }
