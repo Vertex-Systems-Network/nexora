@@ -1,0 +1,129 @@
+name: Nexora chunk budget candidate evidence
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/chunk-budget-candidate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    name: chunk-budget-candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact diagnostic source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout identity
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "Exact diagnostic checkout verified: $EXPECTED_SHA"
+
+      - name: PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: none
+
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Use repository-declared npm
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global npm@10.9.2 --no-audit --no-fund
+          test "$(npm --version)" = "10.9.2"
+
+      - name: Build disposable Vitest 5 / Vite 8 grouped-chunk candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVIDENCE="$GITHUB_WORKSPACE/storage/app/nexora/dependency-intake/chunk-budget-candidate"
+          CACHE="$GITHUB_WORKSPACE/storage/app/nexora/tools/npm-chunk-budget-cache"
+          rm -rf "$EVIDENCE" "$CACHE" node_modules package-lock.json public/build
+          mkdir -p "$EVIDENCE" "$CACHE"
+          cp package.json "$EVIDENCE/package.original.json"
+          cp vite.config.ts "$EVIDENCE/vite.config.original.ts"
+
+          node - package.json <<'NODE'
+          const fs = require('node:fs')
+          const path = process.argv[2]
+          const manifest = JSON.parse(fs.readFileSync(path, 'utf8'))
+          manifest.devDependencies.vitest = '5.0.0'
+          fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n')
+          NODE
+
+          node - vite.config.ts <<'NODE'
+          const fs = require('node:fs')
+          const path = process.argv[2]
+          let source = fs.readFileSync(path, 'utf8')
+          const needle = '        chunkSizeWarningLimit: 900,\n'
+          if (!source.includes(needle)) {
+            throw new Error('expected Vite build insertion point is missing')
+          }
+          const replacement = `        chunkSizeWarningLimit: 900,\n        rolldownOptions: {\n            output: {\n                codeSplitting: {\n                    groups: [\n                        {\n                            test: /[\\\\/]resources[\\\\/]js[\\\\/]admin[\\\\/]pages[\\\\/]Admin[\\\\/]/,\n                            name: (moduleId) => {\n                                const normalized = moduleId.replace(/\\\\\\\\/g, "/");\n                                const marker = "/resources/js/admin/pages/Admin/";\n                                const markerIndex = normalized.indexOf(marker);\n                                if (markerIndex < 0) return null;\n                                const relative = normalized.slice(markerIndex + marker.length);\n                                const slashIndex = relative.indexOf("/");\n                                if (slashIndex < 0) return null;\n                                return \`admin-\${relative.slice(0, slashIndex).toLowerCase()}\`;\n                            },\n                            priority: 20,\n                        },\n                    ],\n                },\n            },\n        },\n`
+          source = source.replace(needle, replacement)
+          fs.writeFileSync(path, source)
+          NODE
+          cp package.json "$EVIDENCE/package.json"
+          cp vite.config.ts "$EVIDENCE/vite.config.candidate.ts"
+
+          npm install --ignore-scripts --no-audit --no-fund --cache "$CACHE" >"$EVIDENCE/install.stdout.log" 2>"$EVIDENCE/install.stderr.log"
+          cp package-lock.json "$EVIDENCE/package-lock.json"
+          rm -rf node_modules
+          npm ci --no-audit --no-fund --cache "$CACHE" >"$EVIDENCE/ci.stdout.log" 2>"$EVIDENCE/ci.stderr.log"
+          npm run typecheck >"$EVIDENCE/typecheck.stdout.log" 2>"$EVIDENCE/typecheck.stderr.log"
+          npm run test >"$EVIDENCE/test.stdout.log" 2>"$EVIDENCE/test.stderr.log"
+          npm run build >"$EVIDENCE/build.stdout.log" 2>"$EVIDENCE/build.stderr.log"
+
+          set +e
+          npm run verify:build >"$EVIDENCE/verify-build.stdout.log" 2>"$EVIDENCE/verify-build.stderr.log"
+          VERIFY_RC=$?
+          set -e
+          printf '%s\n' "$VERIFY_RC" > "$EVIDENCE/verify-build.exit-code.txt"
+          test -s storage/app/nexora/certification/build-assets.json
+          cp storage/app/nexora/certification/build-assets.json "$EVIDENCE/build-assets.json"
+          cp public/build/manifest.json "$EVIDENCE/vite-manifest.json"
+
+          python - "$EVIDENCE/build-assets.json" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          report = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          js_count = int(report['counts']['js'])
+          max_js = int(report['budgets']['max_javascript_assets'])
+          errors = list(report.get('errors') or [])
+          asset_errors = [error for error in errors if error.startswith('too many JS assets:')]
+          print(f'Grouped candidate JS assets: {js_count} / {max_js}')
+          print(f"Build bytes: {report['totals']['build']}; JS bytes: {report['totals']['js']}; gzip JS: {report['totals']['js_gzip']}")
+          for error in errors:
+              print(f'Verifier evidence: {error}')
+          if js_count > max_js or asset_errors:
+              raise SystemExit('grouped candidate still violates the unchanged JS asset-count ceiling')
+          PY
+
+      - name: Upload review-only chunk dossier
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-chunk-budget-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            storage/app/nexora/dependency-intake/chunk-budget-candidate/**
