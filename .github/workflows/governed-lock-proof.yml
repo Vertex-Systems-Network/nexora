@@ -75,8 +75,53 @@ jobs:
             2> storage/app/nexora/dependency-intake/governed-proof.stderr.log
           RC=$?
           set -e
+          printf '%s\n' "$RC" > storage/app/nexora/dependency-intake/governed-proof.exit-code.txt
           cat storage/app/nexora/dependency-intake/governed-proof.stdout.json
           cat storage/app/nexora/dependency-intake/governed-proof.stderr.log >&2 || true
+
+          LATEST_RUN="$(find storage/app/nexora/dependency-intake/lock-refresh-runs -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1)"
+          if [ -n "$LATEST_RUN" ] && [ -s "$LATEST_RUN/workspace-A/package-lock.json" ] && [ -s "$LATEST_RUN/workspace-B/package-lock.json" ]; then
+            python - "$LATEST_RUN/workspace-A/package-lock.json" "$LATEST_RUN/workspace-B/package-lock.json" \
+              > storage/app/nexora/dependency-intake/npm-ab-semantic-diff.txt <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          left = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          right = json.loads(Path(sys.argv[2]).read_text(encoding='utf-8'))
+          differences = []
+
+          def walk(a, b, path='$'):
+              if type(a) is not type(b):
+                  differences.append((path, a, b))
+                  return
+              if isinstance(a, dict):
+                  for key in sorted(set(a) | set(b)):
+                      child = f'{path}.{key}'
+                      if key not in a:
+                          differences.append((child, '<missing>', b[key]))
+                      elif key not in b:
+                          differences.append((child, a[key], '<missing>'))
+                      else:
+                          walk(a[key], b[key], child)
+                  return
+              if isinstance(a, list):
+                  if a != b:
+                      differences.append((path, a, b))
+                  return
+              if a != b:
+                  differences.append((path, a, b))
+
+          walk(left, right)
+          print(f'raw differing paths: {len(differences)}')
+          for path, a, b in differences[:200]:
+              print(path)
+              print('  A:', repr(a)[:1000])
+              print('  B:', repr(b)[:1000])
+          PY
+            cat storage/app/nexora/dependency-intake/npm-ab-semantic-diff.txt
+          fi
+
           test "$RC" -eq 2
           test -s storage/app/nexora/dependency-intake/candidates/composer.lock
           test -s storage/app/nexora/dependency-intake/candidates/package-lock.json
@@ -124,5 +169,9 @@ jobs:
             storage/app/nexora/dependency-intake/lock-refresh.md
             storage/app/nexora/dependency-intake/governed-proof.stdout.json
             storage/app/nexora/dependency-intake/governed-proof.stderr.log
+            storage/app/nexora/dependency-intake/governed-proof.exit-code.txt
+            storage/app/nexora/dependency-intake/npm-ab-semantic-diff.txt
+            storage/app/nexora/dependency-intake/lock-refresh-runs/**/workspace-A/package-lock.json
+            storage/app/nexora/dependency-intake/lock-refresh-runs/**/workspace-B/package-lock.json
             storage/app/nexora/certification/build-assets.json
             public/build/manifest.json
