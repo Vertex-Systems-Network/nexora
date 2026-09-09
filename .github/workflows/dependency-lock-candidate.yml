@@ -66,28 +66,30 @@ jobs:
           node --version
           npm --version
 
-      - name: Diagnose Vite and Vitest peer graph variants
+      - name: Narrow Vitest versus older Vite peer graph
         shell: bash
         run: |
           set -uo pipefail
           DIAG_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/dependency-intake/npm-peer-diagnostics"
           CACHE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/tools/npm-diagnostic-cache"
+          rm -rf "$DIAG_ROOT" "$CACHE_ROOT"
           mkdir -p "$DIAG_ROOT" "$CACHE_ROOT"
-          : > "$DIAG_ROOT/results.tsv"
+          printf 'case\tvite_action\tvitest_action\texit_code\tlock_sha256\n' > "$DIAG_ROOT/results.tsv"
 
           run_case() {
             local name="$1"
-            local vite_version="$2"
-            local vitest_version="$3"
+            local vite_action="$2"
+            local vitest_action="$3"
             local dir="$DIAG_ROOT/$name"
             mkdir -p "$dir"
             cp package.json "$dir/package.json"
-            node - "$dir/package.json" "$vite_version" "$vitest_version" <<'NODE'
+            node - "$dir/package.json" "$vite_action" "$vitest_action" <<'NODE'
           const fs = require('node:fs')
-          const [path, viteVersion, vitestVersion] = process.argv.slice(2)
+          const [path, viteAction, vitestAction] = process.argv.slice(2)
           const manifest = JSON.parse(fs.readFileSync(path, 'utf8'))
-          if (viteVersion) manifest.devDependencies.vite = viteVersion
-          if (vitestVersion) manifest.devDependencies.vitest = vitestVersion
+          if (viteAction && viteAction !== '__keep__') manifest.devDependencies.vite = viteAction
+          if (vitestAction === '__remove__') delete manifest.devDependencies.vitest
+          else if (vitestAction && vitestAction !== '__keep__') manifest.devDependencies.vitest = vitestAction
           fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n')
           NODE
             set +e
@@ -102,13 +104,13 @@ jobs:
             if [ -s "$dir/package-lock.json" ]; then
               lock_sha="$(sha256sum "$dir/package-lock.json" | awk '{print $1}')"
             fi
-            printf '%s\t%s\t%s\t%s\t%s\n' "$name" "$vite_version" "$vitest_version" "$rc" "$lock_sha" \
+            printf '%s\t%s\t%s\t%s\t%s\n' "$name" "$vite_action" "$vitest_action" "$rc" "$lock_sha" \
               >> "$DIAG_ROOT/results.tsv"
           }
 
-          run_case vite-8.2.1 8.2.1 ''
-          run_case vitest-4.1.10 '' 4.1.10
-          run_case vite-8.2.1-vitest-4.1.10 8.2.1 4.1.10
+          run_case without-vitest __keep__ __remove__
+          run_case vite-8.0.6 8.0.6 __keep__
+          run_case vite-8.0.6-without-vitest 8.0.6 __remove__
           cat "$DIAG_ROOT/results.tsv"
 
       - name: Generate double-run reproducible lock candidate
@@ -155,4 +157,5 @@ jobs:
             storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/package-lock.json
             storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/stdout.log
             storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/stderr.log
+            storage/app/nexora/tools/npm-diagnostic-cache/*/_logs/*-debug-0.log
             storage/app/nexora/tools/npm-cache/_logs/*-debug-0.log
