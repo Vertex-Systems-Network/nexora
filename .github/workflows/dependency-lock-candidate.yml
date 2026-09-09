@@ -1,0 +1,94 @@
+name: Nexora dependency lock candidate evidence
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/dependency-lock-candidate.yml'
+      - 'composer.json'
+      - 'package.json'
+      - 'scripts/dependency-lock-refresh.php'
+      - 'scripts/lib/dependency-lock-intake.php'
+      - 'scripts/lib/dependency-toolchain.php'
+      - 'scripts/lib/dependency-candidate-supply-chain.php'
+      - 'config/nexora-dependencies.php'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    name: dependency-lock-candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact candidate source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout identity
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          echo "Exact candidate checkout verified: $ACTUAL_SHA"
+
+      - name: PHP 8.4 and Composer 2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Record toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          php --version | head -n 1
+          composer --version --no-ansi
+          node --version
+          npm --version
+
+      - name: Generate double-run reproducible lock candidate
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p storage/app/nexora/dependency-intake
+          php scripts/dependency-lock-refresh.php --confirm=REFRESH --json > storage/app/nexora/dependency-intake/lock-refresh.json
+          RC=$?
+          set -e
+          cat storage/app/nexora/dependency-intake/lock-refresh.json
+          if [ "$RC" -ne 2 ]; then
+            echo "Lock refresh did not reach review-required state (exit=$RC)." >&2
+            exit "$RC"
+          fi
+          test -s storage/app/nexora/dependency-intake/candidates/composer.lock
+          test -s storage/app/nexora/dependency-intake/candidates/package-lock.json
+          test -s storage/app/nexora/dependency-intake/lock-refresh.md
+          sha256sum \
+            storage/app/nexora/dependency-intake/candidates/composer.lock \
+            storage/app/nexora/dependency-intake/candidates/package-lock.json \
+            > storage/app/nexora/dependency-intake/candidate-sha256.txt
+
+      - name: Upload review-only candidate dossier
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-dependency-lock-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            storage/app/nexora/dependency-intake/candidates/composer.lock
+            storage/app/nexora/dependency-intake/candidates/package-lock.json
+            storage/app/nexora/dependency-intake/lock-refresh.md
+            storage/app/nexora/dependency-intake/lock-refresh.json
+            storage/app/nexora/dependency-intake/candidate-sha256.txt
