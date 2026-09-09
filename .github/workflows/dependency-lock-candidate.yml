@@ -64,10 +64,18 @@ jobs:
         run: |
           set -uo pipefail
           mkdir -p storage/app/nexora/dependency-intake
+          set +e
           php scripts/dependency-lock-refresh.php --confirm=REFRESH --json > storage/app/nexora/dependency-intake/lock-refresh.json
           RC=$?
           set -e
           cat storage/app/nexora/dependency-intake/lock-refresh.json
+          if [ -s storage/app/nexora/dependency-intake/candidates/composer.lock ] && \
+             [ -s storage/app/nexora/dependency-intake/candidates/package-lock.json ]; then
+            sha256sum \
+              storage/app/nexora/dependency-intake/candidates/composer.lock \
+              storage/app/nexora/dependency-intake/candidates/package-lock.json \
+              > storage/app/nexora/dependency-intake/candidate-sha256.txt
+          fi
           if [ "$RC" -ne 2 ]; then
             echo "Lock refresh did not reach review-required state (exit=$RC)." >&2
             exit "$RC"
@@ -75,12 +83,10 @@ jobs:
           test -s storage/app/nexora/dependency-intake/candidates/composer.lock
           test -s storage/app/nexora/dependency-intake/candidates/package-lock.json
           test -s storage/app/nexora/dependency-intake/lock-refresh.md
-          sha256sum \
-            storage/app/nexora/dependency-intake/candidates/composer.lock \
-            storage/app/nexora/dependency-intake/candidates/package-lock.json \
-            > storage/app/nexora/dependency-intake/candidate-sha256.txt
+          test -s storage/app/nexora/dependency-intake/candidate-sha256.txt
 
       - name: Upload review-only candidate dossier
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: nexora-dependency-lock-candidate-${{ github.event.pull_request.head.sha || github.sha }}
