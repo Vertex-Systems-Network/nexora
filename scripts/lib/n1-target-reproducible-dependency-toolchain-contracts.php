@@ -58,17 +58,16 @@ function nexoraAnalyzeReproducibleDependencyToolchainContracts(string $root): ar
         "'semantic_exact_match' =>",
         "'mode' => 'double-run-reproducible-candidate-refresh'",
         "'root_lockfiles_mutated' => false",
-        "['npm', 'install', '--ignore-scripts', '--no-audit', '--no-fund']",
-        "['npm', 'ci', '--ignore-scripts', '--no-audit', '--no-fund']",
-        "'npm-candidate-lock-replay'",
-        'npm candidate lock clean replay failed in workspace',
+        "'npm', 'install', '--package-lock-only', '--include=optional'",
+        "'npm-candidate-lock'",
+        'Clean npm-ci replay is a later gate.',
     ] as $marker) {
         if (! str_contains($refresh, $marker)) {
             $errors[] = "v5.12 double-run lock refresh missing [{$marker}]";
         }
     }
-    if (str_contains($refresh, "['npm', 'install', '--package-lock-only'")) {
-        $errors[] = 'v5.12 npm candidate generation must use a real isolated install before clean npm ci replay';
+    if (str_contains($refresh, "'npm', 'ci'")) {
+        $errors[] = 'v5.12 candidate refresh must not install the runtime dependency graph; npm-ci replay belongs to certification';
     }
 
     $promote = $read('scripts/dependency-lock-promote.php');
