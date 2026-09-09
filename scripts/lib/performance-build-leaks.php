@@ -22,7 +22,7 @@ function nexoraPerformanceBuildLocalLeaks(string $source): array
         }
     }
 
-    if (preg_match('~(?<![A-Za-z0-9_.-])/Users/[^/\\\\\s"\'`<>]+(?:/|\\\\)~', $source) === 1) {
+    if (preg_match('~(?<![A-Za-z0-9_.-])/Users/[^/\\\\\s]+(?:/|\\\\)~', $source) === 1) {
         $leaks[] = '/Users/<user>/';
     }
 
