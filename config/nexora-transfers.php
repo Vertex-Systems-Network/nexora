@@ -13,6 +13,7 @@ return [
     ],
 
     'marketplace' => [
+        'max_catalog_bytes' => 8_388_608, // 8 MiB bounded JSON catalog before decode/normalization.
         'max_download_bytes' => 52_428_800, // Must remain within Sentinel quarantine upload policy.
     ],
 

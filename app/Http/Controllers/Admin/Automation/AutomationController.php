@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Admin\Automation;
 use App\Http\Controllers\Controller;
 use App\Jobs\ExecuteWorkflowRunJob;
 use App\Models\AutomationEvent;
-use App\Models\User;
 use App\Models\WebhookDelivery;
 use App\Models\WebhookDestination;
 use App\Models\WebhookEndpoint;
@@ -16,15 +15,23 @@ use App\Models\WorkflowRun;
 use App\Nexora\Automation\Services\AutomationActionRegistry;
 use App\Nexora\Automation\Services\AutomationDefinitionValidator;
 use App\Nexora\Automation\Services\AutomationTriggerRegistry;
+use App\Nexora\Enterprise\Services\TenantContext;
+use App\Nexora\Enterprise\Services\TenantMemberDirectory;
 use App\Nexora\Security\Audit\AuditManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class AutomationController extends Controller
 {
+    public function __construct(
+        private TenantMemberDirectory $tenantMembers,
+        private TenantContext $tenant,
+    ) {}
+
     public function index(Request $request, AutomationTriggerRegistry $triggers, AutomationActionRegistry $actions): Response
     {
         $workflows = Workflow::query()->withCount(['runs'])->latest('updated_at')->paginate(25)->through(fn (Workflow $workflow): array => $this->workflow($workflow));
@@ -40,7 +47,7 @@ final class AutomationController extends Controller
         return Inertia::render('Admin/Automation/Index', [
             'workflows'=>$workflows,'recentRuns'=>$runs,'destinations'=>$destinations,'endpoints'=>$endpoints,
             'triggers'=>array_values($triggers->all()),'actions'=>array_values($actions->all()),
-            'users'=>User::query()->where('status','active')->orderBy('name')->get(['id','name','email'])->map(fn (User $user): array => ['value'=>(string)$user->id,'label'=>$user->name,'description'=>$user->email])->values(),
+            'users'=>$this->userOptions(),
             'newSecret'=>$request->session()->pull('automation_secret'),
         ]);
     }
@@ -53,7 +60,8 @@ final class AutomationController extends Controller
     public function store(Request $request, AutomationDefinitionValidator $validator, AuditManager $audit): RedirectResponse
     {
         $base = $request->validate([
-            'name'=>['required','string','max:180'],'slug'=>['nullable','string','max:180','regex:/^[a-z0-9][a-z0-9-]*$/','unique:nx_workflows,slug'],
+            'name'=>['required','string','max:180'],
+            'slug'=>['nullable','string','max:180','regex:/^[a-z0-9][a-z0-9-]*$/',Rule::unique('nx_workflows','slug')->where('tenant_id',$this->tenant->id())],
             'description'=>['nullable','string','max:2000'],'status'=>['required','in:draft,active,paused'],
             'trigger_key'=>['required','string','max:120'],'trigger_config'=>['nullable','array'],'conditions'=>['nullable','array','max:20'],'actions'=>['required','array','min:1','max:20'],
         ]);
@@ -73,7 +81,8 @@ final class AutomationController extends Controller
     public function update(Request $request, Workflow $workflow, AutomationDefinitionValidator $validator, AuditManager $audit): RedirectResponse
     {
         $base = $request->validate([
-            'name'=>['required','string','max:180'],'slug'=>['required','string','max:180','regex:/^[a-z0-9][a-z0-9-]*$/','unique:nx_workflows,slug,'.$workflow->id],
+            'name'=>['required','string','max:180'],
+            'slug'=>['required','string','max:180','regex:/^[a-z0-9][a-z0-9-]*$/',Rule::unique('nx_workflows','slug')->where('tenant_id',$this->tenant->id())->ignore($workflow->id)],
             'description'=>['nullable','string','max:2000'],'status'=>['required','in:draft,active,paused'],
             'trigger_key'=>['required','string','max:120'],'trigger_config'=>['nullable','array'],'conditions'=>['nullable','array','max:20'],'actions'=>['required','array','min:1','max:20'],
         ]);
@@ -126,8 +135,15 @@ final class AutomationController extends Controller
             'workflow'=>$workflow ? $this->workflow($workflow) : null,'triggers'=>array_values($triggers->all()),'actions'=>array_values($actions->all()),
             'destinations'=>WebhookDestination::query()->where('enabled',true)->orderBy('name')->get()->map(fn (WebhookDestination $destination): array => ['value'=>(string)$destination->id,'label'=>$destination->name,'description'=>$destination->url])->values(),
             'endpoints'=>WebhookEndpoint::query()->where('enabled',true)->orderBy('name')->get()->map(fn (WebhookEndpoint $endpoint): array => ['value'=>(string)$endpoint->id,'label'=>$endpoint->name,'description'=>$endpoint->slug])->values(),
-            'users'=>User::query()->where('status','active')->orderBy('name')->get(['id','name','email'])->map(fn (User $user): array => ['value'=>(string)$user->id,'label'=>$user->name,'description'=>$user->email])->values(),
+            'users'=>$this->userOptions(),
         ]);
+    }
+
+    private function userOptions(): mixed
+    {
+        return $this->tenantMembers->activeUsers()
+            ->map(fn ($user): array => ['value'=>(string)$user->id,'label'=>$user->name,'description'=>$user->email])
+            ->values();
     }
 
     private function workflow(Workflow $workflow): array

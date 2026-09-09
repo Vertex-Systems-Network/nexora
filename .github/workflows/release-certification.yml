@@ -1,9 +1,11 @@
 name: Nexora release certification
 
+# Final/main source certification. Pull-request development validation is handled by the single
+# development execution QA job so PR updates never consume two runners in parallel.
+# This workflow also uses GitHub-hosted infrastructure; no self-hosted runner is required.
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -14,26 +16,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  governance:
-    name: governance
+  source-certification:
+    name: Source certification
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Checkout exact source
         uses: actions/checkout@v7
 
-      - name: PHP 8.4
+      - name: Set up PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.3'
+          extensions: fileinfo, mbstring, openssl, pdo, zip
           coverage: none
-          tools: none
+          tools: composer:v2
 
-      - name: Node 22
+      - name: Set up Node.js 22
         uses: actions/setup-node@v7
         with:
           node-version: '22'
           package-manager-cache: false
+
+      - name: Report GitHub-hosted runner
+        run: |
+          echo "Runner name: $RUNNER_NAME"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Runner architecture: $RUNNER_ARCH"
+
+      - name: Verify GitHub-hosted toolchain
+        run: |
+          php -r "if (version_compare(PHP_VERSION, '8.3.0', '<')) { fwrite(STDERR, 'Nexora requires PHP >= 8.3.0; runner has '.PHP_VERSION.PHP_EOL); exit(1); } echo 'PHP '.PHP_VERSION.PHP_EOL;"
+          node -e "const v=process.versions.node; if (Number(v.split('.')[0]) < 22) { console.error('Nexora source certification requires Node >= 22.0.0; runner has '+v); process.exit(1); } console.log('Node '+v);"
+          composer --version
+          npm --version
 
       - name: Certification preflight
         run: php scripts/certification-preflight.php --source-only
@@ -41,14 +57,104 @@ jobs:
       - name: Source Guard
         run: php scripts/source-guard.php --source-only
 
+      - name: Post-install runtime convergence contract
+        run: php scripts/post-install-runtime-convergence-contract-verify.php
+
+      - name: DEV-4 core functional source contract
+        run: php scripts/dev4-core-functional-contract-verify.php
+
+      - name: Theme product source contract
+        run: php scripts/theme-product-contract-verify.php
+
+      - name: Extension product source contract
+        run: php scripts/extension-product-contract-verify.php
+
+      - name: Studio product source contract
+        run: php scripts/studio-product-contract-verify.php
+
+      - name: Document product source contract
+        run: php scripts/document-product-contract-verify.php
+
+      - name: Content collection product source contract
+        run: php scripts/collection-product-contract-verify.php
+
+      - name: Publishing + SEO product source contract
+        run: php scripts/publishing-seo-product-contract-verify.php
+
+      - name: Admin UX product source contract
+        run: php scripts/admin-ux-product-contract-verify.php
+
+      - name: Forms + Data + Workflows product source contract
+        run: php scripts/forms-workflow-product-contract-verify.php
+
+      - name: Data Connections product source contract
+        run: php scripts/data-connection-product-contract-verify.php
+
+      - name: Primary SQL portability source contract
+        run: php scripts/primary-sql-portability-contract-verify.php
+
+      - name: Installer database UX source contract
+        run: php scripts/installer-database-ux-contract-verify.php
+
+      - name: Development target QA source contract
+        run: php scripts/development-target-qa-contract-verify.php
+
+      - name: Marketplace product source contract
+        run: php scripts/marketplace-product-contract-verify.php
+
+      - name: Commerce product source contract
+        run: php scripts/commerce-product-contract-verify.php
+
+      - name: Customer Portal product source contract
+        run: php scripts/customer-portal-product-contract-verify.php
+
+      - name: CRM + Membership product source contract
+        run: php scripts/crm-membership-product-contract-verify.php
+
+      - name: Search 2.0 product source contract
+        run: php scripts/search-product-contract-verify.php
+
+      - name: Collaboration product source contract
+        run: php scripts/collaboration-product-contract-verify.php
+
+      - name: Automation product source contract
+        run: php scripts/automation-product-contract-verify.php
+
+      - name: AI Platform product source contract
+        run: php scripts/ai-platform-product-contract-verify.php
+
+      - name: Multisite / Organizations product source contract
+        run: php scripts/multisite-organizations-product-contract-verify.php
+
+      - name: SSO / Enterprise Governance product source contract
+        run: php scripts/enterprise-governance-product-contract-verify.php
+
+      - name: Public API / SDK product source contract
+        run: php scripts/public-api-sdk-product-contract-verify.php
+
+      - name: Content Migration product source contract
+        run: php scripts/content-migration-product-contract-verify.php
+
+      - name: Observability product source contract
+        run: php scripts/observability-product-contract-verify.php
+
+      - name: Forge / Developer Experience product source contract
+        run: php scripts/forge-developer-experience-product-contract-verify.php
+
+      - name: Sentinel 2.0 product source contract
+        run: php scripts/sentinel2-product-contract-verify.php
+
+      - name: Marketplace 2.0 product source contract
+        run: php scripts/marketplace2-product-contract-verify.php
+
+      - name: Cloud / HA product source contract
+        run: php scripts/cloud-ha-product-contract-verify.php
+
+      - name: Backup / DR / Upgrade product source contract
+        run: php scripts/backup-dr-upgrade-product-contract-verify.php
+
+      - name: Performance + Accessibility + Release product source contract
+        run: php scripts/performance-accessibility-release-product-contract-verify.php
+
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
-
-      - name: Install frontend dependencies
-        run: npm install --no-audit --no-fund
-
-      - name: Frontend dependency compatibility
-        run: |
-          npm run typecheck
-          npm run test
-          npm run build:raw

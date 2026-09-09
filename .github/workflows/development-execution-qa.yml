@@ -1,0 +1,112 @@
+name: Nexora development execution QA
+
+# Real development-checkout execution evidence. This is intentionally separate from source certification
+# and from the installed rc.93 Laragon recovery target. The workflow never creates/drops/retargets live
+# databases and never upgrades the recovery installation.
+# The single job also publishes the repository ruleset's required `governance` status context, avoiding a
+# second PR runner while keeping the full development QA as the merge-governance boundary.
+# Every pull-request head, including documentation/governance-only commits, must emit this context because
+# the repository ruleset evaluates required checks against the current PR head SHA.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexora-development-execution-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  development-execution-qa:
+    name: governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      APP_ENV: testing
+      APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+      NEXORA_INSTALLER_BYPASS: 'true'
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_DATABASE: nexora_testing
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nexora_testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout exact development source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          clean: true
+
+      - name: Prepare ephemeral CI testing environment file
+        run: |
+          cat > .env.testing <<'EOF'
+          APP_ENV=testing
+          APP_DEBUG=false
+          APP_URL=https://nexora.test
+          EOF
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: fileinfo, mbstring, openssl, pdo, pdo_mysql, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Report GitHub-hosted runner
+        run: |
+          echo "Runner name: $RUNNER_NAME"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Runner architecture: $RUNNER_ARCH"
+
+      - name: Verify development toolchain
+        run: |
+          php -r "if (version_compare(PHP_VERSION, '8.3.0', '<')) { fwrite(STDERR, 'Nexora development QA requires PHP >= 8.3.0; runner has '.PHP_VERSION.PHP_EOL); exit(1); } echo 'PHP '.PHP_VERSION.PHP_EOL;"
+          node -e "const v=process.versions.node; if (Number(v.split('.')[0]) < 22) { console.error('Nexora development QA requires Node >= 22.0.0; runner has '+v); process.exit(1); } console.log('Node '+v);"
+          composer --version
+          npm --version
+
+      - name: Install backend development dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install frontend development dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify warning-clean Laravel test bootstrap
+        run: php artisan test tests/Unit/AtomicFileWriterTest.php --colors=never --display-warnings --fail-on-warning
+
+      - name: Execute full development QA and write evidence
+        run: php scripts/development-readiness.php --full --tests --evidence
+
+      - name: Upload development QA evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-development-readiness-${{ github.event.pull_request.head.sha || github.sha }}
+          path: storage/app/nexora/qa/development-readiness.json
+          if-no-files-found: warn
+          retention-days: 14

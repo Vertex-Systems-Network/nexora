@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use App\Nexora\Cloud\Services\RuntimeDeploymentIdentity;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -120,6 +121,14 @@ final class IdentityAccessFlowTest extends TestCase
         $admin->roles()->attach(Role::query()->where('slug', 'administrator')->value('id'));
         $otherAdmin = User::factory()->create(['email_verified_at' => now()]);
         $otherAdmin->roles()->attach(Role::query()->where('slug', 'administrator')->value('id'));
+
+        // Saved views use the same fetch-based JSON path as the Admin client.
+        // Production fetch requests carry the active deployment generation so
+        // the runtime stale-client fence can reject genuinely old clients.
+        $this->withHeader(
+            'X-Nexora-Deployment-Generation',
+            app(RuntimeDeploymentIdentity::class)->generation(),
+        );
 
         $response = $this->actingAs($admin)->postJson('/admin/saved-views', [
             'scope' => 'admin.users',

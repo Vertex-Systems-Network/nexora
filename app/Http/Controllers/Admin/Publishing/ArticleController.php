@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Publishing;
 
-use App\Nexora\Enterprise\Validation\TenantExists;
 use App\Http\Controllers\Controller;
 use App\Models\AuthorProfile;
 use App\Models\ContentSeries;
 use App\Models\Document;
 use App\Models\MediaAsset;
 use App\Models\TaxonomyTerm;
+use App\Nexora\Enterprise\Validation\TenantExists;
 use App\Nexora\Publishing\Services\ArticlePublishingManager;
 use App\Nexora\Security\Audit\AuditManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -65,6 +64,8 @@ final class ArticleController extends Controller
     {
         abort_unless(in_array($document->type, ['article', 'blog_post'], true), 404);
         $document->load(['articleMetadata.heroMedia', 'authorProfiles:id,display_name,slug', 'taxonomyTerms:id,taxonomy,name,slug', 'series:id,name,slug']);
+        $heroMedia = $document->articleMetadata?->heroMedia;
+
         return Inertia::render('Admin/Publishing/ArticleSettings', [
             'document' => [
                 'id' => $document->id, 'title' => $document->title, 'type' => $document->type, 'status' => $document->status,
@@ -73,6 +74,7 @@ final class ArticleController extends Controller
                 'featured_until' => $document->articleMetadata?->featured_until?->format('Y-m-d\TH:i') ?? '',
                 'hero_image_url' => (string) ($document->articleMetadata?->hero_image_url ?? ''),
                 'hero_media_id' => $document->articleMetadata?->hero_media_id,
+                'hero_media' => $this->mediaSelection($heroMedia),
                 'source_url' => (string) ($document->articleMetadata?->source_url ?? ''),
                 'allow_comments' => (bool) ($document->articleMetadata?->allow_comments ?? false),
                 'is_sponsored' => (bool) ($document->articleMetadata?->is_sponsored ?? false),
@@ -84,7 +86,6 @@ final class ArticleController extends Controller
             'authors' => AuthorProfile::query()->where('is_public', true)->orderBy('display_name')->get(['id','display_name','slug'])->map(fn ($item) => ['id'=>$item->id,'name'=>$item->display_name,'slug'=>$item->slug])->values(),
             'terms' => TaxonomyTerm::query()->orderBy('taxonomy')->orderBy('name')->get(['id','taxonomy','name','slug'])->map(fn ($item) => ['id'=>$item->id,'taxonomy'=>$item->taxonomy,'name'=>$item->name,'slug'=>$item->slug])->values(),
             'series' => ContentSeries::query()->where('status', 'active')->orderBy('name')->get(['id','name','slug'])->values(),
-            'media' => MediaAsset::query()->where('media_type', 'image')->latest('id')->limit(250)->get(['id','uuid','title','original_name'])->map(fn ($item) => ['id'=>$item->id,'name'=>$item->title ?: $item->original_name,'url'=>url('/media/'.$item->uuid)])->values(),
         ]);
     }
 
@@ -96,7 +97,7 @@ final class ArticleController extends Controller
             'is_featured' => ['required', 'boolean'],
             'featured_until' => ['nullable', 'date'],
             'hero_image_url' => ['nullable', 'url:http,https', 'max:2048'],
-            'hero_media_id' => ['nullable', 'integer', Rule::exists('nx_media_assets', 'id')->where(fn ($query) => $query->where('media_type', 'image')->whereNull('deleted_at'))],
+            'hero_media_id' => ['nullable', 'integer', new TenantExists('nx_media_assets')],
             'source_url' => ['nullable', 'url:http,https', 'max:2048'],
             'allow_comments' => ['required', 'boolean'],
             'is_sponsored' => ['required', 'boolean'],
@@ -108,8 +109,36 @@ final class ArticleController extends Controller
         if (! empty($data['scheduled_at']) && $document->status !== 'draft') {
             return back()->withErrors(['scheduled_at' => 'Only draft content can be scheduled. Published or archived content must be returned to draft first.']);
         }
+        if (! empty($data['hero_media_id']) && ! $this->isPublicImage((int) $data['hero_media_id'])) {
+            return back()->withErrors(['hero_media_id' => 'Choose an active public image from this organization Media Library.']);
+        }
+
         $manager->save($document, $data);
         $audit->record('publishing.article.settings.updated', $document, ['scheduled_at' => $data['scheduled_at'] ?? null, 'featured' => (bool) $data['is_featured']]);
         return back()->with('success', 'Publishing settings saved.');
+    }
+
+    /** @return array{id:int,title:string,url:?string,alt_text:?string,width:?int,height:?int}|null */
+    private function mediaSelection(?MediaAsset $asset): ?array
+    {
+        if ($asset === null) return null;
+        return [
+            'id' => (int) $asset->id,
+            'title' => (string) ($asset->title ?: $asset->original_name),
+            'url' => $asset->publicUrl(),
+            'alt_text' => $asset->alt_text ? (string) $asset->alt_text : null,
+            'width' => $asset->width ? (int) $asset->width : null,
+            'height' => $asset->height ? (int) $asset->height : null,
+        ];
+    }
+
+    private function isPublicImage(int $assetId): bool
+    {
+        return MediaAsset::query()
+            ->whereKey($assetId)
+            ->where('media_type', 'image')
+            ->where('visibility', 'public')
+            ->whereNull('deleted_at')
+            ->exists();
     }
 }

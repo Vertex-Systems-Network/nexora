@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Icon } from "@admin/components/Icon";
+import { MediaPicker, type MediaPickerSelection } from "@admin/components/MediaPicker";
 import { Button, Card, IconButton, Input, Select, Textarea } from "@nexora/admin-ui";
 
 export type WriterScalar = string | number | boolean | null;
@@ -52,7 +53,31 @@ function BlockFields({ block, mediaAssets, onData }: { block: WriterBlock; media
     }
     if (block.type === "image") {
         const selected = mediaAssets.find((asset) => asset.id === Number(block.data.media_asset_id || 0));
-        return <div className="grid gap-4"><Select label="Media Library image" value={selected ? String(selected.id) : ""} onChange={(value) => { const next = mediaAssets.find((asset) => String(asset.id) === value); onData({ ...block.data, media_asset_id: value ? Number(value) : null, alt_text: stringValue(block.data.alt_text) || next?.alt_text || "" }); }} options={[{ value:"", label:"Choose an image" }, ...mediaAssets.map((asset) => ({ value:String(asset.id), label:asset.name, description:asset.width&&asset.height?`${asset.width} × ${asset.height}`:undefined }))]} />{selected && <div className="overflow-hidden rounded-[var(--nx-radius-card)] border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)]"><img src={selected.url} alt="" className="max-h-80 w-full object-contain" loading="lazy" decoding="async" /></div>}<Input label="Alt text" value={stringValue(block.data.alt_text)} onChange={(event) => onData({ ...block.data, alt_text: event.target.value })} hint="Describe the image when it conveys meaning."/><Textarea label="Caption" rows={3} value={stringValue(block.data.caption)} onChange={(event) => onData({ ...block.data, caption: event.target.value })} /></div>;
+        const selection: MediaPickerSelection | null = selected ? {
+            id: selected.id,
+            title: selected.name,
+            url: selected.url,
+            alt_text: selected.alt_text,
+            width: selected.width,
+            height: selected.height,
+        } : null;
+        return <div className="grid gap-4">
+            <MediaPicker
+                type="image"
+                value={selected?.url}
+                selection={selection}
+                showSelection
+                buttonLabel={selected ? "Replace Media Library image" : "Choose from Media Library"}
+                onChange={(_, asset) => onData({
+                    ...block.data,
+                    media_asset_id: asset.id,
+                    alt_text: stringValue(block.data.alt_text) || asset.alt_text || "",
+                })}
+            />
+            <p className="text-xs leading-5 text-[var(--nx-text-muted)]">Writer stores the canonical Media Library asset ID. Public rendering resolves the current asset URL and responsive variants at request time.</p>
+            <Input label="Alt text" value={stringValue(block.data.alt_text)} onChange={(event) => onData({ ...block.data, alt_text: event.target.value })} hint="Describe the image when it conveys meaning."/>
+            <Textarea label="Caption" rows={3} value={stringValue(block.data.caption)} onChange={(event) => onData({ ...block.data, caption: event.target.value })} />
+        </div>;
     }
     return <Textarea label="Paragraph" value={stringValue(block.data.text)} onChange={(event) => onData({ ...block.data, text: event.target.value })} rows={6} placeholder="Start writing…" />;
 }
@@ -84,7 +109,7 @@ export function BlockEditor({ value, definitions, mediaAssets = [], onChange }: 
                 </div>
             </Card>
 
-            {value.blocks.length === 0 && <Card className="border-dashed p-8 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[var(--nx-brand-soft)] text-[var(--nx-brand-600)]"><Icon name="writer" className="h-6 w-6" /></span><h3 className="mt-4 text-sm font-semibold text-[var(--nx-text)]">Start the document body</h3><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--nx-text-muted)]">Add a paragraph, heading, list, quote, code block or divider. Future publishing modules can register additional block types.</p><Button type="button" className="mt-5" leadingIcon={<Icon name="paragraph" className="h-4 w-4" />} onClick={() => addBlock("paragraph")}>Add first paragraph</Button></Card>}
+            {value.blocks.length === 0 && <Card className="border-dashed p-8 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[var(--nx-brand-soft)] text-[var(--nx-brand-600)]"><Icon name="writer" className="h-6 w-6" /></span><h3 className="mt-4 text-sm font-semibold text-[var(--nx-text)]">Start the document body</h3><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--nx-text-muted)]">Add a paragraph, heading, list, quote, code block, image or divider. Future publishing modules can register additional block types.</p><Button type="button" className="mt-5" leadingIcon={<Icon name="paragraph" className="h-4 w-4" />} onClick={() => addBlock("paragraph")}>Add first paragraph</Button></Card>}
 
             {value.blocks.map((block, index) => {
                 const definition = definitionMap[block.type];

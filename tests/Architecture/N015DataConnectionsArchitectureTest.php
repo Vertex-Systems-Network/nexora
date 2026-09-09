@@ -13,11 +13,19 @@ final class N015DataConnectionsArchitectureTest extends TestCase
     public function installer_uses_premium_selects_aws_primary_presets_and_auxiliary_data_services(): void
     {
         $view = (string) file_get_contents(resource_path('views/install/index.blade.php'));
+        $select = (string) file_get_contents(resource_path('views/components/ui/select.blade.php'));
+        $installerUi = (string) file_get_contents(public_path('installer/nexora-ui.js'));
         $registry = (string) file_get_contents(app_path('Nexora/Installation/Database/DatabaseDriverRegistry.php'));
         $catalog = (string) file_get_contents(app_path('Nexora/Data/ConnectionCatalog.php'));
 
-        self::assertStringContainsString('data-nx-select="database"', $view);
-        self::assertStringContainsString('data-nx-select="language"', $view);
+        self::assertStringContainsString('<x-ui.select name="db_driver"', $view);
+        self::assertStringContainsString('kind="database"', $view);
+        self::assertStringContainsString('<x-ui.select name="language"', $view);
+        self::assertStringContainsString('kind="language"', $view);
+        self::assertStringContainsString('data-nx-select="{{ $kind }}"', $select);
+        self::assertStringContainsString("querySelectorAll('select[data-nx-select]')", $installerUi);
+        self::assertStringContainsString("select.dataset.nxSelect === 'database'", $installerUi);
+        self::assertStringContainsString('.nx-select-trigger', $view);
         self::assertStringContainsString('Additional data services', $view);
         self::assertStringContainsString('.driver-health-icon svg', $view);
         self::assertStringContainsString("'aws_rds_mysql'", $registry);

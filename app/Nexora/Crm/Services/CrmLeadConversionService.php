@@ -23,10 +23,10 @@ final readonly class CrmLeadConversionService
             /** @var CrmLead $locked */
             $locked=CrmLead::query()->lockForUpdate()->findOrFail($lead->id);
             if ($locked->converted_at !== null || $locked->converted_opportunity_id !== null) throw new InvalidArgumentException('This lead has already been converted.');
-            $pipeline ??= CrmPipeline::query()->where('active',true)->orderByDesc('is_default')->first();
-            if (! $pipeline) throw new InvalidArgumentException('Create an active CRM pipeline before converting a lead.');
-            $stage ??= CrmPipelineStage::query()->where('pipeline_id',$pipeline->id)->orderBy('position')->first();
-            if (! $stage || $stage->pipeline_id !== $pipeline->id) throw new InvalidArgumentException('The selected CRM pipeline has no valid starting stage.');
+
+            $pipeline=$this->resolvePipeline($pipeline);
+            $stage=$this->resolveStage($pipeline,$stage);
+
             $opportunity=CrmOpportunity::query()->create([
                 'pipeline_id'=>$pipeline->id,'stage_id'=>$stage->id,'organization_id'=>$locked->organization_id,'contact_id'=>$locked->contact_id,
                 'name'=>$locked->title,'status'=>$stage->is_won?'won':($stage->is_lost?'lost':'open'),'currency'=>$locked->currency,
@@ -41,5 +41,38 @@ final readonly class CrmLeadConversionService
             $this->automation->emit('crm.opportunity.created',['opportunity'=>['id'=>$opportunity->id,'name'=>$opportunity->name,'pipeline_id'=>$pipeline->id,'stage_id'=>$stage->id,'status'=>$opportunity->status,'amount_minor'=>$opportunity->amount_minor,'currency'=>$opportunity->currency]],'crm.opportunity',$opportunity->id);
             return $opportunity;
         });
+    }
+
+    private function resolvePipeline(?CrmPipeline $pipeline): CrmPipeline
+    {
+        if ($pipeline === null) {
+            $resolved=CrmPipeline::query()->where('active',true)->orderByDesc('is_default')->first();
+            if (! $resolved) throw new InvalidArgumentException('Create an active CRM pipeline before converting a lead.');
+
+            return $resolved;
+        }
+
+        $resolved=CrmPipeline::query()
+            ->whereKey($pipeline->id)
+            ->where('active',true)
+            ->first();
+        if (! $resolved) throw new InvalidArgumentException('The selected CRM pipeline does not belong to the current organization or is inactive.');
+
+        return $resolved;
+    }
+
+    private function resolveStage(CrmPipeline $pipeline, ?CrmPipelineStage $stage): CrmPipelineStage
+    {
+        $query=CrmPipelineStage::query()->where('pipeline_id',$pipeline->id);
+        if ($stage !== null) {
+            $query->whereKey($stage->id);
+        } else {
+            $query->orderBy('position');
+        }
+
+        $resolved=$query->first();
+        if (! $resolved) throw new InvalidArgumentException('The selected CRM pipeline has no valid starting stage.');
+
+        return $resolved;
     }
 }

@@ -9,6 +9,6 @@ export type LocalizationProps = { locale:string; direction:"ltr"|"rtl"; supporte
 export type EnterpriseSharedProps = { current:{id:string;name:string;slug:string;status:string;timezone:string;locale:string}|null; available:{id:string;name:string;slug:string}[]; memberRole:string|null; impersonation:{active:true;actor_id:number;actor_name:string;target_name:string}|null };
 export type SharedPageProps = {
     [key:string]: unknown;
-    app:{name:string;environment:string;deployment?:DeploymentIdentity}; auth:{user:AuthUser|null}; adminNavigation:NavigationItem[]; appearance:AppearanceSettings;
+    app:{name:string;logoUrl:string;defaultTimezone:string;defaultLocale:string;environment:string;deployment?:DeploymentIdentity}; auth:{user:AuthUser|null}; adminNavigation:NavigationItem[]; appearance:AppearanceSettings;
     notifications:{unread:number}; enterprise:EnterpriseSharedProps; localization:LocalizationProps; flash:{success?:string|null;error?:string|null;warning?:string|null}; errors:Record<string,string>;
 };

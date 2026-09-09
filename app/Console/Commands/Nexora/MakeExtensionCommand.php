@@ -4,28 +4,67 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\Nexora;
 
+use App\Nexora\Forge\Services\ForgeExtensionScaffolder;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
+use Throwable;
 
 final class MakeExtensionCommand extends Command
 {
-    protected $signature = 'nexora:make:extension {identifier} {--name=} {--type=extension}';
-    protected $description = 'Create a Forge-compatible Nexora extension source scaffold.';
+    protected $signature = 'nexora:make:extension
+        {identifier : Namespaced package identifier such as vendor.extension}
+        {--name= : Human-readable package name}
+        {--type=extension : extension, app, integration or studio-pack}
+        {--dry-run : Preview the deterministic scaffold without writing files}
+        {--force : Refresh generated files only when the destination is owned by the same Forge scaffold}';
 
-    public function handle(): int
+    protected $description = 'Create or preview a safe Forge-compatible Nexora extension source scaffold.';
+
+    public function handle(ForgeExtensionScaffolder $forge): int
     {
-        $id=strtolower(trim((string)$this->argument('identifier')));
-        if (preg_match('/^[a-z0-9]+(?:[._-][a-z0-9]+)+$/',$id)!==1) { $this->error('Use a namespaced identifier such as vendor.extension.'); return self::FAILURE; }
-        $type=(string)$this->option('type'); if (! in_array($type,['extension','app','integration','studio-pack'],true)) { $this->error('Type must be extension, app, integration or studio-pack.'); return self::FAILURE; }
-        $name=trim((string)($this->option('name') ?: ucwords(str_replace(['.','-','_'],' ',$id))));
-        $root=base_path('extensions/'.$id); if (is_dir($root)) { $this->error('Extension source directory already exists: '.$root); return self::FAILURE; }
-        foreach (['src','resources','database/migrations','tests'] as $dir) File::ensureDirectoryExists($root.'/'.$dir,0755,true);
-        $manifest=['schema'=>'https://nexora.dev/schemas/package-v1.json','id'=>$id,'name'=>$name,'type'=>$type,'version'=>'0.1.0','description'=>'','requires'=>['nexora'=>'>=0.34 <2.0'],'runtime'=>['mode'=>'declarative'],'capabilities'=>[],'dependencies'=>(object)[],'migrations'=>['policy'=>'none','schema_compatible_rollback'=>false]];
-        File::put($root.'/nexora.json',json_encode($manifest,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR).PHP_EOL);
-        File::put($root.'/README.md',"# {$name}\n\nForge source package for Nexora. Build/sign the ZIP outside the runtime installation directory, then upload it through Sentinel.\n");
-        File::put($root.'/database/migrations/.gitkeep',''); File::put($root.'/tests/.gitkeep','');
-        File::put($root.'/composer.json',json_encode(['name'=>str_replace('.','/',$id),'type'=>'nexora-extension','require'=>['php'=>'^8.3']],JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR).PHP_EOL);
-        $this->info('Created Forge extension scaffold: '.$root); $this->line('Next: add only requested capabilities to nexora.json, package the directory as ZIP, then send it through Sentinel.');
-        return self::SUCCESS;
+        try {
+            $identifier = (string) $this->argument('identifier');
+            $name = $this->option('name');
+            $type = (string) $this->option('type');
+            $plan = $forge->plan($identifier, is_string($name) ? $name : null, $type);
+
+            if ((bool) $this->option('dry-run')) {
+                $this->info('Forge dry run — no filesystem changes were made.');
+                $this->table(
+                    ['Field', 'Value'],
+                    [
+                        ['Identifier', $plan['identifier']],
+                        ['Name', $plan['name']],
+                        ['Type', $plan['type']],
+                        ['Destination', $plan['target']],
+                        ['Exists', $plan['exists'] ? 'yes' : 'no'],
+                        ['Forge owned', $plan['forge_owned'] ? 'yes' : 'no'],
+                    ],
+                );
+                $this->line('Generated files:');
+                foreach ($plan['files'] as $file) {
+                    $this->line(' - '.$file);
+                }
+                $this->newLine();
+                $this->line('Trust boundary: Forge only generates source. Installation still requires package review and Sentinel ALLOW.');
+
+                return self::SUCCESS;
+            }
+
+            $result = $forge->create(
+                $identifier,
+                is_string($name) ? $name : null,
+                $type,
+                (bool) $this->option('force'),
+            );
+
+            $this->info(($result['refreshed'] ? 'Refreshed' : 'Created').' Forge extension scaffold: '.$result['target']);
+            $this->line('Next: add only requested capabilities, package/sign outside runtime storage, then upload through Sentinel.');
+            $this->line('Forge never installs, enables, grants trust or bypasses Sentinel.');
+
+            return self::SUCCESS;
+        } catch (Throwable $exception) {
+            $this->error($exception->getMessage());
+            return self::FAILURE;
+        }
     }
 }

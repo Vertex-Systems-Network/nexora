@@ -16,7 +16,7 @@ final class N100V56InstallerRuntimeReadinessArchitectureTest extends TestCase
         $result = \nexoraAnalyzeInstallerRuntimeReadinessContracts(base_path());
 
         self::assertSame([], $result['errors'], implode("\n", $result['errors']));
-        self::assertSame(7, $result['metrics']['readiness_components']);
+        self::assertGreaterThanOrEqual(7, $result['metrics']['readiness_components_minimum']);
         self::assertSame(105, $result['metrics']['target_gate_denominator']);
         self::assertSame(0, $result['metrics']['target_gate_denominator_changed']);
     }

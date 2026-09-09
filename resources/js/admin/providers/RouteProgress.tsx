@@ -3,24 +3,47 @@ import { router } from "@inertiajs/react";
 
 export function RouteProgress() {
     const [visible, setVisible] = useState(false);
-    const timer = useRef<number | null>(null);
+    const showTimer = useRef<number | null>(null);
+    const hideTimer = useRef<number | null>(null);
 
     useEffect(() => {
+        const clearTimers = () => {
+            if (showTimer.current !== null) window.clearTimeout(showTimer.current);
+            if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
+            showTimer.current = null;
+            hideTimer.current = null;
+        };
+
         const removeStart = router.on("start", () => {
-            timer.current = window.setTimeout(() => setVisible(true), 120);
+            clearTimers();
+            showTimer.current = window.setTimeout(() => {
+                showTimer.current = null;
+                setVisible(true);
+            }, 120);
         });
         const removeFinish = router.on("finish", () => {
-            if (timer.current !== null) window.clearTimeout(timer.current);
-            timer.current = null;
-            window.setTimeout(() => setVisible(false), 90);
+            if (showTimer.current !== null) window.clearTimeout(showTimer.current);
+            showTimer.current = null;
+            if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
+            hideTimer.current = window.setTimeout(() => {
+                hideTimer.current = null;
+                setVisible(false);
+            }, 90);
         });
 
         return () => {
             removeStart();
             removeFinish();
-            if (timer.current !== null) window.clearTimeout(timer.current);
+            clearTimers();
         };
     }, []);
 
-    return visible ? <div className="nx-route-progress" role="progressbar" aria-label="Loading page" /> : null;
+    return visible ? (
+        <div
+            className="nx-route-progress"
+            role="progressbar"
+            aria-label="Loading page"
+            aria-valuetext="Loading"
+        />
+    ) : null;
 }

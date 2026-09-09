@@ -99,8 +99,6 @@ type Permission = {
     group: string;
 };
 
-
-
 type Props = {
     organization: Organization;
     members: Member[];
@@ -114,6 +112,7 @@ type Props = {
     users: UserOption[];
     availablePermissions: Permission[];
     canManageMembers: boolean;
+    canDirectAddMembers: boolean;
     canManageDomains: boolean;
     canManageIdentity: boolean;
     canManageScim: boolean;
@@ -211,6 +210,12 @@ export default function OrganizationShow(props: Props) {
     const permissionGroups = Array.from(
         new Set(props.availablePermissions.map((permission) => permission.group)),
     );
+    const impersonationUsers = props.members
+        .filter((member) => member.status === "active" && member.user_status === "active")
+        .map((member) => ({
+            value: String(member.user_id),
+            label: [member.name ?? "Unknown user", member.email].filter(Boolean).join(" · "),
+        }));
 
     const openRolePermissions = (role: EnterpriseRole) => {
         setRoleEdit(role);
@@ -293,7 +298,9 @@ export default function OrganizationShow(props: Props) {
                             <Button variant="secondary" onClick={() => setInviteOpen(true)}>
                                 Invite
                             </Button>
-                            <Button onClick={() => setMemberOpen(true)}>Add member</Button>
+                            {props.canDirectAddMembers && (
+                                <Button onClick={() => setMemberOpen(true)}>Add member</Button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -525,7 +532,7 @@ export default function OrganizationShow(props: Props) {
             </Card>
 
             <Modal
-                open={memberOpen}
+                open={memberOpen && props.canDirectAddMembers}
                 onClose={() => setMemberOpen(false)}
                 title="Add organization member"
                 footer={(
@@ -771,8 +778,8 @@ export default function OrganizationShow(props: Props) {
                         value={impersonationForm.data.target_user_id}
                         onChange={(value) => impersonationForm.setData("target_user_id", value)}
                         options={[
-                            { value: "", label: "Choose a user" },
-                            ...props.users.map((user) => ({ value: String(user.id), label: user.name })),
+                            { value: "", label: "Choose an organization member" },
+                            ...impersonationUsers,
                         ]}
                     />
                     <Textarea

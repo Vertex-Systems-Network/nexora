@@ -16,7 +16,7 @@ final class SourceActivateCommand extends Command
     protected $signature = 'nexora:source:activate
         {--assert-current : Fail if this CLI process is not executing the packaged critical source set after cache cleanup}';
 
-    protected $description = 'Clear Laravel caches and issue a CLI activation nonce and one-time token that the Laragon web process must securely acknowledge.';
+    protected $description = 'Clear Laravel caches and issue a CLI activation nonce and one-time token that the active web PHP process must securely acknowledge.';
 
     public function handle(
         SourceActivationIdentity $identity,
@@ -63,8 +63,14 @@ final class SourceActivateCommand extends Command
             $receipt,
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
         ));
+
+        $baseUrl = rtrim((string) config('app.url', 'http://localhost'), '/');
+        $ackCommand = PHP_OS_FAMILY === 'Windows'
+            ? "scripts\\n1-source-web-ack.bat {$baseUrl}"
+            : "scripts/n1-source-web-ack.sh {$baseUrl}";
+
         $this->warn(
-            'CLI source is current. Restart/reload Laragon PHP/web, run `scripts\n1-source-web-ack.bat http://nexora`, '
+            'CLI source is current. Restart/reload the active PHP/web service, run `'.$ackCommand.'`, '
             .'then run `php artisan nexora:source:status --require-web-ack` to prove the web process acknowledged this exact disk source and loaded runtime-class generation.',
         );
 

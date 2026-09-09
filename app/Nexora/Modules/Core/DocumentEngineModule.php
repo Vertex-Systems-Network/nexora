@@ -20,8 +20,8 @@ final readonly class DocumentEngineModule implements ModuleContract
         return new ModuleManifest(
             identifier: 'nexora.documents',
             name: 'Nexora Document Engine',
-            version: '0.18.0',
-            description: 'Universal structured-document foundation with typed blocks, revisions and reusable publishing contracts.',
+            version: '0.18.1',
+            description: 'Universal structured-document foundation with typed blocks, revisions, tenant-aware content collections and reusable publishing contracts.',
             core: true,
             loadOrder: 35,
             capabilities: ['content.documents.read', 'content.documents.write', 'content.revisions.read', 'content.revisions.write', 'content.editorial.review', 'content.autosave.write', 'admin.navigation.register'],
@@ -30,7 +30,7 @@ final readonly class DocumentEngineModule implements ModuleContract
                 new ModuleDependency('nexora.identity-access', '^0.5'),
                 new ModuleDependency('nexora.admin', '^0.5'),
             ],
-            metadata: ['schema_version' => 1, 'storage' => 'structured-json'],
+            metadata: ['schema_version' => 2, 'storage' => 'structured-json'],
         );
     }
 
@@ -44,9 +44,18 @@ final readonly class DocumentEngineModule implements ModuleContract
             'order' => 55,
             'permission' => 'documents.view',
         ]);
+        $this->navigation->register([
+            'id' => 'collections',
+            'label' => 'Collections',
+            'href' => '/admin/collections',
+            'icon' => 'layers',
+            'order' => 56,
+            'permission' => 'collections.view',
+        ]);
     }
 
     public function boot(): void
     {
+        require base_path('routes/content-collections.php');
     }
 }

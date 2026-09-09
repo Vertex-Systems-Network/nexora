@@ -8,8 +8,10 @@ use App\Models\Document;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-final class RelatedContentService
+final readonly class RelatedContentService
 {
+    public function __construct(private PublicDocumentVisibility $visibility) {}
+
     /** @return Collection<int,Document> */
     public function forDocument(Document $document, int $limit = 4): Collection
     {
@@ -26,11 +28,11 @@ final class RelatedContentService
             ->pluck('overlap_count', 'document_id');
 
         if ($scores->isEmpty()) return collect();
-        $documents = Document::query()
+        $query = Document::query()
             ->whereIn('id', $scores->keys())
             ->whereIn('type', ['article', 'blog_post'])
-            ->where('status', 'published')
-            ->get();
+            ->where('status', 'published');
+        $documents = $this->visibility->apply($query)->get();
 
         return $documents->sortByDesc(static fn (Document $item): int => (int) ($scores[$item->id] ?? 0))->take($limit)->values();
     }

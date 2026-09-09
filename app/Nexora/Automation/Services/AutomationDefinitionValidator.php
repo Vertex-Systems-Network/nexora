@@ -6,12 +6,16 @@ namespace App\Nexora\Automation\Services;
 
 use App\Models\WebhookDestination;
 use App\Models\WebhookEndpoint;
-use App\Models\User;
+use App\Nexora\Enterprise\Services\TenantMemberDirectory;
 use Illuminate\Validation\ValidationException;
 
 final class AutomationDefinitionValidator
 {
-    public function __construct(private AutomationTriggerRegistry $triggers, private AutomationActionRegistry $actions) {}
+    public function __construct(
+        private AutomationTriggerRegistry $triggers,
+        private AutomationActionRegistry $actions,
+        private TenantMemberDirectory $tenantMembers,
+    ) {}
 
     /** @param array<string,mixed> $definition */
     public function validate(array $definition): array
@@ -39,7 +43,8 @@ final class AutomationDefinitionValidator
                 if ($destination < 1 || ! WebhookDestination::query()->whereKey($destination)->exists()) throw ValidationException::withMessages(["actions.$index.config.destination_id"=>'Choose an existing webhook destination.']);
             }
             if ($type === 'admin.notification') {
-                if ((int) ($config['user_id'] ?? 0) < 1 || ! User::query()->whereKey((int) ($config['user_id'] ?? 0))->exists()) throw ValidationException::withMessages(["actions.$index.config.user_id"=>'Choose an existing user who should receive the notification.']);
+                $userId = (int) ($config['user_id'] ?? 0);
+                if (! $this->tenantMembers->contains($userId)) throw ValidationException::withMessages(["actions.$index.config.user_id"=>'Choose an active member of the current organization.']);
                 if (trim((string) ($config['title'] ?? '')) === '') throw ValidationException::withMessages(["actions.$index.config.title"=>'Notification title is required.']);
             }
             if ($type === 'audit.record' && trim((string) ($config['event'] ?? '')) === '') {

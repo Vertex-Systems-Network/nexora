@@ -12,9 +12,13 @@ use Illuminate\Support\Str;
 final class RuntimeLeaseManager
 {
     public function __construct(private readonly RuntimeHostClockIdentity $clock) {}
+
     public function acquireOrRenew(string $name, string $owner, int $ttlSeconds = 90, array $metadata = []): bool
     {
-        if (! Schema::hasTable('nx_runtime_leases')) return true;
+        // Distributed leadership must never degrade to implicit success. If the
+        // lease table is unavailable, callers must fail closed rather than let
+        // multiple nodes believe they own the same activity.
+        if (! Schema::hasTable('nx_runtime_leases')) return false;
         $ttlSeconds = max(15, min(3600, $ttlSeconds));
 
         return DB::transaction(function () use ($name, $owner, $ttlSeconds, $metadata): bool {
@@ -49,7 +53,10 @@ final class RuntimeLeaseManager
     /** @param array<string,mixed> $metadata */
     public function acquireActivityUnlessBarrierActive(string $name,string $owner,int $ttlSeconds,array $metadata,string $barrierName): bool
     {
-        if (! Schema::hasTable('nx_runtime_leases')) return true;
+        // Barrier-aware work has the same fail-closed requirement as leadership:
+        // no coordination table means there is no trustworthy proof that the
+        // barrier is inactive or that this node owns the activity.
+        if (! Schema::hasTable('nx_runtime_leases')) return false;
         $ttlSeconds=max(15,min(7200,$ttlSeconds));
         return DB::transaction(function () use ($name,$owner,$ttlSeconds,$metadata,$barrierName): bool {
             $now=$this->clock->databaseNow();

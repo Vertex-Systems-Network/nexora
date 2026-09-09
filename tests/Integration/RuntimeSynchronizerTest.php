@@ -35,7 +35,7 @@ final class RuntimeSynchronizerTest extends TestCase
         self::assertSame($expectedModules, Module::query()->count());
         self::assertSame($expectedCapabilities, Capability::query()->count());
         self::assertSame($expectedDependencies, ModuleDependency::query()->count());
-        $this->assertDatabaseHas('nx_modules', ['identifier' => 'nexora.runtime', 'version' => '0.4.0', 'status' => 'active']);
+        $this->assertDatabaseHas('nx_modules', ['identifier' => 'nexora.runtime', 'version' => '0.5.0', 'status' => 'active']);
         $this->assertDatabaseHas('nx_modules', ['identifier' => 'nexora.discovery', 'version' => '0.26.0', 'status' => 'active']);
         $this->assertDatabaseHas('nx_module_capabilities', ['mode' => 'requested']);
     }

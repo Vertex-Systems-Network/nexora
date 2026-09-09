@@ -11,17 +11,19 @@ use App\Models\CrmContact;
 use App\Models\CrmOpportunity;
 use App\Models\Role;
 use App\Models\StudioCanvas;
-use App\Models\User;
 use App\Nexora\Data\ConnectionCatalog;
 use App\Nexora\Discovery\Search\SearchIndexer;
+use App\Nexora\Enterprise\Services\TenantMemberDirectory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class SearchController extends Controller
 {
-    public function __construct(private ConnectionCatalog $connectionCatalog, private SearchIndexer $contentSearch)
-    {
-    }
+    public function __construct(
+        private ConnectionCatalog $connectionCatalog,
+        private SearchIndexer $contentSearch,
+        private TenantMemberDirectory $tenantMembers,
+    ) {}
 
     public function __invoke(Request $request): JsonResponse
     {
@@ -119,11 +121,12 @@ final class SearchController extends Controller
             }
         }
 
-
-        if ($request->user()->hasPermission('documents.view')) {
-            foreach ($this->contentSearch->search($q, false, 8) as $result) {
+        $resourceTypes = [];
+        if ($request->user()->hasPermission('documents.view')) $resourceTypes[] = 'document';
+        if ($request->user()->hasPermission('media.view')) $resourceTypes[] = 'media';
+        if ($resourceTypes !== []) {
+            foreach ($this->contentSearch->search($q, false, 8, null, $resourceTypes) as $result) {
                 $isMedia = $result['resource_type'] === 'media';
-                if ($isMedia && ! $request->user()->hasPermission('media.view')) continue;
                 $results[] = [
                     'type' => $isMedia ? 'media' : 'document',
                     'title' => $result['title'],
@@ -134,15 +137,7 @@ final class SearchController extends Controller
         }
 
         if ($request->user()->hasPermission('users.view')) {
-            $users = User::query()
-                ->where(function ($query) use ($q): void {
-                    $query->where('name', 'like', "%{$q}%")
-                        ->orWhere('email', 'like', "%{$q}%");
-                })
-                ->limit(6)
-                ->get(['id', 'name', 'email']);
-
-            foreach ($users as $user) {
+            foreach ($this->tenantMembers->search($q, 6) as $user) {
                 $results[] = [
                     'type' => 'user',
                     'title' => $user->name,

@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 return new class extends Migration {
     /** @var list<string> */
     private array $tenantTables = [
-        'nx_documents','nx_media_assets','nx_newsletter_lists','nx_workflows','nx_studio_canvases',
+        'nx_documents','nx_media_assets','nx_newsletter_lists','nx_workflows','nx_studio_canvases','nx_data_connections',
         'nx_commerce_products','nx_commerce_customers','nx_commerce_orders','nx_commerce_invoices','nx_commerce_payment_transactions','nx_commerce_refunds','nx_commerce_subscriptions',
         'nx_crm_organizations','nx_crm_contacts','nx_crm_pipelines','nx_crm_leads','nx_crm_opportunities','nx_crm_activities','nx_crm_notes','nx_crm_custom_field_definitions',
         'nx_membership_plans','nx_memberships','nx_membership_access_policies','nx_helpdesk_sla_policies','nx_helpdesk_tickets',

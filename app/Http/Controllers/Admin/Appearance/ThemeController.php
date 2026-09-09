@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin\Appearance;
 
 use App\Http\Controllers\Controller;
+use App\Models\SecurityScan;
 use App\Models\Theme;
 use App\Models\ThemeActivation;
 use App\Models\ThemeVersion;
@@ -73,6 +74,15 @@ final class ThemeController extends Controller
 
     public function install(Request $request): RedirectResponse
     {
+        if ($request->filled('scan_id')) {
+            $validated = $request->validate([
+                'scan_id' => ['required', 'uuid', 'exists:nx_security_scans,id'],
+            ]);
+            $scan = SecurityScan::query()->with('quarantinePackage')->findOrFail((string) $validated['scan_id']);
+
+            return $this->promoteApprovedScan($scan, $request->user()?->id, true);
+        }
+
         $maxKb = (int) config('sentinel.upload.max_kilobytes', 51_200);
         $validated = $request->validate(['package' => ['required', 'file', "max:{$maxKb}"]]);
         $file = $validated['package'];
@@ -87,14 +97,7 @@ final class ThemeController extends Controller
             return redirect()->route('admin.security.sentinel.show', $scan)->with('warning', 'Theme installation was blocked until Sentinel returns an ALLOW decision.');
         }
 
-        try {
-            $version = $this->installer->install($package, $scan, $request->user()?->id);
-            $this->audit->record('theme.installed', $version, ['theme_id' => $version->theme_id, 'version' => $version->version, 'scan_id' => $scan->id]);
-            return back()->with('success', 'Theme passed Sentinel and was installed safely. Preview it before activation.');
-        } catch (\Throwable $exception) {
-            report($exception);
-            return back()->with('error', 'Theme could not be installed: '.$exception->getMessage());
-        }
+        return $this->promoteApprovedScan($scan->loadMissing('quarantinePackage'), $request->user()?->id, false);
     }
 
     public function activate(Request $request, ThemeVersion $version): RedirectResponse
@@ -132,6 +135,36 @@ final class ThemeController extends Controller
             return back()->with('success', 'Theme design tokens updated.');
         } catch (\Throwable $exception) {
             return back()->with('error', $exception->getMessage());
+        }
+    }
+
+    private function promoteApprovedScan(SecurityScan $scan, ?int $userId, bool $preScanned): RedirectResponse
+    {
+        $scan->loadMissing('quarantinePackage');
+        if (($scan->manifest['type'] ?? null) !== 'theme') {
+            return back()->with('error', 'Only a Sentinel-scanned theme package can be promoted through the Theme Engine.');
+        }
+        if ($scan->quarantinePackage === null) {
+            return back()->with('error', 'The quarantined theme package is no longer available.');
+        }
+
+        try {
+            $version = $this->installer->install($scan->quarantinePackage, $scan, $userId);
+            $this->audit->record('theme.installed', $version, [
+                'theme_id' => $version->theme_id,
+                'version' => $version->version,
+                'scan_id' => $scan->id,
+                'pre_scanned' => $preScanned,
+            ]);
+            return redirect()->route('admin.themes.index')->with(
+                'success',
+                $preScanned
+                    ? 'Sentinel-approved theme installed safely. Preview it before activation.'
+                    : 'Theme passed Sentinel and was installed safely. Preview it before activation.',
+            );
+        } catch (\Throwable $exception) {
+            report($exception);
+            return back()->with('error', 'Theme could not be installed: '.$exception->getMessage());
         }
     }
 

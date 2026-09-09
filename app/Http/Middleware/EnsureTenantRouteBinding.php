@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\EnterpriseOrganization;
 use App\Nexora\Enterprise\Services\TenantContext;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,18 @@ final class EnsureTenantRouteBinding
         }
 
         if (! $parameter instanceof Model) {
+            return;
+        }
+
+        // EnterpriseOrganization is the tenant root itself and therefore does
+        // not carry a tenant_id column. Treat its primary key as the tenant
+        // identity so permissions resolved for organization A can never be
+        // reused against an organization-B route parameter.
+        if ($parameter instanceof EnterpriseOrganization) {
+            abort_if(
+                $tenantId === null || (string) $parameter->getKey() !== $tenantId,
+                404,
+            );
             return;
         }
 

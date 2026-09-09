@@ -460,6 +460,25 @@ final class InstallationRunControl
         }, false);
     }
 
+    private function sanitizeFailureMessage(?string $failureMessage): ?string
+    {
+        if ($failureMessage === null) {
+            return null;
+        }
+
+        $safe = trim($failureMessage);
+        if ($safe === '') {
+            return null;
+        }
+
+        $safe = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/u', ' ', $safe) ?? $safe;
+        $safe = preg_replace('/\s+/u', ' ', $safe) ?? $safe;
+        $safe = preg_replace('/\bBearer\s+[A-Za-z0-9._~+\/=:-]+/i', 'Bearer [redacted]', $safe) ?? $safe;
+        $safe = preg_replace('/\b(password|passwd|pwd|secret|token|api[_-]?key|authorization)\s*[:=]\s*([^\s,;]+)/i', '$1=[redacted]', $safe) ?? $safe;
+
+        return mb_substr(trim($safe), 0, 500);
+    }
+
     private function assertRunId(string $runId): void
     {
         if (preg_match('/^[a-f0-9]{24}$/', $runId) !== 1) throw new RuntimeException('Invalid installation run identifier.');

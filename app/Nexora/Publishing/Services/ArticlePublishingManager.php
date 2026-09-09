@@ -18,6 +18,22 @@ use App\Nexora\Documents\Services\DocumentRevisionManager;
 final class ArticlePublishingManager
 {
     public function __construct(private DocumentRevisionManager $revisions, private MediaUsageManager $mediaUsage, private ConcurrencyGuard $concurrency) {}
+
+    public function registerDocumentLifecycle(): void
+    {
+        $publishing = $this;
+        Document::saved(static function (Document $document) use ($publishing): void {
+            if (! in_array($document->type, ['article', 'blog_post'], true)) {
+                return;
+            }
+
+            $publishing->ensureSeoDefaults($document);
+            if ($document->status === 'published') {
+                $document->articleMetadata()->whereNotNull('scheduled_at')->update(['scheduled_at' => null]);
+            }
+        });
+    }
+
     /** @param array<string,mixed> $data */
     public function save(Document $document, array $data): void
     {

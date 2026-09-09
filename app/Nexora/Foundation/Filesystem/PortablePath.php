@@ -21,7 +21,7 @@ final class PortablePath
             throw new InvalidArgumentException('Filesystem paths may not contain NUL bytes.');
         }
 
-        $normalized = str_replace('\\', '/', trim($path));
+        $normalized = str_replace('\\', '/', $path);
         if ($normalized === '' || str_starts_with($normalized, '/') || str_starts_with($normalized, '//') || preg_match('/^[A-Za-z]:\//', $normalized) === 1) {
             throw new InvalidArgumentException('Expected a non-empty relative filesystem path.');
         }

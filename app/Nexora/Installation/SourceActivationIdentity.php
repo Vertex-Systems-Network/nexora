@@ -133,7 +133,7 @@ final class SourceActivationIdentity
         throw new RuntimeException(
             'Nexora source activation mismatch. The PHP process is not executing the exact critical installer source set from this package. '
             .implode(' ', (array) ($state['errors'] ?? []))
-            .' Run `php artisan nexora:source:activate --assert-current`, reload/restart Laragon web/PHP, '
+            .' Run `php artisan nexora:source:activate --assert-current`, reload/restart the active PHP/web service, '
             .'then verify `/install/source-status` before retrying installation.',
         );
     }

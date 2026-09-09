@@ -45,6 +45,22 @@ final class RuntimeNodeHeartbeat
 
     public function handle(Request $request, Closure $next): Response
     {
+        // Health endpoints own their response semantics. Liveness is deliberately
+        // minimal, while readiness runs the bounded node/runtime/database/cache
+        // probes in HealthProbeService and must be allowed to return structured
+        // JSON even when the current node is draining or otherwise not ready.
+        if ($request->is('health/live') || $request->is('health/ready')) {
+            return $next($request);
+        }
+
+        // The public login form must stay available to establish an identity.
+        // Deep deployment/cluster fencing is retained for the credential POST
+        // and authenticated application requests, but is unnecessary for the
+        // read-only guest form and otherwise causes dozens of database probes.
+        if ($request->isMethod('GET') && $request->is('login')) {
+            return $next($request);
+        }
+
         // Runtime fencing is meaningful only after Nexora has a sealed installation.
         // The installer/bootstrap path may intentionally have no configured database yet,
         // so probing node readiness here would turn a healthy bootstrap into a false 503.
@@ -67,7 +83,7 @@ final class RuntimeNodeHeartbeat
 
         $this->recordHeartbeatWhenDue();
 
-        $readiness = $this->readinessResponse($runtime);
+        $readiness = $this->readinessResponse($request, $runtime);
         if ($readiness !== null) {
             return $readiness;
         }
@@ -124,10 +140,18 @@ final class RuntimeNodeHeartbeat
     }
 
     /** @param array<string, string> $runtime */
-    private function readinessResponse(array $runtime): ?Response
+    private function readinessResponse(Request $request, array $runtime): ?Response
     {
         try {
-            if (! $this->nodes->isReady()) {
+            // A drained/maintenance node must still expose its authenticated,
+            // permission-guarded status control so an operator can return it to
+            // service. Only the node-state fence is skipped here; runtime
+            // compatibility, client/session generation and activity barriers
+            // below remain enforced before the controller is reached.
+            $nodeStatusRecovery = $request->isMethod('POST')
+                && $request->is('admin/cloud/node/status');
+
+            if (! $nodeStatusRecovery && ! $this->nodes->isReady()) {
                 return response(
                     'This Nexora runtime node is draining or in maintenance mode.',
                     503,
