@@ -20,6 +20,30 @@ export default defineConfig({
         cssCodeSplit: true,
         reportCompressedSize: false,
         chunkSizeWarningLimit: 900,
+        rolldownOptions: {
+            output: {
+                codeSplitting: {
+                    groups: [
+                        {
+                            test: /[\\/]resources[\\/]js[\\/]admin[\\/]pages[\\/]Admin[\\/]/,
+                            name: (moduleId) => {
+                                const normalized = moduleId.replace(/\\/g, "/");
+                                const marker = "/resources/js/admin/pages/Admin/";
+                                const markerIndex = normalized.indexOf(marker);
+                                if (markerIndex < 0) return null;
+
+                                const relative = normalized.slice(markerIndex + marker.length);
+                                const slashIndex = relative.indexOf("/");
+                                if (slashIndex < 0) return null;
+
+                                return `admin-${relative.slice(0, slashIndex).toLowerCase()}`;
+                            },
+                            priority: 20,
+                        },
+                    ],
+                },
+            },
+        },
     },
     resolve: {
         alias: {
