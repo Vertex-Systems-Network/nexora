@@ -66,7 +66,7 @@ jobs:
           node --version
           npm --version
 
-      - name: Narrow Vitest versus older Vite peer graph
+      - name: Bisect Vitest Arborist trigger
         shell: bash
         run: |
           set -uo pipefail
@@ -74,22 +74,20 @@ jobs:
           CACHE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/tools/npm-diagnostic-cache"
           rm -rf "$DIAG_ROOT" "$CACHE_ROOT"
           mkdir -p "$DIAG_ROOT" "$CACHE_ROOT"
-          printf 'case\tvite_action\tvitest_action\texit_code\tlock_sha256\n' > "$DIAG_ROOT/results.tsv"
+          printf 'case\tvitest_action\texit_code\tlock_sha256\n' > "$DIAG_ROOT/results.tsv"
 
           run_case() {
             local name="$1"
-            local vite_action="$2"
-            local vitest_action="$3"
+            local vitest_action="$2"
             local dir="$DIAG_ROOT/$name"
             mkdir -p "$dir"
             cp package.json "$dir/package.json"
-            node - "$dir/package.json" "$vite_action" "$vitest_action" <<'NODE'
+            node - "$dir/package.json" "$vitest_action" <<'NODE'
           const fs = require('node:fs')
-          const [path, viteAction, vitestAction] = process.argv.slice(2)
+          const [path, vitestAction] = process.argv.slice(2)
           const manifest = JSON.parse(fs.readFileSync(path, 'utf8'))
-          if (viteAction && viteAction !== '__keep__') manifest.devDependencies.vite = viteAction
           if (vitestAction === '__remove__') delete manifest.devDependencies.vitest
-          else if (vitestAction && vitestAction !== '__keep__') manifest.devDependencies.vitest = vitestAction
+          else manifest.devDependencies.vitest = vitestAction
           fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n')
           NODE
             set +e
@@ -104,13 +102,14 @@ jobs:
             if [ -s "$dir/package-lock.json" ]; then
               lock_sha="$(sha256sum "$dir/package-lock.json" | awk '{print $1}')"
             fi
-            printf '%s\t%s\t%s\t%s\t%s\n' "$name" "$vite_action" "$vitest_action" "$rc" "$lock_sha" \
+            printf '%s\t%s\t%s\t%s\n' "$name" "$vitest_action" "$rc" "$lock_sha" \
               >> "$DIAG_ROOT/results.tsv"
           }
 
-          run_case without-vitest __keep__ __remove__
-          run_case vite-8.0.6 8.0.6 __keep__
-          run_case vite-8.0.6-without-vitest 8.0.6 __remove__
+          run_case without-vitest __remove__
+          run_case vitest-4.0.18 4.0.18
+          run_case vitest-3.2.4 3.2.4
+          run_case vitest-2.1.9 2.1.9
           cat "$DIAG_ROOT/results.tsv"
 
       - name: Generate double-run reproducible lock candidate
