@@ -105,3 +105,4 @@ jobs:
             storage/app/nexora/dependency-intake/lock-refresh.md
             storage/app/nexora/dependency-intake/lock-refresh.json
             storage/app/nexora/dependency-intake/candidate-sha256.txt
+            storage/app/nexora/tools/npm-cache/_logs/*-debug-0.log
