@@ -103,7 +103,10 @@ $generate = static function (string $workspaceId) use (
     $composer,
     $record,
 ): array {
-    $workspace = $runDirectory.'/workspace-'.$workspaceId;
+    // A/B runs remain isolated by parent directory while sharing the same leaf
+    // basename. npm derives an unnamed root package-lock `name` from that leaf,
+    // so using a stable basename prevents workspace-A/workspace-B metadata drift.
+    $workspace = $runDirectory.'/'.$workspaceId.'/workspace';
     $localErrors = [];
     if (! is_dir($workspace) && ! mkdir($workspace, 0775, true) && ! is_dir($workspace)) {
         throw new RuntimeException("Unable to create isolated dependency workspace [{$workspaceId}].");
