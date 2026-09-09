@@ -58,6 +58,7 @@ function nexoraAnalyzeReproducibleDependencyToolchainContracts(string $root): ar
         "'semantic_exact_match' =>",
         "'mode' => 'double-run-reproducible-candidate-refresh'",
         "'root_lockfiles_mutated' => false",
+        "$workspace = $runDirectory.'/'.$workspaceId.'/workspace';",
         "'npm', 'install', '--package-lock-only', '--include=optional'",
         "'npm-candidate-lock'",
         'Clean npm-ci replay is a later gate.',
