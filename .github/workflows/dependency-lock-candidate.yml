@@ -66,11 +66,11 @@ jobs:
           node --version
           npm --version
 
-      - name: Certify coherent Vite 7 disposable frontend candidate
+      - name: Certify Vitest 5 on current Vite 8 stack
         shell: bash
         run: |
           set -uo pipefail
-          CANDIDATE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/dependency-intake/vite7-compatible-candidate"
+          CANDIDATE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/dependency-intake/vitest-5-vite8-candidate"
           CACHE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/tools/npm-candidate-cache"
           rm -rf "$CANDIDATE_ROOT" "$CACHE_ROOT" node_modules
           mkdir -p "$CANDIDATE_ROOT" "$CACHE_ROOT"
@@ -80,10 +80,7 @@ jobs:
           const fs = require('node:fs')
           const path = process.argv[2]
           const manifest = JSON.parse(fs.readFileSync(path, 'utf8'))
-          manifest.devDependencies.vite = '7.3.6'
-          manifest.devDependencies.vitest = '4.0.18'
-          manifest.devDependencies['@vitejs/plugin-react'] = '5.2.0'
-          manifest.devDependencies['laravel-vite-plugin'] = '2.1.0'
+          manifest.devDependencies.vitest = '5.0.0'
           fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n')
           NODE
 
@@ -165,13 +162,13 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           path: |
-            storage/app/nexora/dependency-intake/vite7-compatible-candidate/package.original.json
-            storage/app/nexora/dependency-intake/vite7-compatible-candidate/package.json
-            storage/app/nexora/dependency-intake/vite7-compatible-candidate/package-lock.json
-            storage/app/nexora/dependency-intake/vite7-compatible-candidate/sha256.txt
-            storage/app/nexora/dependency-intake/vite7-compatible-candidate/results.tsv
-            storage/app/nexora/dependency-intake/vite7-compatible-candidate/*.stdout.log
-            storage/app/nexora/dependency-intake/vite7-compatible-candidate/*.stderr.log
+            storage/app/nexora/dependency-intake/vitest-5-vite8-candidate/package.original.json
+            storage/app/nexora/dependency-intake/vitest-5-vite8-candidate/package.json
+            storage/app/nexora/dependency-intake/vitest-5-vite8-candidate/package-lock.json
+            storage/app/nexora/dependency-intake/vitest-5-vite8-candidate/sha256.txt
+            storage/app/nexora/dependency-intake/vitest-5-vite8-candidate/results.tsv
+            storage/app/nexora/dependency-intake/vitest-5-vite8-candidate/*.stdout.log
+            storage/app/nexora/dependency-intake/vitest-5-vite8-candidate/*.stderr.log
             storage/app/nexora/dependency-intake/candidates/composer.lock
             storage/app/nexora/dependency-intake/candidates/package-lock.json
             storage/app/nexora/dependency-intake/lock-refresh.md
