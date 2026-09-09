@@ -66,6 +66,51 @@ jobs:
           node --version
           npm --version
 
+      - name: Diagnose Vite and Vitest peer graph variants
+        shell: bash
+        run: |
+          set -uo pipefail
+          DIAG_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/dependency-intake/npm-peer-diagnostics"
+          CACHE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/tools/npm-diagnostic-cache"
+          mkdir -p "$DIAG_ROOT" "$CACHE_ROOT"
+          : > "$DIAG_ROOT/results.tsv"
+
+          run_case() {
+            local name="$1"
+            local vite_version="$2"
+            local vitest_version="$3"
+            local dir="$DIAG_ROOT/$name"
+            mkdir -p "$dir"
+            cp package.json "$dir/package.json"
+            node - "$dir/package.json" "$vite_version" "$vitest_version" <<'NODE'
+          const fs = require('node:fs')
+          const [path, viteVersion, vitestVersion] = process.argv.slice(2)
+          const manifest = JSON.parse(fs.readFileSync(path, 'utf8'))
+          if (viteVersion) manifest.devDependencies.vite = viteVersion
+          if (vitestVersion) manifest.devDependencies.vitest = vitestVersion
+          fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n')
+          NODE
+            set +e
+            (
+              cd "$dir"
+              npm install --package-lock-only --ignore-scripts --no-audit --no-fund \
+                --cache "$CACHE_ROOT/$name"
+            ) >"$dir/stdout.log" 2>"$dir/stderr.log"
+            local rc=$?
+            set -e
+            local lock_sha=""
+            if [ -s "$dir/package-lock.json" ]; then
+              lock_sha="$(sha256sum "$dir/package-lock.json" | awk '{print $1}')"
+            fi
+            printf '%s\t%s\t%s\t%s\t%s\n' "$name" "$vite_version" "$vitest_version" "$rc" "$lock_sha" \
+              >> "$DIAG_ROOT/results.tsv"
+          }
+
+          run_case vite-8.2.1 8.2.1 ''
+          run_case vitest-4.1.10 '' 4.1.10
+          run_case vite-8.2.1-vitest-4.1.10 8.2.1 4.1.10
+          cat "$DIAG_ROOT/results.tsv"
+
       - name: Generate double-run reproducible lock candidate
         shell: bash
         run: |
@@ -105,4 +150,9 @@ jobs:
             storage/app/nexora/dependency-intake/lock-refresh.md
             storage/app/nexora/dependency-intake/lock-refresh.json
             storage/app/nexora/dependency-intake/candidate-sha256.txt
+            storage/app/nexora/dependency-intake/npm-peer-diagnostics/results.tsv
+            storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/package.json
+            storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/package-lock.json
+            storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/stdout.log
+            storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/stderr.log
             storage/app/nexora/tools/npm-cache/_logs/*-debug-0.log
