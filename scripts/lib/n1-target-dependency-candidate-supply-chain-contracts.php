@@ -61,7 +61,7 @@ function nexoraAnalyzeDependencyCandidateSupplyChainContracts(string $root): arr
     $refresh = $read('scripts/dependency-lock-refresh.php');
     foreach ([
         "nexoraRunDependencyCandidateSupplyChain(",
-        "workspace-'",
+        '$workspace = $runDirectory.\'/\'.$workspaceId.\'/workspace\';',
         "'supply_chain'",
         "'supply_chain_fingerprint_sha256'",
         "workspace_a",
