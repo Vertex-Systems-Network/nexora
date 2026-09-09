@@ -20,7 +20,7 @@ jobs:
   candidate:
     name: dependency-lock-candidate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout exact candidate source
         uses: actions/checkout@v7
@@ -66,54 +66,69 @@ jobs:
           node --version
           npm --version
 
-      - name: Bisect Vitest 4.1 lock regression
+      - name: Certify Vitest 4.0.18 disposable frontend candidate
         shell: bash
         run: |
           set -uo pipefail
-          DIAG_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/dependency-intake/npm-peer-diagnostics"
-          CACHE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/tools/npm-diagnostic-cache"
-          rm -rf "$DIAG_ROOT" "$CACHE_ROOT"
-          mkdir -p "$DIAG_ROOT" "$CACHE_ROOT"
-          printf 'case\tvitest_version\texit_code\tlock_sha256\n' > "$DIAG_ROOT/results.tsv"
+          CANDIDATE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/dependency-intake/vitest-4.0.18-candidate"
+          CACHE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/tools/npm-candidate-cache"
+          rm -rf "$CANDIDATE_ROOT" "$CACHE_ROOT" node_modules
+          mkdir -p "$CANDIDATE_ROOT" "$CACHE_ROOT"
+          cp package.json "$CANDIDATE_ROOT/package.original.json"
 
-          run_case() {
-            local version="$1"
-            local name="vitest-$version"
-            local dir="$DIAG_ROOT/$name"
-            mkdir -p "$dir"
-            cp package.json "$dir/package.json"
-            node - "$dir/package.json" "$version" <<'NODE'
+          node - package.json <<'NODE'
           const fs = require('node:fs')
-          const [path, version] = process.argv.slice(2)
+          const path = process.argv[2]
           const manifest = JSON.parse(fs.readFileSync(path, 'utf8'))
-          manifest.devDependencies.vitest = version
+          manifest.devDependencies.vitest = '4.0.18'
           fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n')
           NODE
+
+          run_and_record() {
+            local name="$1"
+            shift
             set +e
-            (
-              cd "$dir"
-              npm install --package-lock-only --ignore-scripts --no-audit --no-fund \
-                --cache "$CACHE_ROOT/$name"
-            ) >"$dir/stdout.log" 2>"$dir/stderr.log"
+            "$@" >"$CANDIDATE_ROOT/$name.stdout.log" 2>"$CANDIDATE_ROOT/$name.stderr.log"
             local rc=$?
             set -e
-            local lock_sha=""
-            if [ -s "$dir/package-lock.json" ]; then
-              lock_sha="$(sha256sum "$dir/package-lock.json" | awk '{print $1}')"
-            fi
-            printf '%s\t%s\t%s\t%s\n' "$name" "$version" "$rc" "$lock_sha" \
-              >> "$DIAG_ROOT/results.tsv"
+            printf '%s\t%s\n' "$name" "$rc" >> "$CANDIDATE_ROOT/results.tsv"
+            return "$rc"
           }
 
-          run_case 4.0.18
-          run_case 4.1.0
-          run_case 4.1.5
-          run_case 4.1.8
-          run_case 4.1.9
-          run_case 4.1.10
-          cat "$DIAG_ROOT/results.tsv"
+          printf 'gate\texit_code\n' > "$CANDIDATE_ROOT/results.tsv"
+          overall=0
+          run_and_record lock npm install --package-lock-only --ignore-scripts --no-audit --no-fund --cache "$CACHE_ROOT" || overall=1
+          if [ -s package-lock.json ]; then
+            cp package.json "$CANDIDATE_ROOT/package.json"
+            cp package-lock.json "$CANDIDATE_ROOT/package-lock.json"
+            sha256sum package.json package-lock.json > "$CANDIDATE_ROOT/sha256.txt"
+          else
+            overall=1
+          fi
 
-      - name: Generate double-run reproducible lock candidate
+          if [ "$overall" -eq 0 ]; then
+            run_and_record ci npm ci --no-audit --no-fund --cache "$CACHE_ROOT" || overall=1
+          fi
+          if [ "$overall" -eq 0 ]; then
+            run_and_record typecheck npm run typecheck || overall=1
+          fi
+          if [ "$overall" -eq 0 ]; then
+            run_and_record test npm run test || overall=1
+          fi
+          if [ "$overall" -eq 0 ]; then
+            run_and_record build npm run build || overall=1
+          fi
+          if [ "$overall" -eq 0 ]; then
+            run_and_record verify-build npm run verify:build || overall=1
+          fi
+
+          git checkout -- package.json
+          rm -f package-lock.json
+          rm -rf node_modules
+          cat "$CANDIDATE_ROOT/results.tsv"
+          test "$overall" -eq 0
+
+      - name: Confirm unchanged current manifest remains governed-blocked
         shell: bash
         run: |
           set -uo pipefail
@@ -131,7 +146,7 @@ jobs:
               > storage/app/nexora/dependency-intake/candidate-sha256.txt
           fi
           if [ "$RC" -ne 2 ]; then
-            echo "Lock refresh did not reach review-required state (exit=$RC)." >&2
+            echo "Current manifest remains blocked as expected for Issue #52 (exit=$RC)." >&2
             exit "$RC"
           fi
           test -s storage/app/nexora/dependency-intake/candidates/composer.lock
@@ -147,15 +162,17 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           path: |
+            storage/app/nexora/dependency-intake/vitest-4.0.18-candidate/package.original.json
+            storage/app/nexora/dependency-intake/vitest-4.0.18-candidate/package.json
+            storage/app/nexora/dependency-intake/vitest-4.0.18-candidate/package-lock.json
+            storage/app/nexora/dependency-intake/vitest-4.0.18-candidate/sha256.txt
+            storage/app/nexora/dependency-intake/vitest-4.0.18-candidate/results.tsv
+            storage/app/nexora/dependency-intake/vitest-4.0.18-candidate/*.stdout.log
+            storage/app/nexora/dependency-intake/vitest-4.0.18-candidate/*.stderr.log
             storage/app/nexora/dependency-intake/candidates/composer.lock
             storage/app/nexora/dependency-intake/candidates/package-lock.json
             storage/app/nexora/dependency-intake/lock-refresh.md
             storage/app/nexora/dependency-intake/lock-refresh.json
             storage/app/nexora/dependency-intake/candidate-sha256.txt
-            storage/app/nexora/dependency-intake/npm-peer-diagnostics/results.tsv
-            storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/package.json
-            storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/package-lock.json
-            storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/stdout.log
-            storage/app/nexora/dependency-intake/npm-peer-diagnostics/*/stderr.log
-            storage/app/nexora/tools/npm-diagnostic-cache/*/_logs/*-debug-0.log
+            storage/app/nexora/tools/npm-candidate-cache/_logs/*-debug-0.log
             storage/app/nexora/tools/npm-cache/_logs/*-debug-0.log
