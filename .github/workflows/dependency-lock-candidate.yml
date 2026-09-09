@@ -66,7 +66,7 @@ jobs:
           node --version
           npm --version
 
-      - name: Bisect Vitest Arborist trigger
+      - name: Bisect Vitest 4.1 lock regression
         shell: bash
         run: |
           set -uo pipefail
@@ -74,20 +74,19 @@ jobs:
           CACHE_ROOT="$GITHUB_WORKSPACE/storage/app/nexora/tools/npm-diagnostic-cache"
           rm -rf "$DIAG_ROOT" "$CACHE_ROOT"
           mkdir -p "$DIAG_ROOT" "$CACHE_ROOT"
-          printf 'case\tvitest_action\texit_code\tlock_sha256\n' > "$DIAG_ROOT/results.tsv"
+          printf 'case\tvitest_version\texit_code\tlock_sha256\n' > "$DIAG_ROOT/results.tsv"
 
           run_case() {
-            local name="$1"
-            local vitest_action="$2"
+            local version="$1"
+            local name="vitest-$version"
             local dir="$DIAG_ROOT/$name"
             mkdir -p "$dir"
             cp package.json "$dir/package.json"
-            node - "$dir/package.json" "$vitest_action" <<'NODE'
+            node - "$dir/package.json" "$version" <<'NODE'
           const fs = require('node:fs')
-          const [path, vitestAction] = process.argv.slice(2)
+          const [path, version] = process.argv.slice(2)
           const manifest = JSON.parse(fs.readFileSync(path, 'utf8'))
-          if (vitestAction === '__remove__') delete manifest.devDependencies.vitest
-          else manifest.devDependencies.vitest = vitestAction
+          manifest.devDependencies.vitest = version
           fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n')
           NODE
             set +e
@@ -102,14 +101,16 @@ jobs:
             if [ -s "$dir/package-lock.json" ]; then
               lock_sha="$(sha256sum "$dir/package-lock.json" | awk '{print $1}')"
             fi
-            printf '%s\t%s\t%s\t%s\n' "$name" "$vitest_action" "$rc" "$lock_sha" \
+            printf '%s\t%s\t%s\t%s\n' "$name" "$version" "$rc" "$lock_sha" \
               >> "$DIAG_ROOT/results.tsv"
           }
 
-          run_case without-vitest __remove__
-          run_case vitest-4.0.18 4.0.18
-          run_case vitest-3.2.4 3.2.4
-          run_case vitest-2.1.9 2.1.9
+          run_case 4.0.18
+          run_case 4.1.0
+          run_case 4.1.5
+          run_case 4.1.8
+          run_case 4.1.9
+          run_case 4.1.10
           cat "$DIAG_ROOT/results.tsv"
 
       - name: Generate double-run reproducible lock candidate
