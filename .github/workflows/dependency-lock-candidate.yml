@@ -66,7 +66,7 @@ jobs:
           node --version
           npm --version
 
-      - name: Certify installed Vitest 5 lock replay on current Vite 8 stack
+      - name: Certify installed Vitest 5 lock replay and capture build verifier evidence
         shell: bash
         run: |
           set -uo pipefail
@@ -132,11 +132,38 @@ jobs:
             run_and_record verify-build npm run verify:build || overall=1
           fi
 
+          if [ -s storage/app/nexora/certification/build-assets.json ]; then
+            cp storage/app/nexora/certification/build-assets.json "$CANDIDATE_ROOT/build-assets.json"
+          fi
+          python - "$CANDIDATE_ROOT/leak-context.txt" <<'PY'
+          from pathlib import Path
+          import sys
+          out = Path(sys.argv[1])
+          lines = []
+          for path in sorted(Path('public/build/assets').glob('*.js')):
+              data = path.read_text(encoding='utf-8', errors='replace')
+              needle = '/Users/'
+              start = 0
+              while True:
+                  pos = data.find(needle, start)
+                  if pos < 0:
+                      break
+                  lo = max(0, pos - 220)
+                  hi = min(len(data), pos + len(needle) + 220)
+                  lines.append(f'FILE: {path.as_posix()}\n{data[lo:hi]}\n')
+                  start = pos + len(needle)
+          out.write_text('\n'.join(lines) if lines else 'NO /Users/ literal found\n', encoding='utf-8')
+          PY
+          if [ -f public/build/manifest.json ]; then
+            cp public/build/manifest.json "$CANDIDATE_ROOT/vite-manifest.json"
+          fi
+
           git checkout -- package.json
           rm -f package-lock.json
           rm -rf node_modules
           cat "$CANDIDATE_ROOT/results.tsv"
           cat "$CANDIDATE_ROOT/rolldown-bindings.txt" 2>/dev/null || true
+          cat "$CANDIDATE_ROOT/leak-context.txt" 2>/dev/null || true
           test "$overall" -eq 0
 
       - name: Confirm unchanged current manifest remains governed-blocked
@@ -179,6 +206,9 @@ jobs:
             storage/app/nexora/dependency-intake/vitest-5-installed-lock-candidate/sha256.txt
             storage/app/nexora/dependency-intake/vitest-5-installed-lock-candidate/rolldown-bindings.txt
             storage/app/nexora/dependency-intake/vitest-5-installed-lock-candidate/results.tsv
+            storage/app/nexora/dependency-intake/vitest-5-installed-lock-candidate/build-assets.json
+            storage/app/nexora/dependency-intake/vitest-5-installed-lock-candidate/leak-context.txt
+            storage/app/nexora/dependency-intake/vitest-5-installed-lock-candidate/vite-manifest.json
             storage/app/nexora/dependency-intake/vitest-5-installed-lock-candidate/*.stdout.log
             storage/app/nexora/dependency-intake/vitest-5-installed-lock-candidate/*.stderr.log
             storage/app/nexora/dependency-intake/candidates/composer.lock
