@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-10):** protected `main` includes the accepted source/AI-intake baseline and the latest governed runtime/dependency status synchronization. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Dependency closure has a machine-clean governed lock candidate, and the bounded runtime child-execution fix exists on a separate Draft carrier, but neither has completed its governed integration path. Source/CI acceptance is not the same as real-target or release completion.
+> **Canonical current status (2026-09-10):** protected `main@e19d6fa818a7eebaf293d34bd87cff79ebc90ade` remains the accepted baseline. Active Draft PR #30 now contains the governed Issue #52 dependency closure and the integrated Issue #46 bounded-child runtime fix, but those changes are not protected-main acceptance. `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` remains **BLOCKED** until fresh real-target readiness/current-receipt, exact target↔web identity, and authoritative `/login` evidence pass on the same target.
 
 ## AI development startup gate
 
@@ -20,22 +20,24 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## Current runtime closure
 
-- **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY`.
-- **PR #30:** remains **Draft and unmerged**. It is the bounded runtime-recovery carrier, not a completed release carrier.
-- **Issue #46 / PR #51:** the bounded child-execution implementation exists on Draft PR #51, including finite execution deadline, deterministic termination/cleanup, bounded stdout/stderr capture and explicit timeout/output-limit evidence. It is not yet integrated into #30 and must be synchronized/re-certified after the dependency closure changes are accepted.
-- **Independent review:** critical runtime-control changes still require exact-head independent review before PR #30 may merge.
-- **Real-target evidence:** fresh final readiness/current receipt, exact target↔web identity and authoritative `/login` evidence on the same proven origin remain required.
+- **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY`; target status remains **BLOCKED**.
+- **PR #30:** Draft/unmerged, current integrated source head before this status sync `68d6aa5d8610e05acf7c51bed503ae09bd4311cd`.
+- **Issue #46 / PR #51:** bounded child-execution source fix is integrated into #30. Exact #51 head `2e0736e4da1d5a89b6979e9171c672a1c0c32745` passed release certification #885 / `34424303763`; #51 changed exactly the three bounded runtime/workflow paths and merged as `68d6aa5d8610e05acf7c51bed503ae09bd4311cd`.
+- **Child execution boundary:** finite 120-second default deadline, 256 KiB per-stream output cap, lower-only certification overrides, deterministic soft→hard termination, bounded/redacted failure evidence, and behavioral cleanup/lock-reuse verification are source-integrated.
+- **Review boundary:** exact-head AI reviews are recorded with honest provenance; independent-human approval is not claimed. Any final #30 review must bind the final post-sync head.
+- **Real-target evidence:** fresh final readiness/current receipt, exact target↔web identity, and authoritative `/login` evidence remain required.
 - **CORE-QA-001:** MUST NOT start until runtime closure is target-verified.
-- **PR #1:** remains the Draft final carrier and MUST NOT be represented as release-complete.
+- **PR #1:** remains a separate Draft final carrier and is not release-complete.
 
 ## Current dependency closure
 
-- **Issue #52 / PR #55:** Draft PR #55 is the clean dependency carrier stacked on PR #30. Current clean source head `c9531d7b3571062ec932b8999d9cf77c54cd7f1f` passed exact-head Nexora release certification #867 / run `34367088183`.
-- **Governed proof-v4:** disposable diagnostic PR #58 completed successfully and was closed unmerged. Exact diagnostic head `73b45bfde0e339c223f9c1b250e79ed391ecc936` passed governed lock proof run #4 / `34372657034` and release certification #868 / `34372656788`.
-- **Exact candidate locks:** `composer.lock` SHA-256 `a96e562048532b4d9773877cea6c8dc0dd2a1adff52c25b7481493402beeced8`; `package-lock.json` SHA-256 `ad3e1dd0300ef0796865fa78ed63e547090940360925efd8939f43966f3ed804`.
-- **Reproducibility:** A/B raw hashes match, semantic hashes match, raw package-lock differing paths are `0`, supply-chain/audit evidence passes with matching A/B fingerprints, and proof errors/warnings are empty.
-- **Frontend replay:** the exact generated npm lock passes fresh `npm ci --ignore-scripts`, typecheck, Vitest, production build and build verification at **35 / 64 JavaScript assets**; the accepted ceiling remains unchanged.
-- **Remaining gate:** the repository promotion tool explicitly requires `PROMOTE-REVIEWED` only after **human review of both candidate lockfiles**. That attestation is not replaced or fabricated by AI/self-review. Root lockfiles therefore remain unpromoted on PR #55 and Issue #52 remains open.
+- **Issue #52:** CLOSED / completed after the original frontend dependency failure was eliminated on a fresh #51 exact-head rerun.
+- **Governed candidate v5:** run `34420984941` SUCCESS, artifact `10130890580`.
+- **AI lock review:** reviewer `AI:GPT-5.6-Sol@ChatGPT`; no human review or independent approval is claimed. The one-time repository-admin authorization is retained in `.ai/plans/issue-52-ai-lock-review-exception.md`.
+- **Exact reviewed locks:** `composer.lock` SHA-256 `1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198`; `package-lock.json` SHA-256 `09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75`.
+- **Promotion:** corrected fail-closed promotion run `34421381192` SUCCESS, dossier artifact `10131020021`; strict locks, provenance, supply-chain, reviewed-attestation verification and frontend replay passed.
+- **Integration:** PR #55 exact-head certification #883 / `34423528195` SUCCESS, zero unresolved threads, then guarded integration into #30. Reviewed lock bytes remain unchanged after protected-main reconciliation.
+- **Runtime rerun:** PR #51 certification #885 / `34424303763` SUCCESS using the committed reviewed dependency closure.
 
 ## Status boundary
 
@@ -43,14 +45,13 @@ Nexora has extensive source implementation and passing hosted certification evid
 
 ## Current next sequence
 
-1. Complete the required human review of the exact governed `composer.lock` / `package-lock.json` candidate pair and promote only those reviewed bytes through the repository lock-review path.
-2. Re-run exact-head release certification on the resulting lock-bearing PR #55 head and integrate #55 into PR #30 only after its review/thread gates are clean.
-3. Synchronize the Issue #46 / PR #51 bounded-child fix onto the updated PR #30 base, re-run exact-head certification, and integrate it only when green/reviewed.
-4. Obtain independent exact-head review for the resulting PR #30 runtime-control head.
-5. Collect fresh real-target readiness/current-receipt, target↔web identity and authoritative `/login` evidence on the same proven origin.
-6. Merge PR #30 only after every required source/review/target gate is satisfied.
-7. Start `CORE-QA-001` only after runtime closure is target-verified.
-8. Continue the broader final target/release sequence through PR #1 without collapsing source progress into release readiness.
+1. Finish this status-only reconciliation and require fresh exact-head #30 release certification plus a fresh exact-head review on the resulting head.
+2. Keep PR #30 Draft/unmerged while target evidence is missing.
+3. On the exact Windows/Laragon rc.93 target, obtain fresh `post-install-status --assert-ready` evidence requiring `status=pass`, `ready=true`, `runtime_ready=true`, `receipt_current=true`, `errors=[]`.
+4. Prove the configured `app.url` web process belongs to that exact target through the fresh one-time CLI↔web acknowledgement and local `--require-web-ack` verification.
+5. Obtain authoritative `/login` evidence on that same proven origin with TLS verification enabled and redirects disabled.
+6. Only after the source/review/target gates all pass may PR #30 merge and `RUNTIME-CLOSURE-001` become `TARGET_VERIFIED`.
+7. Start `CORE-QA-001` only after genuine target verification; continue broader release work through PR #1 without collapsing Source, Target and Release states.
 
 ## Core stack
 

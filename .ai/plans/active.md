@@ -8,7 +8,8 @@
 - Status: `BLOCKED` pending final real-target readiness + exact target-to-web `/login` evidence
 - Real target: Windows + Laragon, `D:\laragon\www\nexora`
 - Installed target release: `1.0.0-rc.93`
-- Current canonical source baseline for this pass: `main@dffb238e655a1c474f4f7ce7e75c6eda004c0c32`
+- Fresh protected-main baseline reconciled for this pass: `main@e19d6fa818a7eebaf293d34bd87cff79ebc90ade`
+- Active Draft source carrier before this status sync: `PR #30 / feat/runtime-recovery-orchestrator@68d6aa5d8610e05acf7c51bed503ae09bd4311cd`
 - Method: bounded existing-problem repair + DMAIC/control improvement; no roadmap expansion
 
 ## Governance boundary
@@ -24,6 +25,17 @@ System Graph/Flow product contribution remains `NOT_APPLICABLE`: no new product 
 ## Objective
 
 Close the installed rc.93 post-install runtime identity mismatch without disguising it as an rc.94 upgrade; prove compatibility/readiness on the real target; prove that the HTTP origin being certified is served by the exact target rather than merely trusting `app.url`; make the safe recovery sequence deterministic; then advance to `CORE-QA-001` only after final target evidence passes.
+
+## Source integration checkpoint — 2026-09-10
+
+- Issue #52 dependency determinism closure is integrated into PR #30; Issue #52 is CLOSED after fresh PR #51 rerun.
+- Governed candidate v5 run `34420984941` and corrected promotion run `34421381192` are SUCCESS.
+- Exact reviewed source locks are `composer.lock=1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198` and `package-lock.json=09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75`.
+- PR #55 final certification #883 / `34423528195` passed before guarded integration.
+- Protected main `e19d6fa818a7eebaf293d34bd87cff79ebc90ade` was reconciled into #30 while preserving its governance/README history and retaining the exact reviewed Vitest/lock intent.
+- Issue #46 / PR #51 was synchronized to that current base with exactly three intended changed paths; exact-head release certification #885 / `34424303763` passed.
+- PR #51 is integrated into #30 as `68d6aa5d8610e05acf7c51bed503ae09bd4311cd`.
+- This checkpoint is source-work evidence only. Final post-sync #30 exact-head CI/review plus fresh real-target readiness, target↔web identity and `/login` evidence remain mandatory.
 
 ## Real-target evidence received — 2026-08-25
 
@@ -69,7 +81,7 @@ Observed:
 - environment/activation/service/process now compatible
 - source/deployment/framework/data-plane/storage/host/resource/policy/dependency compatibility remained PASS
 - `deployment_drift.status=pass`
-- dependency runtime status PASS; reviewed dependency-lock attestation remains `missing` as a separate release/dependency-governance concern, not a runtime identity mismatch
+- historical target dependency runtime status PASS; active #30 source now carries governed reviewed locks (`composer.lock=1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198`, `package-lock.json=09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75`), while installed-target dependency sealing remains separate target evidence
 
 ### Post-install handoff
 
@@ -96,7 +108,7 @@ A later adversarial pass found two additional reliability/evidence risks in the 
 
 A further adversarial pass found a **wrong-host false-PASS** surface: bootstrapping the target and reading its own `config('app.url')` prevents arbitrary operator URL override, but it does not prove that the server currently answering that URL is the same target directory. A stale/misconfigured `app.url` could point to another reachable Nexora deployment whose `/login` returns HTTP 200. Therefore `app.url + /login 200` is no longer sufficient acceptance evidence.
 
-The durable control improvement is a single Runtime Recovery / Closure Orchestrator that preserves human approval for mutation while automating deterministic verification/reconciliation, serializing apply-mode writers, preserving unique evidence, and proving a fresh target-local CLI→web nonce/source/runtime handshake before `/login` can become authoritative.
+The durable control improvement is a single Runtime Recovery / Closure Orchestrator that preserves explicit mutation authorization while automating deterministic verification/reconciliation, serializing apply-mode writers, bounding every child deadline/output capture, preserving unique evidence, and proving a fresh target-local CLI→web nonce/source/runtime handshake before `/login` can become authoritative.
 
 ## Runtime Recovery / Closure Orchestrator contract
 
