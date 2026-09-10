@@ -1,6 +1,10 @@
-# Nexora Agent Entry Point
+# Nexora AI-Native Development Agent Entry Point
 
 Every AI agent, coding agent, reviewer, planner or automation working in this repository MUST begin here.
+
+## AI-Native Development Framework
+
+This repository follows AI-Native development principles with governance-first approach, evidence tracking, and stage-based progression.
 
 ## Mandatory startup sequence
 
