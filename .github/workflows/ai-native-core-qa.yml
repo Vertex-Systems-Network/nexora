@@ -133,3 +133,47 @@ jobs:
             echo "⚠️ **Some checks failed** - Review required"
             exit 1
           fi
+
+  auto-merge:
+    name: Auto-Merge Pull Request
+    runs-on: ubuntu-latest
+    needs: [ai-governance, core-qa, summary]
+    if: success() && github.event_name == 'pull_request'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+          
+      - name: Auto-Merge Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "🔄 Attempting auto-merge for PR #$PR_NUMBER"
+          
+          # Wait a moment for all checks to finalize
+          sleep 10
+          
+          # Check if PR can be merged
+          MERGEABLE=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.mergeable')
+          
+          if [ "$MERGEABLE" == "true" ]; then
+            echo "✅ PR is mergeable. Attempting squash merge..."
+            gh api \
+              --method PUT \
+              repos/${{ github.repository }}/pulls/$PR_NUMBER/merge \
+              -f merge_method="squash" \
+              -f commit_title="Merge PR #$PR_NUMBER: AI-Native Core QA Automation" \
+              -f commit_message="Automated merge via AI-Native Governance Workflow" && \
+              echo "🎉 Successfully merged PR #$PR_NUMBER" || \
+              echo "⚠️ Merge API call failed, might be due to branch protection rules."
+          else
+            echo "⏳ PR is not yet mergeable (status: $MERGEABLE). Skipping auto-merge."
+            echo "💡 Please check branch protection rules or pending checks."
+          fi
