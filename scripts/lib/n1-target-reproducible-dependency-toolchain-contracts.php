@@ -77,7 +77,10 @@ function nexoraAnalyzeReproducibleDependencyToolchainContracts(string $root): ar
         'currentToolchainFingerprint',
         'Candidate lock pair does not carry a successful double-run reproducibility proof.',
         'Dependency toolchain fingerprint changed since candidate generation',
+        'authorized review of both candidate lockfiles.',
         "'toolchain_fingerprint_sha256' =>",
+        "'reproducible' =>",
+        "'candidate_reproducible' =>",
     ] as $marker) {
         if (! str_contains($promote, $marker)) {
             $errors[] = "v5.12 promotion toolchain/reproducibility binding missing [{$marker}]";
