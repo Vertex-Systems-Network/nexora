@@ -46,3 +46,7 @@ Thumbs.db
 /storage/app/nexora/deployment-control/
 /storage/app/nexora/deployment-access.key
 /storage/app/nexora/database-backups/
+node_modules/
+.next/
+dist/
+build/
