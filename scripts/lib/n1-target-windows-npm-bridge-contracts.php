@@ -78,8 +78,11 @@ function nexoraAnalyzeWindowsNpmBridgeContracts(string $root): array
     }
 
     $refresh = $read('scripts/dependency-lock-refresh.php');
-    if (! str_contains($refresh, "['npm', 'install', '--package-lock-only'")) {
-        $errors[] = 'Dependency refresh no longer exposes the npm candidate command through the central command runner.';
+    $candidatePattern = <<<'REGEX'
+/\$command\s*=\s*\[\s*'npm'\s*,\s*'install'\s*,\s*'--package-lock-only'\s*,\s*'--include=optional'/s
+REGEX;
+    if (preg_match($candidatePattern, $refresh) !== 1) {
+        $errors[] = 'Dependency refresh no longer exposes the optional-aware lock-only npm candidate command through the central command runner.';
     }
     if (! str_contains($refresh, 'nexoraRunTargetCommand($command, $workspace, $environment)')) {
         $errors[] = 'Dependency refresh must execute npm candidate generation through nexoraRunTargetCommand.';

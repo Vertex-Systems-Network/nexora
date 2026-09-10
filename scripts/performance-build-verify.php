@@ -9,6 +9,7 @@ $reportDir = $root.'/storage/app/nexora/certification';
 $config = require $root.'/config/nexora-performance.php';
 $platform = require $root.'/config/nexora.php';
 require_once $root.'/scripts/lib/source-attestation.php';
+require_once $root.'/scripts/lib/performance-build-leaks.php';
 $sourceAttestation=nexoraComputeSourceAttestation($root);
 $budgets = (array) ($config['budgets'] ?? []);
 $errors = [];
@@ -66,7 +67,9 @@ foreach ($iterator as $file) {
     if ($category === 'image' && $size > (int)$budgets['image_asset_bytes']) $errors[] = "Image asset budget exceeded: {$relative} {$size} > {$budgets['image_asset_bytes']}";
     if (in_array($category,['js','css'],true)) {
         $source=(string)file_get_contents($absolute);
-        foreach (['localhost:5173','127.0.0.1:5173','D:\\laragon\\','/Users/'] as $leak) if (str_contains($source,$leak)) $errors[]="local development path leaked in {$relative}: {$leak}";
+        foreach (nexoraPerformanceBuildLocalLeaks($source) as $leak) {
+            $errors[]="local development path leaked in {$relative}: {$leak}";
+        }
         if (str_contains($source,'sourceMappingURL=')) $errors[]='sourceMappingURL leaked in production asset: '.$relative;
     }
     $files[] = ['path'=>$relative,'bytes'=>$size,'sha256'=>hash_file('sha256',$absolute),'category'=>$category];

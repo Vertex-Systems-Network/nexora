@@ -58,10 +58,17 @@ function nexoraAnalyzeReproducibleDependencyToolchainContracts(string $root): ar
         "'semantic_exact_match' =>",
         "'mode' => 'double-run-reproducible-candidate-refresh'",
         "'root_lockfiles_mutated' => false",
+        '$workspace = $runDirectory.\'/\'.$workspaceId.\'/workspace\';',
+        "'npm', 'install', '--package-lock-only', '--include=optional'",
+        "'npm-candidate-lock'",
+        'Clean npm-ci replay is a later gate.',
     ] as $marker) {
         if (! str_contains($refresh, $marker)) {
             $errors[] = "v5.12 double-run lock refresh missing [{$marker}]";
         }
+    }
+    if (str_contains($refresh, "'npm', 'ci'")) {
+        $errors[] = 'v5.12 candidate refresh must not install the runtime dependency graph; npm-ci replay belongs to certification';
     }
 
     $promote = $read('scripts/dependency-lock-promote.php');
@@ -70,7 +77,10 @@ function nexoraAnalyzeReproducibleDependencyToolchainContracts(string $root): ar
         'currentToolchainFingerprint',
         'Candidate lock pair does not carry a successful double-run reproducibility proof.',
         'Dependency toolchain fingerprint changed since candidate generation',
+        'authorized review of both candidate lockfiles.',
         "'toolchain_fingerprint_sha256' =>",
+        "'reproducible' =>",
+        "'candidate_reproducible' =>",
     ] as $marker) {
         if (! str_contains($promote, $marker)) {
             $errors[] = "v5.12 promotion toolchain/reproducibility binding missing [{$marker}]";
