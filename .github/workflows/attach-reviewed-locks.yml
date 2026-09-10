@@ -1,0 +1,112 @@
+name: Nexora attach exact reviewed locks
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/attach-reviewed-locks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  attach-reviewed-locks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact target source branch
+        uses: actions/checkout@v7
+        with:
+          ref: ai/issue-52-deterministic-dependency-closure
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Fail closed unless target branch is exact reviewed base
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED='d90a5f5e4805739cba1d0eaf9958262f40d6f8ac'
+          ACTUAL="$(git rev-parse HEAD)"
+          test "$ACTUAL" = "$EXPECTED"
+          REMOTE="$(git ls-remote origin refs/heads/ai/issue-52-deterministic-dependency-closure | awk '{print $1}')"
+          test "$REMOTE" = "$EXPECTED"
+          test ! -e composer.lock
+          test ! -e package-lock.json
+          echo "Exact #55 attachment base verified: $ACTUAL"
+
+      - name: Download exact successful AI-reviewed promotion dossier
+        uses: actions/download-artifact@v7
+        with:
+          name: nexora-ai-reviewed-lock-promotion-v5-e6b688831349fa246710da35cac47fcc949d28e7
+          path: .promotion
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 34421381192
+
+      - name: Verify successful promotion dossier and copy only exact locks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s .promotion/composer.lock
+          test -s .promotion/package-lock.json
+          test -s .promotion/storage/app/nexora/dependency-intake/lock-promotion.json
+          test -s .promotion/storage/app/nexora/dependency-intake/reviewed-locks.json
+          test -s .promotion/storage/app/nexora/dependency-intake/lock-refresh.json
+          test -s .promotion/storage/app/nexora/dependency-intake/lock-promotion-journal.json
+
+          test "$(sha256sum .promotion/composer.lock | awk '{print $1}')" = '1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198'
+          test "$(sha256sum .promotion/package-lock.json | awk '{print $1}')" = '09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75'
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('.promotion/storage/app/nexora/dependency-intake')
+          promotion = json.loads((root/'lock-promotion.json').read_text())
+          review = json.loads((root/'reviewed-locks.json').read_text())
+          refresh = json.loads((root/'lock-refresh.json').read_text())
+          journal = json.loads((root/'lock-promotion-journal.json').read_text())
+          composer = '1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198'
+          npm = '09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75'
+          assert promotion['status'] == 'reviewed-promoted'
+          assert promotion['reviewer'] == 'AI:GPT-5.6-Sol@ChatGPT'
+          assert promotion['rollback_required'] is False
+          assert promotion['errors'] == []
+          assert promotion['root_hashes_after']['composer_lock_sha256'] == composer
+          assert promotion['root_hashes_after']['package_lock_sha256'] == npm
+          assert review['status'] == 'reviewed'
+          assert review['reviewer'] == 'AI:GPT-5.6-Sol@ChatGPT'
+          assert review['composer_lock_sha256'] == composer
+          assert review['package_lock_sha256'] == npm
+          assert refresh['reproducible'] is True
+          assert refresh['candidate_reproducible'] is True
+          assert journal['status'] == 'complete'
+          print('Successful exact AI-reviewed promotion dossier verified.')
+          PY
+
+          cp .promotion/composer.lock composer.lock
+          cp .promotion/package-lock.json package-lock.json
+          test "$(sha256sum composer.lock | awk '{print $1}')" = '1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198'
+          test "$(sha256sum package-lock.json | awk '{print $1}')" = '09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75'
+
+          mapfile -t CHANGED < <(git status --short --untracked-files=all | awk '{print $2}' | grep -v '^.promotion/' | sort)
+          printf '%s\n' "${CHANGED[@]}"
+          test "${#CHANGED[@]}" -eq 2
+          test "${CHANGED[0]}" = 'composer.lock'
+          test "${CHANGED[1]}" = 'package-lock.json'
+
+      - name: Commit exact reviewed lock pair atomically to PR 55 branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'WPEssential'
+          git config user.email 'wordpress.essential@gmail.com'
+          git add -- composer.lock package-lock.json
+          test "$(git diff --cached --name-only | sort | tr '\n' ' ')" = 'composer.lock package-lock.json '
+          git commit -m 'deps: promote exact AI-reviewed lock pair' \
+            -m 'Issue #52 fresh artifact 10130890580; promotion proof run 34421381192; reviewer AI:GPT-5.6-Sol@ChatGPT. composer.lock=1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198 package-lock.json=09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75. No human review or independent approval claimed.'
+          PARENT="$(git rev-parse HEAD^)"
+          test "$PARENT" = 'd90a5f5e4805739cba1d0eaf9958262f40d6f8ac'
+          test "$(git show --format= --name-only HEAD | sort | tr '\n' ' ')" = 'composer.lock package-lock.json '
+          git push origin HEAD:refs/heads/ai/issue-52-deterministic-dependency-closure
+          echo "Attached exact reviewed locks at $(git rev-parse HEAD)"
