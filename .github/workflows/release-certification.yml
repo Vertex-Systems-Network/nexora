@@ -17,7 +17,20 @@ jobs:
   governance:
     name: governance
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nexora_testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
     steps:
       - name: Checkout exact source
         uses: actions/checkout@v7
@@ -34,18 +47,34 @@ jobs:
           test "$ACTUAL_SHA" = "$EXPECTED_SHA"
           echo "Exact source checkout verified: $ACTUAL_SHA"
 
-      - name: PHP 8.4
+      - name: PHP 8.4 + Composer 2.10.3
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           coverage: none
-          tools: none
+          extensions: mbstring, pdo_mysql, zip
+          tools: composer:2.10.3
 
       - name: Node 22
         uses: actions/setup-node@v7
         with:
           node-version: '22'
           package-manager-cache: false
+
+      - name: Pin npm 10.9.2
+        run: npm install --global npm@10.9.2 --no-audit --no-fund
+
+      - name: Verify governed toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -v
+          composer --version
+          node --version
+          test "$(npm --version)" = "10.9.2"
+
+      - name: Repository hygiene guard
+        run: php scripts/repository-hygiene-guard.php
 
       - name: Certification preflight
         run: php scripts/certification-preflight.php --source-only
@@ -68,6 +97,7 @@ jobs:
           php -l scripts/lib/performance-build-leaks.php
           php -l scripts/performance-build-leak-contract-verify.php
           php -l scripts/performance-build-verify.php
+          php -l scripts/repository-hygiene-guard.php
           php scripts/runtime-recovery-orchestrator-contract-verify.php
           php scripts/runtime-recovery-readiness-exit-contract-verify.php
           php scripts/runtime-recovery-target-file-containment-contract-verify.php
@@ -75,12 +105,23 @@ jobs:
           php scripts/runtime-recovery-mutation-evidence-contract-verify.php
           php scripts/runtime-recovery-child-boundary-contract-verify.php
           php scripts/performance-build-leak-contract-verify.php
+          php scripts/repository-hygiene-guard.php
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
 
-      - name: Install frontend dependencies
-        run: npm install --no-audit --no-fund
+      - name: Install backend dependencies from reviewed lock
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare ephemeral test key
+        shell: bash
+        run: echo "APP_KEY=base64:$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+
+      - name: Backend PHPUnit compatibility
+        run: php artisan test --display-warnings --fail-on-warning
+
+      - name: Install frontend dependencies from reviewed lock
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Frontend dependency compatibility
         run: |
