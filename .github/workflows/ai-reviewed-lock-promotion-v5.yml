@@ -1,0 +1,210 @@
+name: Nexora AI-reviewed lock promotion v5
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ai-reviewed-lock-promotion-v5.yml'
+      - '.ai/plans/issue-52-ai-lock-review-exception.md'
+      - '.ai/evidence/issue-52-ai-lock-review-v5.md'
+      - 'package.json'
+      - 'composer.json'
+      - 'vite.config.ts'
+      - 'scripts/dependency-lock-promote.php'
+      - 'scripts/dependency-lock-review.php'
+      - 'scripts/dependency-lock-refresh.php'
+      - 'scripts/lib/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  ai-reviewed-lock-promotion-v5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact diagnostic source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout identity
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "Exact diagnostic checkout verified: $EXPECTED_SHA"
+
+      - name: PHP 8.4.25 and Composer 2.10.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4.25'
+          coverage: none
+          tools: composer:2.10.3
+
+      - name: Node 22.23.2
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.23.2'
+          package-manager-cache: false
+
+      - name: Use exact candidate npm toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global npm@10.9.2 --no-audit --no-fund
+          test "$(npm --version)" = '10.9.2'
+          test "$(node --version)" = 'v22.23.2'
+          test "$(composer --version --no-ansi | awk '{print $3}')" = '2.10.3'
+          php -r 'if (PHP_VERSION !== "8.4.25") { fwrite(STDERR, "unexpected PHP ".PHP_VERSION.PHP_EOL); exit(1); }'
+
+      - name: Verify corrected promotion contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l scripts/dependency-lock-promote.php
+          php -l scripts/dependency-lock-review.php
+          php scripts/n1-target-reproducible-dependency-toolchain-contract-verify.php
+          php scripts/n1-target-dependency-candidate-supply-chain-contract-verify.php
+          grep -F "'reproducible' => (\$candidate['reproducible'] ?? false) === true" scripts/dependency-lock-promote.php
+          grep -F "'candidate_reproducible' => (\$candidate['reproducible'] ?? false) === true" scripts/dependency-lock-promote.php
+
+      - name: Download exact fresh governed candidate artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: nexora-governed-lock-proof-v5-f1829d676fd0bf9ef807c3207c1654de530c2e37
+          path: .governed-proof
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 34420984941
+
+      - name: Stage exact AI-reviewed v5 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          CANDIDATE_ROOT='.governed-proof/storage/app/nexora/dependency-intake'
+          test -s "$CANDIDATE_ROOT/candidates/candidate.json"
+          test -s "$CANDIDATE_ROOT/candidates/composer.lock"
+          test -s "$CANDIDATE_ROOT/candidates/package-lock.json"
+
+          test "$(sha256sum "$CANDIDATE_ROOT/candidates/composer.lock" | awk '{print $1}')" = '1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198'
+          test "$(sha256sum "$CANDIDATE_ROOT/candidates/package-lock.json" | awk '{print $1}')" = '09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75'
+          test "$(sha256sum "$CANDIDATE_ROOT/candidates/candidate.json" | awk '{print $1}')" = '242862cb8d4a879946f17fec16ff766b0c876e11f3da6e6871176eed8d62ef04'
+
+          mkdir -p storage/app/nexora/dependency-intake
+          cp -a "$CANDIDATE_ROOT/candidates" storage/app/nexora/dependency-intake/
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('storage/app/nexora/dependency-intake/candidates/candidate.json').read_text())
+          assert p['status'] == 'review-required'
+          assert p['reproducible'] is True
+          assert p['reproduction']['raw_exact_match'] is True
+          assert p['reproduction']['semantic_exact_match'] is True
+          assert p['reproduction']['exact_match'] is True
+          assert p['supply_chain']['status'] == 'pass'
+          assert p['supply_chain']['exact_match'] is True
+          assert p['source_tree_sha256'] == 'ea18ce24741d7bd79ee618fe673e49f618672dabce5a38810dadfc5af42b2194'
+          assert p['toolchain_fingerprint_sha256'] == '8d713101071ed36ab1dc851e293019a03a89edd8dae5e40a2d0a002e0f6c5143'
+          assert p['supply_chain_fingerprint_sha256'] == 'e48c62702769ee324a685b58654ed7fd6be0799c2a61a314be7c374835c71414'
+          assert p['candidate_hashes']['composer_lock_sha256'] == '1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198'
+          assert p['candidate_hashes']['package_lock_sha256'] == '09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75'
+          assert not p['validation']['errors']
+          assert not p['validation']['warnings']
+          print('Fresh AI-reviewed v5 candidate identity verified.')
+          PY
+
+      - name: Verify exact AI attestation evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s .ai/plans/issue-52-ai-lock-review-exception.md
+          test -s .ai/evidence/issue-52-ai-lock-review-v5.md
+          grep -F 'AI:GPT-5.6-Sol@ChatGPT' .ai/evidence/issue-52-ai-lock-review-v5.md
+          grep -F '10130890580' .ai/evidence/issue-52-ai-lock-review-v5.md
+          grep -F '1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198' .ai/evidence/issue-52-ai-lock-review-v5.md
+          grep -F '09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75' .ai/evidence/issue-52-ai-lock-review-v5.md
+          if grep -Fq 'HUMAN LOCK REVIEW PASS — reviewer=' .ai/evidence/issue-52-ai-lock-review-v5.md; then
+            echo 'Human attestation must not be fabricated.' >&2
+            exit 1
+          fi
+
+      - name: Promote exact fresh AI-reviewed pair fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e composer.lock
+          test ! -e package-lock.json
+          php scripts/dependency-lock-promote.php \
+            '--reviewer=AI:GPT-5.6-Sol@ChatGPT' \
+            --confirm=PROMOTE-REVIEWED \
+            --json | tee storage/app/nexora/dependency-intake/ai-promotion-v5.stdout.json
+
+      - name: Verify exact promoted bytes and attestation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(sha256sum composer.lock | awk '{print $1}')" = '1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198'
+          test "$(sha256sum package-lock.json | awk '{print $1}')" = '09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75'
+          php scripts/dependency-contract-verify.php --strict-locks
+          php scripts/dependency-lock-review.php --verify-attestation --require-refresh-handoff --json \
+            | tee storage/app/nexora/dependency-intake/ai-reviewed-lock-v5-verify.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          review = json.loads(Path('storage/app/nexora/dependency-intake/reviewed-locks.json').read_text())
+          assert review['status'] == 'reviewed'
+          assert review['reviewer'] == 'AI:GPT-5.6-Sol@ChatGPT'
+          assert review['composer_lock_sha256'] == '1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198'
+          assert review['package_lock_sha256'] == '09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75'
+          promotion = json.loads(Path('storage/app/nexora/dependency-intake/lock-promotion.json').read_text())
+          assert promotion['status'] == 'reviewed-promoted'
+          assert promotion['reviewer'] == 'AI:GPT-5.6-Sol@ChatGPT'
+          assert promotion['rollback_required'] is False
+          assert not promotion['errors']
+          assert promotion['root_hashes_after']['composer_lock_sha256'] == review['composer_lock_sha256']
+          assert promotion['root_hashes_after']['package_lock_sha256'] == review['package_lock_sha256']
+          refresh = json.loads(Path('storage/app/nexora/dependency-intake/lock-refresh.json').read_text())
+          assert refresh['mode'] == 'reviewed-candidate-promotion'
+          assert refresh['reproducible'] is True
+          assert refresh['candidate_reproducible'] is True
+          print('Corrected promotion handoff and exact reviewed root locks verified.')
+          PY
+
+      - name: Replay promoted npm lock and certify frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf node_modules public/build
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run typecheck
+          npm run test
+          npm run build
+          npm run verify:build
+
+      - name: Upload exact successful promotion dossier
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-ai-reviewed-lock-promotion-v5-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            composer.lock
+            package-lock.json
+            storage/app/nexora/dependency-intake/candidates/candidate.json
+            storage/app/nexora/dependency-intake/lock-promotion.json
+            storage/app/nexora/dependency-intake/lock-promotion-journal.json
+            storage/app/nexora/dependency-intake/lock-refresh.json
+            storage/app/nexora/dependency-intake/reviewed-locks.json
+            storage/app/nexora/dependency-intake/ai-promotion-v5.stdout.json
+            storage/app/nexora/dependency-intake/ai-reviewed-lock-v5-verify.json
+            storage/app/nexora/dependency-intake/promotion-runs/**/summary.json
+            storage/app/nexora/dependency-intake/promotion-runs/**/candidate-supply-chain.json
+            storage/app/nexora/certification/build-assets.json
+            public/build/manifest.json
