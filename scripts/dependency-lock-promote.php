@@ -23,7 +23,7 @@ if ($reviewer === '' || strlen($reviewer) > 120) {
     exit(2);
 }
 if ($confirm !== 'PROMOTE-REVIEWED') {
-    fwrite(STDERR, "[Nexora Dependency Lock Promote] Explicit --confirm=PROMOTE-REVIEWED is required after human review of both candidate lockfiles.\n");
+    fwrite(STDERR, "[Nexora Dependency Lock Promote] Explicit --confirm=PROMOTE-REVIEWED is required after authorized review of both candidate lockfiles.\n");
     exit(2);
 }
 
@@ -188,8 +188,7 @@ if (($promotionSupplyChain['status'] ?? null) !== 'pass'
     || ! hash_equals($candidateSupplyChainFingerprint, (string) ($promotionSupplyChain['fingerprint_sha256'] ?? ''))) {
     $details = implode('; ', array_map('strval', (array) ($promotionSupplyChain['errors'] ?? [])));
     fwrite(STDERR, "[Nexora Dependency Lock Promote] Candidate supply-chain revalidation failed before root mutation"
-        .($details !== '' ? ": {$details}" : '.')."
-");
+        .($details !== '' ? ": {$details}" : '.')."\n");
     exit(1);
 }
 file_put_contents(
@@ -277,7 +276,8 @@ try {
         'promoted_at' => gmdate(DATE_ATOM),
         'promoted_by' => $reviewer,
         'toolchain_fingerprint_sha256' => $currentToolchainFingerprint,
-        'candidate_reproducible' => true,
+        'reproducible' => ($candidate['reproducible'] ?? false) === true,
+        'candidate_reproducible' => ($candidate['reproducible'] ?? false) === true,
         'candidate_supply_chain_status' => 'pass',
         'candidate_supply_chain_fingerprint_sha256' => $candidateSupplyChainFingerprint,
         'candidate_provenance_fingerprint_sha256' => $candidateProvenance['fingerprint_sha256'] ?? null,

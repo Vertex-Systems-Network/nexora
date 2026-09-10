@@ -103,7 +103,10 @@ $generate = static function (string $workspaceId) use (
     $composer,
     $record,
 ): array {
-    $workspace = $runDirectory.'/workspace-'.$workspaceId;
+    // A/B runs remain isolated by parent directory while sharing the same leaf
+    // basename. npm derives an unnamed root package-lock `name` from that leaf,
+    // so using a stable basename prevents workspace-A/workspace-B metadata drift.
+    $workspace = $runDirectory.'/'.$workspaceId.'/workspace';
     $localErrors = [];
     if (! is_dir($workspace) && ! mkdir($workspace, 0775, true) && ! is_dir($workspace)) {
         throw new RuntimeException("Unable to create isolated dependency workspace [{$workspaceId}].");
@@ -141,7 +144,14 @@ $generate = static function (string $workspaceId) use (
     }
 
     if ($localErrors === []) {
-        $command = ['npm', 'install', '--package-lock-only', '--ignore-scripts', '--no-audit', '--no-fund'];
+        // Candidate refresh is intentionally lock-only: it must not install the
+        // runtime graph. Explicit optional inclusion makes native/platform
+        // package choices part of the reviewed lock instead of depending on an
+        // installed node_modules tree. Clean npm-ci replay is a later gate.
+        $command = [
+            'npm', 'install', '--package-lock-only', '--include=optional',
+            '--ignore-scripts', '--no-audit', '--no-fund',
+        ];
         $result = nexoraRunTargetCommand($command, $workspace, $environment);
         $record($workspaceId, 'npm-candidate-lock', $command, $result);
         if ($result['exit_code'] !== 0) {
