@@ -1,0 +1,56 @@
+[2026-09-10 13:41:05] local.ERROR: syntax error, unexpected token "{", expecting "," or ";" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"{\", expecting \",\" or \";\" at /workspace/vendor/symfony/http-foundation/Request.php:117)
+[stacktrace]
+#0 /workspace/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}()
+#1 /workspace/vendor/laravel/framework/src/Illuminate/Http/Request.php(29): Composer\\Autoload\\ClassLoader->loadClass()
+#2 /workspace/vendor/composer/ClassLoader.php(576): include('...')
+#3 /workspace/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}()
+#4 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/SetRequestForConsole.php(31): Composer\\Autoload\\ClassLoader->loadClass()
+#5 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(349): Illuminate\\Foundation\\Bootstrap\\SetRequestForConsole->bootstrap()
+#6 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(507): Illuminate\\Foundation\\Application->bootstrapWith()
+#7 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(196): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#8 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1242): Illuminate\\Foundation\\Console\\Kernel->handle()
+#9 /workspace/artisan(25): Illuminate\\Foundation\\Application->handleCommand()
+#10 {main}
+"} 
+[2026-09-10 13:41:12] local.ERROR: syntax error, unexpected token "{", expecting "," or ";" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"{\", expecting \",\" or \";\" at /workspace/vendor/symfony/http-foundation/Request.php:117)
+[stacktrace]
+#0 /workspace/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}()
+#1 /workspace/vendor/laravel/framework/src/Illuminate/Http/Request.php(29): Composer\\Autoload\\ClassLoader->loadClass()
+#2 /workspace/vendor/composer/ClassLoader.php(576): include('...')
+#3 /workspace/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}()
+#4 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/SetRequestForConsole.php(31): Composer\\Autoload\\ClassLoader->loadClass()
+#5 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(349): Illuminate\\Foundation\\Bootstrap\\SetRequestForConsole->bootstrap()
+#6 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(507): Illuminate\\Foundation\\Application->bootstrapWith()
+#7 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(196): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#8 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1242): Illuminate\\Foundation\\Console\\Kernel->handle()
+#9 /workspace/artisan(25): Illuminate\\Foundation\\Application->handleCommand()
+#10 {main}
+"} 
+[2026-09-10 13:41:23] local.ERROR: syntax error, unexpected token "{", expecting "," or ";" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"{\", expecting \",\" or \";\" at /workspace/vendor/symfony/http-foundation/Request.php:117)
+[stacktrace]
+#0 /workspace/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}()
+#1 /workspace/vendor/laravel/framework/src/Illuminate/Http/Request.php(29): Composer\\Autoload\\ClassLoader->loadClass()
+#2 /workspace/vendor/composer/ClassLoader.php(576): include('...')
+#3 /workspace/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}()
+#4 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/SetRequestForConsole.php(31): Composer\\Autoload\\ClassLoader->loadClass()
+#5 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(349): Illuminate\\Foundation\\Bootstrap\\SetRequestForConsole->bootstrap()
+#6 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(507): Illuminate\\Foundation\\Application->bootstrapWith()
+#7 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(196): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#8 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1242): Illuminate\\Foundation\\Console\\Kernel->handle()
+#9 /workspace/artisan(25): Illuminate\\Foundation\\Application->handleCommand()
+#10 {main}
+"} 
+[2026-09-10 13:42:56] local.ERROR: syntax error, unexpected token "{", expecting "," or ";" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"{\", expecting \",\" or \";\" at /workspace/vendor/symfony/http-foundation/Request.php:117)
+[stacktrace]
+#0 /workspace/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}()
+#1 /workspace/vendor/laravel/framework/src/Illuminate/Http/Request.php(29): Composer\\Autoload\\ClassLoader->loadClass()
+#2 /workspace/vendor/composer/ClassLoader.php(576): include('...')
+#3 /workspace/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}()
+#4 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/SetRequestForConsole.php(31): Composer\\Autoload\\ClassLoader->loadClass()
+#5 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(349): Illuminate\\Foundation\\Bootstrap\\SetRequestForConsole->bootstrap()
+#6 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(507): Illuminate\\Foundation\\Application->bootstrapWith()
+#7 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(196): Illuminate\\Foundation\\Console\\Kernel->bootstrap()
+#8 /workspace/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1242): Illuminate\\Foundation\\Console\\Kernel->handle()
+#9 /workspace/artisan(25): Illuminate\\Foundation\\Application->handleCommand()
+#10 {main}
+"} 
