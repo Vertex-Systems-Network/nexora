@@ -1,0 +1,217 @@
+name: Nexora governed lock proof v5
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/governed-lock-proof-v5.yml'
+      - 'package.json'
+      - 'composer.json'
+      - 'vite.config.ts'
+      - 'scripts/dependency-lock-refresh.php'
+      - 'scripts/dependency-lock-promote.php'
+      - 'scripts/dependency-lock-review.php'
+      - 'scripts/lib/n1-target-reproducible-dependency-toolchain-contracts.php'
+      - 'scripts/lib/n1-target-windows-npm-bridge-contracts.php'
+      - 'scripts/lib/n1-target-dependency-candidate-supply-chain-contracts.php'
+      - 'scripts/lib/performance-build-leaks.php'
+      - 'scripts/performance-build-leak-contract-verify.php'
+      - 'scripts/performance-build-verify.php'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  governed-lock-proof-v5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact diagnostic source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout identity
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "Exact diagnostic checkout verified: $EXPECTED_SHA"
+
+      - name: PHP 8.4.25 and Composer 2.10.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4.25'
+          coverage: none
+          tools: composer:2.10.3
+
+      - name: Node 22.23.2
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.23.2'
+          package-manager-cache: false
+
+      - name: Use exact reviewed npm line
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global npm@10.9.2 --no-audit --no-fund
+          test "$(npm --version)" = "10.9.2"
+          test "$(node --version)" = "v22.23.2"
+          test "$(composer --version --no-ansi | awk '{print $3}')" = "2.10.3"
+          php -r 'if (PHP_VERSION !== "8.4.25") { fwrite(STDERR, "unexpected PHP ".PHP_VERSION.PHP_EOL); exit(1); }'
+
+      - name: Verify lock source and promotion contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l scripts/dependency-lock-refresh.php
+          php -l scripts/dependency-lock-promote.php
+          php -l scripts/dependency-lock-review.php
+          php -l scripts/lib/n1-target-reproducible-dependency-toolchain-contracts.php
+          php -l scripts/lib/n1-target-windows-npm-bridge-contracts.php
+          php -l scripts/lib/n1-target-dependency-candidate-supply-chain-contracts.php
+          php scripts/n1-target-reproducible-dependency-toolchain-contract-verify.php
+          php scripts/n1-target-windows-npm-bridge-contract-verify.php
+          php scripts/n1-target-dependency-candidate-supply-chain-contract-verify.php
+          php scripts/performance-build-leak-contract-verify.php
+          grep -F "'reproducible' => (\$candidate['reproducible'] ?? false) === true" scripts/dependency-lock-promote.php
+          grep -F "'candidate_reproducible' => (\$candidate['reproducible'] ?? false) === true" scripts/dependency-lock-promote.php
+
+      - name: Generate fresh governed A-B candidate
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p storage/app/nexora/dependency-intake
+          set +e
+          php scripts/dependency-lock-refresh.php --confirm=REFRESH --json \
+            > storage/app/nexora/dependency-intake/governed-proof.stdout.json \
+            2> storage/app/nexora/dependency-intake/governed-proof.stderr.log
+          RC=$?
+          set -e
+          printf '%s\n' "$RC" > storage/app/nexora/dependency-intake/governed-proof.exit-code.txt
+          cat storage/app/nexora/dependency-intake/governed-proof.stdout.json
+          cat storage/app/nexora/dependency-intake/governed-proof.stderr.log >&2 || true
+
+          LATEST_RUN="$(find storage/app/nexora/dependency-intake/lock-refresh-runs -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1)"
+          A_LOCK="$LATEST_RUN/A/workspace/package-lock.json"
+          B_LOCK="$LATEST_RUN/B/workspace/package-lock.json"
+          test -s "$A_LOCK"
+          test -s "$B_LOCK"
+
+          python - "$A_LOCK" "$B_LOCK" > storage/app/nexora/dependency-intake/npm-ab-semantic-diff.txt <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          left = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          right = json.loads(Path(sys.argv[2]).read_text(encoding='utf-8'))
+          differences = []
+
+          def walk(a, b, path='$'):
+              if type(a) is not type(b):
+                  differences.append((path, a, b))
+                  return
+              if isinstance(a, dict):
+                  for key in sorted(set(a) | set(b)):
+                      child = f'{path}.{key}'
+                      if key not in a:
+                          differences.append((child, '<missing>', b[key]))
+                      elif key not in b:
+                          differences.append((child, a[key], '<missing>'))
+                      else:
+                          walk(a[key], b[key], child)
+                  return
+              if isinstance(a, list):
+                  if a != b:
+                      differences.append((path, a, b))
+                  return
+              if a != b:
+                  differences.append((path, a, b))
+
+          walk(left, right)
+          print(f'raw differing paths: {len(differences)}')
+          for path, a, b in differences[:200]:
+              print(path)
+              print('  A:', repr(a)[:1000])
+              print('  B:', repr(b)[:1000])
+          if differences:
+              raise SystemExit(1)
+          PY
+          cat storage/app/nexora/dependency-intake/npm-ab-semantic-diff.txt
+
+          test "$RC" -eq 2
+          test -s storage/app/nexora/dependency-intake/candidates/composer.lock
+          test -s storage/app/nexora/dependency-intake/candidates/package-lock.json
+          test -s storage/app/nexora/dependency-intake/candidates/candidate.json
+          test -s storage/app/nexora/dependency-intake/lock-refresh.json
+          test -s storage/app/nexora/dependency-intake/lock-refresh.md
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('storage/app/nexora/dependency-intake/lock-refresh.json').read_text())
+          assert payload['status'] == 'review-required', payload['status']
+          assert payload['candidate_published'] is True
+          assert payload['reproducible'] is True
+          reproduction = payload['reproduction']
+          assert reproduction['raw_exact_match'] is True
+          assert reproduction['semantic_exact_match'] is True
+          assert reproduction['exact_match'] is True
+          assert reproduction['workspace_a_hashes'] == reproduction['workspace_b_hashes']
+          supply = payload['supply_chain']
+          assert supply['status'] == 'pass'
+          assert supply['exact_match'] is True
+          assert supply['workspace_a']['fingerprint_sha256'] == supply['workspace_b']['fingerprint_sha256']
+          assert payload['toolchain']['status'] == 'pass'
+          print('Fresh governed candidate is raw+semantic reproducible with matching supply-chain evidence.')
+          PY
+
+      - name: Replay fresh generated npm lock and certify frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp storage/app/nexora/dependency-intake/candidates/package-lock.json package-lock.json
+          rm -rf node_modules public/build
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run typecheck
+          npm run test
+          npm run build
+          npm run verify:build
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('storage/app/nexora/certification/build-assets.json').read_text())
+          count = int(report['counts']['js'])
+          ceiling = int(report['budgets']['max_javascript_assets'])
+          print(f'Certified grouped JS assets: {count} / {ceiling}')
+          print(f"Build bytes: {report['totals']['build']}; JS bytes: {report['totals']['js']}; gzip JS: {report['totals']['js_gzip']}")
+          if count > ceiling:
+              raise SystemExit('generated-lock build exceeds unchanged JS asset ceiling')
+          if report.get('errors'):
+              raise SystemExit('build verifier reported errors: ' + repr(report['errors']))
+          PY
+
+      - name: Upload fresh review-only governed dossier
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nexora-governed-lock-proof-v5-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            storage/app/nexora/dependency-intake/candidates/composer.lock
+            storage/app/nexora/dependency-intake/candidates/package-lock.json
+            storage/app/nexora/dependency-intake/candidates/candidate.json
+            storage/app/nexora/dependency-intake/lock-refresh.json
+            storage/app/nexora/dependency-intake/lock-refresh.md
+            storage/app/nexora/dependency-intake/governed-proof.stdout.json
+            storage/app/nexora/dependency-intake/governed-proof.stderr.log
+            storage/app/nexora/dependency-intake/governed-proof.exit-code.txt
+            storage/app/nexora/dependency-intake/npm-ab-semantic-diff.txt
+            storage/app/nexora/dependency-intake/lock-refresh-runs/**/A/workspace/package-lock.json
+            storage/app/nexora/dependency-intake/lock-refresh-runs/**/B/workspace/package-lock.json
+            storage/app/nexora/certification/build-assets.json
+            public/build/manifest.json
