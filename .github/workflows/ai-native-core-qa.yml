@@ -156,6 +156,23 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           echo "🔄 Attempting auto-merge for PR #$PR_NUMBER"
+
+          # Configure git user
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Sync branch with main to satisfy "up-to-date" requirement
+          echo "🔄 Syncing branch with main..."
+          git fetch origin main
+          if ! git rebase origin/main; then
+            echo "⚠️ Rebase failed or conflicts detected. Skipping merge."
+            exit 0
+          fi
+          git push origin HEAD --force-with-lease
+          echo "✅ Branch synced successfully"
+
+          # Wait a moment for checks to finalize after rebase
+          sleep 15
           
           # Wait a moment for all checks to finalize
           sleep 10
