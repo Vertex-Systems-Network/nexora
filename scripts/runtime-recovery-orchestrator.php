@@ -14,6 +14,11 @@ declare(strict_types=1);
 
 const NEXORA_RUNTIME_RECOVERY_CONFIRMATION = 'RECOVER-RUNTIME';
 const NEXORA_RUNTIME_RECOVERY_RC93_VERSION = '1.0.0-rc.93';
+const NEXORA_RUNTIME_RECOVERY_CHILD_DEADLINE_SECONDS = 120;
+const NEXORA_RUNTIME_RECOVERY_CHILD_OUTPUT_LIMIT_BYTES = 262144;
+const NEXORA_RUNTIME_RECOVERY_CHILD_POLL_MICROSECONDS = 10000;
+const NEXORA_RUNTIME_RECOVERY_CHILD_TERMINATION_GRACE_MILLISECONDS = 750;
+const NEXORA_RUNTIME_RECOVERY_CHILD_KILL_GRACE_MILLISECONDS = 1500;
 const NEXORA_RUNTIME_RECOVERY_RC93_ALLOWED_MISMATCHES = [
     'activation',
     'environment',
@@ -241,6 +246,103 @@ function nexoraRuntimeRecoveryFail(string $message, array $context = []): never
     ], 1);
 }
 
+function nexoraRuntimeRecoveryLowerOnlyOverride(string $name, int $default, int $minimum): int
+{
+    $value = getenv($name);
+    if (! is_string($value) || preg_match('/^[0-9]+$/', $value) !== 1) {
+        return $default;
+    }
+
+    $candidate = (int) $value;
+    if ($candidate < $minimum || $candidate > $default) {
+        return $default;
+    }
+
+    return $candidate;
+}
+
+function nexoraRuntimeRecoveryRedactBoundedDiagnostic(string $value): string
+{
+    $redacted = preg_replace(
+        [
+            '/(?i)(authorization\s*:\s*bearer)\s+[^\s]+/',
+            '/(?i)(password|passwd|secret|token|api[_-]?key)(\s*[:=]\s*)(["\']?)[^\s,}\]]+\3/',
+        ],
+        [
+            '$1 [REDACTED]',
+            '$1$2[REDACTED]',
+        ],
+        $value,
+    );
+
+    return trim(is_string($redacted) ? $redacted : $value);
+}
+
+/** @return array{soft_sent:bool,hard_sent:bool,cleanup_complete:bool,pid:?int} */
+function nexoraRuntimeRecoveryTerminateChild($process): array
+{
+    $status = @proc_get_status($process);
+    $pid = is_array($status) && is_int($status['pid'] ?? null) ? $status['pid'] : null;
+    $running = is_array($status) && ($status['running'] ?? false) === true;
+    $softSent = false;
+    $hardSent = false;
+
+    if ($running) {
+        $softSent = @proc_terminate($process);
+        $deadline = microtime(true) + (NEXORA_RUNTIME_RECOVERY_CHILD_TERMINATION_GRACE_MILLISECONDS / 1000);
+        do {
+            usleep(NEXORA_RUNTIME_RECOVERY_CHILD_POLL_MICROSECONDS);
+            $status = @proc_get_status($process);
+            $running = is_array($status) && ($status['running'] ?? false) === true;
+        } while ($running && microtime(true) < $deadline);
+    }
+
+    if ($running) {
+        $hardSent = @proc_terminate($process, 9);
+        $deadline = microtime(true) + (NEXORA_RUNTIME_RECOVERY_CHILD_KILL_GRACE_MILLISECONDS / 1000);
+        do {
+            usleep(NEXORA_RUNTIME_RECOVERY_CHILD_POLL_MICROSECONDS);
+            $status = @proc_get_status($process);
+            $running = is_array($status) && ($status['running'] ?? false) === true;
+        } while ($running && microtime(true) < $deadline);
+    }
+
+    return [
+        'soft_sent' => $softSent,
+        'hard_sent' => $hardSent,
+        'cleanup_complete' => ! $running,
+        'pid' => $pid,
+    ];
+}
+
+/** @return array{bytes:int,truncated:bool} */
+function nexoraRuntimeRecoveryBoundCaptureFile($handle, int $outputLimitBytes): array
+{
+    $stat = @fstat($handle);
+    $bytes = is_array($stat) && is_int($stat['size'] ?? null) ? max(0, $stat['size']) : 0;
+    $truncated = $bytes > $outputLimitBytes;
+    if ($truncated) {
+        @ftruncate($handle, $outputLimitBytes);
+        $bytes = $outputLimitBytes;
+    }
+
+    return ['bytes' => $bytes, 'truncated' => $truncated];
+}
+
+function nexoraRuntimeRecoveryReadBoundedCapture($handle, int $outputLimitBytes): string
+{
+    if (! @rewind($handle)) {
+        return '';
+    }
+
+    $value = stream_get_contents($handle, $outputLimitBytes + 1);
+    if (! is_string($value)) {
+        return '';
+    }
+
+    return strlen($value) > $outputLimitBytes ? substr($value, 0, $outputLimitBytes) : $value;
+}
+
 /** @param list<string> $command @return array{exit_code:int,stdout:string,stderr:string} */
 function nexoraRuntimeRecoveryRun(array $command, string $cwd): array
 {
@@ -248,20 +350,39 @@ function nexoraRuntimeRecoveryRun(array $command, string $cwd): array
         nexoraRuntimeRecoveryFail('Runtime recovery requires proc_open for shell-bypassed child execution.');
     }
 
-    // Keep only stdout on an anonymous pipe. Reading stdout to EOF before
-    // draining a second stderr pipe can deadlock when a child fills stderr,
-    // especially on Windows where anonymous process pipes are blocking. A
-    // transient regular file preserves stderr diagnostics without pipe
-    // back-pressure and is removed when the handle closes.
+    $deadlineSeconds = nexoraRuntimeRecoveryLowerOnlyOverride(
+        'NEXORA_RUNTIME_RECOVERY_CHILD_DEADLINE_SECONDS',
+        NEXORA_RUNTIME_RECOVERY_CHILD_DEADLINE_SECONDS,
+        1,
+    );
+    $outputLimitBytes = nexoraRuntimeRecoveryLowerOnlyOverride(
+        'NEXORA_RUNTIME_RECOVERY_CHILD_OUTPUT_LIMIT_BYTES',
+        NEXORA_RUNTIME_RECOVERY_CHILD_OUTPUT_LIMIT_BYTES,
+        1024,
+    );
+
+    // Use transient regular files for both child output streams. On Windows,
+    // proc_open anonymous pipes cannot be relied on as true non-blocking streams;
+    // file-backed capture lets the parent enforce the wall-clock deadline without
+    // ever blocking on a pipe read. Capture is polled/truncated and final evidence
+    // is bounded to the declared per-stream limit.
+    $stdoutHandle = @tmpfile();
     $stderrHandle = @tmpfile();
-    if (! is_resource($stderrHandle)) {
-        nexoraRuntimeRecoveryFail('Runtime recovery could not create transient stderr capture for child execution.');
+    if (! is_resource($stdoutHandle) || ! is_resource($stderrHandle)) {
+        if (is_resource($stdoutHandle)) {
+            fclose($stdoutHandle);
+        }
+        if (is_resource($stderrHandle)) {
+            fclose($stderrHandle);
+        }
+        nexoraRuntimeRecoveryFail('Runtime recovery could not create transient bounded child-output capture.');
     }
 
-    $descriptors = [1 => ['pipe', 'w'], 2 => $stderrHandle];
+    $descriptors = [1 => $stdoutHandle, 2 => $stderrHandle];
     $pipes = [];
     $process = @proc_open($command, $descriptors, $pipes, $cwd, null, ['bypass_shell' => true]);
     if (! is_resource($process)) {
+        fclose($stdoutHandle);
         fclose($stderrHandle);
         nexoraRuntimeRecoveryFail('Unable to start a required recovery child process.', [
             'command' => $command,
@@ -269,19 +390,104 @@ function nexoraRuntimeRecoveryRun(array $command, string $cwd): array
         ]);
     }
 
-    $stdout = is_resource($pipes[1] ?? null) ? (string) stream_get_contents($pipes[1]) : '';
+    $boundaryReason = null;
+    $stdoutTruncated = false;
+    $stderrTruncated = false;
+    $observedExitCode = null;
+    $startedAt = microtime(true);
+
+    while (true) {
+        $stdoutBoundary = nexoraRuntimeRecoveryBoundCaptureFile($stdoutHandle, $outputLimitBytes);
+        $stderrBoundary = nexoraRuntimeRecoveryBoundCaptureFile($stderrHandle, $outputLimitBytes);
+        if ($stdoutBoundary['truncated']) {
+            $stdoutTruncated = true;
+            $boundaryReason = 'stdout-limit';
+            break;
+        }
+        if ($stderrBoundary['truncated']) {
+            $stderrTruncated = true;
+            $boundaryReason = 'stderr-limit';
+            break;
+        }
+
+        $status = @proc_get_status($process);
+        if (! is_array($status)) {
+            $boundaryReason = 'status-unavailable';
+            break;
+        }
+        if (($status['running'] ?? false) !== true) {
+            $exit = $status['exitcode'] ?? null;
+            $observedExitCode = is_int($exit) && $exit >= 0 ? $exit : null;
+            break;
+        }
+        if ((microtime(true) - $startedAt) >= $deadlineSeconds) {
+            $boundaryReason = 'timeout';
+            break;
+        }
+
+        usleep(NEXORA_RUNTIME_RECOVERY_CHILD_POLL_MICROSECONDS);
+    }
+
+    $termination = [
+        'soft_sent' => false,
+        'hard_sent' => false,
+        'cleanup_complete' => true,
+        'pid' => null,
+    ];
+    if ($boundaryReason !== null) {
+        $termination = nexoraRuntimeRecoveryTerminateChild($process);
+    }
+
+    $stdoutBoundary = nexoraRuntimeRecoveryBoundCaptureFile($stdoutHandle, $outputLimitBytes);
+    $stderrBoundary = nexoraRuntimeRecoveryBoundCaptureFile($stderrHandle, $outputLimitBytes);
+    $stdoutTruncated = $stdoutTruncated || $stdoutBoundary['truncated'];
+    $stderrTruncated = $stderrTruncated || $stderrBoundary['truncated'];
+    if ($boundaryReason === null && $stdoutTruncated) {
+        $boundaryReason = 'stdout-limit';
+    }
+    if ($boundaryReason === null && $stderrTruncated) {
+        $boundaryReason = 'stderr-limit';
+    }
+
     foreach ($pipes as $pipe) {
         if (is_resource($pipe)) {
             fclose($pipe);
         }
     }
     $exitCode = proc_close($process);
+    if ($observedExitCode !== null && (! is_int($exitCode) || $exitCode < 0)) {
+        $exitCode = $observedExitCode;
+    }
 
+    $stdout = nexoraRuntimeRecoveryReadBoundedCapture($stdoutHandle, $outputLimitBytes);
     $stderr = '';
     if (@rewind($stderrHandle)) {
-        $stderr = (string) stream_get_contents($stderrHandle);
+        $stderr = (string) stream_get_contents($stderrHandle, $outputLimitBytes + 1);
+        if (strlen($stderr) > $outputLimitBytes) {
+            $stderr = substr($stderr, 0, $outputLimitBytes);
+            $stderrTruncated = true;
+            $boundaryReason ??= 'stderr-limit';
+        }
     }
+    fclose($stdoutHandle);
     fclose($stderrHandle);
+
+    if ($boundaryReason !== null) {
+        nexoraRuntimeRecoveryFail('Recovery child process violated the bounded execution contract.', [
+            'child_boundary' => [
+                'reason' => $boundaryReason,
+                'deadline_seconds' => $deadlineSeconds,
+                'output_limit_bytes' => $outputLimitBytes,
+                'stdout_bytes_captured' => strlen($stdout),
+                'stderr_bytes_captured' => strlen($stderr),
+                'stdout_truncated' => $stdoutTruncated,
+                'stderr_truncated' => $stderrTruncated,
+                'termination' => $termination,
+            ],
+            'stdout' => nexoraRuntimeRecoveryRedactBoundedDiagnostic($stdout),
+            'stderr' => nexoraRuntimeRecoveryRedactBoundedDiagnostic($stderr),
+        ]);
+    }
 
     return [
         'exit_code' => is_int($exitCode) ? $exitCode : 1,
@@ -1001,8 +1207,10 @@ repeated runs cannot silently overwrite prior evidence. Once the target lock is
 owned, terminal apply failures also write a protected outcome receipt. Mutating
 child operations are marked attempted before execution; if such a child fails
 before a definitive success result, evidence reports mutation_may_have_occurred=true
-rather than claiming no mutation. Pre-lock argument/target/storage/lock-acquisition
-failures remain receipt-free.
+rather than claiming no mutation. Every recovery child has a finite execution
+deadline and bounded stdout/stderr evidence; timeout/output violations terminate
+the child, remain FAIL, and cannot be parsed as successful recovery. Pre-lock
+argument/target/storage/lock-acquisition failures remain receipt-free.
 
 The orchestrator never upgrades/copies source, installs dependencies, runs
 migrations, or weakens TLS. Apply mode uses only existing runtime identity and

@@ -64,6 +64,7 @@ jobs:
           php -l scripts/runtime-recovery-target-file-containment-contract-verify.php
           php -l scripts/rc93-repair-path-containment-contract-verify.php
           php -l scripts/runtime-recovery-mutation-evidence-contract-verify.php
+          php -l scripts/runtime-recovery-child-boundary-contract-verify.php
           php -l scripts/lib/performance-build-leaks.php
           php -l scripts/performance-build-leak-contract-verify.php
           php -l scripts/performance-build-verify.php
@@ -72,6 +73,7 @@ jobs:
           php scripts/runtime-recovery-target-file-containment-contract-verify.php
           php scripts/rc93-repair-path-containment-contract-verify.php
           php scripts/runtime-recovery-mutation-evidence-contract-verify.php
+          php scripts/runtime-recovery-child-boundary-contract-verify.php
           php scripts/performance-build-leak-contract-verify.php
 
       - name: Unified source certification
