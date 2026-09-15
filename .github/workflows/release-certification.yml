@@ -42,11 +42,18 @@ jobs:
           coverage: none
           tools: none
 
-      - name: Node 22
+      - name: Node 22.14.0
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22'
+          node-version: '22.14.0'
           package-manager-cache: false
+
+      - name: Verify frontend toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = "v22.14.0"
+          test "$(npm --version)" = "10.9.2"
 
       - name: Certification preflight
         run: php scripts/certification-preflight.php --source-only
@@ -81,7 +88,7 @@ jobs:
         run: php scripts/certify-release.php --source-only
 
       - name: Install frontend dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Frontend dependency compatibility
         run: |
