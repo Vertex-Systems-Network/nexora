@@ -114,9 +114,26 @@ jobs:
       - name: Install backend dependencies from reviewed lock
         run: composer install --no-interaction --prefer-dist --no-progress
 
-      - name: Prepare ephemeral test key
+      - name: Prepare ephemeral test environment
         shell: bash
-        run: echo "APP_KEY=base64:$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          chmod 600 .env
+          {
+            echo "APP_ENV=testing"
+            echo "APP_KEY=base64:$(openssl rand -base64 32)"
+            echo "DB_CONNECTION=mysql"
+            echo "DB_HOST=127.0.0.1"
+            echo "DB_PORT=3306"
+            echo "DB_DATABASE=nexora_testing"
+            echo "DB_USERNAME=root"
+            echo "DB_PASSWORD=root"
+            echo "CACHE_STORE=array"
+            echo "QUEUE_CONNECTION=sync"
+            echo "SESSION_DRIVER=array"
+            echo "MAIL_MAILER=array"
+          } >> "$GITHUB_ENV"
 
       - name: Backend PHPUnit compatibility
         shell: bash
