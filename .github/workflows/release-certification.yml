@@ -114,15 +114,21 @@ jobs:
       - name: Install backend dependencies from reviewed lock
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Install frontend dependencies from reviewed lock
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Build frontend assets required by feature tests
+        run: npm run build:raw
+
       - name: Prepare ephemeral test environment
         shell: bash
         run: |
           set -euo pipefail
-          cp .env.example .env
-          chmod 600 .env
+          cp .env.example .env.testing
+          chmod 600 .env.testing
           {
             echo "APP_ENV=testing"
-            echo "APP_KEY=base64:$(openssl rand -base64 32)"
+            echo "APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
             echo "DB_CONNECTION=mysql"
             echo "DB_HOST=127.0.0.1"
             echo "DB_PORT=3306"
@@ -139,7 +145,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          php artisan test --display-warnings --fail-on-warning 2>&1 | tee phpunit-output.txt
+          php artisan test --env=testing --display-warnings --fail-on-warning 2>&1 | tee phpunit-output.txt
 
       - name: Upload PHPUnit diagnostic on failure
         if: failure()
@@ -149,9 +155,6 @@ jobs:
           path: phpunit-output.txt
           if-no-files-found: error
           retention-days: 1
-
-      - name: Install frontend dependencies from reviewed lock
-        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Frontend dependency compatibility
         run: |
