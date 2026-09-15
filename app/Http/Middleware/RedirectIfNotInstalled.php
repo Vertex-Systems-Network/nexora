@@ -35,6 +35,19 @@ final class RedirectIfNotInstalled
                     'X-Nexora-Installation-Lock' => 'invalid',
                 ]);
             }
+
+            // Once installation is sealed, keep the installer control plane closed.
+            // Only the read-only status page and the post-install handoff remain reachable.
+            // This prevents unauthenticated callers from reusing setup-only network/database
+            // probes (for example install.data-service.test) as an SSRF/internal-network oracle.
+            if ($request->routeIs('install.*')
+                && ! $request->routeIs(
+                    'install.index',
+                    'install.runtime.handoff',
+                    'install.source.status',
+                )) {
+                abort(404);
+            }
         } elseif (! $request->routeIs('install.*') && ! $request->routeIs('locale.update')) {
             return redirect()->route('install.index');
         }
