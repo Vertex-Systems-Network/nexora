@@ -119,7 +119,19 @@ jobs:
         run: echo "APP_KEY=base64:$(openssl rand -base64 32)" >> "$GITHUB_ENV"
 
       - name: Backend PHPUnit compatibility
-        run: php artisan test --display-warnings --fail-on-warning
+        shell: bash
+        run: |
+          set -o pipefail
+          php artisan test --display-warnings --fail-on-warning 2>&1 | tee phpunit-output.txt
+
+      - name: Upload PHPUnit diagnostic on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: phpunit-diagnostic
+          path: phpunit-output.txt
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Install frontend dependencies from reviewed lock
         run: npm ci --ignore-scripts --no-audit --no-fund
