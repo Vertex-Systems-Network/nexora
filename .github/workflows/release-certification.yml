@@ -87,8 +87,23 @@ jobs:
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
 
-      - name: Install frontend dependencies
-        run: npm ci --no-audit --no-fund
+      - name: Generate npm lock candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --package-lock-only --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+          test -s package-lock.json
+
+      - name: Upload npm lock candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nexora-package-lock-candidate
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Install frontend dependencies from candidate lock
+        run: npm ci --legacy-peer-deps --no-audit --no-fund
 
       - name: Frontend dependency compatibility
         run: |
