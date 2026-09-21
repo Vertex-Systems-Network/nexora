@@ -70,7 +70,7 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
         self::assertStringContainsString("'mutation_performed' => false", $source);
         self::assertStringContainsString('nexoraRuntimeRecoveryCompatibility($target)', $source);
         self::assertStringContainsString('nexoraRuntimeRecoveryPostInstallStatus($target, true)', $source);
-        self::assertStringContainsString("nexoraRuntimeRecoveryNeedsReceiptRefresh(\$readiness['payload'])", $source);
+        self::assertStringContainsString("nexoraRuntimeRecoveryNeedsReceiptRefresh(\$readiness)", $source);
 
         // PASS requires both the expected JSON invariants and a zero child exit.
         self::assertGreaterThanOrEqual(2, substr_count($source, "return \$result['exit_code'] === 0"));
