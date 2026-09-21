@@ -29,7 +29,7 @@ final class N027AutomationArchitectureTest extends TestCase
         self::assertStringContainsString('Http::withoutRedirecting()',$httpClient);
         self::assertStringContainsString("'allow_redirects'=>false",$httpClient);
         self::assertStringContainsString('previous_secret_valid_until',$inbound);
-        self::assertStringContainsString("preventRequestForgery(except: ['hooks/*'])",$bootstrap);
+        self::assertStringContainsString("preventRequestForgery(except: ['hooks/*', 'scim/*', 'sso/*/*/callback'])",$bootstrap);
         foreach([$index,$form] as $source){ self::assertStringContainsString('@nexora/admin-ui',$source); self::assertDoesNotMatchRegularExpression('/<(button|input|select|textarea)\b/',$source); }
         self::assertStringContainsString('| N0.27 | Automation/workflow engine, triggers/conditions/actions/webhooks | DONE |',$plan);
         self::assertStringContainsString('| N0.28 | Sentinel advanced supply-chain controls: SBOM, signing, provenance, sandbox adapters | DONE |',$plan);
