@@ -15,12 +15,18 @@ Always begin with `AGENTS.md`, `.ai/state.json`, this handoff, the canonical roa
 - Canonical stage count: `75`
 - Existing canonical rc.93 repair tooling originated in PR #26
 - Current source-work carrier: PR #30, `feat/runtime-recovery-orchestrator`
-- Fresh protected-main baseline reconciled into carrier: `e19d6fa818a7eebaf293d34bd87cff79ebc90ade`
-- Integrated #30 source head before this status sync: `68d6aa5d8610e05acf7c51bed503ae09bd4311cd`
+- Fresh protected-main baseline reconciled into carrier: `8972632c230117c377c1e0e5d7219352518acda7`
+- Pre-reconciliation PR #30 head: `37d6741d33e1ca6eb320ed28652f68e9d5dc3e29`
 - Issue #52 dependency closure: integrated; Issue #52 closed after #51 exact-head rerun passed
 - Issue #46 bounded-child source fix: integrated into #30 via PR #51
 
 Historical SHAs are evidence references. Always re-read current HEAD before relying on this handoff.
+
+## 2026-09-22 hardened-main reconciliation
+
+PR #30 was stale against protected `main@8972632c230117c377c1e0e5d7219352518acda7`. The reconciliation keeps the runtime carrier's unique evidence/plan material while applying every protected-main change since its prior merge base. Nineteen overlapping runtime/dependency files were already byte-identical. For the four divergent shared paths, current main is authoritative: hardened release certification, current `package-lock.json`, current runtime regression assertions, and README/status are preserved.
+
+This is source reconciliation only. The resulting exact PR head must pass fresh CI and a distinct exact-head review. Target status remains BLOCKED pending fresh readiness/current receipt, exact CLI↔web identity, authoritative `/login`, and credential rotation after PR #71.
 
 ## Governance invariants
 

@@ -18,4 +18,15 @@ final class InstallerGateTest extends TestCase
 
         $this->get('/')->assertRedirect('/install');
     }
+
+    #[Test]
+    public function installed_application_closes_setup_only_installer_endpoints(): void
+    {
+        config()->set('installer.bypass', true);
+
+        $this->postJson('/install/data-service/test', [
+            'driver' => 'redis',
+            'endpoint' => '127.0.0.1:6379',
+        ])->assertNotFound();
+    }
 }

@@ -8,9 +8,19 @@
 - Status: `BLOCKED` pending final real-target readiness + exact target-to-web `/login` evidence
 - Real target: Windows + Laragon, `D:\laragon\www\nexora`
 - Installed target release: `1.0.0-rc.93`
-- Fresh protected-main baseline reconciled for this pass: `main@e19d6fa818a7eebaf293d34bd87cff79ebc90ade`
-- Active Draft source carrier before this status sync: `PR #30 / feat/runtime-recovery-orchestrator@68d6aa5d8610e05acf7c51bed503ae09bd4311cd`
+- Fresh protected-main baseline reconciled for this pass: `main@8972632c230117c377c1e0e5d7219352518acda7`
+- Active source carrier before hardened-main reconciliation: `PR #30 / feat/runtime-recovery-orchestrator@37d6741d33e1ca6eb320ed28652f68e9d5dc3e29`
 - Method: bounded existing-problem repair + DMAIC/control improvement; no roadmap expansion
+
+## Hardened-main reconciliation checkpoint — 2026-09-22
+
+- Protected main advanced to `8972632c230117c377c1e0e5d7219352518acda7` through audit/security remediation.
+- PR #30 was 8 commits behind current main and non-mergeable before this reconciliation.
+- All protected-main changes since the prior merge base are applied into the runtime carrier.
+- Nineteen overlapping runtime/dependency paths were byte-identical before merge.
+- Current main wins the four divergent shared paths: release-certification workflow, README/status, `package-lock.json`, and `RuntimeRecoveryOrchestratorTest.php`.
+- Historical dependency-review evidence is retained as history; fresh exact-head CI must re-establish current source evidence after the protected-main lock representation is adopted.
+- No target, provider, deployment, release or CORE-QA authority is inferred from this merge.
 
 ## Governance boundary
 

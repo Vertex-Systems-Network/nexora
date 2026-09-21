@@ -17,12 +17,26 @@ jobs:
   governance:
     name: governance
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nexora_testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
     steps:
       - name: Checkout exact source
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
 
       - name: Verify exact checkout identity
         shell: bash
@@ -34,18 +48,31 @@ jobs:
           test "$ACTUAL_SHA" = "$EXPECTED_SHA"
           echo "Exact source checkout verified: $ACTUAL_SHA"
 
-      - name: PHP 8.4
-        uses: shivammathur/setup-php@v2
+      - name: PHP 8.4 + Composer 2.10.3
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
         with:
           php-version: '8.4'
           coverage: none
-          tools: none
+          extensions: mbstring, pdo_mysql, zip
+          tools: composer:2.10.3
 
-      - name: Node 22
-        uses: actions/setup-node@v7
+      - name: Node 22.14.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22'
+          node-version: '22.14.0'
           package-manager-cache: false
+
+      - name: Verify governed toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -v
+          composer --version
+          node --version
+          test "$(npm --version)" = "10.9.2"
+
+      - name: Repository hygiene guard
+        run: php scripts/repository-hygiene-guard.php
 
       - name: Certification preflight
         run: php scripts/certification-preflight.php --source-only
@@ -68,6 +95,7 @@ jobs:
           php -l scripts/lib/performance-build-leaks.php
           php -l scripts/performance-build-leak-contract-verify.php
           php -l scripts/performance-build-verify.php
+          php -l scripts/repository-hygiene-guard.php
           php scripts/runtime-recovery-orchestrator-contract-verify.php
           php scripts/runtime-recovery-readiness-exit-contract-verify.php
           php scripts/runtime-recovery-target-file-containment-contract-verify.php
@@ -75,12 +103,55 @@ jobs:
           php scripts/runtime-recovery-mutation-evidence-contract-verify.php
           php scripts/runtime-recovery-child-boundary-contract-verify.php
           php scripts/performance-build-leak-contract-verify.php
+          php scripts/repository-hygiene-guard.php
 
       - name: Unified source certification
         run: php scripts/certify-release.php --source-only
 
-      - name: Install frontend dependencies
-        run: npm install --no-audit --no-fund
+      - name: Install backend dependencies from reviewed lock
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install frontend dependencies from reviewed lock
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Build frontend assets required by feature tests
+        run: npm run build:raw
+
+      - name: Prepare ephemeral test environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.example .env.testing
+          chmod 600 .env.testing
+          {
+            echo "APP_ENV=testing"
+            echo "APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+            echo "DB_CONNECTION=mysql"
+            echo "DB_HOST=127.0.0.1"
+            echo "DB_PORT=3306"
+            echo "DB_DATABASE=nexora_testing"
+            echo "DB_USERNAME=root"
+            echo "DB_PASSWORD=root"
+            echo "CACHE_STORE=array"
+            echo "QUEUE_CONNECTION=sync"
+            echo "SESSION_DRIVER=array"
+            echo "MAIL_MAILER=array"
+          } >> "$GITHUB_ENV"
+
+      - name: Backend PHPUnit compatibility
+        shell: bash
+        run: |
+          set -o pipefail
+          php artisan test --env=testing --display-warnings --fail-on-warning 2>&1 | tee phpunit-output.txt
+
+      - name: Upload PHPUnit diagnostic on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: phpunit-diagnostic
+          path: phpunit-output.txt
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Frontend dependency compatibility
         run: |
