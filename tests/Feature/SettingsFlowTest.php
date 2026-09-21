@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Models\EnterpriseOrganization;
+use App\Models\EnterpriseSetting;
 use App\Models\Role;
-use App\Models\Setting;
 use App\Models\User;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -29,7 +30,14 @@ final class SettingsFlowTest extends TestCase
             'radius' => 'large',
         ])->assertSessionHasNoErrors();
 
-        self::assertSame('Nexora Studio', Setting::query()->where('key', 'app.name')->value('value'));
-        self::assertSame('dark', Setting::query()->where('key', 'appearance.theme')->value('value'));
+        $organization = EnterpriseOrganization::query()->where('is_default', true)->firstOrFail();
+        self::assertSame(
+            'Nexora Studio',
+            EnterpriseSetting::query()->where('organization_id', $organization->id)->where('key', 'app.name')->value('value'),
+        );
+        self::assertSame(
+            'dark',
+            EnterpriseSetting::query()->where('organization_id', $organization->id)->where('key', 'appearance.theme')->value('value'),
+        );
     }
 }

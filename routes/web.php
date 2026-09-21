@@ -134,7 +134,9 @@ Route::post('/scim/v2/Users', [ScimController::class, 'createUser'])->middleware
 Route::patch('/scim/v2/Users/{user}', [ScimController::class, 'patchUser'])->middleware('throttle:120,1')->name('enterprise.scim.users.patch');
 
 Route::middleware('guest')->group(function (): void {
-    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])
+        ->withoutMiddleware([RuntimeNodeHeartbeat::class, ResolveEnterpriseOrganization::class])
+        ->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:5,1')->name('login.store');
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:5,1')->name('register.store');

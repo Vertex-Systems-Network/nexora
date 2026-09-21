@@ -20,10 +20,10 @@ final class InstallerRecoveryCertificationTest extends TestCase
         app(InstallationState::class)->markInstalled(['installation_id'=>'rc7-test','version'=>'1.0.0-rc.63']);
 
         try {
-            $this->get('/install')->assertRedirect('/login');
-            $this->postJson('/install/database/test', [])->assertStatus(409);
-            $this->postJson('/install/cancel', ['run_id'=>str_repeat('a', 24)])->assertStatus(409);
-            $this->postJson('/install/status', ['run_id'=>str_repeat('a', 24)])->assertStatus(409);
+            $this->get('/install')->assertRedirect('/install/runtime-handoff');
+            $this->postJson('/install/database/test', [])->assertNotFound();
+            $this->postJson('/install/cancel', ['run_id'=>str_repeat('a', 24)])->assertNotFound();
+            $this->postJson('/install/status', ['run_id'=>str_repeat('a', 24)])->assertNotFound();
         } finally {
             @unlink($path);
         }

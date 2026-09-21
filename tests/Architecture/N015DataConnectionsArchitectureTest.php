@@ -15,9 +15,11 @@ final class N015DataConnectionsArchitectureTest extends TestCase
         $view = (string) file_get_contents(resource_path('views/install/index.blade.php'));
         $registry = (string) file_get_contents(app_path('Nexora/Installation/Database/DatabaseDriverRegistry.php'));
         $catalog = (string) file_get_contents(app_path('Nexora/Data/ConnectionCatalog.php'));
+        $select = (string) file_get_contents(resource_path('views/components/ui/select.blade.php'));
 
-        self::assertStringContainsString('data-nx-select="database"', $view);
-        self::assertStringContainsString('data-nx-select="language"', $view);
+        self::assertStringContainsString('kind="database"', $view);
+        self::assertStringContainsString('kind="language"', $view);
+        self::assertStringContainsString('data-nx-select="{{ $kind }}"', $select);
         self::assertStringContainsString('Additional data services', $view);
         self::assertStringContainsString('.driver-health-icon svg', $view);
         self::assertStringContainsString("'aws_rds_mysql'", $registry);

@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-10):** protected `main` includes the accepted source/AI-intake baseline and the latest governed runtime/dependency status synchronization. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Dependency closure has a machine-clean governed lock candidate, and the bounded runtime child-execution fix exists on a separate Draft carrier, but neither has completed its governed integration path. Source/CI acceptance is not the same as real-target or release completion.
+> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Product remediation is active on Draft PR #79 stacked into PR #78. The latest terminal exact-head certification is #971 / run `35657541109`: **FAIL — 1 failed, 343 passed (3548 assertions)** on parent head `7b1d986f3ccf7ed916d20f030632b96e3eedd507`. The strict resource envelope is now proven PASS; only the fixture-local policy plane is red because the deterministic HTTP body ceiling was lowered below the unchanged media upload policy. This milestone aligns those two fixture limits and adds an explicit deep policy diagnostic assertion; fresh exact-head CI is required. Source progress is not target verification or release completion.
 
 ## AI development startup gate
 
@@ -14,9 +14,24 @@ Every AI development session MUST execute this gate before unrelated new impleme
 4. Resolve or explicitly document blocked, draft, red, stale or review-pending items; never bypass them silently.
 5. Re-read protected `main` and the canonical AI state/handoff after accepted merges.
 6. Only then select and start the next authorized development unit.
-7. Before finishing the session, synchronize this README's current-status section with the actual accepted repository state.
+7. Before reporting a material milestone complete, blocked, verifying or waiting, synchronize the compact **AI-Native Progress Ledger** below with repository-backed state. A missed README sync is an incomplete milestone.
 
 This rule applies on every AI development start, including work resumed from an existing plan.
+
+## AI-Native Progress Ledger
+
+- **Observed:** 2026-09-22
+- **Protected main:** `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`
+- **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
+- **Open remediation Issues:** #72, #74
+- **Active remediation stack:** PR #79 → PR #78
+- **Latest terminal evidence:** certification #971 / run `35657541109` on parent head `7b1d986f3ccf7ed916d20f030632b96e3eedd507` — **FAIL, 1 failed / 343 passed / 3548 assertions**
+- **This milestone:** keep every production HA/policy check intact while making the deterministic unit fixture internally coherent: the media upload ceiling now matches the reduced HTTP body ceiling, and an explicit deep policy-plane assertion surfaces any future fixture drift.
+- **Current state:** **VERIFYING** — fresh exact-head CI required for this material commit.
+- **Remaining known failure surface from #971:** only the HA fixture's local policy-plane check; resource envelope and every other HA/PHPUnit check are currently proven PASS.
+- **Next safe action:** reconcile one fresh exact-head certification. If green, mark PR #79 ready for independent exact-head review; do not self-approve or merge.
+- **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
+- **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 
 ## Current runtime closure
 
