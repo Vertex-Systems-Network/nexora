@@ -45,6 +45,12 @@ final class RuntimeNodeHeartbeat
 
     public function handle(Request $request, Closure $next): Response
     {
+        // Liveness/readiness probes own their own health semantics and must remain
+        // observable even when application traffic is fenced or a node is draining.
+        if ($request->routeIs('runtime.health.live', 'runtime.health.ready')) {
+            return $next($request);
+        }
+
         // Runtime fencing is meaningful only after Nexora has a sealed installation.
         // The installer/bootstrap path may intentionally have no configured database yet,
         // so probing node readiness here would turn a healthy bootstrap into a false 503.

@@ -54,7 +54,7 @@ final class IdentityAccessFlowTest extends TestCase
             'organization_id' => $organization->id,
             'name' => 'Auditor',
             'slug' => 'auditor',
-            'permissions' => ['audit.view'],
+            'permissions' => ['admin.access', 'audit.view'],
             'is_system' => false,
         ]);
         EnterpriseOrganizationMember::query()->create([
