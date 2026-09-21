@@ -28,6 +28,6 @@ final class N100V30DistributedUpgradeArchitectureTest extends TestCase
         self::assertStringContainsString('assertConverged',$ledger);
         self::assertStringContainsString("503",$heartbeat);
         self::assertStringContainsString('if(!$this->nodes->isReady()||!$this->versions->compatible())return false;',$leadership);
-        self::assertStringContainsString("queue.worker')->shouldQuit = true",$provider);
+        self::assertStringContainsString("queue.worker')->shouldQuit=true",$provider);
     }
 }
