@@ -18,23 +18,24 @@ current_stage:
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: AI-SUPERVISOR-POST-MERGE-RECONCILIATION-003
-  title: "Reconcile compact governance state after PR #79 -> #78 -> main source integration"
+  id: AI-SUPERVISOR-SUPERSEDED-CARRIER-CLOSEOUT-004
+  title: "Close superseded PR #73 and reconcile compact governance state"
   status: VERIFYING
 last_completed_milestone:
   main_commit: 8972632c230117c377c1e0e5d7219352518acda7
-  summary: "security: restore deterministic release certification gates (#78)"
-exact_next_safe_action: "Observe one protected-main release-certification run for main@8972632c230117c377c1e0e5d7219352518acda7. If green, reconcile superseded PR #73 and continue RUNTIME-CLOSURE target evidence / credential-rotation gates. Do not start CORE-QA."
+  summary: "audit remediation source integrated; stale PR #73 closed unmerged as superseded"
+exact_next_safe_action: "Run one exact-head certification observation for the new PR #82 governance head. Independent exact-head review remains required before merge. Do not tight-poll the still-missing main push run; continue Issues #72/#74 target-closure evidence only through an authorized real-target channel. Do not start CORE-QA."
 pending_runner_ids:
   - RB-NEX-MAIN-POSTMERGE-001
-  - RB-NEX-AI-SUPERVISOR-CI-002
-blocked_runner_ids: []
+  - RB-NEX-AI-SUPERVISOR-CI-003
+blocked_runner_ids:
+  - RB-NEX-AI-SUPERVISOR-CI-003
 current_blockers:
   - "RUNTIME-CLOSURE-001 remains BLOCKED; CORE-QA-001 must not start."
   - "Real-target readiness/current receipt, target↔web identity, and authoritative /login evidence remain required."
   - "Credential rotation required after the key exposure in quarantined PR #71 remains a target/provider action not completed by source merge."
-  - "Protected-main push certification for 8972632c230117c377c1e0e5d7219352518acda7 had not surfaced in the first post-merge observation."
-  - "Governance PR #82 requires fresh exact-head CI and review after this restack."
+  - "Protected-main push certification for 8972632c230117c377c1e0e5d7219352518acda7 has still not surfaced after a bounded follow-up observation; no rerun or tight polling is authorized by this state."
+  - "Governance PR #82 previous head cc4bd5ef98318b156bd4482ce8819488302a1fe4 passed certification #975 / 35660675591, but this material closeout commit requires fresh exact-head CI and independent review."
   - "No current canonical numeric module/overall progress metric is available; percentages must not be fabricated."
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
@@ -59,5 +60,6 @@ readme_progress_sync:
 state_drift:
   detected: true
   notes:
-    - "Protected main moved from a04d18cf... to 8972632c... after PR #78 source integration."
+    - "PR #73 is now closed unmerged as superseded by integrated PR #78/#79 remediation."
+    - "Protected main remains 8972632c... and its configured push certification has not surfaced in bounded observations."
     - ".ai/state.json and .ai/handoff/current.md remain broader product-stage sources and must not be promoted beyond BLOCKED without target evidence."

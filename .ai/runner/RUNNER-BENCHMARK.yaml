@@ -34,18 +34,32 @@ tasks:
     deterministic_dedup_key: "nexora:main:8972632c230117c377c1e0e5d7219352518acda7:postmerge-certification"
     status: WAITING_EXTERNAL_START
     immutable_evidence: null
-    note: "First post-merge snapshot returned no workflow run; observe once later, do not tight-poll."
+    note: "Initial snapshot and one later bounded observation returned no workflow run; remain WAITING_EXTERNAL_START and do not rerun/tight-poll."
   - id: RB-NEX-AI-SUPERVISOR-CI-002
     source_work: "AI-SUPERVISOR-POST-MERGE-RECONCILIATION-003"
     source_issue_or_pr: "PR #82"
-    command_or_workflow: "repository PR CI / exact-head governance certification"
+    command_or_workflow: "Nexora release certification"
     source_ref: "ai/supervisor-governance-v1"
-    source_sha: PENDING_RESTACK_HEAD
-    environment_matrix_input_fixture: "GitHub-hosted repository workflow as configured by protected main"
-    authorization_state: "REGISTERED_ONLY; no merge/deploy authority inferred"
+    source_sha: "cc4bd5ef98318b156bd4482ce8819488302a1fe4"
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow as configured by protected main"
+    authorization_state: "automatic repository CI; no merge/deploy authority inferred"
     security_critical: true
     merge_blocking: true
     expected_runner_time: null
-    deterministic_dedup_key: "nexora:ai/supervisor-governance-v1:post-main-restack:governance-ci"
+    deterministic_dedup_key: "nexora:pr82:cc4bd5ef98318b156bd4482ce8819488302a1fe4:release-certification"
+    status: PASS
+    immutable_evidence: "run #975 / 35660675591 conclusion=success"
+  - id: RB-NEX-AI-SUPERVISOR-CI-003
+    source_work: "AI-SUPERVISOR-SUPERSEDED-CARRIER-CLOSEOUT-004"
+    source_issue_or_pr: "PR #82"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "ai/supervisor-governance-v1"
+    source_sha: PENDING_CLOSEOUT_HEAD
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow as configured by protected main"
+    authorization_state: "REGISTERED_ONLY; exact commit SHA will be bound by PR comment after atomic commit creation"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:ai/supervisor-governance-v1:carrier-closeout-004:release-certification"
     status: BLOCKED_BINDING
     immutable_evidence: null

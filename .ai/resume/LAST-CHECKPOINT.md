@@ -1,24 +1,24 @@
-# Last Checkpoint — AI-SUPERVISOR-POST-MERGE-RECONCILIATION-003
+# Last Checkpoint — AI-SUPERVISOR-SUPERSEDED-CARRIER-CLOSEOUT-004
 
-Protected `main` is now `8972632c230117c377c1e0e5d7219352518acda7`.
+Protected `main` remains `8972632c230117c377c1e0e5d7219352518acda7`.
 
-Source integration completed:
+Completed in this milestone:
 
-- PR #79 exact head `edcd005e8559f1e1d6dc32c47e93066eabbdf17a` passed release certification #972 / `35657956782`.
-- PR #79 merged into PR #78 as `0812fbabaaf5b337fc80fb11209ebb8b20600cf8`.
-- That exact PR #78 head passed release certification #973 / `35659627211`.
-- PR #78 squash-merged into protected main as `8972632c230117c377c1e0e5d7219352518acda7`.
-- Human-admin merge waivers were single-use and are consumed/expired.
-- First post-main-merge observation had not yet surfaced a push certification for the new main SHA; state is WAITING_EXTERNAL_CI, not PASS.
+- Rehydrated compact governance state and live GitHub intake.
+- Confirmed PR #82 previous exact head `cc4bd5ef98318b156bd4482ce8819488302a1fe4` passed Nexora release certification #975 / `35660675591`.
+- Confirmed PR #82 still has zero submitted independent reviews and zero unresolved review threads; it remains review-gated.
+- Performed the allowed bounded follow-up observation for protected `main@8972632c...`; no push workflow run surfaced, so the state remains WAITING_EXTERNAL_START/CI and is not promoted to PASS.
+- Verified PR #78 explicitly superseded PR #73's portable repository-level remediation scope and that protected main contains the accepted lockfiles, hygiene guard, hardened release certification, plus later PR #79 fixes.
+- Closed stale Draft PR #73 unmerged as superseded and left Issues #72/#74 open for unresolved target/provider evidence.
 
-Live intake after merge:
+Live intake after closeout:
 
 - OPEN Issues: #72, #74.
-- OPEN PRs: #1, #30, #73, #75, #81, #82.
+- OPEN PRs: #1, #30, #75, #81, #82.
 - Product stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**.
 - CORE-QA must not start.
-- Real-target readiness/identity/login evidence and credential rotation after PR #71 remain separate unresolved gates.
+- Real-target readiness/current receipt, target↔web identity, authoritative `/login` evidence, and credential rotation after PR #71 remain unresolved.
 
-This restack synchronizes README visibility plus compact governance state; it does not claim target verification, provider mutation, deployment, release completion, or CORE-QA authorization.
+This governance commit updates README progress plus compact state/claims/queue/runner records. It does not claim target verification, provider mutation, deployment, release completion, or CORE-QA authorization.
 
-Next safe action: observe one push certification for `main@8972632c...`. If green, reconcile superseded PR #73 and continue target closure.
+Next safe action: observe one exact-head certification for the new PR #82 head. Merge remains blocked until a distinct independent exact-head review exists. Do not tight-poll the missing protected-main push run.

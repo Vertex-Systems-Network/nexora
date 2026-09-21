@@ -21,12 +21,12 @@ items:
     source: "PR #82"
     status: VERIFYING
     priority: 1
-    note: "Restacked onto new main with current README/compact state; requires fresh exact-head CI/review."
+    note: "Previous head cc4bd5ef... passed #975; this closeout head updates README/state after PR #73 closure and requires fresh exact-head CI plus independent review."
   - id: NEX-PR73
     source: "PR #73"
-    status: RECONCILE_SUPERSEDED
+    status: CLOSED_SUPERSEDED
     priority: 2
-    note: "PR #78 states it supersedes portable repository-level #73 scope; inspect before close to avoid discarding unique work."
+    note: "Closed unmerged after verifying PR #78/#79 integration superseded the portable remediation scope; target/provider gates remain tracked in Issues #72/#74."
   - id: NEX-RUNTIME-30
     source: "PR #30"
     status: BLOCKED

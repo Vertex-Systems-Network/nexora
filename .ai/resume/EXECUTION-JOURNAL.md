@@ -29,3 +29,13 @@
 - First post-merge snapshot did not show a push certification for the new main SHA; recorded WAITING_EXTERNAL_CI without rerun/poll loop.
 - Open remediation Issues remain #72/#74; open PR #73 is a superseded-candidate requiring reconciliation, not silent deletion.
 - README progress ledger synchronized on governance PR #82 rather than by a direct status-only main commit.
+
+## 2026-09-22 — AI-SUPERVISOR-SUPERSEDED-CARRIER-CLOSEOUT-004
+
+- Rehydrated compact state and reconciled protected main, live Issues, and live PRs.
+- PR #82 previous exact head `cc4bd5ef98318b156bd4482ce8819488302a1fe4` is terminal GREEN on certification #975 / `35660675591`; independent reviews remain 0.
+- Performed one bounded follow-up observation for `main@8972632c...`; its configured push certification still did not surface. No rerun and no polling loop were attempted.
+- Verified merged PR #78 explicitly superseded PR #73's portable audit-remediation scope and protected main contains that remediation plus later #79 fixes.
+- Closed Draft PR #73 unmerged as superseded; Issues #72/#74 remain open because real-target evidence and credential rotation are unresolved.
+- Synchronized README progress and compact governance state for the closeout; no product/runtime/provider/deployment/release mutation was performed.
+- Milestone is VERIFYING because this material governance head requires fresh exact-head CI; PR #82 remains independent-review gated.

@@ -15,9 +15,9 @@ claims:
     status: OBSERVED
     evidence: "live GitHub issue search after main merge"
   - id: OPEN-PRS
-    value: [1, 30, 73, 75, 81, 82]
+    value: [1, 30, 75, 81, 82]
     status: OBSERVED
-    evidence: "live GitHub PR search after PR #78/#79 merges"
+    evidence: "live GitHub PR search after closing superseded PR #73"
   - id: AUDIT-REMEDIATION-SOURCE
     value: "PR #79 -> PR #78 -> main@8972632c230117c377c1e0e5d7219352518acda7"
     status: SOURCE_INTEGRATED
@@ -29,7 +29,15 @@ claims:
   - id: MAIN-PUSH-CI
     value: "8972632c230117c377c1e0e5d7219352518acda7"
     status: WAITING_EXTERNAL_CI
-    evidence: "no workflow run surfaced on first post-merge observation"
+    evidence: "no workflow run surfaced on initial or bounded follow-up post-merge observation; no rerun/poll loop"
+  - id: PR73-CLOSEOUT
+    value: "closed unmerged; superseded by PR #78/#79 integration"
+    status: CLOSED_SUPERSEDED
+    evidence: "PR #78 explicitly supersedes portable #73 scope; main@8972632c contains accepted remediation"
+  - id: PR82-PREVIOUS-HEAD-CI
+    value: "cc4bd5ef98318b156bd4482ce8819488302a1fe4 / run 35660675591"
+    status: PASS
+    evidence: "Nexora release certification #975 conclusion=success; head changed afterward for material closeout sync"
   - id: NUMERIC-PROGRESS
     value: null
     status: UNAVAILABLE

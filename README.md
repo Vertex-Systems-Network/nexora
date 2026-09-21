@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-22):** protected `main` is `8972632c230117c377c1e0e5d7219352518acda7` after source-only audit remediation PR #78 merged; stacked PHPUnit remediation PR #79 was integrated into #78 first. PR #78 exact head `0812fbabaaf5b337fc80fb11209ebb8b20600cf8` passed release certification #973 / run `35659627211`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED** because real-target verification and rotation of the credential exposed by quarantined PR #71 remain unresolved. The first post-merge snapshot had not yet surfaced a push certification for the new main SHA, so protected-main certification is **WAITING_EXTERNAL_CI**, not PASS. Source integration is not target verification or release completion.
+> **Canonical current status (2026-09-22):** protected `main` is `8972632c230117c377c1e0e5d7219352518acda7` after source-only audit remediation PR #78 merged; stacked PR #79 was integrated first. PR #78 exact head `0812fbabaaf5b337fc80fb11209ebb8b20600cf8` passed release certification #973 / run `35659627211`. Superseded Draft PR #73 is now closed unmerged. Governance PR #82 previous head `cc4bd5ef98318b156bd4482ce8819488302a1fe4` passed certification #975 / run `35660675591`, but the new material closeout head requires fresh exact-head CI and independent review. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED** because real-target verification and credential rotation after quarantined PR #71 remain unresolved. Protected-main push certification still has not surfaced in bounded observations; it is not treated as PASS. Source integration is not target verification or release completion.
 
 ## AI development startup gate
 
@@ -28,10 +28,11 @@ This compact ledger is mandatory and is updated on every **material engineering 
 - **Open remediation Issues:** #72, #74
 - **Source remediation:** PR #79 merged into PR #78; PR #78 merged into protected `main`
 - **Latest terminal pre-merge evidence:** PR #78 certification #973 / run `35659627211` on exact head `0812fbabaaf5b337fc80fb11209ebb8b20600cf8` — **SUCCESS**
-- **Protected-main push certification:** **WAITING_EXTERNAL_CI** — no run surfaced for `main@8972632c...` in the first post-merge observation
-- **Governance:** PR #82 is restacked onto the new main with compact supervisor state and mandatory README synchronization; it remains exact-head-CI/review gated
-- **Current blockers:** real-target readiness/current receipt + target↔web identity + authoritative `/login` evidence; credential rotation required after quarantined PR #71; governance PR #82 certification/review; CORE-QA remains blocked
-- **Next safe action:** observe one protected-main push certification for `8972632c...`; then reconcile superseded remediation PR #73 and continue runtime target-closure work without collapsing Source / Target / Release evidence
+- **Protected-main push certification:** **WAITING_EXTERNAL_START/CI** — no run surfaced for `main@8972632c...` in the initial or one bounded follow-up observation; no rerun/tight-poll loop was used
+- **Superseded carrier cleanup:** Draft PR #73 closed unmerged after verifying PR #78/#79 integration superseded its portable remediation scope
+- **Governance:** PR #82 previous exact head `cc4bd5ef98318b156bd4482ce8819488302a1fe4` passed #975 / `35660675591`; this material closeout head is **VERIFYING** and still requires independent exact-head review before merge
+- **Current blockers:** real-target readiness/current receipt + target↔web identity + authoritative `/login` evidence; credential rotation required after quarantined PR #71; PR #82 fresh exact-head CI/review; CORE-QA remains blocked
+- **Next safe action:** reconcile one fresh exact-head certification for the new PR #82 head; do not tight-poll the missing main push run; continue Issues #72/#74 target-closure evidence only through an authorized real-target channel
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 
