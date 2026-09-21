@@ -4,34 +4,35 @@ compact_state_path: .ai/resume
 observed_main:
   branch: main
   sha: a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2
-  observed_at: "2026-09-21T21:09:00+05:00"
+  observed_at: "2026-09-22T01:49:50+05:00"
 active_issue:
   number: 72
   title: "Audit remediation: quarantine CORE-QA and harden source/release gates"
 active_pr:
-  number: 73
-  title: "fix(governance): remediate audit findings before CORE-QA"
-  branch: ai/audit-remediation-72
+  number: 82
+  title: "chore(ai-governance): add compact supervisor resume controls"
+  branch: ai/supervisor-governance-v1
 active_branch: ai/supervisor-governance-v1
 current_stage:
   id: RUNTIME-CLOSURE-001
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: AI-SUPERVISOR-COMPACT-STATE-001
-  title: "Integrate engineering-supervisor resume/runner/progress-response governance"
+  id: AI-SUPERVISOR-README-PROGRESS-SYNC-002
+  title: "Make README progress synchronization mandatory for every material engineering milestone"
   status: VERIFYING
 last_completed_milestone:
   main_commit: a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2
   summary: "security: close installer control plane and lock frontend supply chain (#80)"
-exact_next_safe_action: "Open this control-plane change as a draft PR, bind its exact PR head to the registered CI runner task, perform one consolidated exact-head status refresh, and leave merge to protected-path review/governance."
+exact_next_safe_action: "Bind PR #82 exact governance head to RB-NEX-AI-SUPERVISOR-CI-002, obtain exact-head CI and independent review, and do not self-merge. Product remediation remains on PR #79, whose exact head 4824f44518f902c0ce802bc482fd0203eac5f12e has failing certification #963 that must be fixed before PR #78 can advance."
 pending_runner_ids:
-  - RB-NEX-AI-SUPERVISOR-CI-001
+  - RB-NEX-AI-SUPERVISOR-CI-002
 blocked_runner_ids: []
 current_blockers:
   - "RUNTIME-CLOSURE-001 remains BLOCKED; CORE-QA-001 must not start."
+  - "PR #79 exact head 4824f44518f902c0ce802bc482fd0203eac5f12e failed release certification #963 with 6 failed, 338 passed (3527 assertions)."
+  - "Protected governance PR #82 requires fresh exact-head CI and independent review after this README-progress-sync change."
   - "Open remediation Issues #72 and #74 plus PRs #73/#78/#79 must be reconciled before unrelated product development."
-  - "Protected control-plane changes require exact-head review; this milestone is not self-approved for merge."
   - "No current canonical numeric module/overall progress metric is available; percentages must not be fabricated."
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
@@ -49,7 +50,12 @@ progress:
     percent: null
     display_bar: "[??????????] N/A"
     basis: "canonical numeric metric unavailable; do not reuse stale historical Project Power values"
+readme_progress_sync:
+  required_every_material_milestone: true
+  ledger_path: "README.md#ai-native-progress-ledger"
+  missing_sync_blocks_completion_claim: true
 state_drift:
   detected: true
   notes:
-    - ".ai/state.json base_sha and handoff baselines predate observed main; compact state records live main without promoting product status."
+    - ".ai/state.json and handoff baselines remain older than observed protected main; this governance milestone does not fabricate product-state promotion."
+    - "Live GitHub currently includes PR #82; older compact claims were reconciled in this governance update."

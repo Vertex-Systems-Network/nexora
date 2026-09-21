@@ -1,15 +1,18 @@
-# Last Checkpoint — AI-SUPERVISOR-COMPACT-STATE-001
+# Last Checkpoint — AI-SUPERVISOR-README-PROGRESS-SYNC-002
 
 Observed protected `main` at `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`.
 
 Live intake at this checkpoint:
 
 - OPEN Issues: #72, #74.
-- OPEN PRs: #1, #30, #73, #75, #78, #79, #81.
+- OPEN PRs: #1, #30, #73, #75, #78, #79, #81, #82.
 - Active product stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is not advanced by this governance change.
-- `.ai/state.json` and `.ai/handoff/current.md` contain historical baselines older than current main; this milestone does not rewrite product truth merely to hide that drift.
-- No authoritative current numeric module or overall percentage was found in protected-main canonical state, so progress percentages are intentionally not invented.
+- Product remediation PR #79 exact head `4824f44518f902c0ce802bc482fd0203eac5f12e` failed release certification #963 / run `35652625641` with **6 failed, 338 passed (3527 assertions)**.
+- README now contains a compact **AI-Native Progress Ledger** with that exact live status instead of the stale historical dependency/runtime sequence.
+- `.ai/governance/engineering-supervisor.md` now makes README progress synchronization a mandatory milestone Definition-of-Done gate.
+- `.ai/governance/ai-development-orchestration.md` now requires the same sync before AI-assisted runs can be reported in terminal milestone states.
+- Numeric progress remains intentionally N/A because no canonical current percentage exists.
 
-This milestone adds a compact resume index, deterministic claims/coordination/runner surfaces, and a mandatory response footer contract. It does not change runtime code, migrations, dependencies, release state, target evidence, or production/provider state.
+This milestone is governance/control-plane only. It does not merge PR #79/#78, advance CORE-QA, modify production/provider/target state, or weaken CI/security/review controls.
 
-Next safe action: open a draft protected-control-plane PR, bind exact head to the registered CI task, perform one consolidated status refresh, and stop if checks/review are pending.
+Next safe action: obtain fresh exact-head CI and independent review for PR #82. Product remediation continues separately on PR #79 from exact #963 failure evidence.

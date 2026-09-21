@@ -1,6 +1,6 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-updated_at: "2026-09-21T21:09:00+05:00"
+updated_at: "2026-09-22T01:49:50+05:00"
 rules:
   registration_grants_execution_authority: false
   exact_source_sha_required_before_running_or_terminal_evidence: true
@@ -21,3 +21,19 @@ tasks:
     status: REGISTERED
     immutable_evidence: null
     note: "Bind exact PR head SHA before interpreting RUNNING/PASS/FAIL evidence. One consolidated status refresh per milestone by default."
+
+  - id: RB-NEX-AI-SUPERVISOR-CI-002
+    source_work: "AI-SUPERVISOR-README-PROGRESS-SYNC-002"
+    source_issue_or_pr: "PR #82"
+    command_or_workflow: "repository PR CI / exact-head governance certification"
+    source_ref: "ai/supervisor-governance-v1"
+    source_sha: PENDING_FINAL_HEAD
+    environment_matrix_input_fixture: "GitHub-hosted repository workflow as configured by protected main"
+    authorization_state: "REGISTERED_ONLY; automatic repository CI may run, but no rerun/merge/deployment authority is inferred"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:ai/supervisor-governance-v1:README-PROGRESS-SYNC:governance-ci"
+    status: BLOCKED_BINDING
+    immutable_evidence: null
+    note: "Bind the final commit SHA produced by this durable-state reconciliation before accepting RUNNING/PASS/FAIL evidence."

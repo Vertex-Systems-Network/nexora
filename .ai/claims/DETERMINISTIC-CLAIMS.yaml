@@ -1,6 +1,6 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-updated_at: "2026-09-21T21:09:00+05:00"
+updated_at: "2026-09-22T01:49:50+05:00"
 claims:
   - id: MAIN-HEAD
     value: "a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2"
@@ -15,7 +15,7 @@ claims:
     status: OBSERVED
     evidence: "live GitHub issue search"
   - id: OPEN-PRS
-    value: [1, 30, 73, 75, 78, 79, 81]
+    value: [1, 30, 73, 75, 78, 79, 81, 82]
     status: OBSERVED
     evidence: "live GitHub PR search"
   - id: NUMERIC-PROGRESS
@@ -26,3 +26,8 @@ rules:
   chat_memory_never_overrides_repository: true
   inferred_runtime_truth_forbidden: true
   pending_or_running_never_equals_pass: true
+
+  - id: README-PROGRESS-SYNC
+    value: "required every material engineering milestone"
+    status: GOVERNED
+    evidence: ".ai/governance/engineering-supervisor.md + .ai/governance/ai-development-orchestration.md + README.md AI-Native Progress Ledger"
