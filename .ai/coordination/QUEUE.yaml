@@ -1,0 +1,34 @@
+schema_version: 1
+repository: Vertex-Systems-Network/nexora
+updated_at: "2026-09-21T21:09:00+05:00"
+items:
+  - id: NEX-AUDIT-72
+    source: "Issue #72 / PR #73"
+    status: ACTIVE
+    priority: 1
+    note: "Audit remediation path; do not bypass with unrelated product work."
+  - id: NEX-ORCH-74
+    source: "Issue #74"
+    status: ACTIVE
+    priority: 1
+    note: "Runtime-closure remediation coordination lanes; no stage advancement without accepted evidence."
+  - id: NEX-CI-78-79
+    source: "PR #78 / PR #79"
+    status: OPEN_RECONCILE
+    priority: 1
+    note: "Inspect exact heads, reviews and CI before any merge decision."
+  - id: NEX-RUNTIME-30
+    source: "PR #30"
+    status: BLOCKED
+    priority: 2
+    note: "Draft runtime closure carrier; target/review gates remain distinct from source work."
+  - id: NEX-FINAL-1
+    source: "PR #1"
+    status: BLOCKED
+    priority: 3
+    note: "Final development carrier; not release-complete."
+  - id: NEX-DEPS-75-81
+    source: "PR #75 / PR #81"
+    status: DEFERRED_BY_GATE
+    priority: 4
+    note: "Dependency maintenance must not bypass active remediation/review gates."

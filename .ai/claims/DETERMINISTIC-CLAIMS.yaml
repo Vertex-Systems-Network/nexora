@@ -1,0 +1,28 @@
+schema_version: 1
+repository: Vertex-Systems-Network/nexora
+updated_at: "2026-09-21T21:09:00+05:00"
+claims:
+  - id: MAIN-HEAD
+    value: "a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2"
+    status: OBSERVED
+    evidence: "live GitHub default branch read immediately before governance mutation"
+  - id: ACTIVE-STAGE
+    value: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
+    status: BLOCKED
+    evidence: ".ai/state.json + .ai/handoff/current.md + live remediation Issue/PR context"
+  - id: OPEN-ISSUES
+    value: [72, 74]
+    status: OBSERVED
+    evidence: "live GitHub issue search"
+  - id: OPEN-PRS
+    value: [1, 30, 73, 75, 78, 79, 81]
+    status: OBSERVED
+    evidence: "live GitHub PR search"
+  - id: NUMERIC-PROGRESS
+    value: null
+    status: UNAVAILABLE
+    evidence: "no current canonical numeric module/overall metric found on protected main; historical PR prose is not promoted"
+rules:
+  chat_memory_never_overrides_repository: true
+  inferred_runtime_truth_forbidden: true
+  pending_or_running_never_equals_pass: true

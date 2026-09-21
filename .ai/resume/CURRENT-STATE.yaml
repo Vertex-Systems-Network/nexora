@@ -1,0 +1,55 @@
+schema_version: 1
+repository: Vertex-Systems-Network/nexora
+compact_state_path: .ai/resume
+observed_main:
+  branch: main
+  sha: a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2
+  observed_at: "2026-09-21T21:09:00+05:00"
+active_issue:
+  number: 72
+  title: "Audit remediation: quarantine CORE-QA and harden source/release gates"
+active_pr:
+  number: 73
+  title: "fix(governance): remediate audit findings before CORE-QA"
+  branch: ai/audit-remediation-72
+active_branch: ai/supervisor-governance-v1
+current_stage:
+  id: RUNTIME-CLOSURE-001
+  unit: SYS-RUNTIME-IDENTITY
+  status: BLOCKED
+current_milestone:
+  id: AI-SUPERVISOR-COMPACT-STATE-001
+  title: "Integrate engineering-supervisor resume/runner/progress-response governance"
+  status: VERIFYING
+last_completed_milestone:
+  main_commit: a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2
+  summary: "security: close installer control plane and lock frontend supply chain (#80)"
+exact_next_safe_action: "Open this control-plane change as a draft PR, bind its exact PR head to the registered CI runner task, perform one consolidated exact-head status refresh, and leave merge to protected-path review/governance."
+pending_runner_ids:
+  - RB-NEX-AI-SUPERVISOR-CI-001
+blocked_runner_ids: []
+current_blockers:
+  - "RUNTIME-CLOSURE-001 remains BLOCKED; CORE-QA-001 must not start."
+  - "Open remediation Issues #72 and #74 plus PRs #73/#78/#79 must be reconciled before unrelated product development."
+  - "Protected control-plane changes require exact-head review; this milestone is not self-approved for merge."
+  - "No current canonical numeric module/overall progress metric is available; percentages must not be fabricated."
+timeout_control:
+  max_consolidated_status_refreshes_per_milestone: 1
+  tight_polling_forbidden: true
+  rerun_on_chat_timeout_forbidden: true
+  second_refresh_requires_material_transition_and_journal_entry: true
+progress:
+  current_module:
+    label: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
+    percent: null
+    display_bar: "[??????????] N/A"
+    basis: "canonical numeric metric unavailable; stage is BLOCKED"
+  overall:
+    label: "Nexora"
+    percent: null
+    display_bar: "[??????????] N/A"
+    basis: "canonical numeric metric unavailable; do not reuse stale historical Project Power values"
+state_drift:
+  detected: true
+  notes:
+    - ".ai/state.json base_sha and handoff baselines predate observed main; compact state records live main without promoting product status."

@@ -4,7 +4,12 @@ Every AI agent, coding agent, reviewer, planner or automation working in this re
 
 ## Mandatory startup sequence
 
-1. Read `.ai/README.md`.
+The compact supervisor resume layer is read **before** historical/canonical planning material. It is a resume index only and never overrides live repository/runtime truth.
+
+1. Read `.ai/resume/CURRENT-STATE.yaml`.
+2. Read `.ai/resume/LAST-CHECKPOINT.md`.
+3. Read `.ai/governance/engineering-supervisor.md`.
+4. Read `.ai/README.md`.
 2. Read `.ai/state.json`.
 3. Read `.ai/handoff/current.md`.
 4. Read `.ai/roadmap/stages.md` and release trains.
