@@ -460,6 +460,37 @@ final class InstallationRunControl
         }, false);
     }
 
+    private function sanitizeFailureMessage(?string $message): ?string
+    {
+        if ($message === null) {
+            return null;
+        }
+
+        $sanitized = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/u', ' ', $message) ?? '';
+        $sanitized = preg_replace('/\s+/u', ' ', trim($sanitized)) ?? '';
+        if ($sanitized === '') {
+            return null;
+        }
+
+        $sanitized = preg_replace(
+            '/\b(password|passwd|pwd|secret|token|api[_-]?key|authorization)\b\s*([:=])\s*([^\s,;]+)/i',
+            '$1$2[REDACTED]',
+            $sanitized,
+        ) ?? $sanitized;
+        $sanitized = preg_replace(
+            '/\b(Bearer)\s+[A-Za-z0-9._~+\/=:-]+/i',
+            '$1 [REDACTED]',
+            $sanitized,
+        ) ?? $sanitized;
+        $sanitized = preg_replace(
+            '/([A-Za-z][A-Za-z0-9+.-]*:\/\/[^:\/\s]+:)[^@\/\s]+@/',
+            '$1[REDACTED]@',
+            $sanitized,
+        ) ?? $sanitized;
+
+        return mb_substr($sanitized, 0, 1000);
+    }
+
     private function assertRunId(string $runId): void
     {
         if (preg_match('/^[a-f0-9]{24}$/', $runId) !== 1) throw new RuntimeException('Invalid installation run identifier.');

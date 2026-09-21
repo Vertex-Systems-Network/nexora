@@ -26,7 +26,8 @@ final class ResolveEnterpriseOrganization
         // The installation wizard must remain database-independent until the
         // permanent installation lock exists. Schema::hasTable() opens the
         // configured database connection, which is intentionally not ready yet.
-        if (! $this->installation->isInstalled() || $request->routeIs('install.*')) {
+        if (! $this->installation->isInstalled()
+            || $request->routeIs('install.*', 'runtime.health.live', 'runtime.health.ready')) {
             $this->context->clear();
             return $next($request);
         }

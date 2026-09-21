@@ -12,13 +12,14 @@ use App\Nexora\Foundation\Database\ConcurrencyGuard;
 use App\Nexora\Themes\Services\DocumentHtmlRenderer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 final class SendNewsletterDelivery implements ShouldQueue
 {
-    use Queueable;
+    use Dispatchable, Queueable;
 
     public int $tries = 3;
     public int $timeout = 120;
