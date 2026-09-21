@@ -1,39 +1,51 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-updated_at: "2026-09-22T01:49:50+05:00"
+updated_at: "2026-09-22"
 rules:
   registration_grants_execution_authority: false
   exact_source_sha_required_before_running_or_terminal_evidence: true
   terminal_evidence_immutable: true
 tasks:
-  - id: RB-NEX-AI-SUPERVISOR-CI-001
-    source_work: "AI-SUPERVISOR-COMPACT-STATE-001"
-    source_issue_or_pr: "draft PR to be created for ai/supervisor-governance-v1"
-    command_or_workflow: "repository PR CI / exact-head governance certification"
-    source_ref: "ai/supervisor-governance-v1"
-    source_sha: null
-    environment_matrix_input_fixture: "GitHub-hosted repository workflow as configured by protected main"
-    authorization_state: "REGISTERED_ONLY; automatic repository CI may run, but no rerun/merge/deployment authority is inferred"
+  - id: RB-NEX-PR78-CI-001
+    source_work: "audit remediation source integration"
+    source_issue_or_pr: "PR #78"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "security/audit-remediation-current-main"
+    source_sha: "0812fbabaaf5b337fc80fb11209ebb8b20600cf8"
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow + MySQL 8.4 + governed PHP/Composer/Node toolchain"
+    authorization_state: "automatic repository CI"
     security_critical: true
     merge_blocking: true
     expected_runner_time: null
-    deterministic_dedup_key: "nexora:ai/supervisor-governance-v1:PR_HEAD:governance-ci"
-    status: REGISTERED
+    deterministic_dedup_key: "nexora:pr78:0812fbabaaf5b337fc80fb11209ebb8b20600cf8:release-certification"
+    status: PASS
+    immutable_evidence: "run #973 / 35659627211 conclusion=success"
+  - id: RB-NEX-MAIN-POSTMERGE-001
+    source_work: "post-PR78 main verification"
+    source_issue_or_pr: "main after PR #78"
+    command_or_workflow: "Nexora release certification push workflow"
+    source_ref: "main"
+    source_sha: "8972632c230117c377c1e0e5d7219352518acda7"
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow"
+    authorization_state: "automatic repository CI only; no rerun authority inferred"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:main:8972632c230117c377c1e0e5d7219352518acda7:postmerge-certification"
+    status: WAITING_EXTERNAL_START
     immutable_evidence: null
-    note: "Bind exact PR head SHA before interpreting RUNNING/PASS/FAIL evidence. One consolidated status refresh per milestone by default."
-
+    note: "First post-merge snapshot returned no workflow run; observe once later, do not tight-poll."
   - id: RB-NEX-AI-SUPERVISOR-CI-002
-    source_work: "AI-SUPERVISOR-README-PROGRESS-SYNC-002"
+    source_work: "AI-SUPERVISOR-POST-MERGE-RECONCILIATION-003"
     source_issue_or_pr: "PR #82"
     command_or_workflow: "repository PR CI / exact-head governance certification"
     source_ref: "ai/supervisor-governance-v1"
-    source_sha: PENDING_FINAL_HEAD
+    source_sha: PENDING_RESTACK_HEAD
     environment_matrix_input_fixture: "GitHub-hosted repository workflow as configured by protected main"
-    authorization_state: "REGISTERED_ONLY; automatic repository CI may run, but no rerun/merge/deployment authority is inferred"
+    authorization_state: "REGISTERED_ONLY; no merge/deploy authority inferred"
     security_critical: true
     merge_blocking: true
     expected_runner_time: null
-    deterministic_dedup_key: "nexora:ai/supervisor-governance-v1:README-PROGRESS-SYNC:governance-ci"
+    deterministic_dedup_key: "nexora:ai/supervisor-governance-v1:post-main-restack:governance-ci"
     status: BLOCKED_BINDING
     immutable_evidence: null
-    note: "Bind the final commit SHA produced by this durable-state reconciliation before accepting RUNNING/PASS/FAIL evidence."

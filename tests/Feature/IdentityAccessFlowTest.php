@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Models\EnterpriseOrganization;
+use App\Models\EnterpriseOrganizationMember;
+use App\Models\EnterpriseRole;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use App\Nexora\Cloud\Services\RuntimeDeploymentIdentity;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -45,7 +49,25 @@ final class IdentityAccessFlowTest extends TestCase
         $user = User::factory()->create(['email_verified_at' => now()]);
         $user->roles()->attach($role);
 
-        $this->actingAs($user)->get('/admin/audit')->assertOk();
+        $organization = EnterpriseOrganization::query()->where('is_default', true)->firstOrFail();
+        EnterpriseRole::query()->create([
+            'organization_id' => $organization->id,
+            'name' => 'Auditor',
+            'slug' => 'auditor',
+            'permissions' => ['admin.access', 'audit.view'],
+            'is_system' => false,
+        ]);
+        EnterpriseOrganizationMember::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $user->id,
+            'role' => 'auditor',
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['nexora.enterprise.organization_id' => $organization->id])
+            ->get('/admin/audit')->assertOk();
         $this->actingAs($user)->get('/admin/users')->assertForbidden();
         $this->assertDatabaseHas('nx_audit_logs', [
             'user_id' => $user->id,
@@ -121,14 +143,19 @@ final class IdentityAccessFlowTest extends TestCase
         $otherAdmin = User::factory()->create(['email_verified_at' => now()]);
         $otherAdmin->roles()->attach(Role::query()->where('slug', 'administrator')->value('id'));
 
-        $response = $this->actingAs($admin)->postJson('/admin/saved-views', [
-            'scope' => 'admin.users',
-            'name' => 'Suspended users',
-            'state' => ['status' => 'suspended'],
-        ])->assertCreated();
+        $generation = app(RuntimeDeploymentIdentity::class)->generation();
+        $response = $this->actingAs($admin)
+            ->withHeader('X-Nexora-Deployment-Generation', $generation)
+            ->postJson('/admin/saved-views', [
+                'scope' => 'admin.users',
+                'name' => 'Suspended users',
+                'state' => ['status' => 'suspended'],
+            ])->assertCreated();
 
         $viewId = $response->json('view.id');
-        $this->actingAs($otherAdmin)->deleteJson("/admin/saved-views/{$viewId}")->assertNotFound();
+        $this->actingAs($otherAdmin)
+            ->withHeader('X-Nexora-Deployment-Generation', $generation)
+            ->deleteJson("/admin/saved-views/{$viewId}")->assertNotFound();
         $this->assertDatabaseHas('nx_saved_views', ['id' => $viewId, 'user_id' => $admin->id]);
     }
 

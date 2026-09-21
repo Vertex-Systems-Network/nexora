@@ -26,7 +26,8 @@ final class N100Rc3RuntimeFrontendArchitectureTest extends TestCase
         self::assertStringContainsString('useForm<WorkflowFormData>',$automation);
         self::assertStringNotContainsString('Record<string,unknown>',$automation);
         self::assertStringNotContainsString('Record<string, unknown>',$automation);
-        self::assertStringContainsString('useForm<SsoFormData>',$enterprise);
+        self::assertStringContainsString('Deliberate shallow boundary: SSO configuration and secret payload default server-side.',$enterprise);
+        self::assertStringContainsString('const ssoForm = useForm({',$enterprise);
         self::assertStringContainsString('export type WriterValue =',$writer);
         self::assertStringContainsString('ButtonLink',$helpdeskNav);
         self::assertStringContainsString('ButtonLink',$membershipNav);

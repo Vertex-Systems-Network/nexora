@@ -1,27 +1,39 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-updated_at: "2026-09-22T01:49:50+05:00"
+updated_at: "2026-09-22"
 claims:
   - id: MAIN-HEAD
-    value: "a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2"
+    value: "8972632c230117c377c1e0e5d7219352518acda7"
     status: OBSERVED
-    evidence: "live GitHub default branch read immediately before governance mutation"
+    evidence: "live GitHub protected main after PR #78 merge"
   - id: ACTIVE-STAGE
     value: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     status: BLOCKED
-    evidence: ".ai/state.json + .ai/handoff/current.md + live remediation Issue/PR context"
+    evidence: ".ai/state.json + .ai/handoff/current.md + unresolved target evidence / credential rotation"
   - id: OPEN-ISSUES
     value: [72, 74]
     status: OBSERVED
-    evidence: "live GitHub issue search"
+    evidence: "live GitHub issue search after main merge"
   - id: OPEN-PRS
-    value: [1, 30, 73, 75, 78, 79, 81, 82]
+    value: [1, 30, 73, 75, 81, 82]
     status: OBSERVED
-    evidence: "live GitHub PR search"
+    evidence: "live GitHub PR search after PR #78/#79 merges"
+  - id: AUDIT-REMEDIATION-SOURCE
+    value: "PR #79 -> PR #78 -> main@8972632c230117c377c1e0e5d7219352518acda7"
+    status: SOURCE_INTEGRATED
+    evidence: "PR #79 #972 SUCCESS; PR #78 #973 SUCCESS; verified main merge commit"
+  - id: PR78-EXACT-HEAD-CI
+    value: "0812fbabaaf5b337fc80fb11209ebb8b20600cf8 / run 35659627211"
+    status: PASS
+    evidence: "Nexora release certification #973 conclusion=success"
+  - id: MAIN-PUSH-CI
+    value: "8972632c230117c377c1e0e5d7219352518acda7"
+    status: WAITING_EXTERNAL_CI
+    evidence: "no workflow run surfaced on first post-merge observation"
   - id: NUMERIC-PROGRESS
     value: null
     status: UNAVAILABLE
-    evidence: "no current canonical numeric module/overall metric found on protected main; historical PR prose is not promoted"
+    evidence: "no current canonical numeric module/overall metric; historical percentages are not promoted"
   - id: README-PROGRESS-SYNC
     value: "required every material engineering milestone"
     status: GOVERNED

@@ -29,10 +29,20 @@ final class MediaLibraryFlowTest extends TestCase
         $admin=User::factory()->create(['email_verified_at'=>now()]);
         $admin->roles()->attach(Role::query()->where('slug','administrator')->value('id'));
 
-        $this->actingAs($admin)->post('/admin/media/upload', [
-            'file'=>UploadedFile::fake()->create('guide.pdf', 64, 'application/pdf'),
-            'title'=>'Platform guide', 'alt_text'=>'', 'caption'=>'Reference document',
-        ])->assertSessionHasNoErrors();
+        $temporary = tempnam(sys_get_temp_dir(), 'nexora-media-');
+        self::assertNotFalse($temporary);
+        $header = "%PDF-1.4\n";
+        file_put_contents($temporary, $header.str_repeat('0', (64 * 1024) - strlen($header)));
+        $file = new UploadedFile($temporary, 'guide.pdf', 'application/pdf', null, true);
+
+        try {
+            $this->actingAs($admin)->post('/admin/media/upload', [
+                'file'=>$file,
+                'title'=>'Platform guide', 'alt_text'=>'', 'caption'=>'Reference document',
+            ])->assertSessionHasNoErrors();
+        } finally {
+            @unlink($temporary);
+        }
 
         $asset=MediaAsset::query()->firstOrFail();
         self::assertSame('document',$asset->media_type);

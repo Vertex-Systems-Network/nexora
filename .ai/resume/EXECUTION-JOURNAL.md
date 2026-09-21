@@ -19,3 +19,13 @@
 - Added a fixed README **AI-Native Progress Ledger** containing live stage, Issue/PR, exact head, CI failure, blockers and next safe action without fabricated percentages.
 - No product/runtime/deployment/provider/migration/destructive action was performed on the governance branch.
 - Milestone remains `VERIFYING`; protected governance changes require fresh exact-head CI and independent review.
+
+## 2026-09-22 — AI-SUPERVISOR-POST-MERGE-RECONCILIATION-003
+
+- Reconciled exact protected main and live Issues/PRs after source remediation integration.
+- PR #79 exact head `edcd005e8559f1e1d6dc32c47e93066eabbdf17a` was GREEN on #972 and merged into PR #78.
+- Resulting PR #78 exact head `0812fbabaaf5b337fc80fb11209ebb8b20600cf8` was GREEN on #973 and merged into protected main as `8972632c230117c377c1e0e5d7219352518acda7`.
+- Scoped merge waivers were consumed/expired on first use; they grant no target/deploy/release authority.
+- First post-merge snapshot did not show a push certification for the new main SHA; recorded WAITING_EXTERNAL_CI without rerun/poll loop.
+- Open remediation Issues remain #72/#74; open PR #73 is a superseded-candidate requiring reconciliation, not silent deletion.
+- README progress ledger synchronized on governance PR #82 rather than by a direct status-only main commit.

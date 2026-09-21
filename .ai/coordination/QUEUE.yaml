@@ -1,27 +1,37 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-updated_at: "2026-09-21T21:09:00+05:00"
+updated_at: "2026-09-22"
 items:
   - id: NEX-AUDIT-72
-    source: "Issue #72 / PR #73"
-    status: ACTIVE
+    source: "Issue #72"
+    status: ACTIVE_TARGET_CLOSURE
     priority: 1
-    note: "Audit remediation path; do not bypass with unrelated product work."
+    note: "Repository/source remediation is integrated; real-target evidence and credential rotation remain unresolved."
   - id: NEX-ORCH-74
     source: "Issue #74"
     status: ACTIVE
     priority: 1
-    note: "Runtime-closure remediation coordination lanes; no stage advancement without accepted evidence."
+    note: "Runtime-closure remediation coordination continues; no CORE-QA stage advancement without target verification."
   - id: NEX-CI-78-79
     source: "PR #78 / PR #79"
-    status: OPEN_RECONCILE
+    status: SOURCE_INTEGRATED_MAIN
     priority: 1
-    note: "Inspect exact heads, reviews and CI before any merge decision."
+    note: "PR #79 and PR #78 are merged; main=8972632c...; protected-main push certification still needs one terminal observation."
+  - id: NEX-GOV-82
+    source: "PR #82"
+    status: VERIFYING
+    priority: 1
+    note: "Restacked onto new main with current README/compact state; requires fresh exact-head CI/review."
+  - id: NEX-PR73
+    source: "PR #73"
+    status: RECONCILE_SUPERSEDED
+    priority: 2
+    note: "PR #78 states it supersedes portable repository-level #73 scope; inspect before close to avoid discarding unique work."
   - id: NEX-RUNTIME-30
     source: "PR #30"
     status: BLOCKED
     priority: 2
-    note: "Draft runtime closure carrier; target/review gates remain distinct from source work."
+    note: "Runtime closure carrier remains blocked by target/review gates."
   - id: NEX-FINAL-1
     source: "PR #1"
     status: BLOCKED
@@ -31,4 +41,4 @@ items:
     source: "PR #75 / PR #81"
     status: DEFERRED_BY_GATE
     priority: 4
-    note: "Dependency maintenance must not bypass active remediation/review gates."
+    note: "Dependency maintenance remains behind active runtime/governance gates."

@@ -20,7 +20,8 @@ final class InstallerBootstrapIsolationArchitectureTest extends TestCase
         $bootstrap = (string) file_get_contents(base_path('bootstrap/app.php'));
 
         self::assertStringContainsString('withoutMiddleware([RuntimeNodeHeartbeat::class, ResolveEnterpriseOrganization::class, HandleInertiaRequests::class])', $routes);
-        self::assertStringContainsString('if (! $this->installation->isInstalled() || $request->routeIs(\'install.*\'))', $tenant);
+        self::assertStringContainsString('if (! $this->installation->isInstalled()', $tenant);
+        self::assertStringContainsString("\$request->routeIs('install.*', 'runtime.health.live', 'runtime.health.ready')", $tenant);
         self::assertStringContainsString('$userLocale = $this->installation->isInstalled() ? $request->user()?->locale : null', $locale);
         self::assertStringContainsString('if (! $this->installation->isInstalled())', $headers);
         self::assertStringContainsString("'mode' => 'bootstrap'", $inertia);

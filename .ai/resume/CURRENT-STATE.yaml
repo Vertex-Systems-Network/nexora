@@ -3,8 +3,8 @@ repository: Vertex-Systems-Network/nexora
 compact_state_path: .ai/resume
 observed_main:
   branch: main
-  sha: a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2
-  observed_at: "2026-09-22T01:49:50+05:00"
+  sha: 8972632c230117c377c1e0e5d7219352518acda7
+  observed_at: "2026-09-22"
 active_issue:
   number: 72
   title: "Audit remediation: quarantine CORE-QA and harden source/release gates"
@@ -18,21 +18,23 @@ current_stage:
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: AI-SUPERVISOR-README-PROGRESS-SYNC-002
-  title: "Make README progress synchronization mandatory for every material engineering milestone"
+  id: AI-SUPERVISOR-POST-MERGE-RECONCILIATION-003
+  title: "Reconcile compact governance state after PR #79 -> #78 -> main source integration"
   status: VERIFYING
 last_completed_milestone:
-  main_commit: a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2
-  summary: "security: close installer control plane and lock frontend supply chain (#80)"
-exact_next_safe_action: "Bind PR #82 exact governance head to RB-NEX-AI-SUPERVISOR-CI-002, obtain exact-head CI and independent review, and do not self-merge. Product remediation remains on PR #79, whose exact head 4824f44518f902c0ce802bc482fd0203eac5f12e has failing certification #963 that must be fixed before PR #78 can advance."
+  main_commit: 8972632c230117c377c1e0e5d7219352518acda7
+  summary: "security: restore deterministic release certification gates (#78)"
+exact_next_safe_action: "Observe one protected-main release-certification run for main@8972632c230117c377c1e0e5d7219352518acda7. If green, reconcile superseded PR #73 and continue RUNTIME-CLOSURE target evidence / credential-rotation gates. Do not start CORE-QA."
 pending_runner_ids:
+  - RB-NEX-MAIN-POSTMERGE-001
   - RB-NEX-AI-SUPERVISOR-CI-002
 blocked_runner_ids: []
 current_blockers:
   - "RUNTIME-CLOSURE-001 remains BLOCKED; CORE-QA-001 must not start."
-  - "PR #79 exact head 4824f44518f902c0ce802bc482fd0203eac5f12e failed release certification #963 with 6 failed, 338 passed (3527 assertions)."
-  - "Protected governance PR #82 requires fresh exact-head CI and independent review after this README-progress-sync change."
-  - "Open remediation Issues #72 and #74 plus PRs #73/#78/#79 must be reconciled before unrelated product development."
+  - "Real-target readiness/current receipt, target↔web identity, and authoritative /login evidence remain required."
+  - "Credential rotation required after the key exposure in quarantined PR #71 remains a target/provider action not completed by source merge."
+  - "Protected-main push certification for 8972632c230117c377c1e0e5d7219352518acda7 had not surfaced in the first post-merge observation."
+  - "Governance PR #82 requires fresh exact-head CI and review after this restack."
   - "No current canonical numeric module/overall progress metric is available; percentages must not be fabricated."
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
@@ -44,12 +46,12 @@ progress:
     label: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     percent: null
     display_bar: "[??????????] N/A"
-    basis: "canonical numeric metric unavailable; stage is BLOCKED"
+    basis: "canonical numeric metric unavailable; source remediation integrated, target closure still blocked"
   overall:
     label: "Nexora"
     percent: null
     display_bar: "[??????????] N/A"
-    basis: "canonical numeric metric unavailable; do not reuse stale historical Project Power values"
+    basis: "canonical numeric metric unavailable"
 readme_progress_sync:
   required_every_material_milestone: true
   ledger_path: "README.md#ai-native-progress-ledger"
@@ -57,5 +59,5 @@ readme_progress_sync:
 state_drift:
   detected: true
   notes:
-    - ".ai/state.json and handoff baselines remain older than observed protected main; this governance milestone does not fabricate product-state promotion."
-    - "Live GitHub currently includes PR #82; older compact claims were reconciled in this governance update."
+    - "Protected main moved from a04d18cf... to 8972632c... after PR #78 source integration."
+    - ".ai/state.json and .ai/handoff/current.md remain broader product-stage sources and must not be promoted beyond BLOCKED without target evidence."

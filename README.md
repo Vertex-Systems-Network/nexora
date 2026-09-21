@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Open remediation Issues are #72 and #74. The active PHPUnit remediation stack is PR #79 → PR #78; PR #79 exact head `4824f44518f902c0ce802bc482fd0203eac5f12e` is still Draft and latest exact-head release certification #963 / run `35652625641` is **FAIL** with **6 failed, 338 passed (3527 assertions)**. Governance PR #82 remains open/review-required. Source/CI progress is not target verification or release completion.
+> **Canonical current status (2026-09-22):** protected `main` is `8972632c230117c377c1e0e5d7219352518acda7` after source-only audit remediation PR #78 merged; stacked PHPUnit remediation PR #79 was integrated into #78 first. PR #78 exact head `0812fbabaaf5b337fc80fb11209ebb8b20600cf8` passed release certification #973 / run `35659627211`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED** because real-target verification and rotation of the credential exposed by quarantined PR #71 remain unresolved. The first post-merge snapshot had not yet surfaced a push certification for the new main SHA, so protected-main certification is **WAITING_EXTERNAL_CI**, not PASS. Source integration is not target verification or release completion.
 
 ## AI development startup gate
 
@@ -14,7 +14,7 @@ Every AI development session MUST execute this gate before unrelated new impleme
 4. Resolve or explicitly document blocked, draft, red, stale or review-pending items; never bypass them silently.
 5. Re-read protected `main` and the canonical AI state/handoff after accepted merges.
 6. Only then select and start the next authorized development unit.
-7. Before reporting any material milestone complete, blocked, verifying or waiting, update the fixed **AI-Native Progress Ledger** below with the exact repository-backed state. Missing this README sync means the milestone is not fully complete.
+7. Before reporting any material milestone complete, blocked, verifying or waiting, update the fixed **AI-Native Progress Ledger** below with exact repository-backed state. Missing this README sync means the milestone is not fully complete.
 
 This rule applies on every AI development start, including work resumed from an existing plan.
 
@@ -23,16 +23,15 @@ This rule applies on every AI development start, including work resumed from an 
 This compact ledger is mandatory and is updated on every **material engineering milestone**. It records repository truth, including FAIL/VERIFYING/WAITING states; it must not be rewritten as success-only reporting.
 
 - **Observed:** 2026-09-22
-- **Protected main:** `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`
+- **Protected main:** `8972632c230117c377c1e0e5d7219352518acda7`
 - **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
 - **Open remediation Issues:** #72, #74
-- **Active remediation stack:** PR #79 → PR #78
-- **PR #79 exact head:** `4824f44518f902c0ce802bc482fd0203eac5f12e` — Draft, mergeable, review pending
-- **Latest exact-head certification:** #963 / run `35652625641` — **FAIL**, `6 failed, 338 passed (3527 assertions)`
-- **Latest proven movement:** prior remediation reduced the full-suite baseline substantially, but the latest runtime-admission change introduced a new installer-bootstrap architecture regression; current FAIL state is intentionally visible here.
-- **Current failure surface:** strict HA readiness fixture; login query budget; 2 security-session response assertions; cloud node recovery; installer-bootstrap isolation architecture contract.
-- **Governance:** PR #82 adds compact supervisor controls and this mandatory README synchronization gate; protected governance changes still require independent exact-head review.
-- **Next safe action:** reconcile/fix the exact #963 failure set on PR #79 without weakening runtime/security/HA gates; keep CORE-QA blocked.
+- **Source remediation:** PR #79 merged into PR #78; PR #78 merged into protected `main`
+- **Latest terminal pre-merge evidence:** PR #78 certification #973 / run `35659627211` on exact head `0812fbabaaf5b337fc80fb11209ebb8b20600cf8` — **SUCCESS**
+- **Protected-main push certification:** **WAITING_EXTERNAL_CI** — no run surfaced for `main@8972632c...` in the first post-merge observation
+- **Governance:** PR #82 is restacked onto the new main with compact supervisor state and mandatory README synchronization; it remains exact-head-CI/review gated
+- **Current blockers:** real-target readiness/current receipt + target↔web identity + authoritative `/login` evidence; credential rotation required after quarantined PR #71; governance PR #82 certification/review; CORE-QA remains blocked
+- **Next safe action:** observe one protected-main push certification for `8972632c...`; then reconcile superseded remediation PR #73 and continue runtime target-closure work without collapsing Source / Target / Release evidence
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

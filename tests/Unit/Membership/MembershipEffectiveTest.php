@@ -6,7 +6,7 @@ namespace Tests\Unit\Membership;
 
 use App\Models\Membership;
 use Illuminate\Support\Carbon;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 final class MembershipEffectiveTest extends TestCase
 {
