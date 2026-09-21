@@ -73,7 +73,7 @@ final class RuntimeNodeHeartbeat
 
         $this->recordHeartbeatWhenDue();
 
-        if (! $request->routeIs('cloud.node.status')) {
+        if (! $request->routeIs('admin.cloud.node.status')) {
             $readiness = $this->readinessResponse($runtime);
             if ($readiness !== null) {
                 return $readiness;

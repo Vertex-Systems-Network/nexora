@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-10):** protected `main` includes the accepted source/AI-intake baseline and the latest governed runtime/dependency status synchronization. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Dependency closure has a machine-clean governed lock candidate, and the bounded runtime child-execution fix exists on a separate Draft carrier, but neither has completed its governed integration path. Source/CI acceptance is not the same as real-target or release completion.
+> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Product remediation is active on Draft PR #79 stacked into PR #78. The latest terminal exact-head certification is #963 / run `35652625641`: **FAIL — 6 failed, 338 passed (3527 assertions)** on parent head `4824f44518f902c0ce802bc482fd0203eac5f12e`. This material milestone fixes the proven cloud node-recovery route-name mismatch and aligns the installer-bootstrap architecture oracle; fresh exact-head CI is required. Source progress is not target verification or release completion.
 
 ## AI development startup gate
 
@@ -14,9 +14,24 @@ Every AI development session MUST execute this gate before unrelated new impleme
 4. Resolve or explicitly document blocked, draft, red, stale or review-pending items; never bypass them silently.
 5. Re-read protected `main` and the canonical AI state/handoff after accepted merges.
 6. Only then select and start the next authorized development unit.
-7. Before finishing the session, synchronize this README's current-status section with the actual accepted repository state.
+7. Before reporting a material milestone complete, blocked, verifying or waiting, synchronize the compact **AI-Native Progress Ledger** below with repository-backed state. A missed README sync is an incomplete milestone.
 
 This rule applies on every AI development start, including work resumed from an existing plan.
+
+## AI-Native Progress Ledger
+
+- **Observed:** 2026-09-22
+- **Protected main:** `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`
+- **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
+- **Open remediation Issues:** #72, #74
+- **Active remediation stack:** PR #79 → PR #78
+- **Latest terminal evidence:** certification #963 / run `35652625641` on parent head `4824f44518f902c0ce802bc482fd0203eac5f12e` — **FAIL, 6 failed / 338 passed / 3527 assertions**
+- **This milestone:** correct the actual named recovery route to `admin.cloud.node.status` so a draining node can be reactivated by an authorized operator; align the installer-bootstrap architecture test to the explicit health-probe database-independence contract.
+- **Current state:** **VERIFYING** — fresh exact-head CI required for this material commit.
+- **Remaining known failure surface from #963:** strict HA readiness fixture, login query budget, 2 security-session response assertions, plus any failure that persists after this route/oracle correction.
+- **Next safe action:** run/reconcile one exact-head certification; if these two failures clear, continue directly with the remaining hard-failure cluster without weakening security/HA gates.
+- **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
+- **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 
 ## Current runtime closure
 
