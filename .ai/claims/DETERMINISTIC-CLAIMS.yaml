@@ -22,12 +22,11 @@ claims:
     value: null
     status: UNAVAILABLE
     evidence: "no current canonical numeric module/overall metric found on protected main; historical PR prose is not promoted"
-rules:
-  chat_memory_never_overrides_repository: true
-  inferred_runtime_truth_forbidden: true
-  pending_or_running_never_equals_pass: true
-
   - id: README-PROGRESS-SYNC
     value: "required every material engineering milestone"
     status: GOVERNED
     evidence: ".ai/governance/engineering-supervisor.md + .ai/governance/ai-development-orchestration.md + README.md AI-Native Progress Ledger"
+rules:
+  chat_memory_never_overrides_repository: true
+  inferred_runtime_truth_forbidden: true
+  pending_or_running_never_equals_pass: true
