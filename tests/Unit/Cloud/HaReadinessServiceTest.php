@@ -8,6 +8,7 @@ use App\Models\RuntimeNode;
 use App\Nexora\Cloud\Services\HaReadinessService;
 use App\Nexora\Cloud\Services\NodeManager;
 use App\Nexora\Cloud\Services\RuntimeLeaseManager;
+use App\Nexora\Cloud\Services\RuntimePolicyPlaneIdentity;
 use App\Nexora\Cloud\Services\RuntimeProcessPlane;
 use App\Nexora\Cloud\Services\RuntimeResourceEnvelopeIdentity;
 use App\Nexora\Foundation\Runtime\ReviewedDependencyState;
@@ -49,6 +50,7 @@ final class HaReadinessServiceTest extends TestCase
         }
 
         config()->set('nexora-runtime.http.max_body_bytes', 1);
+        config()->set('nexora-transfers.media.max_upload_bytes', 1);
         config()->set('nexora-runtime.php.minimum_memory_bytes', 1);
         config()->set('nexora-runtime.php.minimum_post_bytes', 1);
         config()->set('nexora-runtime.php.minimum_upload_bytes', 1);
@@ -96,6 +98,19 @@ final class HaReadinessServiceTest extends TestCase
                         'limits_status' => $resource['limits_status'] ?? null,
                         'limits_checks' => $resource['limits_checks'] ?? [],
                         'deep' => $resource['deep'] ?? null,
+                    ],
+                    JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
+                ),
+            );
+
+            $policy = app(RuntimePolicyPlaneIdentity::class)->current(true);
+            self::assertSame(
+                'pass',
+                $policy['status'],
+                json_encode(
+                    [
+                        'checks' => $policy['checks'] ?? [],
+                        'deep' => $policy['deep'] ?? null,
                     ],
                     JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
                 ),

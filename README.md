@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Product remediation is active on Draft PR #79 stacked into PR #78. The latest terminal exact-head certification is #970 / run `35656316871`: **FAIL — 1 failed, 343 passed (3547 assertions)** on parent head `4cf1f2256003436bc177abb672772f539a4ad62f`. Every HA convergence check except the local resource envelope is proven PASS. This material milestone makes the strict resource fixture deterministic across CI host PHP/filesystem limits while preserving every production HA/resource check; fresh exact-head CI is required. Source progress is not target verification or release completion.
+> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Product remediation is active on Draft PR #79 stacked into PR #78. The latest terminal exact-head certification is #971 / run `35657541109`: **FAIL — 1 failed, 343 passed (3548 assertions)** on parent head `7b1d986f3ccf7ed916d20f030632b96e3eedd507`. The strict resource envelope is now proven PASS; only the fixture-local policy plane is red because the deterministic HTTP body ceiling was lowered below the unchanged media upload policy. This milestone aligns those two fixture limits and adds an explicit deep policy diagnostic assertion; fresh exact-head CI is required. Source progress is not target verification or release completion.
 
 ## AI development startup gate
 
@@ -25,10 +25,10 @@ This rule applies on every AI development start, including work resumed from an 
 - **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
 - **Open remediation Issues:** #72, #74
 - **Active remediation stack:** PR #79 → PR #78
-- **Latest terminal evidence:** certification #970 / run `35656316871` on parent head `4cf1f2256003436bc177abb672772f539a4ad62f` — **FAIL, 1 failed / 343 passed / 3547 assertions**
-- **This milestone:** retain all strict HA/resource checks, but bind the unit fixture to deterministic PHP/body/queue/filesystem capacity thresholds and add an explicit deep resource diagnostic assertion before canonical node heartbeat/convergence.
+- **Latest terminal evidence:** certification #971 / run `35657541109` on parent head `7b1d986f3ccf7ed916d20f030632b96e3eedd507` — **FAIL, 1 failed / 343 passed / 3548 assertions**
+- **This milestone:** keep every production HA/policy check intact while making the deterministic unit fixture internally coherent: the media upload ceiling now matches the reduced HTTP body ceiling, and an explicit deep policy-plane assertion surfaces any future fixture drift.
 - **Current state:** **VERIFYING** — fresh exact-head CI required for this material commit.
-- **Remaining known failure surface from #970:** only the HA fixture's local resource envelope; every other PHPUnit check is currently proven PASS.
+- **Remaining known failure surface from #971:** only the HA fixture's local policy-plane check; resource envelope and every other HA/PHPUnit check are currently proven PASS.
 - **Next safe action:** reconcile one fresh exact-head certification. If green, mark PR #79 ready for independent exact-head review; do not self-approve or merge.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
