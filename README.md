@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-10):** protected `main` includes the accepted source/AI-intake baseline and the latest governed runtime/dependency status synchronization. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Dependency closure has a machine-clean governed lock candidate, and the bounded runtime child-execution fix exists on a separate Draft carrier, but neither has completed its governed integration path. Source/CI acceptance is not the same as real-target or release completion.
+> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Open remediation Issues are #72 and #74. The active PHPUnit remediation stack is PR #79 → PR #78; PR #79 exact head `4824f44518f902c0ce802bc482fd0203eac5f12e` is still Draft and latest exact-head release certification #963 / run `35652625641` is **FAIL** with **6 failed, 338 passed (3527 assertions)**. Governance PR #82 remains open/review-required. Source/CI progress is not target verification or release completion.
 
 ## AI development startup gate
 
@@ -14,9 +14,27 @@ Every AI development session MUST execute this gate before unrelated new impleme
 4. Resolve or explicitly document blocked, draft, red, stale or review-pending items; never bypass them silently.
 5. Re-read protected `main` and the canonical AI state/handoff after accepted merges.
 6. Only then select and start the next authorized development unit.
-7. Before finishing the session, synchronize this README's current-status section with the actual accepted repository state.
+7. Before reporting any material milestone complete, blocked, verifying or waiting, update the fixed **AI-Native Progress Ledger** below with the exact repository-backed state. Missing this README sync means the milestone is not fully complete.
 
 This rule applies on every AI development start, including work resumed from an existing plan.
+
+## AI-Native Progress Ledger
+
+This compact ledger is mandatory and is updated on every **material engineering milestone**. It records repository truth, including FAIL/VERIFYING/WAITING states; it must not be rewritten as success-only reporting.
+
+- **Observed:** 2026-09-22
+- **Protected main:** `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`
+- **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
+- **Open remediation Issues:** #72, #74
+- **Active remediation stack:** PR #79 → PR #78
+- **PR #79 exact head:** `4824f44518f902c0ce802bc482fd0203eac5f12e` — Draft, mergeable, review pending
+- **Latest exact-head certification:** #963 / run `35652625641` — **FAIL**, `6 failed, 338 passed (3527 assertions)`
+- **Latest proven movement:** prior remediation reduced the full-suite baseline substantially, but the latest runtime-admission change introduced a new installer-bootstrap architecture regression; current FAIL state is intentionally visible here.
+- **Current failure surface:** strict HA readiness fixture; login query budget; 2 security-session response assertions; cloud node recovery; installer-bootstrap isolation architecture contract.
+- **Governance:** PR #82 adds compact supervisor controls and this mandatory README synchronization gate; protected governance changes still require independent exact-head review.
+- **Next safe action:** reconcile/fix the exact #963 failure set on PR #79 without weakening runtime/security/HA gates; keep CORE-QA blocked.
+- **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
+- **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 
 ## Current runtime closure
 

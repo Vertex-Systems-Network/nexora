@@ -184,11 +184,33 @@ Migrations require explicit review for:
 
 Do not assume `apply()` followed by `markApplied()` is crash-safe. Destructive migration authority remains separate and explicit.
 
-## README and large status dashboards
+## README progress synchronization — mandatory milestone gate
 
-Update large public/module progress dashboards only when underlying lifecycle/progress/timeline/public delivery truth changed, or when a terminal product milestone/integration closeout is being reported.
+Every material engineering milestone MUST update the fixed progress ledger in `README.md` before the milestone may be reported complete, blocked, verifying, or waiting.
 
-For governance/security/coordination-only cycles, update compact durable state and relevant governance records only. Do not rewrite a large dashboard merely to create churn.
+The README progress sync is not optional housekeeping. It is part of milestone Definition of Done and must record the latest repository-backed state for the active work, including as applicable:
+
+- observation date;
+- active stage/unit and lifecycle status;
+- active Issue/PR and exact head SHA;
+- latest exact-head CI/run result;
+- completed or newly proven change;
+- current blocker;
+- exact next safe action;
+- current module and overall progress bars.
+
+Rules:
+
+- update only the compact `AI-Native Progress Ledger` / current-status area; do not churn the historical long-form README;
+- never fabricate a percentage. If no canonical numeric metric exists, write `[??????????] N/A — canonical numeric metric unavailable`;
+- record regressions and FAIL/WAITING states explicitly; README progress must not be success-only;
+- pending/running/skipped work is never written as PASS;
+- source, target, and release states remain separate;
+- a status-only README update must be committed with the material milestone when practical, not as a later source-head-changing commit that invalidates already-certified code;
+- when the material source head is intentionally frozen while CI is running, persist the live waiting evidence on the PR/Issue and update README in the next material source/governance commit; do not create a new code head solely to say CI is pending;
+- governance/security/coordination milestones also update the ledger when they materially change engineering workflow, gates, or active status.
+
+If the README ledger cannot be updated when required, report the milestone as incomplete and state why.
 
 ## CI and supply-chain security
 
