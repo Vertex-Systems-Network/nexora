@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Product remediation is active on Draft PR #79 stacked into PR #78. The latest terminal exact-head certification is #966 / run `35654222137`: **FAIL — 5 failed, 339 passed (3529 assertions)** on parent head `cf2a4411b53bbcf0c9aa753d717f954e29ce0571`. Cloud recovery is now proven PASS. This material milestone targets the remaining guest-auth/performance cluster plus the installer architecture matcher error; fresh exact-head CI is required. Source progress is not target verification or release completion.
+> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Product remediation is active on Draft PR #79 stacked into PR #78. The latest terminal exact-head certification is #969 / run `35655054720`: **FAIL — 1 failed, 343 passed (3538 assertions)** on parent head `ce1822f583d94c89902a3e6547e982caf216a2b9`. The prior auth/performance/security/oracle batch is proven PASS; only strict HA readiness remains. This material milestone rebuilds that stale fixture around canonical runtime attestation and convergence producers; fresh exact-head CI is required. Source progress is not target verification or release completion.
 
 ## AI development startup gate
 
@@ -25,11 +25,11 @@ This rule applies on every AI development start, including work resumed from an 
 - **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
 - **Open remediation Issues:** #72, #74
 - **Active remediation stack:** PR #79 → PR #78
-- **Latest terminal evidence:** certification #966 / run `35654222137` on parent head `cf2a4411b53bbcf0c9aa753d717f954e29ce0571` — **FAIL, 5 failed / 339 passed / 3529 assertions**
-- **This milestone:** fix the architecture matcher interpolation error; keep POST authentication runtime-fenced while removing expensive runtime/tenant admission from read-only GET `/login`; isolate the two throttle-sensitive security fixtures with unique client identities without disabling throttling.
+- **Latest terminal evidence:** certification #969 / run `35655054720` on parent head `ce1822f583d94c89902a3e6547e982caf216a2b9` — **FAIL, 1 failed / 343 passed / 3538 assertions**
+- **This milestone:** rebuild the stale strict-HA test fixture using an exact reviewed dependency attestation, shared storage/runtime config, required live process-role leases, canonical `NodeManager::heartbeat()` metadata, a converged second node, and an active scheduler leader; production HA checks remain unchanged.
 - **Current state:** **VERIFYING** — fresh exact-head CI required for this material commit.
-- **Remaining known failure surface from #966:** strict HA readiness fixture, login query budget, 2 security-session response assertions, and the installer architecture matcher error; this milestone directly targets the latter four.
-- **Next safe action:** reconcile one fresh exact-head certification; if the four targeted failures clear, isolate and close the remaining strict HA readiness fixture without weakening HA convergence checks.
+- **Remaining known failure surface from #969:** only `HaReadinessServiceTest`; all other PHPUnit failures from this remediation chain are currently proven PASS.
+- **Next safe action:** reconcile one fresh exact-head certification. If green, transition PR #79 from remediation to independent exact-head review; do not self-approve or merge.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

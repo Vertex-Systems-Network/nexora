@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Cloud;
 
-use App\Models\RuntimeLease;
 use App\Models\RuntimeNode;
 use App\Nexora\Cloud\Services\HaReadinessService;
+use App\Nexora\Cloud\Services\NodeManager;
+use App\Nexora\Cloud\Services\RuntimeLeaseManager;
+use App\Nexora\Cloud\Services\RuntimeProcessPlane;
+use App\Nexora\Foundation\Runtime\ReviewedDependencyState;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -17,17 +20,118 @@ final class HaReadinessServiceTest extends TestCase
 
     public function test_strict_ha_readiness_requires_shared_runtime_and_multiple_matching_nodes(): void
     {
-        config()->set('cache.default','database');
-        config()->set('session.driver','database');
-        config()->set('queue.default','database');
-        config()->set('nexora_cloud.object_storage_disk','s3');
-        config()->set('nexora-ha.required_nodes',2);
-        foreach(['node-a','node-b'] as $key) {
-            RuntimeNode::query()->create(['id'=>(string)Str::uuid(),'node_key'=>$key,'status'=>'active','role'=>'application','version'=>(string)config('nexora.version'),'last_heartbeat_at'=>now()]);
+        config()->set('cache.default', 'database');
+        config()->set('session.driver', 'database');
+        config()->set('queue.default', 'database');
+
+        config()->set('nexora_cloud.node_id', 'node-a');
+        config()->set('nexora_cloud.object_storage_disk', 's3');
+        config()->set('nexora-storage-runtime.object_disk', 's3');
+        config()->set('nexora-storage-runtime.backup_disk', 's3');
+        config()->set('nexora-ha.required_nodes', 2);
+
+        // Keep the strict deep-capacity checks enabled while making the unit
+        // fixture independent of the host runner's available disk/memory size.
+        config()->set('nexora-resource-runtime.require_deep_capacity_for_ha', true);
+        foreach ([
+            'minimum_memory_headroom_bytes',
+            'minimum_queue_memory_headroom_bytes',
+            'minimum_temp_free_bytes',
+            'minimum_storage_free_bytes',
+            'minimum_transfer_free_bytes',
+            'minimum_backup_staging_free_bytes',
+        ] as $key) {
+            config()->set('nexora-resource-runtime.'.$key, 1);
         }
-        RuntimeLease::query()->create(['id'=>(string)Str::uuid(),'name'=>'scheduler-leader','owner_node_key'=>'node-a','expires_at'=>now()->addMinute(),'heartbeat_at'=>now()]);
-        $result=app(HaReadinessService::class)->assess();
-        self::assertTrue($result['ready']);
-        self::assertSame(2,$result['node_count']);
+        config()->set('nexora-resource-runtime.minimum_open_files_soft', 1);
+        config()->set('nexora-runtime.queue.worker_restart_memory_mb', 1024);
+
+        $reviewPath = base_path(ReviewedDependencyState::REVIEW_PATH);
+        $reviewDirectory = dirname($reviewPath);
+        $existingReview = is_file($reviewPath) ? file_get_contents($reviewPath) : null;
+
+        if (! is_dir($reviewDirectory)) {
+            self::assertTrue(mkdir($reviewDirectory, 0700, true) || is_dir($reviewDirectory));
+        }
+
+        $dependencies = app(ReviewedDependencyState::class);
+        $review = [
+            'status' => 'reviewed',
+            ...$dependencies->currentHashes(),
+            'laravel_framework_locked_version' => $dependencies->lockedLaravelVersion(),
+        ];
+        file_put_contents(
+            $reviewPath,
+            json_encode($review, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR)."\n",
+        );
+
+        try {
+            self::assertSame('pass', app(ReviewedDependencyState::class)->inspect()['status']);
+
+            $leases = app(RuntimeLeaseManager::class);
+            $processes = app(RuntimeProcessPlane::class);
+            $processFingerprint = $processes->fingerprintValue();
+            $leaseTtl = 180;
+
+            foreach ([
+                ['web', 'node-a'],
+                ['web', 'node-b'],
+                ['queue', 'node-a'],
+                ['queue', 'node-b'],
+                ['scheduler', 'node-a'],
+            ] as [$role, $owner]) {
+                self::assertTrue($leases->acquireOrRenew(
+                    'runtime-process:'.$role.':'.$owner,
+                    $owner,
+                    $leaseTtl,
+                    [
+                        'kind' => 'runtime-process',
+                        'role' => $role,
+                        'platform_version' => (string) config('nexora.version'),
+                        'process_policy_fingerprint' => $processFingerprint,
+                        'sapi' => PHP_SAPI,
+                    ],
+                ));
+            }
+
+            $nodeA = app(NodeManager::class)->heartbeat();
+            self::assertNotNull($nodeA);
+            $nodeA->forceFill(['status' => 'active'])->save();
+            $nodeA->refresh();
+
+            RuntimeNode::query()->create([
+                'id' => (string) Str::uuid(),
+                'node_key' => 'node-b',
+                'hostname' => 'node-b.test',
+                'status' => 'active',
+                'role' => $nodeA->role,
+                'version' => $nodeA->version,
+                'environment' => $nodeA->environment,
+                'capabilities' => $nodeA->capabilities,
+                'metadata' => $nodeA->metadata,
+                'last_heartbeat_at' => now(),
+            ]);
+
+            self::assertTrue($leases->acquireOrRenew(
+                'scheduler-leader',
+                'node-a',
+                $leaseTtl,
+                ['kind' => 'scheduler-leader'],
+            ));
+
+            $result = app(HaReadinessService::class)->assess();
+
+            self::assertTrue(
+                $result['ready'],
+                json_encode($result['checks'], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            );
+            self::assertSame(2, $result['node_count']);
+        } finally {
+            if (is_string($existingReview)) {
+                file_put_contents($reviewPath, $existingReview);
+            } else {
+                @unlink($reviewPath);
+            }
+        }
     }
 }
