@@ -101,7 +101,7 @@ final class RuntimeRecoveryOrchestratorTest extends TestCase
         $lockStepPosition = strpos($source, "\$steps['apply_lock'] = ['status' => 'pass', 'mode' => 'exclusive-nonblocking'];");
         $failureContextPosition = strpos(
             $source,
-            'nexoraRuntimeRecoverySetAppliedFailureContext(static function () use ($target, &$steps, &$mutationPerformed): array',
+            'nexoraRuntimeRecoverySetAppliedFailureContext(static function () use ($target, &$steps, &$mutationAttempted, &$mutationPerformed, &$mutationMayHaveOccurred): array',
         );
         self::assertIsInt($lockStepPosition);
         self::assertIsInt($failureContextPosition);
