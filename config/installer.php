@@ -17,7 +17,7 @@ return [
         // Sealed after Installer.php is finalized for this source package.
         'installer_sha256' => '6837eae593fa2f3f7d6a8f11d93020d10ad34d753516b9f1bbeec019e13dde69',
         'manifest_path' => $root.'/bootstrap/nexora-source-manifest.json',
-        'manifest_sha256' => 'c6f5c5dc0edee20a3e6955ef3223a0aa3d5482f3712bb1a82fc8089c03b57b70',
+        'manifest_sha256' => '9204bc8e9722c183c35ab766c518f414b213cd1d2b0b632cb9af3214a2ba6a28',
         'activation_receipt_path' => $root.'/storage/app/nexora/source-activation/cli-activation.json',
         'web_ack_path' => $root.'/storage/app/nexora/source-activation/web-ack.json',
         'web_ack_token_path' => $root.'/storage/app/nexora/source-activation/web-ack.token',
