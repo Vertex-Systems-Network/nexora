@@ -73,9 +73,11 @@ final class RuntimeNodeHeartbeat
 
         $this->recordHeartbeatWhenDue();
 
-        $readiness = $this->readinessResponse($runtime);
-        if ($readiness !== null) {
-            return $readiness;
+        if (! $request->routeIs('cloud.node.status')) {
+            $readiness = $this->readinessResponse($runtime);
+            if ($readiness !== null) {
+                return $readiness;
+            }
         }
 
         $clientFence = $this->staleClientResponse($request, $runtime);
