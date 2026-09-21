@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Product remediation is active on Draft PR #79 stacked into PR #78. The latest terminal exact-head certification is #963 / run `35652625641`: **FAIL — 6 failed, 338 passed (3527 assertions)** on parent head `4824f44518f902c0ce802bc482fd0203eac5f12e`. This material milestone fixes the proven cloud node-recovery route-name mismatch and aligns the installer-bootstrap architecture oracle; fresh exact-head CI is required. Source progress is not target verification or release completion.
+> **Canonical current status (2026-09-22):** protected `main` remains `a04d18cf4dedf90e68e5ed6ef3c9c92bc6a170f2`. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` and is **BLOCKED**. Product remediation is active on Draft PR #79 stacked into PR #78. The latest terminal exact-head certification is #966 / run `35654222137`: **FAIL — 5 failed, 339 passed (3529 assertions)** on parent head `cf2a4411b53bbcf0c9aa753d717f954e29ce0571`. Cloud recovery is now proven PASS. This material milestone targets the remaining guest-auth/performance cluster plus the installer architecture matcher error; fresh exact-head CI is required. Source progress is not target verification or release completion.
 
 ## AI development startup gate
 
@@ -25,11 +25,11 @@ This rule applies on every AI development start, including work resumed from an 
 - **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
 - **Open remediation Issues:** #72, #74
 - **Active remediation stack:** PR #79 → PR #78
-- **Latest terminal evidence:** certification #963 / run `35652625641` on parent head `4824f44518f902c0ce802bc482fd0203eac5f12e` — **FAIL, 6 failed / 338 passed / 3527 assertions**
-- **This milestone:** correct the actual named recovery route to `admin.cloud.node.status` so a draining node can be reactivated by an authorized operator; align the installer-bootstrap architecture test to the explicit health-probe database-independence contract.
+- **Latest terminal evidence:** certification #966 / run `35654222137` on parent head `cf2a4411b53bbcf0c9aa753d717f954e29ce0571` — **FAIL, 5 failed / 339 passed / 3529 assertions**
+- **This milestone:** fix the architecture matcher interpolation error; keep POST authentication runtime-fenced while removing expensive runtime/tenant admission from read-only GET `/login`; isolate the two throttle-sensitive security fixtures with unique client identities without disabling throttling.
 - **Current state:** **VERIFYING** — fresh exact-head CI required for this material commit.
-- **Remaining known failure surface from #963:** strict HA readiness fixture, login query budget, 2 security-session response assertions, plus any failure that persists after this route/oracle correction.
-- **Next safe action:** run/reconcile one exact-head certification; if these two failures clear, continue directly with the remaining hard-failure cluster without weakening security/HA gates.
+- **Remaining known failure surface from #966:** strict HA readiness fixture, login query budget, 2 security-session response assertions, and the installer architecture matcher error; this milestone directly targets the latter four.
+- **Next safe action:** reconcile one fresh exact-head certification; if the four targeted failures clear, isolate and close the remaining strict HA readiness fixture without weakening HA convergence checks.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 
