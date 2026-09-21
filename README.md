@@ -25,9 +25,9 @@ This rule applies on every AI development start, including work resumed from an 
 - **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
 - **Open remediation Issues:** #72, #74
 - **Audit remediation:** PR #79 → PR #78 → protected main integrated; superseded PR #73 closed unmerged
-- **Runtime carrier:** PR #30 is reconciled onto current hardened main in this material commit; exact resulting head is bound on the PR conversation after commit creation
-- **Merge resolution:** 19 shared runtime/dependency files were already byte-identical; current-main versions win for release certification, README/status, `package-lock.json`, and the runtime recovery regression test
-- **Current state:** **VERIFYING** — fresh exact-head release certification required for the resulting PR #30 head
+- **Runtime carrier:** PR #30 is reconciled onto current hardened main and scope-scrubbed; after removing an unrelated historical Vite admin-chunking tweak, no product/runtime/build-config code differs from protected main. The remaining diff is evidence/state/control-plane history only
+- **Merge resolution:** protected-main security/workflow/locks/tests are preserved byte-for-byte; the unrelated `vite.config.ts` performance tweak was removed from this runtime-closure carrier
+- **Current state:** **VERIFYING** — previous restack run #977 is superseded by this scope-scrub head; fresh exact-head release certification is required
 - **Remaining blockers:** fresh real-target readiness/current receipt; exact target↔web one-time identity proof; authoritative `/login` evidence on that same origin; rotation of the credential exposed by quarantined PR #71; independent exact-head review
 - **Next safe action:** reconcile one fresh PR #30 exact-head certification; if green, retain the head unchanged for independent review and authorized real-target evidence. Do not start CORE-QA
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
@@ -37,7 +37,7 @@ This rule applies on every AI development start, including work resumed from an 
 
 - **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**.
 - **PR #30:** open and unmerged; this reconciliation removes its stale-main divergence without advancing target state.
-- **Source controls:** runtime recovery/orchestrator implementation, target containment, mutation evidence, readiness/exit contracts and bounded child execution are retained. The corresponding implementation files that overlap current main were already byte-identical.
+- **Source controls:** runtime recovery/orchestrator implementation, target containment, mutation evidence, readiness/exit contracts and bounded child execution are retained on protected main. After scope scrub, PR #30 introduces no unique product/runtime/build-config code relative to main.
 - **Main hardening preserved:** exact-head checkout, immutable GitHub Action SHAs, `persist-credentials:false`, MySQL-backed PHPUnit execution, repository-hygiene guard, deterministic Composer/npm installs, and current regression fixes are carried from protected main.
 - **Review boundary:** high/critical runtime-control promotion still requires a distinct exact-head review. AI author/self-review is not independent approval.
 - **Real-target evidence:** fresh final readiness/current receipt, exact target↔web identity, authoritative `/login` evidence on the same proven origin, and target credential rotation after PR #71 remain unresolved.

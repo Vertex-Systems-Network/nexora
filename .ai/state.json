@@ -49,15 +49,15 @@
     "web_identity": "PENDING fresh exact target-local CLI-to-web one-time challenge acknowledgement against the configured app.url origin",
     "login": "PENDING /login target evidence on the same exact proven web origin",
     "reviewed_dependency_attestation": "historical PR #30 reviewed-lock evidence remains retained, but the reconciled carrier adopts the current protected-main package-lock representation; fresh exact-head release certification is required before the new source head is accepted. This does not assert the installed rc.93 target consumed or resealed current dependency state.",
-    "orchestrator_source_work": "PR #30 is reconciled onto hardened protected main 8972632c230117c377c1e0e5d7219352518acda7 in a two-parent merge commit. Shared runtime implementation bytes were already aligned; current-main workflow/hygiene/regression/lock corrections are preserved. Fresh exact-head CI and independent review are required. Real-target final readiness, exact target-to-web identity, /login evidence, and credential rotation remain pending."
+    "orchestrator_source_work": "PR #30 is reconciled onto hardened protected main 8972632c230117c377c1e0e5d7219352518acda7. Runtime implementation, workflow, dependency locks, regression tests and build config are now byte-identical to main after removing an unrelated historical Vite admin-chunking tweak from the carrier. The remaining PR diff is evidence/state/control-plane history only. Fresh exact-head CI and independent review remain required; target readiness, exact target-to-web identity, /login evidence, and credential rotation remain pending."
   },
   "blocker": {
     "category": "runtime-target",
-    "summary": "PR #30 stale-main divergence is being removed without changing the target verdict. RUNTIME-CLOSURE-001 remains BLOCKED until the reconciled exact head passes source CI/review and fresh rc.93 target readiness/current receipt, exact CLI-to-web identity, authoritative /login evidence, and required credential rotation are accepted.",
+    "summary": "PR #30 stale-main divergence and unrelated Vite scope drift are removed. The carrier now has no unique product/runtime/build-config code relative to protected main. RUNTIME-CLOSURE-001 remains BLOCKED on fresh exact-head evidence/review plus real-target readiness/current receipt, exact CLI-to-web identity, authoritative /login evidence, and credential rotation.",
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "Require fresh exact-head release certification on the reconciled PR #30 head.",
+    "Require fresh exact-head release certification on the scope-scrubbed PR #30 head; run #977 belongs to the superseded prior head.",
     "Obtain a distinct exact-head independent review; author-context AI review is not independent approval.",
     "On the real Windows/Laragon rc.93 target, obtain fresh post-install-status --assert-ready with status=pass, ready=true, runtime_ready=true, receipt_current=true, errors=[].",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",

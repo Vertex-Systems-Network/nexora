@@ -26,7 +26,7 @@ Historical SHAs are evidence references. Always re-read current HEAD before rely
 
 PR #30 was stale against protected `main@8972632c230117c377c1e0e5d7219352518acda7`. The reconciliation keeps the runtime carrier's unique evidence/plan material while applying every protected-main change since its prior merge base. Nineteen overlapping runtime/dependency files were already byte-identical. For the four divergent shared paths, current main is authoritative: hardened release certification, current `package-lock.json`, current runtime regression assertions, and README/status are preserved.
 
-This is source reconciliation only. The resulting exact PR head must pass fresh CI and a distinct exact-head review. Target status remains BLOCKED pending fresh readiness/current receipt, exact CLI↔web identity, authoritative `/login`, and credential rotation after PR #71.
+This is source reconciliation only. A follow-up scope audit removed the historical `perf(build): group lazy admin pages by bounded domain` Vite change because it is unrelated to `SYS-RUNTIME-IDENTITY`. The carrier now has no unique product/runtime/build-config code relative to protected main. The resulting exact PR head must pass fresh CI and a distinct exact-head review. Target status remains BLOCKED pending fresh readiness/current receipt, exact CLI↔web identity, authoritative `/login`, and credential rotation after PR #71.
 
 ## Governance invariants
 

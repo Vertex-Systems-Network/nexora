@@ -20,6 +20,8 @@
 - Nineteen overlapping runtime/dependency paths were byte-identical before merge.
 - Current main wins the four divergent shared paths: release-certification workflow, README/status, `package-lock.json`, and `RuntimeRecoveryOrchestratorTest.php`.
 - Historical dependency-review evidence is retained as history; fresh exact-head CI must re-establish current source evidence after the protected-main lock representation is adopted.
+- Scope audit removed the unrelated historical `vite.config.ts` admin code-splitting performance tweak from this runtime-closure carrier; current build config now matches protected main.
+- After that scrub, PR #30 has no unique product/runtime/build-config code relative to main; remaining differences are evidence/state/control-plane history.
 - No target, provider, deployment, release or CORE-QA authority is inferred from this merge.
 
 ## Governance boundary
