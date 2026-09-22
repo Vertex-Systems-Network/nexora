@@ -28,6 +28,7 @@ This rule applies on every AI development start, including work resumed from an 
 - **Future PR:** PR #1 — **FUTURE_CARRIER_FROZEN**
 - **Closed stale maintenance:** PR #75 and PR #81 closed unmerged; recreate/rebase only after target verification if still applicable
 - **Current blockers:** target-environment readiness/current receipt; exact target↔web identity; authoritative `/login`; credential rotation after PR #71
+- **Target-path portability guard:** Source Guard enforced — active target-contract surfaces must stay operator-neutral and reject machine-local target binding
 - **Next safe action:** execute the governed `runtime:recover` apply path against the operator-provided target path; separately complete authorized credential rotation; do not start CORE-QA before TARGET_VERIFIED
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
