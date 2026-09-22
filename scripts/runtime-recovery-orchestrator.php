@@ -1184,10 +1184,10 @@ function nexoraRuntimeRecoveryUsage(): string
 Nexora Runtime Recovery / Closure Orchestrator
 
 Read-only dry-run:
-  php scripts/runtime-recovery-orchestrator.php --target="D:\\laragon\\www\\nexora"
+  php scripts/runtime-recovery-orchestrator.php --target="<operator-provided-target-path>"
 
 Authorized recovery + automatic verification/reconcile/web identity/login smoke:
-  php scripts/runtime-recovery-orchestrator.php --target="D:\\laragon\\www\\nexora" --apply --confirm=RECOVER-RUNTIME
+  php scripts/runtime-recovery-orchestrator.php --target="<operator-provided-target-path>" --apply --confirm=RECOVER-RUNTIME
 
 The final HTTP smoke is bound to the target application's own bootstrapped
 config('app.url'). Before /login can PASS, the app.url web process must consume

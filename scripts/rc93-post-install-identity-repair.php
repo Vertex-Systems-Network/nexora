@@ -259,10 +259,10 @@ function nexoraRc93RepairUsage(): string
 Nexora rc.93 Post-Install Identity Repair Pack
 
 Dry-run (default):
-  php scripts/rc93-post-install-identity-repair.php --target="D:\laragon\www\nexora"
+  php scripts/rc93-post-install-identity-repair.php --target="<operator-provided-target-path>"
 
 Apply after reviewing the dry-run:
-  php scripts/rc93-post-install-identity-repair.php --target="D:\laragon\www\nexora" --apply --confirm=REPAIR-RC93
+  php scripts/rc93-post-install-identity-repair.php --target="<operator-provided-target-path>" --apply --confirm=REPAIR-RC93
 
 The tool refuses every target version except 1.0.0-rc.93, refuses mismatches
 outside environment/activation/service/process, verifies source/deployment identity,
