@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-22):** protected `main` is `87210e7674f67fb75e046c185206573bebd906f9` after governance/evidence PR #82 merged. PR #82 exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf` passed release certification #980 / `35671637039` and merged under scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002`. Protected-main push certification #981 / `35672290666` completed **SUCCESS** on exact protected main. The active product stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED** only on real-target readiness/current receipt, exact target↔web identity, authoritative `/login`, and credential rotation after PR #71. PR #1 remains frozen future work and is not part of the active runtime-closure path.
+> **Canonical current status (2026-09-22):** source/governance closure is integrated and verified through protected-main baseline `fde0667b150de551184ec5c5261a34f18538ceed`. PR #83 final exact head `75d5436b0394f246bdca626571666abe77cd4012` passed release certification #985 / `35673582569`, merged under scoped admin waiver `WVR-NEX-PR83-MAIN-REVIEW-001`, and resulting-main certification #986 / `35767459733` completed **SUCCESS**. No active source/governance carrier remains for `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY`. The stage remains **BLOCKED** only on real-target readiness/current receipt, exact target↔web identity, authoritative `/login`, and rotation of the credential exposed by PR #71. PR #1 remains frozen future work and is not part of the active runtime-closure path. Live `main` must always be re-read before mutation; later state-only documentation commits do not by themselves change this Source/Target verdict.
 
 ## AI development startup gate
 
@@ -14,52 +14,55 @@ Every AI development session MUST execute this gate before unrelated new impleme
 4. Resolve or explicitly document blocked, draft, red, stale or review-pending items; never bypass them silently.
 5. Re-read protected `main` and the canonical AI state/handoff after accepted merges.
 6. Only then select and start the next authorized development unit.
-7. Before reporting any material milestone complete, blocked, verifying or waiting, update the fixed **AI-Native Progress Ledger** below with exact repository-backed state. Missing this README sync means the milestone is not fully complete.
+7. Before reporting any material milestone complete, blocked, verifying or waiting, update the fixed **AI-Native Progress Ledger** below with repository-backed state. Missing this README sync means the milestone is not fully complete.
 
 This rule applies on every AI development start, including work resumed from an existing plan.
 
 ## AI-Native Progress Ledger
 
 - **Observed:** 2026-09-22
-- **Protected main:** `87210e7674f67fb75e046c185206573bebd906f9`
+- **Last verified source/governance baseline:** `fde0667b150de551184ec5c5261a34f18538ceed` — protected-main #986 / `35767459733` **SUCCESS**
 - **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Open remediation Issues:** #72 (target credential rotation only), #74 (runtime target evidence coordination)
-- **Merged governance/evidence carrier:** PR #82 — exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf`, #980 / `35671637039` **SUCCESS**
-- **Protected-main push certification:** #981 / `35672290666` — **SUCCESS**
-- **Active source/governance carrier:** PR #83, final state-only reconciliation; after merge no source carrier remains for this stage
-- **Future PR:** PR #1, classified **FUTURE_CARRIER_FROZEN**
-- **Closed stale maintenance:** PR #75 and PR #81 closed unmerged; recreate/rebase dependency maintenance only after runtime target verification
+- **Active source/governance carrier:** none
+- **Open remediation Issues:** #72 — target/provider credential rotation; #74 — real-target readiness and identity coordination
+- **Future PR:** PR #1 — **FUTURE_CARRIER_FROZEN**
+- **Closed stale maintenance:** PR #75 and PR #81 closed unmerged; recreate/rebase only after target verification if still applicable
 - **Current blockers:** real-target readiness/current receipt; exact target↔web identity; authoritative `/login`; credential rotation after PR #71
-- **Next safe action after PR #83 merge:** continue real-target W03/W04/W07 evidence and Issue #72 credential rotation; do not start CORE-QA before TARGET_VERIFIED
+- **Next safe action:** execute the governed `runtime:recover` apply path on `D:\laragon\www\nexora`; separately complete authorized credential rotation; do not start CORE-QA before TARGET_VERIFIED
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 
 ## Current runtime closure
 
-- Runtime recovery/orchestrator implementation, target containment, bounded child execution, mutation evidence and readiness/identity controls are present on protected main.
-- PR #30 is source-superseded after scope scrub; final exact head #978 is green and remaining evidence/state is consolidated into PR #82.
-- Source status is **SOURCE_DONE** for integrated runtime implementation; target status remains **BLOCKED**.
-- Still required: real-target final readiness/current receipt, exact target↔web one-time proof, authoritative `/login` on the same origin, and credential rotation after PR #71.
+- Runtime recovery/orchestrator implementation, target containment, bounded child execution, mutation evidence, final readiness/current receipt, exact target↔web challenge and authoritative `/login` controls are present in source.
+- The governed command is:
+  ```bat
+  cd /d D:\laragon\www\nexora
+  npm run runtime:recover -- --target="D:\laragon\www\nexora" --apply --confirm=RECOVER-RUNTIME
+  ```
+- The orchestrator fails closed, writes a machine-readable target receipt, and reports `target_verification_complete=true` only when compatibility, final readiness/current receipt, exact web identity and `/login` all pass.
+- Source status is **SOURCE_DONE**; target status remains **BLOCKED** because no fresh target execution output has been accepted after the current source closure.
+- Credential rotation after PR #71 is a separate real target/provider action and cannot be completed by repository edits.
 - `CORE-QA-001` MUST NOT start until `RUNTIME-CLOSURE-001` is `TARGET_VERIFIED`.
 
 ## Current dependency closure
 
 - Protected main contains current deterministic Composer/npm lockfiles and hardened certification workflow.
-- Historical Issue #52 review/integration evidence is retained under `.ai/evidence/` through the consolidated governance carrier.
+- Historical Issue #52 review/integration evidence is retained under `.ai/evidence/`.
 - Historical exact-artifact attestations remain audit evidence; they do not override current protected-main lock identity or prove installed-target consumption.
 - Future dependency changes require fresh supply-chain intake and exact-head evidence.
 
 ## Status boundary
 
-Nexora has extensive source implementation and passing hosted certification evidence, but hosted source/CI evidence does **not** by itself establish target verification, release certification or production readiness. Any progress report must keep **Source**, **Target** and **Release** states distinct.
+Hosted source/CI evidence does **not** establish real-target verification, credential rotation, release certification or production readiness. Any progress report must keep **Source**, **Target** and **Release** states distinct.
 
 ## Current next sequence
 
-1. Merge the final state-only PR #83 only after fresh exact-head certification and its applicable review/waiver gate.
-2. Obtain fresh real-target readiness/current-receipt evidence.
-3. Prove exact target-local CLI↔web identity and authoritative `/login` on the same origin.
-4. Rotate the credential exposed by PR #71 through an authorized target/provider path.
-5. Mark `RUNTIME-CLOSURE-001` TARGET_VERIFIED only after all target gates pass; only then start `CORE-QA-001`.
+1. On the exact Windows/Laragon target, run the governed `runtime:recover` apply command and retain its non-secret machine-readable receipt.
+2. Accept target closure only if final readiness/current receipt, exact target↔web proof and authoritative same-origin `/login` are all PASS.
+3. Rotate the credential exposed by PR #71 through an authorized target/provider path and retain non-secret evidence.
+4. Reconcile W07 canonical state only after both target evidence and credential rotation are accepted.
+5. Mark `RUNTIME-CLOSURE-001` TARGET_VERIFIED only after all gates pass; only then start `CORE-QA-001`.
 
 ## Core stack
 
@@ -73,8 +76,8 @@ Nexora has extensive source implementation and passing hosted certification evid
 
 ## Historical README / feature record
 
-The previous long-form README, including historical N0.x/N1.x feature notes, deployment instructions and release-development record, is preserved byte-for-byte at [`docs/README_HISTORY_PRE_STATUS_SYNC.md`](docs/README_HISTORY_PRE_STATUS_SYNC.md). It is historical/reference material; when any historical statement conflicts with the canonical current status above, the current protected-main state, `.ai/state.json`, `.ai/handoff/current.md`, live Issues/PRs and accepted exact-head evidence take precedence.
+The previous long-form README, including historical N0.x/N1.x feature notes, deployment instructions and release-development record, is preserved at [`docs/README_HISTORY_PRE_STATUS_SYNC.md`](docs/README_HISTORY_PRE_STATUS_SYNC.md). Historical statements do not override live repository state or accepted exact-head/target evidence.
 
 ## Governance sources
 
-Before extending runtime/deployment/release behavior, read the repository governance and architecture sources, especially `AGENTS.md`, `.ai/state.json`, `.ai/handoff/current.md`, `ARCHITECTURE.md`, `SECURITY.md`, applicable release/runtime plans, and the live Issue/PR set.
+Before extending runtime/deployment/release behavior, read `AGENTS.md`, `.ai/state.json`, `.ai/handoff/current.md`, `ARCHITECTURE.md`, `SECURITY.md`, the applicable runtime/release plans, and live Issues/PRs.

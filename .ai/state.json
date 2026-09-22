@@ -4,8 +4,8 @@
   "control_plane_revision": 7,
   "control_plane_branch": "main",
   "base_branch": "main",
-  "base_sha": "87210e7674f67fb75e046c185206573bebd906f9",
-  "last_verified_source_sha": "87210e7674f67fb75e046c185206573bebd906f9",
+  "base_sha": "fde0667b150de551184ec5c5261a34f18538ceed",
+  "last_verified_source_sha": "fde0667b150de551184ec5c5261a34f18538ceed",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
   "source_generation": "n1-v5.29",
@@ -49,7 +49,7 @@
     "web_identity": "PENDING fresh exact target-local CLI-to-web one-time challenge acknowledgement against the configured app.url origin",
     "login": "PENDING /login target evidence on the same exact proven web origin",
     "reviewed_dependency_attestation": "historical PR #30 reviewed-lock evidence remains retained, but the reconciled carrier adopts the current protected-main package-lock representation; fresh exact-head release certification is required before the new source head is accepted. This does not assert the installed rc.93 target consumed or resealed current dependency state.",
-    "orchestrator_source_work": "Runtime/source implementation and AI governance/evidence consolidation are integrated on protected main 87210e7674f67fb75e046c185206573bebd906f9. PR #82 exact head 5d727efe1ba2810c590e8a86ebc3f122a0c998cf passed #980 and merged under scoped admin waiver WVR-NEX-PR82-MAIN-REVIEW-002. Protected-main push #981 / 35672290666 completed SUCCESS. Remaining runtime closure evidence is real-target/provider only."
+    "orchestrator_source_work": "Runtime/source implementation and AI governance/evidence consolidation are integrated and protected-main verified through fde0667b150de551184ec5c5261a34f18538ceed. PR #83 final head 75d5436b0394f246bdca626571666abe77cd4012 passed #985 / 35673582569, merged under WVR-NEX-PR83-MAIN-REVIEW-001, and resulting-main #986 / 35767459733 completed SUCCESS. The runtime recovery orchestrator already covers final readiness/current receipt, exact target-to-web identity and authoritative /login; remaining closure evidence is real-target/provider only."
   },
   "blocker": {
     "category": "runtime-target-provider",
@@ -196,5 +196,5 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-09-22T05:44:00+05:00"
+  "updated_at": "2026-09-22T23:27:00+05:00"
 }

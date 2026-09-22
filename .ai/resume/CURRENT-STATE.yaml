@@ -3,11 +3,12 @@ repository: Vertex-Systems-Network/nexora
 compact_state_path: .ai/resume
 observed_main:
   branch: main
-  sha: 87210e7674f67fb75e046c185206573bebd906f9
+  sha: fde0667b150de551184ec5c5261a34f18538ceed
   observed_at: "2026-09-22"
+  semantics: "last source/governance baseline verified by protected-main certification #986; always re-read live main before mutation because later state-only reconciliation may advance the branch without changing the target verdict"
 active_issue:
   number: 74
-  title: "AI orchestration: RUNTIME-CLOSURE remediation workers (7 parallel lanes)"
+  title: "RUNTIME-CLOSURE: real-target readiness and identity coordination"
 active_pr: null
 active_branch: main
 current_stage:
@@ -16,17 +17,17 @@ current_stage:
   status: BLOCKED
 current_milestone:
   id: TARGET-EVIDENCE-WAIT-008
-  title: "Await real-target readiness/identity/login evidence and credential rotation"
+  title: "Execute real-target recovery/identity/login evidence and credential rotation"
   status: WAITING_EXTERNAL_TARGET
 last_completed_milestone:
-  main_commit: 87210e7674f67fb75e046c185206573bebd906f9
-  summary: "source/governance integration and protected-main verification complete; PR #83 is the final state-only reconciliation carrier"
-exact_next_safe_action: "Use authorized access to D:\\laragon\\www\\nexora for W03/W04 evidence: final readiness/current receipt, exact CLI↔web identity, authoritative /login, and separately rotate the PR #71 exposed credential via the real target/provider. Do not start CORE-QA before TARGET_VERIFIED."
+  main_commit: fde0667b150de551184ec5c5261a34f18538ceed
+  summary: "PR #83 exact head passed #985, merged, and resulting-main #986 completed SUCCESS; no active source/governance carrier remains"
+exact_next_safe_action: "On authorized real target D:\\laragon\\www\\nexora run npm run runtime:recover -- --target=\"D:\\laragon\\www\\nexora\" --apply --confirm=RECOVER-RUNTIME, retain non-secret machine-readable evidence, and separately rotate the credential exposed by PR #71 through the authorized provider/target path. Do not start CORE-QA before TARGET_VERIFIED."
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:
-  - "Real-target final readiness/current receipt remains required."
-  - "Exact target-local CLI↔web identity and authoritative /login evidence remain required."
+  - "Fresh real-target final readiness/current receipt evidence remains required."
+  - "Fresh exact target-local CLI↔web identity and authoritative same-origin /login evidence remain required."
   - "Credential exposed by quarantined PR #71 still requires authorized real target/provider rotation and non-secret evidence."
   - "CORE-QA-001 must not start before RUNTIME-CLOSURE-001 is TARGET_VERIFIED."
 timeout_control:
@@ -39,7 +40,7 @@ progress:
     label: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     percent: null
     display_bar: "[??????????] N/A"
-    basis: "source/governance integrated and verified; remaining acceptance is real-target/provider evidence"
+    basis: "source/governance integrated and protected-main verified; remaining acceptance requires real-target/provider evidence"
   overall:
     label: "Nexora"
     percent: null
@@ -52,6 +53,7 @@ readme_progress_sync:
 state_drift:
   detected: false
   notes:
+    - "No active source/governance carrier remains for RUNTIME-CLOSURE-001."
     - "PR #1 is FUTURE_CARRIER_FROZEN and is not active runtime-closure work."
     - "Issue #72 remains open solely for real target/provider credential rotation."
-    - "Issue #74 source lanes W01/W02/W05/W06 are done; W03/W04/W07 remain target-gated."
+    - "Issue #74 source lanes are complete; target W03/W04/W07 remain evidence-gated."
