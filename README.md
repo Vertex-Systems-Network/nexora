@@ -53,11 +53,11 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## Status boundary
 
-Hosted source/CI evidence does **not** establish target-environment verification, credential rotation, release certification or production readiness. Any progress report must keep **Source**, **Target** and **Release** states distinct.
+Hosted source/CI evidence does **not** establish target verification, credential rotation, release certification or production readiness. Any progress report must keep **Source**, **Target** and **Release** states distinct.
 
 ## Current next sequence
 
-1. On the exact operator-provided target environment target, run the governed `runtime:recover` apply command and retain its non-secret machine-readable receipt.
+1. On the operator-provided target environment, run the governed `runtime:recover` apply command and retain its non-secret machine-readable receipt.
 2. Accept target closure only if final readiness/current receipt, exact target↔web proof and authoritative same-origin `/login` are all PASS.
 3. Rotate the credential exposed by PR #71 through an authorized target/provider path and retain non-secret evidence.
 4. Reconcile W07 canonical state only after both target evidence and credential rotation are accepted.

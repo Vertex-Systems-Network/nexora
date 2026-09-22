@@ -22,7 +22,7 @@ current_milestone:
 last_completed_milestone:
   main_commit: fde0667b150de551184ec5c5261a34f18538ceed
   summary: "PR #83 exact head passed #985, merged, and resulting-main #986 completed SUCCESS; no active source/governance carrier remains"
-exact_next_safe_action: "On the authorized target environment run npm run runtime:recover -- --target=\"<operator-provided-target-path>\" --apply --confirm=RECOVER-RUNTIME, retain non-secret machine-readable evidence, and separately rotate the credential exposed by PR #71 through the authorized provider/target path. Do not start CORE-QA before TARGET_VERIFIED."<operator-provided-target-path>\" --apply --confirm=RECOVER-RUNTIME, retain non-secret machine-readable evidence, and separately rotate the credential exposed by PR #71 through the authorized provider/target path. Do not start CORE-QA before TARGET_VERIFIED."
+exact_next_safe_action: "On the authorized target environment run npm run runtime:recover -- --target=\"<operator-provided-target-path>\" --apply --confirm=RECOVER-RUNTIME, retain non-secret machine-readable evidence, and separately rotate the credential exposed by PR #71 through the authorized provider/target path. Do not start CORE-QA before TARGET_VERIFIED."
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:

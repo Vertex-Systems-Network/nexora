@@ -29,7 +29,7 @@
 - Registered development unit: `SYS-RUNTIME-IDENTITY`
 - Release train: `builder-beta`
 - Status: `BLOCKED` — source implementation integrated; pending target-environment readiness + exact target-to-web `/login` evidence + credential rotation
-- Real target: operator-provided target environment, `<operator-provided-target-path>`
+- Target environment: operator-provided; absolute target path is runtime input and is not stored as canonical repository state
 - Installed target release: `1.0.0-rc.93`
 - Fresh protected-main baseline reconciled for this pass: `main@8972632c230117c377c1e0e5d7219352518acda7`
 - Source carrier: protected `main@8972632c230117c377c1e0e5d7219352518acda7`; PR #30 exact head `20b75291c761e3c52cb3f89845be76fc06ce27a0` is retired after evidence/state consolidation into PR #82
@@ -277,7 +277,7 @@ Failure modes and controls:
 - redirects mask a different destination → redirects disabled for both source-status and `/login`;
 - exact-target `/login` explicit non-200 → FAIL, never downgraded to BLOCKED;
 - transport/TLS unavailable after valid runtime readiness → BLOCKED without rolling back an independently compatible runtime solely for transport evidence;
-- false canonical advancement → state remains BLOCKED until independent review and real target evidence satisfy DoD.
+- false canonical advancement → state remains BLOCKED until independent review and target-environment evidence satisfy DoD.
 
 ## Performance / reliability / cost
 
