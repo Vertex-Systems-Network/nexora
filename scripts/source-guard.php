@@ -17,6 +17,64 @@ function nexoraFiles(string $root, array $extensions): iterable
     }
 }
 
+function nexoraTargetContractSurface(string $root, string $relative): string
+{
+    return $root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+}
+
+// Security/privacy + portability invariant: active target-contract surfaces must
+// never encode one operator's local server vendor or absolute machine path as
+// canonical repository identity. The target path is runtime input only.
+$operatorNeutralTargetSurfaces = [
+    'README.md',
+    '.ai/state.json',
+    '.ai/resume/CURRENT-STATE.yaml',
+    '.ai/resume/LAST-CHECKPOINT.md',
+    '.ai/handoff/current.md',
+    '.ai/plans/active.md',
+    'scripts/runtime-recovery-orchestrator.php',
+    'scripts/rc93-post-install-identity-repair.php',
+];
+$operatorTargetPlaceholderSurfaces = [
+    'README.md',
+    '.ai/state.json',
+    '.ai/resume/CURRENT-STATE.yaml',
+    '.ai/resume/LAST-CHECKPOINT.md',
+    '.ai/handoff/current.md',
+    '.ai/plans/active.md',
+    'scripts/runtime-recovery-orchestrator.php',
+    'scripts/rc93-post-install-identity-repair.php',
+];
+$legacyLocalServerVendor = 'lara'.'gon';
+$legacyVendorPattern = '/\\b'.preg_quote($legacyLocalServerVendor, '/').'\\b/i';
+$legacyTargetPattern = '/[A-Za-z]:[\\\\\\/]+'.preg_quote($legacyLocalServerVendor, '/').'[\\\\\\/]+www[\\\\\\/]+nexora/i';
+$machineBoundTargetArgumentPattern = '/--target\\s*=\\s*["\\\']?[A-Za-z]:[\\\\\\/]/i';
+$machineBoundCanonicalPathPattern = '/"path"\\s*:\\s*"[A-Za-z]:\\\\/i';
+
+foreach ($operatorNeutralTargetSurfaces as $relative) {
+    $path = nexoraTargetContractSurface($root, $relative);
+    if (! is_file($path)) {
+        $errors[] = "Missing operator-neutral target contract surface: {$relative}";
+        continue;
+    }
+
+    $source = (string) file_get_contents($path);
+    if (preg_match($legacyVendorPattern, $source) === 1 || preg_match($legacyTargetPattern, $source) === 1) {
+        $errors[] = "Operator-neutral target contract regressed to a vendor/machine-specific local-server binding: {$relative}";
+    }
+    if (preg_match($machineBoundTargetArgumentPattern, $source) === 1 || preg_match($machineBoundCanonicalPathPattern, $source) === 1) {
+        $errors[] = "Target path must remain operator-provided runtime input, not a canonical absolute machine path: {$relative}";
+    }
+}
+
+foreach ($operatorTargetPlaceholderSurfaces as $relative) {
+    $path = nexoraTargetContractSurface($root, $relative);
+    $source = is_file($path) ? (string) file_get_contents($path) : '';
+    if (! str_contains($source, '<operator-provided-target-path>')) {
+        $errors[] = "Operator-neutral target placeholder is missing: {$relative}";
+    }
+}
+
 foreach (['app', 'bootstrap', 'config', 'database', 'routes'] as $directory) {
     foreach (nexoraFiles($root.DIRECTORY_SEPARATOR.$directory, ['php']) as $path) {
         $source = (string) file_get_contents($path);

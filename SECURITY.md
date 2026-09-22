@@ -233,3 +233,11 @@ Nexora never treats a generated restore plan as proof of successful recovery. Fi
 ## N1.0 RC17 large-file and transfer safety
 
 Untrusted or potentially large byte transfers must use bounded Nexora transfer policy rather than whole-file PHP memory loads. Media and package staging verify size/integrity around publication; Marketplace downloads use protected temporary storage and configured maximums; Theme/Extension ZIPs enforce entry-count, expanded-size, per-entry and compression-ratio limits in addition to traversal/symlink/case rules. Database backup artifacts are staged and checksum-verified before publication/download. Free-space checks are advisory only: any partial/failed write remains fatal and unpublished/partial destinations must be cleaned. Transfer temporary state is protected runtime data and is never a production-release payload.
+
+## Runtime target privacy and portability
+
+- The repository must not treat one operator's local server vendor, workstation path, or absolute target directory as Nexora runtime identity.
+- Target filesystem location is supplied explicitly at execution time through the governed `--target` argument and is independently resolved/contained by runtime recovery checks.
+- Active AI state, handoff, plan, README, and runtime recovery help surfaces use `<operator-provided-target-path>` rather than persisting machine-local target metadata.
+- Source Guard fails closed if active target-contract surfaces regress to a vendor-specific local-server marker, an absolute Windows target argument/path, or lose the operator-provided target placeholder.
+- This portability/privacy rule does not weaken runtime security: symlink/junction containment, shell bypass, bounded child execution, TLS verification, redirect rejection, one-time target↔web challenge, authoritative `/login`, and target/source/release evidence separation remain mandatory.
