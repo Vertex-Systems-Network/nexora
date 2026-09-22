@@ -32,14 +32,14 @@
     }
   ],
   "current_target": {
-    "environment": "Windows + Laragon real-target development environment",
-    "path": "D:\\laragon\\www\\nexora",
+    "environment": "operator-provided target environment",
+    "path": "<operator-provided-target-path>",
     "installed_release": "1.0.0-rc.93",
     "expected_source_release_after_clean_upgrade_or_install": "1.0.0-rc.94"
   },
   "runtime_closure_evidence": {
     "evidence_date": "2026-08-25",
-    "source": "operator-supplied real-target command output in the active development session",
+    "source": "operator-supplied target command output in the active development session",
     "repair_dry_run": "PASS; exact rc.93 target; only activation/environment/process/service mismatched; no mutation",
     "repair_apply": "PASS; only four approved planes repaired; protected backup and repair receipt emitted",
     "deep_compatibility": "PASS; mismatches=[]; compatible=true; mode=installed-data-plane; deployment_drift=pass",
@@ -49,18 +49,18 @@
     "web_identity": "PENDING fresh exact target-local CLI-to-web one-time challenge acknowledgement against the configured app.url origin",
     "login": "PENDING /login target evidence on the same exact proven web origin",
     "reviewed_dependency_attestation": "historical PR #30 reviewed-lock evidence remains retained, but the reconciled carrier adopts the current protected-main package-lock representation; fresh exact-head release certification is required before the new source head is accepted. This does not assert the installed rc.93 target consumed or resealed current dependency state.",
-    "orchestrator_source_work": "Runtime/source implementation and AI governance/evidence consolidation are integrated and protected-main verified through fde0667b150de551184ec5c5261a34f18538ceed. PR #83 final head 75d5436b0394f246bdca626571666abe77cd4012 passed #985 / 35673582569, merged under WVR-NEX-PR83-MAIN-REVIEW-001, and resulting-main #986 / 35767459733 completed SUCCESS. The runtime recovery orchestrator already covers final readiness/current receipt, exact target-to-web identity and authoritative /login; remaining closure evidence is real-target/provider only."
+    "orchestrator_source_work": "Runtime/source implementation and AI governance/evidence consolidation are integrated and protected-main verified through fde0667b150de551184ec5c5261a34f18538ceed. PR #83 final head 75d5436b0394f246bdca626571666abe77cd4012 passed #985 / 35673582569, merged under WVR-NEX-PR83-MAIN-REVIEW-001, and resulting-main #986 / 35767459733 completed SUCCESS. The runtime recovery orchestrator already covers final readiness/current receipt, exact target-to-web identity and authoritative /login; remaining closure evidence is target/provider only."
   },
   "blocker": {
     "category": "runtime-target-provider",
-    "summary": "Repository/source/governance remediation is integrated. RUNTIME-CLOSURE-001 remains BLOCKED on real-target readiness/current receipt, exact CLI-to-web identity, authoritative /login evidence, and rotation of the credential exposed by quarantined PR #71.",
+    "summary": "Repository/source/governance remediation is integrated. RUNTIME-CLOSURE-001 remains BLOCKED on target environment readiness/current receipt, exact CLI-to-web identity, authoritative /login evidence, and rotation of the credential exposed by quarantined PR #71.",
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "On the real Windows/Laragon rc.93 target, obtain fresh post-install-status --assert-ready with status=pass, ready=true, runtime_ready=true, receipt_current=true, errors=[].",
+    "On the operator-provided rc.93 target environment, obtain fresh post-install-status --assert-ready with status=pass, ready=true, runtime_ready=true, receipt_current=true, errors=[].",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
     "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",
-    "Rotate the credential exposed by quarantined PR #71 through an authorized real-target/provider path without recording the replacement secret.",
+    "Rotate the credential exposed by quarantined PR #71 through an authorized target/provider path without recording the replacement secret.",
     "Only after target gates pass, mark RUNTIME-CLOSURE-001 TARGET_VERIFIED and advance to CORE-QA-001."
   ],
   "next_stage": {
@@ -196,5 +196,5 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-09-22T23:27:00+05:00"
+  "updated_at": "2026-09-23T01:56:00+05:00"
 }

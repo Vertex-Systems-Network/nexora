@@ -9,7 +9,7 @@ claims:
   - id: ACTIVE-STAGE
     value: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     status: BLOCKED
-    evidence: ".ai/state.json + unresolved real-target readiness/identity/login and credential rotation"
+    evidence: ".ai/state.json + unresolved target-environment readiness/identity/login and credential rotation"
   - id: OPEN-ISSUES
     value: [72, 74]
     status: OBSERVED

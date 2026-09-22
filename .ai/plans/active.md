@@ -28,8 +28,8 @@
 - Parent stage: `RUNTIME-CLOSURE-001 — Installation + Runtime Closure`
 - Registered development unit: `SYS-RUNTIME-IDENTITY`
 - Release train: `builder-beta`
-- Status: `BLOCKED` — source implementation integrated; pending real-target readiness + exact target-to-web `/login` evidence + credential rotation
-- Real target: Windows + Laragon, `D:\laragon\www\nexora`
+- Status: `BLOCKED` — source implementation integrated; pending target-environment readiness + exact target-to-web `/login` evidence + credential rotation
+- Target environment: operator-provided; absolute target path is runtime input and is not stored as canonical repository state
 - Installed target release: `1.0.0-rc.93`
 - Fresh protected-main baseline reconciled for this pass: `main@8972632c230117c377c1e0e5d7219352518acda7`
 - Source carrier: protected `main@8972632c230117c377c1e0e5d7219352518acda7`; PR #30 exact head `20b75291c761e3c52cb3f89845be76fc06ce27a0` is retired after evidence/state consolidation into PR #82
@@ -79,15 +79,15 @@ Close the installed rc.93 post-install runtime identity mismatch without disguis
 - Protected main `e19d6fa818a7eebaf293d34bd87cff79ebc90ade` was reconciled into #30 while preserving its governance/README history and retaining the exact reviewed Vitest/lock intent.
 - Issue #46 / PR #51 was synchronized to that current base with exactly three intended changed paths; exact-head release certification #885 / `34424303763` passed.
 - PR #51 is integrated into #30 as `68d6aa5d8610e05acf7c51bed503ae09bd4311cd`.
-- This checkpoint is source-work evidence only. Final post-sync #30 exact-head CI/review plus fresh real-target readiness, target↔web identity and `/login` evidence remain mandatory.
+- This checkpoint is source-work evidence only. Final post-sync #30 exact-head CI/review plus fresh target-environment readiness, target↔web identity and `/login` evidence remain mandatory.
 
-## Real-target evidence received — 2026-08-25
+## Target-environment evidence received — 2026-08-25
 
-Operator-supplied command output from `D:\laragon\www\nexora` establishes the following observed facts. This is real-target evidence supplied in-session; it is not replaced by CI/source claims.
+Operator-supplied command output from the configured target path establishes the following observed facts. This is target-environment evidence supplied in-session; it is not replaced by CI/source claims.
 
 ### Repair dry-run
 
-`npm run repair:rc93 -- --target="D:\laragon\www\nexora"`
+`npm run repair:rc93 -- --target="<operator-provided-target-path>"`
 
 Observed:
 
@@ -99,7 +99,7 @@ Observed:
 
 ### Bounded repair apply
 
-`npm run repair:rc93 -- --target="D:\laragon\www\nexora" --apply --confirm=REPAIR-RC93`
+`npm run repair:rc93 -- --target="<operator-provided-target-path>" --apply --confirm=REPAIR-RC93`
 
 Observed:
 
@@ -161,13 +161,13 @@ Canonical implementation target: `scripts/runtime-recovery-orchestrator.php`, ex
 Dry-run default:
 
 ```bat
-npm run runtime:recover -- --target="D:\laragon\www\nexora"
+npm run runtime:recover -- --target="<operator-provided-target-path>"
 ```
 
 Apply requires explicit mutation authority:
 
 ```bat
-npm run runtime:recover -- --target="D:\laragon\www\nexora" --apply --confirm=RECOVER-RUNTIME
+npm run runtime:recover -- --target="<operator-provided-target-path>" --apply --confirm=RECOVER-RUNTIME
 ```
 
 Required behavior:
@@ -277,7 +277,7 @@ Failure modes and controls:
 - redirects mask a different destination → redirects disabled for both source-status and `/login`;
 - exact-target `/login` explicit non-200 → FAIL, never downgraded to BLOCKED;
 - transport/TLS unavailable after valid runtime readiness → BLOCKED without rolling back an independently compatible runtime solely for transport evidence;
-- false canonical advancement → state remains BLOCKED until independent review and real target evidence satisfy DoD.
+- false canonical advancement → state remains BLOCKED until independent review and target-environment evidence satisfy DoD.
 
 ## Performance / reliability / cost
 

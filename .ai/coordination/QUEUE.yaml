@@ -6,7 +6,7 @@ items:
     source: "Issue #74"
     status: ACTIVE_TARGET_CLOSURE
     priority: 1
-    note: "W01/W02/W05/W06 source lanes are complete; W03/W04 real-target evidence and W07 closure remain blocked on target/provider access."
+    note: "W01/W02/W05/W06 source lanes are complete; W03/W04 target-environment evidence and W07 closure remain blocked on target/provider access."
   - id: NEX-AUDIT-72
     source: "Issue #72"
     status: BLOCKED_EXTERNAL_TARGET

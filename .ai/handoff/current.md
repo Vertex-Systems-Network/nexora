@@ -3,11 +3,11 @@
 - Protected main: `87210e7674f67fb75e046c185206573bebd906f9`.
 - PR #82 is merged; exact head passed #980 / `35671637039` and merge used scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002`.
 - Protected-main push certification #981 / `35672290666` completed **SUCCESS** on exact protected main.
-- Issue #72 source remediation is complete; only real target/provider credential rotation remains.
-- Issue #74 is the active runtime-target coordinator: W01/W02/W05/W06 done, W03/W04/W07 blocked on real target/provider evidence.
+- Issue #72 source remediation is complete; only target/provider credential rotation remains.
+- Issue #74 is the active runtime-target coordinator: W01/W02/W05/W06 done, W03/W04/W07 blocked on target/provider evidence.
 - PR #1 is FUTURE_CARRIER_FROZEN; PR #75/#81 are closed stale maintenance.
 - Runtime target remains BLOCKED; CORE-QA stays locked.
-- After this state-only reconciliation merges, no source carrier remains active for this stage; resume directly at real-target W03/W04 + credential rotation.
+- After this state-only reconciliation merges, no source carrier remains active for this stage; resume directly at target-environment W03/W04 + credential rotation.
 
 # Historical Nexora AI Handoff — retained for evidence
 
@@ -51,7 +51,7 @@ This is source reconciliation only. A follow-up scope audit removed the historic
 ## Governance invariants
 
 - No future stage starts before the active stage is genuinely accepted.
-- Source/CI evidence and real-target evidence remain separate.
+- Source/CI evidence and target-environment evidence remain separate.
 - Existing defects use DMAIC/control evidence; high/critical work keeps FMEA/threat controls.
 - AI-authored PASS prose or a self-authored receipt is not runtime proof.
 - Critical changes require exact-head independent review in addition to authoring tests/CI.
@@ -69,16 +69,13 @@ Active unit:
 
 Status:
 
-**BLOCKED pending final real-target readiness + exact target-to-web `/login` evidence.**
+**BLOCKED pending final target-environment readiness + exact target-to-web `/login` evidence.**
 
 Do not start `CORE-QA-001` yet.
 
-## Real target
+## Target environment
 
-```text
-D:\laragon\www\nexora
-installed release: 1.0.0-rc.93
-```
+The target path is intentionally not canonicalized in the repository. It is supplied by the operator at execution time. Historical accepted target evidence refers to the operator-selected rc.93 installation without preserving its machine-local path here.
 
 ## Live target evidence received on 2026-08-25
 
@@ -141,7 +138,7 @@ PR #30 closes the observed operator-control gap without introducing a new roadma
 Intended operator command after source acceptance:
 
 ```bat
-npm run runtime:recover -- --target="D:\laragon\www\nexora" --apply --confirm=RECOVER-RUNTIME
+npm run runtime:recover -- --target="<operator-provided-target-path>" --apply --confirm=RECOVER-RUNTIME
 ```
 
 Current fail-closed contract:
@@ -228,7 +225,7 @@ Any head change makes prior CI evidence stale.
 - No human review or independent-human approval is claimed for those AI reviews.
 - Because #51 integration and this status synchronization move PR #30's head, every older #30 exact-head review is stale.
 - Before any PR #30 merge, perform a fresh review bound to the final exact head. If repository policy requires an independent actor/runtime beyond this AI context, that requirement remains a merge gate; absence of findings is not implicit approval.
-- Source review never substitutes for fresh real-target readiness, exact CLI↔web identity, or `/login` evidence.
+- Source review never substitutes for fresh target-environment readiness, exact CLI↔web identity, or `/login` evidence.
 
 ## Current source-work acceptance requirements
 
