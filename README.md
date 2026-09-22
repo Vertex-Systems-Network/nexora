@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-22):** protected `main` is `8972632c230117c377c1e0e5d7219352518acda7`. Runtime/source implementation, hardened release certification, repository hygiene, dependency locks and regression fixes are integrated on main. PR #30 exact head `20b75291c761e3c52cb3f89845be76fc06ce27a0` passed certification #978 / `35662411404` and has no unique product/runtime/build-config diff after scope scrub; its remaining evidence/state is consolidated into governance PR #82 rather than merging a second runtime carrier. PR #82 previous exact head `09e548a067a75295f3110a045df567c90718039f` passed #976 / `35661610368`; this material consolidation creates a new head requiring fresh exact-head CI and independent review. The active stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED** on real-target evidence and credential rotation. Source integration is not target verification or release completion.
+> **Canonical current status (2026-09-22):** protected `main` is `87210e7674f67fb75e046c185206573bebd906f9` after governance/evidence PR #82 merged. PR #82 exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf` passed release certification #980 / `35671637039` and merged under scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002`. Protected-main push certification #981 / `35672290666` has started and is currently **in progress**; pending is not PASS. The active product stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED** only on real-target readiness/current receipt, exact target↔web identity, authoritative `/login`, and credential rotation after PR #71. PR #1 remains frozen future work and is not part of the active runtime-closure path.
 
 ## AI development startup gate
 
@@ -21,14 +21,15 @@ This rule applies on every AI development start, including work resumed from an 
 ## AI-Native Progress Ledger
 
 - **Observed:** 2026-09-22
-- **Protected main:** `8972632c230117c377c1e0e5d7219352518acda7`
+- **Protected main:** `87210e7674f67fb75e046c185206573bebd906f9`
 - **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Open remediation Issues:** #72, #74
-- **Source implementation:** integrated on protected main
-- **PR #30:** `20b75291c761e3c52cb3f89845be76fc06ce27a0` — #978 / `35662411404` **SUCCESS**; no unique runtime/product/build-config diff remains; evidence/state consolidated into #82; not a second merge path
-- **PR #82:** prior head `09e548a067a75295f3110a045df567c90718039f` — #976 / `35661610368` **SUCCESS**; consolidated head is **VERIFYING**
-- **Current blockers:** fresh PR #82 exact-head CI + independent review; real-target readiness/current receipt; exact target↔web identity; authoritative `/login`; credential rotation after PR #71
-- **Next safe action:** certify/review consolidated PR #82, merge only with expected-head protection when green/approved, then continue real-target closure; do not start CORE-QA before TARGET_VERIFIED
+- **Open remediation Issues:** #72 (target credential rotation only), #74 (runtime target evidence coordination)
+- **Merged governance/evidence carrier:** PR #82 — exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf`, #980 / `35671637039` **SUCCESS**
+- **Protected-main push certification:** #981 / `35672290666` — **IN_PROGRESS**
+- **Open PR execution path:** PR #1 only, classified **FUTURE_CARRIER_FROZEN**
+- **Closed stale maintenance:** PR #75 and PR #81 closed unmerged; recreate/rebase dependency maintenance only after runtime target verification
+- **Current blockers:** real-target readiness/current receipt; exact target↔web identity; authoritative `/login`; credential rotation after PR #71
+- **Next safe action:** observe #981 once terminal, then continue real-target W03/W04/W07 evidence; do not start CORE-QA before TARGET_VERIFIED
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 
