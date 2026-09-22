@@ -1,0 +1,64 @@
+schema_version: 1
+repository: Vertex-Systems-Network/nexora
+compact_state_path: .ai/resume
+observed_main:
+  branch: main
+  sha: 8972632c230117c377c1e0e5d7219352518acda7
+  observed_at: "2026-09-22"
+active_issue:
+  number: 72
+  title: "Audit remediation: quarantine CORE-QA and harden source/release gates"
+active_pr:
+  number: 82
+  title: "chore(ai-governance): consolidate supervisor state and runtime evidence"
+  branch: ai/supervisor-governance-v1
+active_branch: ai/supervisor-governance-v1
+current_stage:
+  id: RUNTIME-CLOSURE-001
+  unit: SYS-RUNTIME-IDENTITY
+  status: BLOCKED
+current_milestone:
+  id: AI-SUPERVISOR-CARRIER-CONSOLIDATION-005
+  title: "Consolidate retired runtime carrier state/evidence into governance"
+  status: VERIFYING
+last_completed_milestone:
+  main_commit: 8972632c230117c377c1e0e5d7219352518acda7
+  summary: "runtime/source implementation integrated on main; PR #30 scope-scrubbed and certified green"
+exact_next_safe_action: "Obtain fresh exact-head certification and distinct independent review for consolidated PR #82. If both pass, merge #82 with expected-head protection. Then continue real-target readiness/identity/login and credential rotation; do not start CORE-QA before TARGET_VERIFIED."
+pending_runner_ids:
+  - RB-NEX-MAIN-POSTMERGE-001
+  - RB-NEX-AI-SUPERVISOR-CI-004
+blocked_runner_ids:
+  - RB-NEX-AI-SUPERVISOR-CI-004
+current_blockers:
+  - "RUNTIME-CLOSURE-001 remains BLOCKED; CORE-QA-001 must not start."
+  - "Real-target readiness/current receipt, target↔web identity, and authoritative /login evidence remain required."
+  - "Credential rotation after quarantined PR #71 remains a target/provider action."
+  - "Consolidated PR #82 requires fresh exact-head CI and distinct independent review."
+  - "No canonical numeric progress metric is available; percentages must not be fabricated."
+timeout_control:
+  max_consolidated_status_refreshes_per_milestone: 1
+  tight_polling_forbidden: true
+  rerun_on_chat_timeout_forbidden: true
+  second_refresh_requires_material_transition_and_journal_entry: true
+progress:
+  current_module:
+    label: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
+    percent: null
+    display_bar: "[??????????] N/A"
+    basis: "source implementation integrated; target verification and credential rotation remain blocked"
+  overall:
+    label: "Nexora"
+    percent: null
+    display_bar: "[??????????] N/A"
+    basis: "canonical numeric metric unavailable"
+readme_progress_sync:
+  required_every_material_milestone: true
+  ledger_path: "README.md#ai-native-progress-ledger"
+  missing_sync_blocks_completion_claim: true
+state_drift:
+  detected: true
+  notes:
+    - "PR #30 code is already represented on protected main; remaining evidence/state is consolidated into PR #82."
+    - "PR #30 exact head 20b75291c761e3c52cb3f89845be76fc06ce27a0 passed #978 / 35662411404 before retirement."
+    - "PR #82 previous exact head 09e548a067a75295f3110a045df567c90718039f passed #976 / 35661610368; consolidation requires fresh CI/review."

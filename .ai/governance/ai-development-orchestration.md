@@ -478,7 +478,24 @@ Record operational facts:
 
 Do not require or persist private chain-of-thought. Decision summaries and evidence are sufficient for audit/handoff.
 
-## 20. Promotion Contract
+## 20. Progress Visibility and README Synchronization
+
+README progress is a governed handoff surface, not optional project marketing.
+
+For every material AI-assisted engineering milestone:
+
+1. reconcile compact state, live Issues/PRs and exact source head;
+2. update the fixed `README.md` **AI-Native Progress Ledger** with repository-backed status;
+3. include exact active PR/head and latest terminal CI evidence when available;
+4. record FAIL, regression, VERIFYING and WAITING states as truthfully as PASS;
+5. use canonical numeric progress only; otherwise display `[??????????] N/A — canonical numeric metric unavailable`;
+6. keep Source / Target / Release evidence distinct;
+7. do not create a new source-only commit merely to update a running-CI status; fold the README update into the next material change or governance checkpoint;
+8. treat a missed required README sync as an incomplete milestone/handoff defect.
+
+Automation implementing `AI-GOV-AUTOMATION-100` must enforce this check before a run transitions to a terminal reported milestone state.
+
+## 21. Promotion Contract
 
 A change can be promoted only when the exact head/artifact being promoted has:
 
