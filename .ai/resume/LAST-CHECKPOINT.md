@@ -1,18 +1,15 @@
-# Last Checkpoint — AI-SUPERVISOR-POST-MERGE-RECONCILIATION-007
+# Last Checkpoint — TARGET-EVIDENCE-WAIT-008
 
-Protected `main` is `87210e7674f67fb75e046c185206573bebd906f9`.
+Source/governance closure is complete through the current protected-main baseline `87210e7674f67fb75e046c185206573bebd906f9`.
 
-Completed before this reconciliation head:
+Verified source evidence:
 
-- PR #82 exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf` passed release certification #980 / `35671637039`.
-- One-time admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002` was scoped to that exact head/base after waiver 001 expired without mutation on a transport-disconnected merge attempt.
-- PR #82 merged successfully to protected main as `87210e7674f67fb75e046c185206573bebd906f9`.
-- Protected-main push certification #981 / `35672290666` completed **SUCCESS** on exact protected main.
-- Stale dependency PRs #75/#81 are closed unmerged and deferred until after target closure.
-- PR #1 remains Draft and is classified FUTURE_CARRIER_FROZEN; it is not the active runtime-closure merge path.
-- Issue #72 source remediation is complete but remains open for real target/provider credential rotation.
-- Issue #74 now reflects source lanes W01/W02/W05/W06 done and W03/W04/W07 target-gated.
+- PR #82 exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf` passed #980 / `35671637039` and merged under scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002`.
+- Protected-main push certification #981 / `35672290666` completed SUCCESS.
+- PR #83 is the final state-only reconciliation carrier. Its prior exact head `3a71a0f06ec6c8ad3340b4e0136a51a5d74e91be` passed #984 / `35672648715`; this final steady-state head requires its own exact-head certification before merge.
+- Stale dependency PRs #75/#81 are closed unmerged.
+- PR #1 remains FUTURE_CARRIER_FROZEN.
+- Issue #72 source remediation is complete; only target/provider credential rotation remains.
+- Issue #74 source lanes W01/W02/W05/W06 are complete.
 
-This PR #83 is governance/state reconciliation only. It does not mutate product/runtime/dependencies/target/provider/release state.
-
-Next safe action: exact-head certify PR #83, then apply its exact-head review/waiver merge gate. Real-target readiness, exact target↔web identity, authoritative /login and credential rotation remain required before TARGET_VERIFIED / CORE-QA.
+After PR #83 merges, no source/governance carrier should remain active for this stage. The next work is external target evidence only: W03/W04 exact target readiness/identity, authoritative /login on the same origin, and Issue #72 credential rotation. CORE-QA remains locked.

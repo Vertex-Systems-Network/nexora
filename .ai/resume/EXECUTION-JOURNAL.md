@@ -63,3 +63,6 @@
 - Opened PR #83 to reconcile durable README/compact/canonical state without changing target verdict.
 - Follow-up evidence transition: protected-main push certification #981 / `35672290666` completed SUCCESS on exact main `87210e7674f67fb75e046c185206573bebd906f9`.
 - Pre-merge review of PR #83 found Runner Benchmark history truncation; terminal evidence must remain immutable, so the runner ledger is repaired by preserving prior entries and appending new #980/#981/#83 records rather than replacing history.
+- Final steady-state cleanup: PR #83 durable state is prepared to land with no active source carrier after merge; next state is WAITING_EXTERNAL_TARGET rather than another reconciliation loop.
+- README open-PR wording corrected so PR #83 is not omitted while it is the current state carrier; resulting-main execution path is target evidence only, while PR #1 stays future-frozen.
+- Older handoff/active-plan source checkpoints are retained but explicitly marked historical where their SHAs/merge gates are no longer current.

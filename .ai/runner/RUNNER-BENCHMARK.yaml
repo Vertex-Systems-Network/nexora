@@ -110,12 +110,26 @@ tasks:
     source_issue_or_pr: "PR #83"
     command_or_workflow: "Nexora release certification"
     source_ref: "ai/post-merge-reconcile-981"
-    source_sha: PENDING_RECONCILIATION_HEAD
+    source_sha: "3a71a0f06ec6c8ad3340b4e0136a51a5d74e91be"
     environment_matrix_input_fixture: "GitHub-hosted release-certification workflow"
-    authorization_state: "REGISTERED_ONLY; exact head will be bound by PR comment after commit creation"
+    authorization_state: "automatic repository CI; superseded by final steady-state cleanup head"
     security_critical: true
     merge_blocking: true
     expected_runner_time: null
-    deterministic_dedup_key: "nexora:pr83:postmerge-reconcile:release-certification"
+    deterministic_dedup_key: "nexora:pr83:3a71a0f06ec6c8ad3340b4e0136a51a5d74e91be:release-certification"
+    status: PASS
+    immutable_evidence: "run #984 / 35672648715 conclusion=success"
+  - id: RB-NEX-POSTMERGE-RECONCILE-CI-002
+    source_work: "TARGET-EVIDENCE-WAIT-008 steady-state transition"
+    source_issue_or_pr: "PR #83"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "ai/post-merge-reconcile-981"
+    source_sha: PENDING_FINAL_STEADY_STATE_HEAD
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow"
+    authorization_state: "REGISTERED_ONLY; exact final head bound by PR comment after commit creation"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:pr83:final-steady-state:release-certification"
     status: BLOCKED_BINDING
     immutable_evidence: null

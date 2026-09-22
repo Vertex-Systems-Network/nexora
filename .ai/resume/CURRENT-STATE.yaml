@@ -8,32 +8,26 @@ observed_main:
 active_issue:
   number: 74
   title: "AI orchestration: RUNTIME-CLOSURE remediation workers (7 parallel lanes)"
-active_pr:
-  number: 83
-  title: "chore(ai-governance): reconcile post-merge runtime state"
-  branch: ai/post-merge-reconcile-981
-active_branch: ai/post-merge-reconcile-981
+active_pr: null
+active_branch: main
 current_stage:
   id: RUNTIME-CLOSURE-001
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: AI-SUPERVISOR-POST-MERGE-RECONCILIATION-007
-  title: "Reconcile protected-main merge, open queue and target-only blockers"
-  status: VERIFYING
+  id: TARGET-EVIDENCE-WAIT-008
+  title: "Await real-target readiness/identity/login evidence and credential rotation"
+  status: WAITING_EXTERNAL_TARGET
 last_completed_milestone:
   main_commit: 87210e7674f67fb75e046c185206573bebd906f9
-  summary: "PR #82 governance/evidence consolidation merged to protected main under scoped admin waiver after exact-head #980 SUCCESS"
-exact_next_safe_action: "Require fresh exact-head certification for PR #83. If green and its exact head/base are unchanged, complete its review/waiver merge decision. Then continue real-target W03/W04 identity/readiness plus Issue #72 credential rotation. Do not start CORE-QA before TARGET_VERIFIED."
-pending_runner_ids:
-  - RB-NEX-POSTMERGE-RECONCILE-CI-001
-blocked_runner_ids:
-  - RB-NEX-POSTMERGE-RECONCILE-CI-001
+  summary: "source/governance integration and protected-main verification complete; PR #83 is the final state-only reconciliation carrier"
+exact_next_safe_action: "Use authorized access to D:\\laragon\\www\\nexora for W03/W04 evidence: final readiness/current receipt, exact CLI↔web identity, authoritative /login, and separately rotate the PR #71 exposed credential via the real target/provider. Do not start CORE-QA before TARGET_VERIFIED."
+pending_runner_ids: []
+blocked_runner_ids: []
 current_blockers:
   - "Real-target final readiness/current receipt remains required."
   - "Exact target-local CLI↔web identity and authoritative /login evidence remain required."
   - "Credential exposed by quarantined PR #71 still requires authorized real target/provider rotation and non-secret evidence."
-  - "PR #83 post-merge state reconciliation requires exact-head CI and applicable review/waiver gate."
   - "CORE-QA-001 must not start before RUNTIME-CLOSURE-001 is TARGET_VERIFIED."
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
@@ -45,7 +39,7 @@ progress:
     label: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     percent: null
     display_bar: "[??????????] N/A"
-    basis: "source/governance integrated; remaining acceptance requires real-target/provider evidence"
+    basis: "source/governance integrated and verified; remaining acceptance is real-target/provider evidence"
   overall:
     label: "Nexora"
     percent: null
@@ -56,10 +50,8 @@ readme_progress_sync:
   ledger_path: "README.md#ai-native-progress-ledger"
   missing_sync_blocks_completion_claim: true
 state_drift:
-  detected: true
+  detected: false
   notes:
-    - "PR #82 is merged; previous compact state still represented it as active."
-    - "PR #75 and #81 are closed unmerged stale dependency maintenance."
     - "PR #1 is FUTURE_CARRIER_FROZEN and is not active runtime-closure work."
-    - "Issue #72 is source-complete but stays open solely for real target/provider credential rotation."
+    - "Issue #72 remains open solely for real target/provider credential rotation."
     - "Issue #74 source lanes W01/W02/W05/W06 are done; W03/W04/W07 remain target-gated."

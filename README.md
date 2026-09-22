@@ -26,11 +26,11 @@ This rule applies on every AI development start, including work resumed from an 
 - **Open remediation Issues:** #72 (target credential rotation only), #74 (runtime target evidence coordination)
 - **Merged governance/evidence carrier:** PR #82 — exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf`, #980 / `35671637039` **SUCCESS**
 - **Protected-main push certification:** #981 / `35672290666` — **SUCCESS**
-- **Post-merge reconciliation:** PR #83 — **VERIFYING**; exact final head will be bound on the PR after this material commit
-- **Open PR execution path:** PR #1 only, classified **FUTURE_CARRIER_FROZEN**
+- **Active source/governance carrier:** PR #83, final state-only reconciliation; after merge no source carrier remains for this stage
+- **Future PR:** PR #1, classified **FUTURE_CARRIER_FROZEN**
 - **Closed stale maintenance:** PR #75 and PR #81 closed unmerged; recreate/rebase dependency maintenance only after runtime target verification
 - **Current blockers:** real-target readiness/current receipt; exact target↔web identity; authoritative `/login`; credential rotation after PR #71
-- **Next safe action:** exact-head certify/review PR #83, then continue real-target W03/W04/W07 evidence; do not start CORE-QA before TARGET_VERIFIED
+- **Next safe action after PR #83 merge:** continue real-target W03/W04/W07 evidence and Issue #72 credential rotation; do not start CORE-QA before TARGET_VERIFIED
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 
@@ -55,13 +55,11 @@ Nexora has extensive source implementation and passing hosted certification evid
 
 ## Current next sequence
 
-1. Run fresh exact-head release certification for consolidated PR #82.
-2. Obtain distinct independent exact-head review for PR #82.
-3. Merge PR #82 only when CI/review pass and expected head is unchanged.
-4. Obtain fresh real-target readiness/current-receipt evidence.
-5. Prove exact target-local CLI↔web identity and authoritative `/login` on the same origin.
-6. Rotate the credential exposed by PR #71 through an authorized target/provider path.
-7. Mark `RUNTIME-CLOSURE-001` TARGET_VERIFIED only after all target gates pass; only then start `CORE-QA-001`.
+1. Merge the final state-only PR #83 only after fresh exact-head certification and its applicable review/waiver gate.
+2. Obtain fresh real-target readiness/current-receipt evidence.
+3. Prove exact target-local CLI↔web identity and authoritative `/login` on the same origin.
+4. Rotate the credential exposed by PR #71 through an authorized target/provider path.
+5. Mark `RUNTIME-CLOSURE-001` TARGET_VERIFIED only after all target gates pass; only then start `CORE-QA-001`.
 
 ## Core stack
 

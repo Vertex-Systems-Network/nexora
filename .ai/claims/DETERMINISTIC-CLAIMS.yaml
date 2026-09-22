@@ -15,9 +15,9 @@ claims:
     status: OBSERVED
     evidence: "live GitHub issue intake after PR #82 merge"
   - id: OPEN-PRS
-    value: [1, 83]
-    status: OBSERVED
-    evidence: "PR #1 future-frozen + PR #83 post-merge reconciliation; #75/#81 closed and #82 merged"
+    value: [1]
+    status: PROPOSED_POST_MERGE_STEADY_STATE
+    evidence: "PR #83 is the final state-only reconciliation carrier; after its merge PR #1 remains the only open PR and is future-frozen"
   - id: PR82-MERGE
     value: "5d727efe1ba2810c590e8a86ebc3f122a0c998cf -> 87210e7674f67fb75e046c185206573bebd906f9"
     status: SOURCE_INTEGRATED

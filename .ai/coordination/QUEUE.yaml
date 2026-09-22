@@ -12,11 +12,6 @@ items:
     status: BLOCKED_EXTERNAL_TARGET
     priority: 1
     note: "Repository/source remediation complete; exposed credential still requires real target/provider rotation with non-secret evidence."
-  - id: NEX-GOV-83
-    source: "PR #83"
-    status: VERIFYING
-    priority: 1
-    note: "Post-merge README/compact/canonical state reconciliation; no product/runtime/target mutation."
   - id: NEX-MAIN-981
     source: "main@87210e7674f67fb75e046c185206573bebd906f9"
     status: PASS

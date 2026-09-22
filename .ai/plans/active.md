@@ -5,10 +5,9 @@
 - Protected main: `87210e7674f67fb75e046c185206573bebd906f9`.
 - Source implementation: SOURCE_DONE.
 - Governance/evidence consolidation PR #82: MERGED after exact-head #980 SUCCESS.
-- Post-merge state reconciliation: PR #83 VERIFYING.
 - Protected-main push #981 / `35672290666`: **PASS** on exact protected main.
 
-## Remaining active work
+## Remaining active work after this reconciliation merges
 
 1. Real target final readiness/current receipt.
 2. Exact target-local CLI↔web one-time identity proof on configured app.url.
@@ -22,7 +21,7 @@
 - Dependency maintenance #75/#81: closed stale; recreate after target closure.
 - CORE-QA-001: locked until RUNTIME-CLOSURE-001 is TARGET_VERIFIED.
 
-# Active Plan — RUNTIME-CLOSURE-001
+# Historical detailed plan snapshot — RUNTIME-CLOSURE-001
 
 ## Identity
 
