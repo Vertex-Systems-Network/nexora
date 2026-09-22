@@ -149,15 +149,29 @@ tasks:
     immutable_evidence: "run #986 / 35767459733 conclusion=success"
   - id: RB-NEX-TARGET-HANDOFF-CI-001
     source_work: "stable target-evidence handoff after source closure"
-    source_issue_or_pr: "handoff reconciliation PR"
+    source_issue_or_pr: "PR #84"
     command_or_workflow: "Nexora release certification"
     source_ref: "ai/target-evidence-handoff-986"
-    source_sha: PENDING_HANDOFF_HEAD
+    source_sha: "7d27a5e47313df315802b75d848e8d350eb7e80d"
     environment_matrix_input_fixture: "GitHub-hosted release-certification workflow"
-    authorization_state: "REGISTERED_ONLY; exact head will be bound by PR comment after commit creation"
+    authorization_state: "automatic repository CI; merged under scoped admin waiver WVR-NEX-PR84-MAIN-REVIEW-001"
     security_critical: true
     merge_blocking: true
     expected_runner_time: null
-    deterministic_dedup_key: "nexora:target-evidence-handoff-986:release-certification"
-    status: BLOCKED_BINDING
-    immutable_evidence: null
+    deterministic_dedup_key: "nexora:pr84:7d27a5e47313df315802b75d848e8d350eb7e80d:release-certification"
+    status: PASS
+    immutable_evidence: "run #987 / 35768800508 conclusion=success"
+  - id: RB-NEX-MAIN-POSTMERGE-004
+    source_work: "post-PR84 protected-main verification"
+    source_issue_or_pr: "main after PR #84"
+    command_or_workflow: "Nexora release certification push workflow"
+    source_ref: "main"
+    source_sha: "c938f3cca6525da4f6f5bdc167963abd3a3dc883"
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow"
+    authorization_state: "automatic repository CI only"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:main:c938f3cca6525da4f6f5bdc167963abd3a3dc883:postmerge-certification"
+    status: PASS
+    immutable_evidence: "run #988 / 35783620497 conclusion=success"

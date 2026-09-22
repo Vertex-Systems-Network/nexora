@@ -8,7 +8,7 @@ observed_main:
   semantics: "last source/governance baseline verified by protected-main certification #986; always re-read live main before mutation because later state-only reconciliation may advance the branch without changing the target verdict"
 active_issue:
   number: 74
-  title: "RUNTIME-CLOSURE: real-target readiness and identity coordination"
+  title: "RUNTIME-CLOSURE: target readiness and identity coordination"
 active_pr: null
 active_branch: main
 current_stage:
@@ -17,16 +17,16 @@ current_stage:
   status: BLOCKED
 current_milestone:
   id: TARGET-EVIDENCE-WAIT-008
-  title: "Execute real-target recovery/identity/login evidence and credential rotation"
+  title: "Execute target-environment recovery/identity/login evidence and credential rotation"
   status: WAITING_EXTERNAL_TARGET
 last_completed_milestone:
   main_commit: fde0667b150de551184ec5c5261a34f18538ceed
   summary: "PR #83 exact head passed #985, merged, and resulting-main #986 completed SUCCESS; no active source/governance carrier remains"
-exact_next_safe_action: "On authorized real target D:\\laragon\\www\\nexora run npm run runtime:recover -- --target=\"D:\\laragon\\www\\nexora\" --apply --confirm=RECOVER-RUNTIME, retain non-secret machine-readable evidence, and separately rotate the credential exposed by PR #71 through the authorized provider/target path. Do not start CORE-QA before TARGET_VERIFIED."
+exact_next_safe_action: "On the authorized target environment run npm run runtime:recover -- --target=\"<operator-provided-target-path>\" --apply --confirm=RECOVER-RUNTIME, retain non-secret machine-readable evidence, and separately rotate the credential exposed by PR #71 through the authorized provider/target path. Do not start CORE-QA before TARGET_VERIFIED."<operator-provided-target-path>\" --apply --confirm=RECOVER-RUNTIME, retain non-secret machine-readable evidence, and separately rotate the credential exposed by PR #71 through the authorized provider/target path. Do not start CORE-QA before TARGET_VERIFIED."
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:
-  - "Fresh real-target final readiness/current receipt evidence remains required."
+  - "Fresh target-environment final readiness/current receipt evidence remains required."
   - "Fresh exact target-local CLI↔web identity and authoritative same-origin /login evidence remain required."
   - "Credential exposed by quarantined PR #71 still requires authorized real target/provider rotation and non-secret evidence."
   - "CORE-QA-001 must not start before RUNTIME-CLOSURE-001 is TARGET_VERIFIED."
@@ -40,7 +40,7 @@ progress:
     label: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     percent: null
     display_bar: "[??????????] N/A"
-    basis: "source/governance integrated and protected-main verified; remaining acceptance requires real-target/provider evidence"
+    basis: "source/governance integrated and protected-main verified; remaining acceptance requires target-environment/provider evidence"
   overall:
     label: "Nexora"
     percent: null
