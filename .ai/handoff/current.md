@@ -1,3 +1,14 @@
+# Current Handoff — post-PR82 reconciliation
+
+- Protected main: `87210e7674f67fb75e046c185206573bebd906f9`.
+- PR #82 is merged; exact head passed #980 / `35671637039` and merge used scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002`.
+- Protected-main push certification #981 / `35672290666` was observed IN_PROGRESS; do not promote it to PASS until terminal.
+- PR #83 is the active governance/state reconciliation carrier.
+- Issue #72 source remediation is complete; only real target/provider credential rotation remains.
+- Issue #74 is the active runtime-target coordinator: W01/W02/W05/W06 done, W03/W04/W07 blocked on real target/provider evidence.
+- PR #1 is FUTURE_CARRIER_FROZEN; PR #75/#81 are closed stale maintenance.
+- Runtime target remains BLOCKED; CORE-QA stays locked.
+
 # Nexora Current AI Handoff
 
 ## Resume instruction

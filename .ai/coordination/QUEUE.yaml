@@ -2,43 +2,33 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 updated_at: "2026-09-22"
 items:
-  - id: NEX-AUDIT-72
-    source: "Issue #72"
-    status: ACTIVE_TARGET_CLOSURE
-    priority: 1
-    note: "Repository/source remediation is integrated; real-target evidence and credential rotation remain unresolved."
   - id: NEX-ORCH-74
     source: "Issue #74"
-    status: ACTIVE
+    status: ACTIVE_TARGET_CLOSURE
     priority: 1
-    note: "Runtime-closure remediation coordination continues; no CORE-QA stage advancement without target verification."
-  - id: NEX-CI-78-79
-    source: "PR #78 / PR #79"
-    status: SOURCE_INTEGRATED_MAIN
+    note: "W01/W02/W05/W06 source lanes are complete; W03/W04 real-target evidence and W07 closure remain blocked on target/provider access."
+  - id: NEX-AUDIT-72
+    source: "Issue #72"
+    status: BLOCKED_EXTERNAL_TARGET
     priority: 1
-    note: "PR #79 and PR #78 are merged; main=8972632c...; protected-main push certification still needs one terminal observation."
-  - id: NEX-GOV-82
-    source: "PR #82"
+    note: "Repository/source remediation complete; exposed credential still requires real target/provider rotation with non-secret evidence."
+  - id: NEX-GOV-83
+    source: "PR #83"
     status: VERIFYING
     priority: 1
-    note: "Consolidated governance/evidence carrier; previous head 09e548a067a75295f3110a045df567c90718039f passed #976, while this material head requires fresh exact-head CI and independent review."
-  - id: NEX-PR73
-    source: "PR #73"
-    status: CLOSED_SUPERSEDED
-    priority: 2
-    note: "Closed unmerged after verifying PR #78/#79 integration superseded the portable remediation scope; target/provider gates remain tracked in Issues #72/#74."
-  - id: NEX-RUNTIME-30
-    source: "PR #30"
-    status: CONSOLIDATED_CLOSE_PENDING
-    priority: 2
-    note: "Exact head 20b75291c761e3c52cb3f89845be76fc06ce27a0 passed #978; no unique runtime/product/build-config diff remains. Evidence/state is consolidated into PR #82; close #30 unmerged as source-superseded."
+    note: "Post-merge README/compact/canonical state reconciliation; no product/runtime/target mutation."
+  - id: NEX-MAIN-981
+    source: "main@87210e7674f67fb75e046c185206573bebd906f9"
+    status: RUNNING
+    priority: 1
+    note: "Protected-main push certification #981 / 35672290666 observed in_progress; do not treat as PASS."
   - id: NEX-FINAL-1
     source: "PR #1"
-    status: BLOCKED
+    status: FUTURE_CARRIER_FROZEN
     priority: 3
-    note: "Final development carrier; not release-complete."
+    note: "Large future product carrier; reconcile by registered stage/unit only after runtime target verification."
   - id: NEX-DEPS-75-81
     source: "PR #75 / PR #81"
-    status: DEFERRED_BY_GATE
+    status: CLOSED_DEFERRED
     priority: 4
-    note: "Dependency maintenance remains behind active runtime/governance gates."
+    note: "Closed stale dependency carriers; recreate/rebase from then-current main after runtime target closure."

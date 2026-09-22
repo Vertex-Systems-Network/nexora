@@ -3,61 +3,53 @@ repository: Vertex-Systems-Network/nexora
 updated_at: "2026-09-22"
 claims:
   - id: MAIN-HEAD
-    value: "8972632c230117c377c1e0e5d7219352518acda7"
+    value: "87210e7674f67fb75e046c185206573bebd906f9"
     status: OBSERVED
-    evidence: "live GitHub protected main after PR #78 merge"
+    evidence: "live GitHub protected main after PR #82 merge"
   - id: ACTIVE-STAGE
     value: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     status: BLOCKED
-    evidence: ".ai/state.json + .ai/handoff/current.md + unresolved target evidence / credential rotation"
+    evidence: ".ai/state.json + unresolved real-target readiness/identity/login and credential rotation"
   - id: OPEN-ISSUES
     value: [72, 74]
     status: OBSERVED
-    evidence: "live GitHub issue search after main merge"
+    evidence: "live GitHub issue intake after PR #82 merge"
   - id: OPEN-PRS
-    value: [1, 30, 75, 81, 82]
+    value: [1, 83]
     status: OBSERVED
-    evidence: "live GitHub PR search before PR #30 carrier closure; #30 is source-superseded and consolidated into #82"
-  - id: AUDIT-REMEDIATION-SOURCE
-    value: "PR #79 -> PR #78 -> main@8972632c230117c377c1e0e5d7219352518acda7"
+    evidence: "PR #1 future-frozen + PR #83 post-merge reconciliation; #75/#81 closed and #82 merged"
+  - id: PR82-MERGE
+    value: "5d727efe1ba2810c590e8a86ebc3f122a0c998cf -> 87210e7674f67fb75e046c185206573bebd906f9"
     status: SOURCE_INTEGRATED
-    evidence: "PR #79 #972 SUCCESS; PR #78 #973 SUCCESS; verified main merge commit"
-  - id: PR78-EXACT-HEAD-CI
-    value: "0812fbabaaf5b337fc80fb11209ebb8b20600cf8 / run 35659627211"
-    status: PASS
-    evidence: "Nexora release certification #973 conclusion=success"
+    evidence: "PR #82 #980 SUCCESS; scoped admin waiver WVR-NEX-PR82-MAIN-REVIEW-002; GitHub merge result"
   - id: MAIN-PUSH-CI
-    value: "8972632c230117c377c1e0e5d7219352518acda7"
-    status: WAITING_EXTERNAL_CI
-    evidence: "no workflow run surfaced on initial or bounded follow-up post-merge observation; no rerun/poll loop"
-  - id: PR73-CLOSEOUT
-    value: "closed unmerged; superseded by PR #78/#79 integration"
-    status: CLOSED_SUPERSEDED
-    evidence: "PR #78 explicitly supersedes portable #73 scope; main@8972632c contains accepted remediation"
-  - id: PR82-PREVIOUS-HEAD-CI
-    value: "cc4bd5ef98318b156bd4482ce8819488302a1fe4 / run 35660675591"
-    status: PASS
-    evidence: "Nexora release certification #975 conclusion=success; head changed afterward for material closeout sync"
-  - id: PR30-FINAL-CI
-    value: "20b75291c761e3c52cb3f89845be76fc06ce27a0 / run 35662411404"
-    status: PASS
-    evidence: "Nexora release certification #978 conclusion=success"
-  - id: PR30-CARRIER
-    value: "no unique product/runtime/build-config diff; remaining evidence/state consolidated into PR #82"
-    status: SOURCE_SUPERSEDED
-    evidence: "main...PR30 compare after scope scrub + exact-head #978 PASS"
-  - id: PR82-CONSOLIDATION-BASE-CI
-    value: "09e548a067a75295f3110a045df567c90718039f / run 35661610368"
-    status: PASS
-    evidence: "Nexora release certification #976 conclusion=success; stale for new material consolidation head"
+    value: "87210e7674f67fb75e046c185206573bebd906f9 / run 35672290666"
+    status: RUNNING
+    evidence: "Nexora release certification #981 event=push status=in_progress at bounded post-merge observation"
+  - id: ISSUE72
+    value: "source remediation complete; real target/provider credential rotation pending"
+    status: BLOCKED_EXTERNAL_TARGET
+    evidence: "Issue #72 reconciliation comment + protected main source controls"
+  - id: ISSUE74
+    value: "W01/W02/W05/W06 done; W03/W04/W07 target-gated"
+    status: ACTIVE_TARGET_CLOSURE
+    evidence: "Issue #74 lane reconciliation after PR #82 merge"
+  - id: PR1
+    value: "Draft future carrier; 355 files; not active runtime closure"
+    status: FUTURE_CARRIER_FROZEN
+    evidence: "live main...PR1 divergence audit"
+  - id: DEPENDENCY-MAINTENANCE
+    value: "PR #75 and PR #81 closed unmerged"
+    status: DEFERRED_BY_TARGET_GATE
+    evidence: "stale/conflicted maintenance; fresh recreation required after target closure"
   - id: NUMERIC-PROGRESS
     value: null
     status: UNAVAILABLE
-    evidence: "no current canonical numeric module/overall metric; historical percentages are not promoted"
+    evidence: "no current canonical numeric module/overall metric"
   - id: README-PROGRESS-SYNC
     value: "required every material engineering milestone"
     status: GOVERNED
-    evidence: ".ai/governance/engineering-supervisor.md + .ai/governance/ai-development-orchestration.md + README.md AI-Native Progress Ledger"
+    evidence: ".ai/governance/engineering-supervisor.md + README AI-Native Progress Ledger"
 rules:
   chat_memory_never_overrides_repository: true
   inferred_runtime_truth_forbidden: true

@@ -3,39 +3,39 @@ repository: Vertex-Systems-Network/nexora
 compact_state_path: .ai/resume
 observed_main:
   branch: main
-  sha: 8972632c230117c377c1e0e5d7219352518acda7
+  sha: 87210e7674f67fb75e046c185206573bebd906f9
   observed_at: "2026-09-22"
 active_issue:
-  number: 72
-  title: "Audit remediation: quarantine CORE-QA and harden source/release gates"
+  number: 74
+  title: "AI orchestration: RUNTIME-CLOSURE remediation workers (7 parallel lanes)"
 active_pr:
-  number: 82
-  title: "chore(ai-governance): consolidate supervisor state and runtime evidence"
-  branch: ai/supervisor-governance-v1
-active_branch: ai/supervisor-governance-v1
+  number: 83
+  title: "chore(ai-governance): reconcile post-merge runtime state"
+  branch: ai/post-merge-reconcile-981
+active_branch: ai/post-merge-reconcile-981
 current_stage:
   id: RUNTIME-CLOSURE-001
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: AI-SUPERVISOR-CARRIER-CONSOLIDATION-005
-  title: "Consolidate retired runtime carrier state/evidence into governance"
+  id: AI-SUPERVISOR-POST-MERGE-RECONCILIATION-007
+  title: "Reconcile protected-main merge, open queue and target-only blockers"
   status: VERIFYING
 last_completed_milestone:
-  main_commit: 8972632c230117c377c1e0e5d7219352518acda7
-  summary: "runtime/source implementation integrated on main; PR #30 scope-scrubbed and certified green"
-exact_next_safe_action: "Obtain fresh exact-head certification and distinct independent review for consolidated PR #82. If both pass, merge #82 with expected-head protection. Then continue real-target readiness/identity/login and credential rotation; do not start CORE-QA before TARGET_VERIFIED."
+  main_commit: 87210e7674f67fb75e046c185206573bebd906f9
+  summary: "PR #82 governance/evidence consolidation merged to protected main under scoped admin waiver after exact-head #980 SUCCESS"
+exact_next_safe_action: "Observe protected-main push certification #981 once terminal and require fresh exact-head certification for PR #83. If PR #83 is green and its exact head/base are unchanged, complete its review/waiver merge decision. Then continue real-target W03/W04 identity/readiness plus Issue #72 credential rotation. Do not start CORE-QA before TARGET_VERIFIED."
 pending_runner_ids:
-  - RB-NEX-MAIN-POSTMERGE-001
-  - RB-NEX-AI-SUPERVISOR-CI-004
+  - RB-NEX-MAIN-POSTMERGE-002
+  - RB-NEX-POSTMERGE-RECONCILE-CI-001
 blocked_runner_ids:
-  - RB-NEX-AI-SUPERVISOR-CI-004
+  - RB-NEX-POSTMERGE-RECONCILE-CI-001
 current_blockers:
-  - "RUNTIME-CLOSURE-001 remains BLOCKED; CORE-QA-001 must not start."
-  - "Real-target readiness/current receipt, target↔web identity, and authoritative /login evidence remain required."
-  - "Credential rotation after quarantined PR #71 remains a target/provider action."
-  - "Consolidated PR #82 requires fresh exact-head CI and distinct independent review."
-  - "No canonical numeric progress metric is available; percentages must not be fabricated."
+  - "Real-target final readiness/current receipt remains required."
+  - "Exact target-local CLI↔web identity and authoritative /login evidence remain required."
+  - "Credential exposed by quarantined PR #71 still requires authorized real target/provider rotation and non-secret evidence."
+  - "PR #83 post-merge state reconciliation requires exact-head CI and applicable review/waiver gate."
+  - "CORE-QA-001 must not start before RUNTIME-CLOSURE-001 is TARGET_VERIFIED."
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
   tight_polling_forbidden: true
@@ -46,7 +46,7 @@ progress:
     label: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     percent: null
     display_bar: "[??????????] N/A"
-    basis: "source implementation integrated; target verification and credential rotation remain blocked"
+    basis: "source/governance integrated; remaining acceptance requires real-target/provider evidence"
   overall:
     label: "Nexora"
     percent: null
@@ -59,6 +59,8 @@ readme_progress_sync:
 state_drift:
   detected: true
   notes:
-    - "PR #30 code is already represented on protected main; remaining evidence/state is consolidated into PR #82."
-    - "PR #30 exact head 20b75291c761e3c52cb3f89845be76fc06ce27a0 passed #978 / 35662411404 before retirement."
-    - "PR #82 previous exact head 09e548a067a75295f3110a045df567c90718039f passed #976 / 35661610368; consolidation requires fresh CI/review."
+    - "PR #82 is merged; previous compact state still represented it as active."
+    - "PR #75 and #81 are closed unmerged stale dependency maintenance."
+    - "PR #1 is FUTURE_CARRIER_FROZEN and is not active runtime-closure work."
+    - "Issue #72 is source-complete but stays open solely for real target/provider credential rotation."
+    - "Issue #74 source lanes W01/W02/W05/W06 are done; W03/W04/W07 remain target-gated."

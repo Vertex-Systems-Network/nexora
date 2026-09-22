@@ -49,3 +49,15 @@
 - Reconciled broad state/handoff/plan to SOURCE_DONE-on-main versus TARGET-BLOCKED semantics.
 - This material consolidation creates a fresh PR #82 head and therefore requires fresh exact-head CI/review.
 - No target/provider/deploy/release/CORE-QA mutation or promotion was performed.
+
+## 2026-09-22 — AI-SUPERVISOR-POST-MERGE-RECONCILIATION-007
+
+- PR #82 final exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf` passed #980 / `35671637039`.
+- Waiver 001 expired without merge after a transport-disconnected attempt; repository truth was re-read before any retry.
+- Scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002` was then bound to the unchanged exact head/base and consumed by the successful merge.
+- Resulting protected main is `87210e7674f67fb75e046c185206573bebd906f9`.
+- Protected-main push workflow #981 / `35672290666` was observed IN_PROGRESS; it is not promoted to PASS while running.
+- PR #75/#81 were closed unmerged as stale dependency maintenance; PR #1 was classified FUTURE_CARRIER_FROZEN.
+- Issue #72 source remediation is complete with target credential rotation still open.
+- Issue #74 source lanes are complete; W03/W04/W07 remain real-target/provider gated.
+- Opened PR #83 to reconcile durable README/compact/canonical state without changing target verdict.

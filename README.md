@@ -26,6 +26,7 @@ This rule applies on every AI development start, including work resumed from an 
 - **Open remediation Issues:** #72 (target credential rotation only), #74 (runtime target evidence coordination)
 - **Merged governance/evidence carrier:** PR #82 — exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf`, #980 / `35671637039` **SUCCESS**
 - **Protected-main push certification:** #981 / `35672290666` — **IN_PROGRESS**
+- **Post-merge reconciliation:** PR #83 — **VERIFYING**; exact final head will be bound on the PR after this material commit
 - **Open PR execution path:** PR #1 only, classified **FUTURE_CARRIER_FROZEN**
 - **Closed stale maintenance:** PR #75 and PR #81 closed unmerged; recreate/rebase dependency maintenance only after runtime target verification
 - **Current blockers:** real-target readiness/current receipt; exact target↔web identity; authoritative `/login`; credential rotation after PR #71

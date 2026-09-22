@@ -1,14 +1,18 @@
-# Last Checkpoint — AI-SUPERVISOR-CARRIER-CONSOLIDATION-005
+# Last Checkpoint — AI-SUPERVISOR-POST-MERGE-RECONCILIATION-007
 
-Protected `main` remains `8972632c230117c377c1e0e5d7219352518acda7`.
+Protected `main` is `87210e7674f67fb75e046c185206573bebd906f9`.
 
-- PR #30 exact head `20b75291c761e3c52cb3f89845be76fc06ce27a0` passed #978 / `35662411404`.
-- PR #30 now has no unique product/runtime/build-config diff relative to protected main.
-- PR #82 exact head `09e548a067a75295f3110a045df567c90718039f` passed #976 / `35661610368`.
-- PR #30's remaining evidence/state is consolidated into PR #82 to eliminate a duplicate merge carrier.
-- Broader state/handoff/active plan now distinguish SOURCE_DONE on main from TARGET BLOCKED.
-- No target/provider/deployment/release mutation was performed.
+Completed before this reconciliation head:
 
-After this consolidation is bound, PR #30 should close unmerged as source-superseded.
+- PR #82 exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf` passed release certification #980 / `35671637039`.
+- One-time admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002` was scoped to that exact head/base after waiver 001 expired without mutation on a transport-disconnected merge attempt.
+- PR #82 merged successfully to protected main as `87210e7674f67fb75e046c185206573bebd906f9`.
+- Protected-main push certification #981 / `35672290666` started and was observed IN_PROGRESS; pending is not PASS.
+- Stale dependency PRs #75/#81 are closed unmerged and deferred until after target closure.
+- PR #1 remains Draft and is classified FUTURE_CARRIER_FROZEN; it is not the active runtime-closure merge path.
+- Issue #72 source remediation is complete but remains open for real target/provider credential rotation.
+- Issue #74 now reflects source lanes W01/W02/W05/W06 done and W03/W04/W07 target-gated.
 
-Still required: fresh exact-head PR #82 CI, distinct independent review, real-target readiness/current receipt, exact target↔web identity, authoritative `/login`, and credential rotation after PR #71. CORE-QA remains locked.
+This PR #83 is governance/state reconciliation only. It does not mutate product/runtime/dependencies/target/provider/release state.
+
+Next safe action: exact-head certify PR #83 and observe main #981 once terminal. Real-target readiness, exact target↔web identity, authoritative /login and credential rotation remain required before TARGET_VERIFIED / CORE-QA.

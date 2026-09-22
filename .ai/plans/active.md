@@ -1,3 +1,27 @@
+# Active Plan — post-PR82 runtime-target closure
+
+## Current source/control-plane state
+
+- Protected main: `87210e7674f67fb75e046c185206573bebd906f9`.
+- Source implementation: SOURCE_DONE.
+- Governance/evidence consolidation PR #82: MERGED after exact-head #980 SUCCESS.
+- Post-merge state reconciliation: PR #83 VERIFYING.
+- Protected-main push #981: RUNNING at bounded observation; not PASS yet.
+
+## Remaining active work
+
+1. Real target final readiness/current receipt.
+2. Exact target-local CLI↔web one-time identity proof on configured app.url.
+3. Authoritative /login on that same proven origin with TLS verification enabled and redirects disabled.
+4. Real target/provider rotation of the credential exposed by PR #71 with non-secret evidence.
+5. W07 state promotion only after all target gates pass.
+
+## Frozen/deferred work
+
+- PR #1: FUTURE_CARRIER_FROZEN until runtime target closure.
+- Dependency maintenance #75/#81: closed stale; recreate after target closure.
+- CORE-QA-001: locked until RUNTIME-CLOSURE-001 is TARGET_VERIFIED.
+
 # Active Plan — RUNTIME-CLOSURE-001
 
 ## Identity
