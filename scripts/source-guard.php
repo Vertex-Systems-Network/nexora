@@ -48,8 +48,8 @@ $operatorTargetPlaceholderSurfaces = [
 $legacyLocalServerVendor = 'lara'.'gon';
 $legacyVendorPattern = '/\\b'.preg_quote($legacyLocalServerVendor, '/').'\\b/i';
 $legacyTargetPattern = '/[A-Za-z]:[\\\\\\/]+'.preg_quote($legacyLocalServerVendor, '/').'[\\\\\\/]+www[\\\\\\/]+nexora/i';
-$machineBoundTargetArgumentPattern = '/--target\\s*=\\s*["\\\']?[A-Za-z]:[\\\\\\/]/i';
-$machineBoundCanonicalPathPattern = '/"path"\\s*:\\s*"[A-Za-z]:\\\\/i';
+$machineBoundTargetArgumentPattern = '/--target\\s*=\\s*["\\\']?(?:[A-Za-z]:[\\\\\\/]|\\/|~[\\\\\\/]|\\\\\\\\)/i';
+$machineBoundCanonicalPathPattern = '/"path"\\s*:\\s*"(?:[A-Za-z]:\\\\|\\/|~[\\\\\\/]|\\\\\\\\)/i';
 
 foreach ($operatorNeutralTargetSurfaces as $relative) {
     $path = nexoraTargetContractSurface($root, $relative);
@@ -63,7 +63,7 @@ foreach ($operatorNeutralTargetSurfaces as $relative) {
         $errors[] = "Operator-neutral target contract regressed to a vendor/machine-specific local-server binding: {$relative}";
     }
     if (preg_match($machineBoundTargetArgumentPattern, $source) === 1 || preg_match($machineBoundCanonicalPathPattern, $source) === 1) {
-        $errors[] = "Target path must remain operator-provided runtime input, not a canonical absolute machine path: {$relative}";
+        $errors[] = "Target path must remain operator-provided runtime input, not a canonical absolute/local/UNC machine path: {$relative}";
     }
 }
 
