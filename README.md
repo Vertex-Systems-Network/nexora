@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-22):** protected `main` is `87210e7674f67fb75e046c185206573bebd906f9` after governance/evidence PR #82 merged. PR #82 exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf` passed release certification #980 / `35671637039` and merged under scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002`. Protected-main push certification #981 / `35672290666` has started and is currently **in progress**; pending is not PASS. The active product stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED** only on real-target readiness/current receipt, exact target↔web identity, authoritative `/login`, and credential rotation after PR #71. PR #1 remains frozen future work and is not part of the active runtime-closure path.
+> **Canonical current status (2026-09-22):** protected `main` is `87210e7674f67fb75e046c185206573bebd906f9` after governance/evidence PR #82 merged. PR #82 exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf` passed release certification #980 / `35671637039` and merged under scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002`. Protected-main push certification #981 / `35672290666` completed **SUCCESS** on exact protected main. The active product stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED** only on real-target readiness/current receipt, exact target↔web identity, authoritative `/login`, and credential rotation after PR #71. PR #1 remains frozen future work and is not part of the active runtime-closure path.
 
 ## AI development startup gate
 
@@ -25,12 +25,12 @@ This rule applies on every AI development start, including work resumed from an 
 - **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
 - **Open remediation Issues:** #72 (target credential rotation only), #74 (runtime target evidence coordination)
 - **Merged governance/evidence carrier:** PR #82 — exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf`, #980 / `35671637039` **SUCCESS**
-- **Protected-main push certification:** #981 / `35672290666` — **IN_PROGRESS**
+- **Protected-main push certification:** #981 / `35672290666` — **SUCCESS**
 - **Post-merge reconciliation:** PR #83 — **VERIFYING**; exact final head will be bound on the PR after this material commit
 - **Open PR execution path:** PR #1 only, classified **FUTURE_CARRIER_FROZEN**
 - **Closed stale maintenance:** PR #75 and PR #81 closed unmerged; recreate/rebase dependency maintenance only after runtime target verification
 - **Current blockers:** real-target readiness/current receipt; exact target↔web identity; authoritative `/login`; credential rotation after PR #71
-- **Next safe action:** observe #981 once terminal, then continue real-target W03/W04/W07 evidence; do not start CORE-QA before TARGET_VERIFIED
+- **Next safe action:** exact-head certify/review PR #83, then continue real-target W03/W04/W07 evidence; do not start CORE-QA before TARGET_VERIFIED
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

@@ -24,8 +24,8 @@ claims:
     evidence: "PR #82 #980 SUCCESS; scoped admin waiver WVR-NEX-PR82-MAIN-REVIEW-002; GitHub merge result"
   - id: MAIN-PUSH-CI
     value: "87210e7674f67fb75e046c185206573bebd906f9 / run 35672290666"
-    status: RUNNING
-    evidence: "Nexora release certification #981 event=push status=in_progress at bounded post-merge observation"
+    status: PASS
+    evidence: "Nexora release certification #981 event=push conclusion=success on exact protected main"
   - id: ISSUE72
     value: "source remediation complete; real target/provider credential rotation pending"
     status: BLOCKED_EXTERNAL_TARGET

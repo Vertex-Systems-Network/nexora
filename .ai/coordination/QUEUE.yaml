@@ -19,9 +19,9 @@ items:
     note: "Post-merge README/compact/canonical state reconciliation; no product/runtime/target mutation."
   - id: NEX-MAIN-981
     source: "main@87210e7674f67fb75e046c185206573bebd906f9"
-    status: RUNNING
-    priority: 1
-    note: "Protected-main push certification #981 / 35672290666 observed in_progress; do not treat as PASS."
+    status: PASS
+    priority: 2
+    note: "Protected-main push certification #981 / 35672290666 completed SUCCESS; retained as terminal source evidence."
   - id: NEX-FINAL-1
     source: "PR #1"
     status: FUTURE_CARRIER_FROZEN

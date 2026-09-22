@@ -24,9 +24,8 @@ current_milestone:
 last_completed_milestone:
   main_commit: 87210e7674f67fb75e046c185206573bebd906f9
   summary: "PR #82 governance/evidence consolidation merged to protected main under scoped admin waiver after exact-head #980 SUCCESS"
-exact_next_safe_action: "Observe protected-main push certification #981 once terminal and require fresh exact-head certification for PR #83. If PR #83 is green and its exact head/base are unchanged, complete its review/waiver merge decision. Then continue real-target W03/W04 identity/readiness plus Issue #72 credential rotation. Do not start CORE-QA before TARGET_VERIFIED."
+exact_next_safe_action: "Require fresh exact-head certification for PR #83. If green and its exact head/base are unchanged, complete its review/waiver merge decision. Then continue real-target W03/W04 identity/readiness plus Issue #72 credential rotation. Do not start CORE-QA before TARGET_VERIFIED."
 pending_runner_ids:
-  - RB-NEX-MAIN-POSTMERGE-002
   - RB-NEX-POSTMERGE-RECONCILE-CI-001
 blocked_runner_ids:
   - RB-NEX-POSTMERGE-RECONCILE-CI-001

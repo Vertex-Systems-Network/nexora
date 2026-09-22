@@ -6,7 +6,7 @@
 - Source implementation: SOURCE_DONE.
 - Governance/evidence consolidation PR #82: MERGED after exact-head #980 SUCCESS.
 - Post-merge state reconciliation: PR #83 VERIFYING.
-- Protected-main push #981: RUNNING at bounded observation; not PASS yet.
+- Protected-main push #981 / `35672290666`: **PASS** on exact protected main.
 
 ## Remaining active work
 

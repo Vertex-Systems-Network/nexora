@@ -61,3 +61,5 @@
 - Issue #72 source remediation is complete with target credential rotation still open.
 - Issue #74 source lanes are complete; W03/W04/W07 remain real-target/provider gated.
 - Opened PR #83 to reconcile durable README/compact/canonical state without changing target verdict.
+- Follow-up evidence transition: protected-main push certification #981 / `35672290666` completed SUCCESS on exact main `87210e7674f67fb75e046c185206573bebd906f9`.
+- Pre-merge review of PR #83 found Runner Benchmark history truncation; terminal evidence must remain immutable, so the runner ledger is repaired by preserving prior entries and appending new #980/#981/#83 records rather than replacing history.
