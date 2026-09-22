@@ -10,24 +10,24 @@ The compact supervisor resume layer is read **before** historical/canonical plan
 2. Read `.ai/resume/LAST-CHECKPOINT.md`.
 3. Read `.ai/governance/engineering-supervisor.md`.
 4. Read `.ai/README.md`.
-2. Read `.ai/state.json`.
-3. Read `.ai/handoff/current.md`.
-4. Read `.ai/roadmap/stages.md` and release trains.
-5. Read `.ai/governance/development-intake.md`.
-6. Read `.ai/governance/ai-development-orchestration.md` for any AI-assisted planning, coding, review, testing, evidence or promotion work.
-7. Read `.ai/registry/development-units.json` plus relevant child registries (`performance-units.json`, `quality-payment-units.json`, `flow-units.json`, `ai-development-units.json`, future domain registries) and resolve requested work to registered unit ID(s).
-8. Read `.ai/plans/master-execution-plan.md`, `.ai/plans/active.md` and the plan template.
-9. For substantial new/redesigned work read `.ai/quality/engineering-lifecycle.md`, `.ai/quality/lean-six-sigma.md` and use the ResearchBrief/CTQ requirements.
-10. For material data work read `.ai/data/data-flow-governance.md`.
-11. For material runtime/package/data/security/permission/event/network/state/error/deployment relationship changes read `.ai/flow/system-graph.md` and plan expected graph/evidence contribution.
-12. Read `ARCHITECTURE.md` and `SECURITY.md` before architecture/runtime trust/tenancy/package/public API/security changes.
-13. Read `.ai/security/security-program.md`; use the threat-model template for high/critical work. Payment-provider work must additionally read `.ai/security/payment-security.md` and the payment child registry.
-14. Read `.ai/performance/performance-platform.md` and performance budgets for runtime-affecting work.
-15. Read `.ai/reliability/reliability-program.md` for critical recurring/provider/stateful workflows.
-16. Read `.ai/delivery/delivery-excellence.md` for release/CI/process work.
-17. Read AI architecture/design contracts when relevant.
-18. Read relevant capability matrices/addenda and system/future-system registries.
-19. Inspect current Git HEAD and relevant source/tests before trusting historical completion claims.
+5. Read `.ai/state.json`.
+6. Read `.ai/handoff/current.md`.
+7. Read `.ai/roadmap/stages.md` and release trains.
+8. Read `.ai/governance/development-intake.md`.
+9. Read `.ai/governance/ai-development-orchestration.md` for any AI-assisted planning, coding, review, testing, evidence or promotion work.
+10. Read `.ai/registry/development-units.json` plus relevant child registries (`performance-units.json`, `quality-payment-units.json`, `flow-units.json`, `ai-development-units.json`, future domain registries) and resolve requested work to registered unit ID(s).
+11. Read `.ai/plans/master-execution-plan.md`, `.ai/plans/active.md` and the plan template.
+12. For substantial new/redesigned work read `.ai/quality/engineering-lifecycle.md`, `.ai/quality/lean-six-sigma.md` and use the ResearchBrief/CTQ requirements.
+13. For material data work read `.ai/data/data-flow-governance.md`.
+14. For material runtime/package/data/security/permission/event/network/state/error/deployment relationship changes read `.ai/flow/system-graph.md` and plan expected graph/evidence contribution.
+15. Read `ARCHITECTURE.md` and `SECURITY.md` before architecture/runtime trust/tenancy/package/public API/security changes.
+16. Read `.ai/security/security-program.md`; use the threat-model template for high/critical work. Payment-provider work must additionally read `.ai/security/payment-security.md` and the payment child registry.
+17. Read `.ai/performance/performance-platform.md` and performance budgets for runtime-affecting work.
+18. Read `.ai/reliability/reliability-program.md` for critical recurring/provider/stateful workflows.
+19. Read `.ai/delivery/delivery-excellence.md` for release/CI/process work.
+20. Read AI architecture/design contracts when relevant.
+21. Read relevant capability matrices/addenda and system/future-system registries.
+22. Inspect current Git HEAD and relevant source/tests before trusting historical completion claims.
 
 ## Mandatory GitHub intake gate before development
 
