@@ -51,6 +51,37 @@ $legacyTargetPattern = '/[A-Za-z]:[\\\\\\/]+'.preg_quote($legacyLocalServerVendo
 $machineBoundTargetArgumentPattern = '/--target\\s*=\\s*["\\\']?(?:[A-Za-z]:[\\\\\\/]|\\/|~[\\\\\\/]|\\\\\\\\)/i';
 $machineBoundCanonicalPathPattern = '/"path"\\s*:\\s*"(?:[A-Za-z]:\\\\|\\/|~[\\\\\\/]|\\\\\\\\)/i';
 
+$targetPathGuardBadArguments = [
+    '--target="C:\\work\\nexora"',
+    '--target=/srv/nexora',
+    '--target=~/nexora',
+    '--target=\\\\server\\share\\nexora',
+];
+foreach ($targetPathGuardBadArguments as $sample) {
+    if (preg_match($machineBoundTargetArgumentPattern, $sample) !== 1) {
+        $errors[] = 'Target-path portability guard self-test failed to reject a machine-bound --target sample.';
+    }
+}
+$targetPathGuardBadCanonicalPaths = [
+    '"path": "C:\\\\work\\\\nexora"',
+    '"path": "/srv/nexora"',
+    '"path": "~/nexora"',
+    '"path": "\\\\server\\share\\nexora"',
+];
+foreach ($targetPathGuardBadCanonicalPaths as $sample) {
+    if (preg_match($machineBoundCanonicalPathPattern, $sample) !== 1) {
+        $errors[] = 'Target-path portability guard self-test failed to reject a canonical machine path sample.';
+    }
+}
+foreach ([
+    '--target="<operator-provided-target-path>"',
+    '"path": "<operator-provided-target-path>"',
+] as $sample) {
+    if (preg_match($machineBoundTargetArgumentPattern, $sample) === 1 || preg_match($machineBoundCanonicalPathPattern, $sample) === 1) {
+        $errors[] = 'Target-path portability guard self-test rejected the operator-neutral placeholder.';
+    }
+}
+
 foreach ($operatorNeutralTargetSurfaces as $relative) {
     $path = nexoraTargetContractSurface($root, $relative);
     if (! is_file($path)) {
