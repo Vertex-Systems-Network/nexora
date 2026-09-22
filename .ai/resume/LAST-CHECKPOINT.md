@@ -1,15 +1,17 @@
 # Last Checkpoint — TARGET-EVIDENCE-WAIT-008
 
-Source/governance closure is complete through the current protected-main baseline `87210e7674f67fb75e046c185206573bebd906f9`.
+The last verified source/governance baseline is `fde0667b150de551184ec5c5261a34f18538ceed`.
 
 Verified source evidence:
 
 - PR #82 exact head `5d727efe1ba2810c590e8a86ebc3f122a0c998cf` passed #980 / `35671637039` and merged under scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002`.
-- Protected-main push certification #981 / `35672290666` completed SUCCESS.
-- PR #83 is the final state-only reconciliation carrier. Its prior exact head `3a71a0f06ec6c8ad3340b4e0136a51a5d74e91be` passed #984 / `35672648715`; this final steady-state head requires its own exact-head certification before merge.
-- Stale dependency PRs #75/#81 are closed unmerged.
+- Protected-main push #981 / `35672290666` completed SUCCESS.
+- PR #83 final exact head `75d5436b0394f246bdca626571666abe77cd4012` passed #985 / `35673582569`, merged under scoped admin waiver `WVR-NEX-PR83-MAIN-REVIEW-001`, and resulting protected-main #986 / `35767459733` completed SUCCESS.
+- No active source/governance carrier remains for this runtime-closure stage.
 - PR #1 remains FUTURE_CARRIER_FROZEN.
-- Issue #72 source remediation is complete; only target/provider credential rotation remains.
-- Issue #74 source lanes W01/W02/W05/W06 are complete.
+- Issue #72 is source-complete and remains open only for real target/provider credential rotation.
+- Issue #74 owns the remaining real-target readiness/identity/login evidence.
 
-After PR #83 merges, no source/governance carrier should remain active for this stage. The next work is external target evidence only: W03/W04 exact target readiness/identity, authoritative /login on the same origin, and Issue #72 credential rotation. CORE-QA remains locked.
+The source audit confirms `npm run runtime:recover -- --target="D:\\laragon\\www\\nexora" --apply --confirm=RECOVER-RUNTIME` already performs final readiness/current receipt, exact target↔web one-time identity proof and authoritative same-origin `/login`, and writes fail-closed machine-readable evidence.
+
+No fresh real-target output after the accepted historical packet was found in prior conversation/file context. Therefore W03/W04/W07 remain genuinely WAITING_EXTERNAL_TARGET. CORE-QA stays locked.
