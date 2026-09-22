@@ -21,7 +21,7 @@ items:
     source: "PR #82"
     status: VERIFYING
     priority: 1
-    note: "Previous head cc4bd5ef... passed #975; this closeout head updates README/state after PR #73 closure and requires fresh exact-head CI plus independent review."
+    note: "Consolidated governance/evidence carrier; previous head 09e548a067a75295f3110a045df567c90718039f passed #976, while this material head requires fresh exact-head CI and independent review."
   - id: NEX-PR73
     source: "PR #73"
     status: CLOSED_SUPERSEDED
@@ -29,9 +29,9 @@ items:
     note: "Closed unmerged after verifying PR #78/#79 integration superseded the portable remediation scope; target/provider gates remain tracked in Issues #72/#74."
   - id: NEX-RUNTIME-30
     source: "PR #30"
-    status: BLOCKED
+    status: CONSOLIDATED_CLOSE_PENDING
     priority: 2
-    note: "Runtime closure carrier remains blocked by target/review gates."
+    note: "Exact head 20b75291c761e3c52cb3f89845be76fc06ce27a0 passed #978; no unique runtime/product/build-config diff remains. Evidence/state is consolidated into PR #82; close #30 unmerged as source-superseded."
   - id: NEX-FINAL-1
     source: "PR #1"
     status: BLOCKED

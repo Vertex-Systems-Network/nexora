@@ -14,9 +14,28 @@ Always begin with `AGENTS.md`, `.ai/state.json`, this handoff, the canonical roa
 - Control-plane revision: `7`
 - Canonical stage count: `75`
 - Existing canonical rc.93 repair tooling originated in PR #26
-- Current source-work carrier: PR #30, `feat/runtime-recovery-orchestrator`
+- Current source-work carrier: protected `main`; PR #30 is source-superseded after evidence/state consolidation into PR #82
+- Fresh protected-main baseline reconciled into carrier: `8972632c230117c377c1e0e5d7219352518acda7`
+- Retired PR #30 exact head: `20b75291c761e3c52cb3f89845be76fc06ce27a0` — certification #978 / `35662411404` SUCCESS
+- Issue #52 dependency closure: integrated; Issue #52 closed after #51 exact-head rerun passed
+- Issue #46 bounded-child source fix: integrated into #30 via PR #51
 
 Historical SHAs are evidence references. Always re-read current HEAD before relying on this handoff.
+
+## 2026-09-22 hardened-main reconciliation
+
+PR #30 was stale against protected `main@8972632c230117c377c1e0e5d7219352518acda7`. The reconciliation keeps the runtime carrier's unique evidence/plan material while applying every protected-main change since its prior merge base. Nineteen overlapping runtime/dependency files were already byte-identical. For the four divergent shared paths, current main is authoritative: hardened release certification, current `package-lock.json`, current runtime regression assertions, and README/status are preserved.
+
+This is source reconciliation only. A follow-up scope audit removed the historical `perf(build): group lazy admin pages by bounded domain` Vite change because it is unrelated to `SYS-RUNTIME-IDENTITY`. The carrier now has no unique product/runtime/build-config code relative to protected main. The resulting exact PR head must pass fresh CI and a distinct exact-head review. Target status remains BLOCKED pending fresh readiness/current receipt, exact CLI↔web identity, authoritative `/login`, and credential rotation after PR #71.
+
+## 2026-09-22 carrier consolidation checkpoint
+
+- Protected main remains `8972632c230117c377c1e0e5d7219352518acda7`.
+- Runtime implementation/workflow/locks/tests/build configuration are already on protected main.
+- PR #30 exact head `20b75291c761e3c52cb3f89845be76fc06ce27a0` is behind=0, mergeable and certification #978 SUCCESS; after scope scrub it has no unique product/runtime/build-config diff.
+- Its remaining evidence/state artifacts are consolidated into PR #82, so #30 is not a second runtime merge path.
+- This consolidation does **not** satisfy target readiness, exact CLI↔web identity, authoritative `/login`, or credential rotation.
+- CORE-QA remains locked.
 
 ## Governance invariants
 
@@ -77,7 +96,7 @@ deployment_drift.status=pass
 
 Environment, activation, service and process now match. Immutable/source/deployment/framework/data-plane/storage/host/resource/policy/dependency compatibility remained PASS.
 
-The dependency runtime fingerprint is compatible. `reviewed dependency-lock attestation = missing` remains a separate release/dependency-governance item and must not be confused with the closed four-plane identity mismatch.
+The historical rc.93 dependency runtime fingerprint was compatible. The active #30 source branch now carries the governed reviewed lock pair (`composer.lock=1e00ab9e4b63991260e20ae28f7c2f3e092da75425e27a474731c3ad8b86a198`, `package-lock.json=09c913a87f16b13c47020b2bf36aaf9068dbe50948402c9fdcd1bfd644090c75`) and Issue #52 is closed. That source-branch review evidence does not by itself prove the installed rc.93 target has consumed or resealed the new source dependency state, so target evidence remains separate.
 
 ### Post-install handoff
 
@@ -119,6 +138,7 @@ Current fail-closed contract:
 ```text
 explicit target
 → apply-mode single-writer target lock
+→ every child bounded by finite deadline + per-stream output cap with deterministic termination/cleanup
 → deep compatibility
 → if compatible, skip identity repair
 → else only exact rc.93 four-plane adapter is eligible
@@ -160,6 +180,8 @@ Adversarial review found and closed these source risks:
 
 The ninth hardening reuses existing Nexora trust primitives (`SourceActivationHandshake`, `/install/source-status`, `nexora:source:status --require-web-ack`). It adds no public endpoint, dependency, external destination, permission, migration, or product capability.
 
+10. **Unbounded child execution could hold the target lock indefinitely or exhaust capture resources.** Issue #46 / PR #51 adds a finite 120-second default deadline, 256 KiB per-stream caps, lower-only test overrides, file-backed capture, deterministic termination/cleanup, bounded redaction, and behavioral timeout/output/lock-reuse verification. Exact #51 head `2e0736e4da1d5a89b6979e9171c672a1c0c32745` passed release certification #885 / `34424303763` and is integrated into #30.
+
 Canonical PR #30 files include:
 
 - `scripts/runtime-recovery-orchestrator.php`
@@ -172,7 +194,7 @@ Canonical PR #30 files include:
 - `.ai/plans/active.md`
 - this handoff
 
-No migrations, dependency versions, product modules, business features or roadmap stages are added.
+No migrations, product modules, business features or roadmap stages are added. The separately governed Issue #52 dependency closure is now intentionally integrated into this source carrier with exact reviewed lock bytes; it does not widen runtime feature scope.
 
 ## Exact-head CI contract
 
@@ -191,16 +213,11 @@ Any head change makes prior CI evidence stale.
 
 ## Independent review status
 
-Independent exact-head review remains mandatory because this is a critical recovery-control change.
-
-Attempts made so far:
-
-- CodeRabbit review comments were posted on earlier heads but no review was returned.
-- CodeRabbit CLI could not reach GitHub from the current execution environment because DNS resolution failed.
-- GitHub Copilot reviewer `copilot-pull-request-reviewer[bot]` was requested using the documented reviewer identity, but GitHub did not persist a requested reviewer or create a review object for this repository/account.
-- A final bounded CodeRabbit GitHub-app request was made on the previously frozen head; no review submission appeared before the later wrong-host hardening changed the head, so that request/evidence is stale regardless.
-
-Absence of review comments is **not** a review PASS. The authoring agent must not self-approve and call that independent evidence. After the final hardened head freezes and CI passes, request one fresh exact-head independent review; do not loop failed reviewer strategies indefinitely.
+- Exact-head AI review exists for the accepted Issue #52 dependency closure and for PR #51 bounded-child source fix, with reviewer provenance recorded honestly.
+- No human review or independent-human approval is claimed for those AI reviews.
+- Because #51 integration and this status synchronization move PR #30's head, every older #30 exact-head review is stale.
+- Before any PR #30 merge, perform a fresh review bound to the final exact head. If repository policy requires an independent actor/runtime beyond this AI context, that requirement remains a merge gate; absence of findings is not implicit approval.
+- Source review never substitutes for fresh real-target readiness, exact CLI↔web identity, or `/login` evidence.
 
 ## Current source-work acceptance requirements
 

@@ -39,3 +39,13 @@
 - Closed Draft PR #73 unmerged as superseded; Issues #72/#74 remain open because real-target evidence and credential rotation are unresolved.
 - Synchronized README progress and compact governance state for the closeout; no product/runtime/provider/deployment/release mutation was performed.
 - Milestone is VERIFYING because this material governance head requires fresh exact-head CI; PR #82 remains independent-review gated.
+
+## 2026-09-22 — AI-SUPERVISOR-CARRIER-CONSOLIDATION-005
+
+- PR #30 exact head `20b75291c761e3c52cb3f89845be76fc06ce27a0` is terminal GREEN on #978 / `35662411404`.
+- PR #82 exact head `09e548a067a75295f3110a045df567c90718039f` is terminal GREEN on #976 / `35661610368`.
+- PR #30 final diff has no unique product/runtime/build-config code relative to protected main.
+- Consolidated its remaining evidence/state artifacts into PR #82, eliminating a duplicate protected merge carrier.
+- Reconciled broad state/handoff/plan to SOURCE_DONE-on-main versus TARGET-BLOCKED semantics.
+- This material consolidation creates a fresh PR #82 head and therefore requires fresh exact-head CI/review.
+- No target/provider/deploy/release/CORE-QA mutation or promotion was performed.

@@ -54,12 +54,40 @@ tasks:
     source_issue_or_pr: "PR #82"
     command_or_workflow: "Nexora release certification"
     source_ref: "ai/supervisor-governance-v1"
-    source_sha: PENDING_CLOSEOUT_HEAD
+    source_sha: "09e548a067a75295f3110a045df567c90718039f"
     environment_matrix_input_fixture: "GitHub-hosted release-certification workflow as configured by protected main"
-    authorization_state: "REGISTERED_ONLY; exact commit SHA will be bound by PR comment after atomic commit creation"
+    authorization_state: "automatic repository CI; no merge/deploy authority inferred"
     security_critical: true
     merge_blocking: true
     expected_runner_time: null
-    deterministic_dedup_key: "nexora:ai/supervisor-governance-v1:carrier-closeout-004:release-certification"
+    deterministic_dedup_key: "nexora:pr82:09e548a067a75295f3110a045df567c90718039f:release-certification"
+    status: PASS
+    immutable_evidence: "run #976 / 35661610368 conclusion=success"
+  - id: RB-NEX-PR30-CI-001
+    source_work: "runtime carrier hardened-main reconciliation and scope scrub"
+    source_issue_or_pr: "PR #30"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "feat/runtime-recovery-orchestrator"
+    source_sha: "20b75291c761e3c52cb3f89845be76fc06ce27a0"
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow as configured by protected main"
+    authorization_state: "automatic repository CI; carrier is retired rather than merged"
+    security_critical: true
+    merge_blocking: false
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:pr30:20b75291c761e3c52cb3f89845be76fc06ce27a0:release-certification"
+    status: PASS
+    immutable_evidence: "run #978 / 35662411404 conclusion=success"
+  - id: RB-NEX-AI-SUPERVISOR-CI-004
+    source_work: "AI-SUPERVISOR-CARRIER-CONSOLIDATION-005"
+    source_issue_or_pr: "PR #82"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "ai/supervisor-governance-v1"
+    source_sha: PENDING_CONSOLIDATION_HEAD
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow as configured by protected main"
+    authorization_state: "REGISTERED_ONLY; exact head bound by PR comment after commit creation"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:ai/supervisor-governance-v1:carrier-consolidation-005:release-certification"
     status: BLOCKED_BINDING
     immutable_evidence: null

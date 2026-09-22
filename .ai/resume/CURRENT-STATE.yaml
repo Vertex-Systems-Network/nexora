@@ -10,7 +10,7 @@ active_issue:
   title: "Audit remediation: quarantine CORE-QA and harden source/release gates"
 active_pr:
   number: 82
-  title: "chore(ai-governance): add compact supervisor resume controls"
+  title: "chore(ai-governance): consolidate supervisor state and runtime evidence"
   branch: ai/supervisor-governance-v1
 active_branch: ai/supervisor-governance-v1
 current_stage:
@@ -18,25 +18,24 @@ current_stage:
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: AI-SUPERVISOR-SUPERSEDED-CARRIER-CLOSEOUT-004
-  title: "Close superseded PR #73 and reconcile compact governance state"
+  id: AI-SUPERVISOR-CARRIER-CONSOLIDATION-005
+  title: "Consolidate retired runtime carrier state/evidence into governance"
   status: VERIFYING
 last_completed_milestone:
   main_commit: 8972632c230117c377c1e0e5d7219352518acda7
-  summary: "audit remediation source integrated; stale PR #73 closed unmerged as superseded"
-exact_next_safe_action: "Run one exact-head certification observation for the new PR #82 governance head. Independent exact-head review remains required before merge. Do not tight-poll the still-missing main push run; continue Issues #72/#74 target-closure evidence only through an authorized real-target channel. Do not start CORE-QA."
+  summary: "runtime/source implementation integrated on main; PR #30 scope-scrubbed and certified green"
+exact_next_safe_action: "Obtain fresh exact-head certification and distinct independent review for consolidated PR #82. If both pass, merge #82 with expected-head protection. Then continue real-target readiness/identity/login and credential rotation; do not start CORE-QA before TARGET_VERIFIED."
 pending_runner_ids:
   - RB-NEX-MAIN-POSTMERGE-001
-  - RB-NEX-AI-SUPERVISOR-CI-003
+  - RB-NEX-AI-SUPERVISOR-CI-004
 blocked_runner_ids:
-  - RB-NEX-AI-SUPERVISOR-CI-003
+  - RB-NEX-AI-SUPERVISOR-CI-004
 current_blockers:
   - "RUNTIME-CLOSURE-001 remains BLOCKED; CORE-QA-001 must not start."
   - "Real-target readiness/current receipt, target↔web identity, and authoritative /login evidence remain required."
-  - "Credential rotation required after the key exposure in quarantined PR #71 remains a target/provider action not completed by source merge."
-  - "Protected-main push certification for 8972632c230117c377c1e0e5d7219352518acda7 has still not surfaced after a bounded follow-up observation; no rerun or tight polling is authorized by this state."
-  - "Governance PR #82 previous head cc4bd5ef98318b156bd4482ce8819488302a1fe4 passed certification #975 / 35660675591, but this material closeout commit requires fresh exact-head CI and independent review."
-  - "No current canonical numeric module/overall progress metric is available; percentages must not be fabricated."
+  - "Credential rotation after quarantined PR #71 remains a target/provider action."
+  - "Consolidated PR #82 requires fresh exact-head CI and distinct independent review."
+  - "No canonical numeric progress metric is available; percentages must not be fabricated."
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
   tight_polling_forbidden: true
@@ -47,7 +46,7 @@ progress:
     label: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     percent: null
     display_bar: "[??????????] N/A"
-    basis: "canonical numeric metric unavailable; source remediation integrated, target closure still blocked"
+    basis: "source implementation integrated; target verification and credential rotation remain blocked"
   overall:
     label: "Nexora"
     percent: null
@@ -60,6 +59,6 @@ readme_progress_sync:
 state_drift:
   detected: true
   notes:
-    - "PR #73 is now closed unmerged as superseded by integrated PR #78/#79 remediation."
-    - "Protected main remains 8972632c... and its configured push certification has not surfaced in bounded observations."
-    - ".ai/state.json and .ai/handoff/current.md remain broader product-stage sources and must not be promoted beyond BLOCKED without target evidence."
+    - "PR #30 code is already represented on protected main; remaining evidence/state is consolidated into PR #82."
+    - "PR #30 exact head 20b75291c761e3c52cb3f89845be76fc06ce27a0 passed #978 / 35662411404 before retirement."
+    - "PR #82 previous exact head 09e548a067a75295f3110a045df567c90718039f passed #976 / 35661610368; consolidation requires fresh CI/review."

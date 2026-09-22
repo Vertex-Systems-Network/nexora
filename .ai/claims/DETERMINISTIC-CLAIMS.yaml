@@ -17,7 +17,7 @@ claims:
   - id: OPEN-PRS
     value: [1, 30, 75, 81, 82]
     status: OBSERVED
-    evidence: "live GitHub PR search after closing superseded PR #73"
+    evidence: "live GitHub PR search before PR #30 carrier closure; #30 is source-superseded and consolidated into #82"
   - id: AUDIT-REMEDIATION-SOURCE
     value: "PR #79 -> PR #78 -> main@8972632c230117c377c1e0e5d7219352518acda7"
     status: SOURCE_INTEGRATED
@@ -38,6 +38,18 @@ claims:
     value: "cc4bd5ef98318b156bd4482ce8819488302a1fe4 / run 35660675591"
     status: PASS
     evidence: "Nexora release certification #975 conclusion=success; head changed afterward for material closeout sync"
+  - id: PR30-FINAL-CI
+    value: "20b75291c761e3c52cb3f89845be76fc06ce27a0 / run 35662411404"
+    status: PASS
+    evidence: "Nexora release certification #978 conclusion=success"
+  - id: PR30-CARRIER
+    value: "no unique product/runtime/build-config diff; remaining evidence/state consolidated into PR #82"
+    status: SOURCE_SUPERSEDED
+    evidence: "main...PR30 compare after scope scrub + exact-head #978 PASS"
+  - id: PR82-CONSOLIDATION-BASE-CI
+    value: "09e548a067a75295f3110a045df567c90718039f / run 35661610368"
+    status: PASS
+    evidence: "Nexora release certification #976 conclusion=success; stale for new material consolidation head"
   - id: NUMERIC-PROGRESS
     value: null
     status: UNAVAILABLE

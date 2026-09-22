@@ -1,24 +1,14 @@
-# Last Checkpoint — AI-SUPERVISOR-SUPERSEDED-CARRIER-CLOSEOUT-004
+# Last Checkpoint — AI-SUPERVISOR-CARRIER-CONSOLIDATION-005
 
 Protected `main` remains `8972632c230117c377c1e0e5d7219352518acda7`.
 
-Completed in this milestone:
+- PR #30 exact head `20b75291c761e3c52cb3f89845be76fc06ce27a0` passed #978 / `35662411404`.
+- PR #30 now has no unique product/runtime/build-config diff relative to protected main.
+- PR #82 exact head `09e548a067a75295f3110a045df567c90718039f` passed #976 / `35661610368`.
+- PR #30's remaining evidence/state is consolidated into PR #82 to eliminate a duplicate merge carrier.
+- Broader state/handoff/active plan now distinguish SOURCE_DONE on main from TARGET BLOCKED.
+- No target/provider/deployment/release mutation was performed.
 
-- Rehydrated compact governance state and live GitHub intake.
-- Confirmed PR #82 previous exact head `cc4bd5ef98318b156bd4482ce8819488302a1fe4` passed Nexora release certification #975 / `35660675591`.
-- Confirmed PR #82 still has zero submitted independent reviews and zero unresolved review threads; it remains review-gated.
-- Performed the allowed bounded follow-up observation for protected `main@8972632c...`; no push workflow run surfaced, so the state remains WAITING_EXTERNAL_START/CI and is not promoted to PASS.
-- Verified PR #78 explicitly superseded PR #73's portable repository-level remediation scope and that protected main contains the accepted lockfiles, hygiene guard, hardened release certification, plus later PR #79 fixes.
-- Closed stale Draft PR #73 unmerged as superseded and left Issues #72/#74 open for unresolved target/provider evidence.
+After this consolidation is bound, PR #30 should close unmerged as source-superseded.
 
-Live intake after closeout:
-
-- OPEN Issues: #72, #74.
-- OPEN PRs: #1, #30, #75, #81, #82.
-- Product stage remains `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**.
-- CORE-QA must not start.
-- Real-target readiness/current receipt, target↔web identity, authoritative `/login` evidence, and credential rotation after PR #71 remain unresolved.
-
-This governance commit updates README progress plus compact state/claims/queue/runner records. It does not claim target verification, provider mutation, deployment, release completion, or CORE-QA authorization.
-
-Next safe action: observe one exact-head certification for the new PR #82 head. Merge remains blocked until a distinct independent exact-head review exists. Do not tight-poll the missing protected-main push run.
+Still required: fresh exact-head PR #82 CI, distinct independent review, real-target readiness/current receipt, exact target↔web identity, authoritative `/login`, and credential rotation after PR #71. CORE-QA remains locked.
