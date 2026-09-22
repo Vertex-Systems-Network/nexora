@@ -78,16 +78,58 @@ tasks:
     status: PASS
     immutable_evidence: "run #978 / 35662411404 conclusion=success"
   - id: RB-NEX-AI-SUPERVISOR-CI-004
-    source_work: "AI-SUPERVISOR-CARRIER-CONSOLIDATION-005"
+    source_work: "AI-SUPERVISOR-CARRIER-CONSOLIDATION-005 + governance numbering polish"
     source_issue_or_pr: "PR #82"
     command_or_workflow: "Nexora release certification"
     source_ref: "ai/supervisor-governance-v1"
-    source_sha: PENDING_CONSOLIDATION_HEAD
+    source_sha: "5d727efe1ba2810c590e8a86ebc3f122a0c998cf"
     environment_matrix_input_fixture: "GitHub-hosted release-certification workflow as configured by protected main"
-    authorization_state: "REGISTERED_ONLY; exact head bound by PR comment after commit creation"
+    authorization_state: "automatic repository CI; merged under scoped admin waiver WVR-NEX-PR82-MAIN-REVIEW-002"
     security_critical: true
     merge_blocking: true
     expected_runner_time: null
-    deterministic_dedup_key: "nexora:ai/supervisor-governance-v1:carrier-consolidation-005:release-certification"
+    deterministic_dedup_key: "nexora:pr82:5d727efe1ba2810c590e8a86ebc3f122a0c998cf:release-certification"
+    status: PASS
+    immutable_evidence: "run #980 / 35671637039 conclusion=success"
+  - id: RB-NEX-MAIN-POSTMERGE-002
+    source_work: "post-PR82 protected-main verification"
+    source_issue_or_pr: "main after PR #82"
+    command_or_workflow: "Nexora release certification push workflow"
+    source_ref: "main"
+    source_sha: "87210e7674f67fb75e046c185206573bebd906f9"
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow"
+    authorization_state: "automatic repository CI only"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:main:87210e7674f67fb75e046c185206573bebd906f9:postmerge-certification"
+    status: PASS
+    immutable_evidence: "run #981 / 35672290666 conclusion=success"
+  - id: RB-NEX-POSTMERGE-RECONCILE-CI-001
+    source_work: "AI-SUPERVISOR-POST-MERGE-RECONCILIATION-007"
+    source_issue_or_pr: "PR #83"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "ai/post-merge-reconcile-981"
+    source_sha: "3a71a0f06ec6c8ad3340b4e0136a51a5d74e91be"
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow"
+    authorization_state: "automatic repository CI; superseded by final steady-state cleanup head"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:pr83:3a71a0f06ec6c8ad3340b4e0136a51a5d74e91be:release-certification"
+    status: PASS
+    immutable_evidence: "run #984 / 35672648715 conclusion=success"
+  - id: RB-NEX-POSTMERGE-RECONCILE-CI-002
+    source_work: "TARGET-EVIDENCE-WAIT-008 steady-state transition"
+    source_issue_or_pr: "PR #83"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "ai/post-merge-reconcile-981"
+    source_sha: PENDING_FINAL_STEADY_STATE_HEAD
+    environment_matrix_input_fixture: "GitHub-hosted release-certification workflow"
+    authorization_state: "REGISTERED_ONLY; exact final head bound by PR comment after commit creation"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:pr83:final-steady-state:release-certification"
     status: BLOCKED_BINDING
     immutable_evidence: null

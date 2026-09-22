@@ -1,10 +1,21 @@
-# Nexora Current AI Handoff
+# Current Handoff — post-PR82 reconciliation
+
+- Protected main: `87210e7674f67fb75e046c185206573bebd906f9`.
+- PR #82 is merged; exact head passed #980 / `35671637039` and merge used scoped admin waiver `WVR-NEX-PR82-MAIN-REVIEW-002`.
+- Protected-main push certification #981 / `35672290666` completed **SUCCESS** on exact protected main.
+- Issue #72 source remediation is complete; only real target/provider credential rotation remains.
+- Issue #74 is the active runtime-target coordinator: W01/W02/W05/W06 done, W03/W04/W07 blocked on real target/provider evidence.
+- PR #1 is FUTURE_CARRIER_FROZEN; PR #75/#81 are closed stale maintenance.
+- Runtime target remains BLOCKED; CORE-QA stays locked.
+- After this state-only reconciliation merges, no source carrier remains active for this stage; resume directly at real-target W03/W04 + credential rotation.
+
+# Historical Nexora AI Handoff — retained for evidence
 
 ## Resume instruction
 
 Always begin with `AGENTS.md`, `.ai/state.json`, this handoff, the canonical roadmap/registries, and `.ai/plans/active.md`. Then inspect current `main` HEAD, open PRs, exact active unit and exact target evidence before implementation.
 
-## Current source context
+## Historical source context
 
 - Canonical branch: `main`
 - Baseline at start of current orchestration pass: `dffb238e655a1c474f4f7ce7e75c6eda004c0c32`
