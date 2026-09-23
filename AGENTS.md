@@ -194,3 +194,9 @@ High/critical units require a threat model and independent review evidence as de
 Every meaningful pass updates `.ai/state.json`, `.ai/handoff/current.md`, the active plan and affected registry entries. Scope changes update relevant roadmap/capability/quality/data/security/performance/flow/reliability/governance docs.
 
 `NEXORA_AI_PROJECT_STATE.md` remains historical evidence. `.ai/state.json` is canonical active state. Historical `N1.x` names are aliases only; use stable semantic stage/unit IDs.
+
+## VSN organization next-action handoff
+
+Before every user-facing development handoff, read and follow `.ai/NEXT-ACTION-OPTIONS.md`.
+
+If the user sends only this repository's GitHub URL, perform the policy's read-only bootstrap and return shuffled numbered next-action options. A URL-only message never authorizes a repository mutation. A later numeric selection must revalidate live repository state before acting.
