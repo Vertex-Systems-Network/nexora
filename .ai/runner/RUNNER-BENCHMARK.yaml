@@ -281,3 +281,19 @@ tasks:
     deterministic_dedup_key: "nexora:3439ac7e324e867046674044ba4ad1586bd963af:36742999910"
     status: PASS
     immutable_evidence: "GitHub run 36742999910 SUCCESS"
+
+  - id: RB-NEX-PR71-CLEAN-012
+    source_work: PR71-CLEAN-SOURCE-PREPARATION-012
+    source_issue_or_pr: "clean replacement for quarantined PR #71"
+    command_or_workflow: "PHPUnit source regressions + source certification + automatic CI"
+    source_ref: codex/pr71-clean-replacement
+    source_sha: null
+    environment_matrix_input_fixture: "PHP 8.3; SQLite in-memory; ephemeral APP_KEY; writable disposable npm cache"
+    authorization_state: "owner source preparation; no target promotion"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr71:clean-preparation-012
+    status: BLOCKED_BINDING
+    immutable_evidence: null
+    note: "Published exact head/run binding recorded on carrier PR; working-tree 488/4663 PASS is not remote CI."

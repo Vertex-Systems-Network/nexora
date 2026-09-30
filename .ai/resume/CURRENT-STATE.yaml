@@ -2,30 +2,30 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 observed_main:
   branch: main
-  sha: 3439ac7e324e867046674044ba4ad1586bd963af
-  observed_at: "2026-09-30"
-  semantics: "#105 merged; release certification 36742999910 SUCCESS"
+  sha: 55c249c06621fe7dc14868b3a5740b657bcb6b7a
+  observed_at: '2026-10-01'
+  semantics: '#102 merged; clean #71 replacement source preparation only'
 active_issue:
   number: 74
-active_pr: 102
-active_branch: codex/nine-point-closure-batch
+active_pr: null
+active_branch: codex/pr71-clean-replacement
 current_stage:
   id: RUNTIME-CLOSURE-001
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: NINE-POINT-EVIDENCE-RECONCILIATION-011
+  id: PR71-CLEAN-SOURCE-PREPARATION-012
   status: VERIFYING
 last_completed_milestone:
   main_commit: 3439ac7e324e867046674044ba4ad1586bd963af
-  summary: "#105 auth/runtime fix; exact main CI SUCCESS"
-exact_next_safe_action: "Verify updated #102 plan/evidence CI, integrate green; actual target/key/release remain blocked."
+  summary: '#105 auth/runtime fix; exact main CI SUCCESS'
+exact_next_safe_action: Verify clean source preparation CI; map remaining original cases; no Core QA target acceptance.
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:
-  - "No live TLS target/five-engine acceptance established."
-  - "Historical bootstrap key non-use/rotation unresolved in #72."
-  - "CORE-QA remains locked until global runtime acceptance."
+- No live TLS target/five-engine acceptance established.
+- 'Historical bootstrap key non-use/rotation unresolved in #72.'
+- CORE-QA remains locked until global runtime acceptance.
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
   tight_polling_forbidden: true
@@ -34,19 +34,17 @@ timeout_control:
 progress:
   current_module:
     percent: null
-    display_bar: "[??????????] N/A"
+    display_bar: '[??????????] N/A'
   overall:
     percent: null
-    display_bar: "[??????????] N/A"
+    display_bar: '[??????????] N/A'
 readme_progress_sync:
   required_every_material_milestone: true
 state_drift:
   detected: false
   notes:
-    - "Prior #1 future-carrier and pending #104 descriptions are historical."
-    - "Exact #105 source/main CI and disposable runtime verified; updated #102 plan CI remains separate."
-
+  - 'Current main verified directly; earlier #102 pending-carrier descriptions are historical.'
 future_target_input:
-  placeholder: "<operator-provided-target-path>"
+  placeholder: <operator-provided-target-path>
   availability: NOT_PROVISIONED
-  semantics: "Future operator input only; disposable loopback QA is not a provisioned live target."
+  semantics: Future operator input only; disposable loopback QA is not a provisioned live target.

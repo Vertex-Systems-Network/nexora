@@ -1,5 +1,7 @@
 # Nexora
 
+> **PR #71 clean replacement preparation:** eight source regressions / 59 assertions and combined 488 tests / 4663 assertions PASS; remaining original requirements and exact-head CI pending. Global target stage remains BLOCKED. [Coverage and evidence](docs/pr71-clean-replacement.md).
+
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
 > **Canonical current status (2026-09-30):** protected main `3439ac7e324e867046674044ba4ad1586bd963af` includes merged #103 source reconciliation, #104 SQLite provenance fix and #105 authentication throttle repair. Exact resulting-main release certification `36742999910` **SUCCESS**. Source CI: 480 backend tests / 4607 assertions + 6 frontend tests PASS. Source is verified; live Target/Release remain **BLOCKED**.
