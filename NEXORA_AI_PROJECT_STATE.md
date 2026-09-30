@@ -17,9 +17,9 @@
 - Installer protocol: `v5.29`
 - Source generation: `n1-v5.29`
 - Ledger last updated: `2026-08-21`
-- Current target environment: Windows + Laragon (real-target development test environment)
-- Current target path used in live testing: `D:\laragon\www\nexora`
-- Final product target: portable/self-hostable and deployable beyond Laragon; Laragon is a test target, not an architectural dependency.
+- Current target environment: Windows + target environment (real-target development test environment)
+- Current target path used in live testing: `D:\target-environment\www\nexora`
+- Final product target: portable/self-hostable and deployable beyond target environment; target environment is a test target, not an architectural dependency.
 
 ---
 
@@ -120,7 +120,7 @@ Never report a module as simply “100% complete” when only source/static veri
 - Package intent: **Post-Install Runtime Stabilization Closure**
 - rc.94 changes the installation architecture so final installed runtime fingerprints are finalized in a **fresh HTTP runtime-handoff request**, after committed `.env`, database-backed session/cache behavior and installed deployment mode are loaded.
 
-### 5.2 Current live Laragon installation
+### 5.2 Current live target environment installation
 
 The currently installed live target was created from **rc.93** before the rc.94 stabilization architecture existed.
 
@@ -231,7 +231,7 @@ Meaning: installer/build/runtime have advanced significantly, but live post-inst
 | DEV-0 Package/bootstrap | 90% | PARTIAL — final dependency certification deferred |
 | DEV-1 Installer | 100% source | SOURCE DONE — rc.94 fresh-request handoff; clean live confirmation still required |
 | DEV-2A Historical TypeScript remediation | 100% | SOURCE DONE |
-| DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for the reported Laragon run |
+| DEV-2B TypeScript/Vite target build | 100% reported | TARGET VERIFIED for the reported target environment run |
 | DEV-3 Laravel/install runtime | 75% | PARTIAL — live rc.93 needs safe post-install convergence confirmation |
 | DEV-4 Login/admin/core functional QA | 30% | PARTIAL — next major product-facing phase |
 | DEV-5 DB/services portability | 60% | PARTIAL |
@@ -245,7 +245,7 @@ Meaning: installer/build/runtime have advanced significantly, but live post-inst
 
 Do **not** overwrite the already-installed rc.93 application with rc.94 merely to repair the four fingerprints. That would introduce a real source/version change and confuse recovery with upgrade.
 
-1. Run the prepared **rc.93 Post-Install Identity Repair Pack** externally against `D:\laragon\www\nexora`.
+1. Run the prepared **rc.93 Post-Install Identity Repair Pack** externally against `D:\target-environment\www\nexora`.
 2. Verify:
 
 ```bat
@@ -462,7 +462,7 @@ If no release was produced, use `No release` instead of an rc number.
 - Trigger / observed blocker: project had become certification-heavy before basic product/runtime usability was closed.
 - Root cause: development and final audit workflows were mixed.
 - Changes applied: development-first plan; installer UX improvements; auxiliary service workflow foundation; package hygiene; dependency bootstrap behavior; theme/select/cancel/429 improvements.
-- Verification completed: source/static contracts and PHP lint passed; real build was delegated to Laragon target.
+- Verification completed: source/static contracts and PHP lint passed; real build was delegated to target environment target.
 - Real-target evidence: user later reported no build error and runtime bootstrap compatibility PASS.
 - Remaining blocker: installer/browser runtime errors.
 - Next exact action: iterate on real installer blockers until installation completes.
@@ -492,7 +492,7 @@ These must not pull work away from the current gate: **live runtime convergence 
 PROJECT: Nexora
 GOAL: Advanced extensible WordPress/Webflow/Wix/Shopify-class platform ecosystem
 DEV SOURCE: rc.94 / v5.29 / n1-v5.29
-LIVE TARGET: rc.93 installed on Laragon
+LIVE TARGET: rc.93 installed on target environment
 LIVE BLOCKER: post-install environment/activation/service/process fingerprints stale
 SOURCE/DEPLOYMENT/DB: matching
 DEPENDENCY RUNTIME: matching
