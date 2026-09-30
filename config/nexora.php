@@ -25,6 +25,7 @@ use App\Nexora\Modules\Core\CrmModule;
 use App\Nexora\Modules\Core\MembershipModule;
 use App\Nexora\Modules\Core\HelpdeskModule;
 use App\Nexora\Modules\Core\EnterpriseModule;
+use App\Nexora\Modules\Core\AiPlatformModule;
 use App\Nexora\Modules\Core\CloudRuntimeModule;
 
 return [
@@ -53,6 +54,7 @@ return [
             MembershipModule::class,
             HelpdeskModule::class,
             EnterpriseModule::class,
+            AiPlatformModule::class,
             CloudRuntimeModule::class,
             RuntimeModule::class,
             SentinelModule::class,
@@ -139,6 +141,10 @@ return [
         ['slug' => 'enterprise.impersonation.manage', 'name' => 'Manage Enterprise Impersonation', 'group' => 'enterprise', 'risk' => 'critical', 'description' => 'Start or stop reason-bound audited impersonation sessions.'],
         ['slug' => 'enterprise.audit.read', 'name' => 'Read Enterprise Audit', 'group' => 'enterprise', 'risk' => 'sensitive', 'description' => 'Read enterprise governance and identity events.'],
         ['slug' => 'enterprise.tenant.resolve', 'name' => 'Resolve Enterprise Tenant', 'group' => 'enterprise', 'risk' => 'normal', 'description' => 'Resolve the request tenant by verified domain, session organization and membership.'],
+        ['slug' => 'ai.connections.read', 'name' => 'Read AI Connections', 'group' => 'ai', 'risk' => 'sensitive', 'description' => 'Read tenant AI connection metadata without exposing provider credentials.'],
+        ['slug' => 'ai.connections.write', 'name' => 'Manage AI Connections', 'group' => 'ai', 'risk' => 'critical', 'description' => 'Create and change tenant AI provider connections and encrypted credentials.'],
+        ['slug' => 'ai.generate', 'name' => 'Generate AI Text', 'group' => 'ai', 'risk' => 'sensitive', 'description' => 'Submit bounded text-generation requests through an enabled tenant AI connection.'],
+        ['slug' => 'ai.providers.register', 'name' => 'Register AI Providers', 'group' => 'ai', 'risk' => 'critical', 'description' => 'Register verified extension-backed AI text-provider adapters without vendor SDKs in Core.'],
 
         ['slug' => 'extensions.registry.read', 'name' => 'Read Extension Registry', 'group' => 'extensions', 'risk' => 'normal', 'description' => 'Inspect installed extension packages and version metadata.'],
         ['slug' => 'extensions.lifecycle.manage', 'name' => 'Manage Extension Lifecycle', 'group' => 'extensions', 'risk' => 'critical', 'description' => 'Install, enable, disable, update, rollback and uninstall verified extension packages.'],

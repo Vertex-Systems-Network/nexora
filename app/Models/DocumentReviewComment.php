@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Nexora\Enterprise\Support\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class DocumentReviewComment extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'nx_document_review_comments';
     protected $guarded = [];
 

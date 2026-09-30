@@ -19,13 +19,14 @@ final readonly class RefundService
         private ConcurrencyGuard $concurrency,
     ) {}
 
-    public function record(CommercePaymentTransaction $payment, int $amountMinor, string $status, ?string $reason, ?int $actorId, ?string $providerReference = null, ?string $idempotencyKey = null): CommerceRefund
+    /** @param array<string,mixed> $metadata */
+    public function record(CommercePaymentTransaction $payment, int $amountMinor, string $status, ?string $reason, ?int $actorId, ?string $providerReference = null, ?string $idempotencyKey = null, array $metadata = []): CommerceRefund
     {
         if ($amountMinor <= 0) throw new InvalidArgumentException('Refund amount must be greater than zero.');
         $idempotencyKey = $this->idempotencyKey($idempotencyKey);
 
         try {
-            return $this->concurrency->transaction(function () use ($payment, $amountMinor, $status, $reason, $actorId, $providerReference, $idempotencyKey): CommerceRefund {
+            return $this->concurrency->transaction(function () use ($payment, $amountMinor, $status, $reason, $actorId, $providerReference, $idempotencyKey, $metadata): CommerceRefund {
                 if ($idempotencyKey !== null) {
                     $existing = CommerceRefund::query()->where('idempotency_key', $idempotencyKey)->first();
                     if ($existing) return $existing;
@@ -51,6 +52,7 @@ final readonly class RefundService
                     'amount_minor' => $amountMinor,
                     'reason' => $reason,
                     'idempotency_key' => $idempotencyKey,
+                    'metadata' => $metadata,
                     'created_by' => $actorId,
                     'processed_at' => now(),
                 ]);

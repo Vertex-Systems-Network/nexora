@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Nexora\Foundation\Contracts\SettingsContract;
 use App\Nexora\Installation\InstallationState;
 use Closure;
 use Illuminate\Http\Request;
@@ -12,7 +13,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class SetLocale
 {
-    public function __construct(private readonly InstallationState $installation) {}
+    public function __construct(
+        private readonly InstallationState $installation,
+        private readonly SettingsContract $settings,
+    ) {}
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -24,10 +28,14 @@ final class SetLocale
         // user provider and therefore the not-yet-configured application DB.
         $userLocale = $this->installation->isInstalled() ? $request->user()?->locale : null;
 
+        $configuredDefault = $this->installation->isInstalled()
+            ? $this->settings->get('app.default_locale', config('localization.default', config('app.locale', 'en')))
+            : config('localization.default', config('app.locale', 'en'));
+
         $candidate = $userLocale
             ?: $request->session()->get('locale')
             ?: $request->cookie($cookieName)
-            ?: config('localization.default', config('app.locale', 'en'));
+            ?: $configuredDefault;
 
         $locale = is_string($candidate) && isset($supported[$candidate]) ? $candidate : $fallback;
         if (! isset($supported[$locale])) {

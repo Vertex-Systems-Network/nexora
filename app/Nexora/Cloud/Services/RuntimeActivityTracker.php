@@ -57,12 +57,26 @@ final readonly class RuntimeActivityTracker
         return $out;
     }
 
-    /** @return array{connection:string,queues:array<string,int>,total:int,status:string} */
+    /** @return array<string,mixed> */
     public function queueBacklog(): array
     {
         $connection=(string)config('queue.default','sync');$queues=(array)config('nexora-upgrade.cluster_queue_names',['default']);$counts=[];$total=0;
         if($connection==='sync')return ['connection'=>$connection,'queues'=>['default'=>0],'total'=>0,'status'=>'pass'];
-        foreach($queues as $queue){$queue=trim((string)$queue);if($queue==='')continue;try{$size=(int)Queue::connection($connection)->size($queue);$counts[$queue]=$size;$total+=$size;}catch(\Throwable $e){return ['connection'=>$connection,'queues'=>$counts,'total'=>$total,'status'=>'unknown','error'=>substr($e->getMessage(),0,300)];}}
+        foreach($queues as $queue){
+            $queue=trim((string)$queue);if($queue==='')continue;
+            try{$size=(int)Queue::connection($connection)->size($queue);$counts[$queue]=$size;$total+=$size;}
+            catch(\Throwable $e){
+                report($e);
+                return [
+                    'connection'=>$connection,
+                    'queues'=>$counts,
+                    'total'=>$total,
+                    'status'=>'unknown',
+                    'error_code'=>'queue_probe_'.substr(hash('sha256',$e::class),0,12),
+                    'message'=>'Queue backlog could not be inspected. Review server logs for the matching operational incident.',
+                ];
+            }
+        }
         return ['connection'=>$connection,'queues'=>$counts,'total'=>$total,'status'=>$total===0?'pass':'pending'];
     }
 

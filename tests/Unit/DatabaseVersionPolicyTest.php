@@ -15,7 +15,17 @@ final class DatabaseVersionPolicyTest extends TestCase
     public static function supported(): array
     {
         return [
-            ['mysql','5.7.44-log'],['mariadb','10.11.6-MariaDB-0ubuntu0'],['pgsql','16.4'],['sqlite','3.45.3'],['sqlsrv','16.0.4125.3'],
+            ['mysql','5.7.44-log'],
+            ['mariadb','10.11.6-MariaDB-0ubuntu0'],
+            ['pgsql','16.4'],
+            ['sqlite','3.45.3'],
+            ['sqlsrv','16.0.4125.3'],
+            ['aws_rds_mysql','8.0.40'],
+            ['aws_rds_mariadb','10.11.8-MariaDB'],
+            ['aws_rds_pgsql','16.4'],
+            ['aws_rds_sqlsrv','16.0.4125.3'],
+            ['aws_aurora_mysql','8.0.mysql_aurora.3.08.0'],
+            ['aws_aurora_pgsql','15.8'],
         ];
     }
 
@@ -28,7 +38,19 @@ final class DatabaseVersionPolicyTest extends TestCase
 
     public static function unsupported(): array
     {
-        return [['mysql','5.6.51'],['mariadb','10.2.44-MariaDB'],['pgsql','9.6.24'],['sqlite','3.25.3'],['sqlsrv','13.0.6435.1']];
+        return [
+            ['mysql','5.6.51'],
+            ['mariadb','10.2.44-MariaDB'],
+            ['pgsql','9.6.24'],
+            ['sqlite','3.25.3'],
+            ['sqlsrv','13.0.6435.1'],
+            ['aws_rds_mysql','5.6.51'],
+            ['aws_rds_mariadb','10.2.44-MariaDB'],
+            ['aws_rds_pgsql','9.6.24'],
+            ['aws_rds_sqlsrv','13.0.6435.1'],
+            ['aws_aurora_mysql','5.6.10'],
+            ['aws_aurora_pgsql','9.6.24'],
+        ];
     }
 
     #[Test, DataProvider('unsupported')]

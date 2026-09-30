@@ -6,10 +6,13 @@ namespace Tests\Feature\Certification;
 
 use App\Nexora\Installation\InstallationState;
 use PHPUnit\Framework\Attributes\Test;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 final class InstallerRecoveryCertificationTest extends TestCase
 {
+    use RefreshDatabase;
+
     #[Test]
     public function completed_installation_locks_all_installer_controls(): void
     {

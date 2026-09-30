@@ -8,6 +8,6 @@ use App\Models\Document;
 
 interface SeoManagerContract
 {
-    /** @return array{metadata:array<string,mixed>,schema:array<string,mixed>} */
+    /** @return array{metadata:array<string,mixed>,schema:array<string,mixed>,social:array<string,mixed>} */
     public function documentPayload(Document $document, string $locale = 'en'): array;
 }

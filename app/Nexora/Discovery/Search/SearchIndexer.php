@@ -8,11 +8,17 @@ use App\Models\Document;
 use App\Models\MediaAsset;
 use App\Models\SearchIndexEntry;
 use App\Models\SeoEntry;
+use App\Nexora\Publishing\Services\PublicDocumentVisibility;
 use Illuminate\Support\Collection;
 
 final class SearchIndexer
 {
-    public function __construct(private DocumentTextExtractor $extractor) {}
+    private const RESOURCE_TYPES = ['document', 'media'];
+
+    public function __construct(
+        private DocumentTextExtractor $extractor,
+        private PublicDocumentVisibility $publicVisibility,
+    ) {}
 
     public function indexDocument(Document $document, ?string $locale = null): SearchIndexEntry
     {
@@ -94,17 +100,38 @@ final class SearchIndexer
         return ['indexed'=>$indexed,'removed'=>$removed];
     }
 
-    /** @return Collection<int,array<string,mixed>> */
-    public function search(string $query, bool $publicOnly = false, int $limit = 20, ?string $locale = null): Collection
-    {
+    /**
+     * @param list<string>|null $resourceTypes
+     * @return Collection<int,array<string,mixed>>
+     */
+    public function search(
+        string $query,
+        bool $publicOnly = false,
+        int $limit = 20,
+        ?string $locale = null,
+        ?array $resourceTypes = null,
+    ): Collection {
         $needle = $this->normalize($query);
         if (mb_strlen($needle) < 2) return collect();
         $locale ??= app()->getLocale();
         $like = '%'.$needle.'%';
+        $limit = max(1, min(100, $limit));
+
+        $types = $publicOnly
+            ? ['document']
+            : $this->normalizeResourceTypes($resourceTypes);
+        if ($types === []) return collect();
 
         $candidates = SearchIndexEntry::query()
             ->where('locale', $locale)
-            ->when($publicOnly, fn ($builder) => $builder->where('resource_type','document')->where('status', 'published'))
+            ->whereIn('resource_type', $types)
+            ->when($publicOnly, function ($builder): void {
+                $builder->where('status', 'published');
+                $protectedDocumentIds = $this->publicVisibility->protectedDocumentIds();
+                if ($protectedDocumentIds !== []) {
+                    $builder->whereNotIn('resource_id', $protectedDocumentIds);
+                }
+            })
             ->where(function ($builder) use ($like): void {
                 $builder->whereRaw('LOWER(title) LIKE ?', [$like])
                     ->orWhereRaw('LOWER(COALESCE(excerpt, ?)) LIKE ?', ['', $like])
@@ -140,6 +167,18 @@ final class SearchIndexer
                 'score'=>$score,
             ];
         })->sortByDesc('score')->take($limit)->values();
+    }
+
+    /** @param list<string>|null $resourceTypes
+     *  @return list<string> */
+    private function normalizeResourceTypes(?array $resourceTypes): array
+    {
+        if ($resourceTypes === null) return self::RESOURCE_TYPES;
+
+        return array_values(array_intersect(
+            self::RESOURCE_TYPES,
+            array_values(array_unique(array_map('strval', $resourceTypes))),
+        ));
     }
 
     private function normalize(string $value): string

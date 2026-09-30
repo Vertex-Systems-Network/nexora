@@ -16,10 +16,15 @@ return [
     | Release-candidate asset budgets
     |--------------------------------------------------------------------------
     |
-    | These are intentionally generous RC ceilings, not a claim that every
-    | page ships the entire allowance. N1.6 will introduce route/component
-    | budgets and deeper cache/CDN optimization. RC9 prevents accidental
-    | multi-megabyte regressions from becoming production artifacts.
+    | These are intentionally generous release ceilings, not a claim that every
+    | page ships the entire allowance. The initial JS budget follows only the
+    | app entry's static import graph; lazy Inertia pages remain outside that
+    | first-load graph and are measured by the total/per-asset budgets below.
+    |
+    | Nexora intentionally emits one lazy JavaScript chunk for many Inertia
+    | route modules. Keep a bounded whole-build chunk ceiling with enough room
+    | for the current route surface plus shared chunks without treating lazy
+    | routes as first-load payload.
     |
     */
     'budgets' => [
@@ -27,12 +32,13 @@ return [
         'javascript_total_bytes' => (int) $env('NEXORA_BUDGET_JS_TOTAL_BYTES', 3_500_000),
         'javascript_asset_bytes' => (int) $env('NEXORA_BUDGET_JS_ASSET_BYTES', 1_500_000),
         'javascript_gzip_total_bytes' => (int) $env('NEXORA_BUDGET_JS_GZIP_TOTAL_BYTES', 1_250_000),
+        'initial_javascript_gzip_bytes' => (int) $env('NEXORA_BUDGET_INITIAL_JS_GZIP_BYTES', 900_000),
         'css_total_bytes' => (int) $env('NEXORA_BUDGET_CSS_TOTAL_BYTES', 750_000),
         'css_asset_bytes' => (int) $env('NEXORA_BUDGET_CSS_ASSET_BYTES', 500_000),
         'font_asset_bytes' => (int) $env('NEXORA_BUDGET_FONT_ASSET_BYTES', 350_000),
         'image_asset_bytes' => (int) $env('NEXORA_BUDGET_IMAGE_ASSET_BYTES', 1_750_000),
         'static_public_asset_bytes' => (int) $env('NEXORA_BUDGET_STATIC_PUBLIC_ASSET_BYTES', 1_750_000),
-        'max_javascript_assets' => (int) $env('NEXORA_BUDGET_MAX_JS_ASSETS', 64),
+        'max_javascript_assets' => (int) $env('NEXORA_BUDGET_MAX_JS_ASSETS', 128),
         'max_css_assets' => (int) $env('NEXORA_BUDGET_MAX_CSS_ASSETS', 32),
     ],
 
