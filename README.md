@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-30):** GitHub source development continues under user authorization. Protected-main `d8e83e87305bc8c11d8b073b42f13cb69414c550` passed push certification #1125 / `36689146406`. Environment-neutral tooling and source maintenance PRs #94–#99 are integrated. Parser maintenance #100 merged after exact-head #1126 SUCCESS; resulting-main push CI must be verified separately. No current installation path or live URL has been provisioned. Historical rc.93 evidence is not current target verification; runtime target acceptance remains **BLOCKED**. Provider rotation (#72), target identity/readiness (#74), repository review enforcement (#87), and draft #1 remain distinct outstanding gates.
+> **Canonical current status (2026-09-30):** Source reconciliation is locally verified on `codex/product-source-reconciliation`, based on protected main `9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5` and draft #1. 38 conflicts resolved; 477 backend tests and 6 frontend tests pass; TypeScript/Vite build and source certification pass. Initial canonical MySQL CI #1132 passed; supplemental QA #173 failed on three textual contracts, corrected locally. Follow-up remote CI and independent review are pending. Isolated local backend suites pass; combined local artisan execution has HTTP throttling interference. No current hosting target is provisioned; target acceptance remains **BLOCKED**. See [source reconciliation evidence](docs/source-reconciliation-2026-09-30.md).
 
 ## AI development startup gate
 
@@ -23,11 +23,11 @@ This rule applies on every AI development start, including work resumed from an 
 - **Observed:** 2026-09-30
 - **Last verified source baseline:** `d8e83e87305bc8c11d8b073b42f13cb69414c550` — protected-main #1125 / `36689146406` **SUCCESS**
 - **Product acceptance stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Current source batch:** environment-neutral tooling and reviewed dependency maintenance; #94–#99 integrated, #100 merged after fresh exact-head #1126 SUCCESS; resulting-main push CI must be verified separately
+- **Current source batch:** draft #1/main source reconciliation; 38 conflicts resolved; local checks PASS; remote CI and independent review pending
 - **Current deployment:** not provisioned; user scope is GitHub source development
 - **Open remediation Issues:** #72 provider credential rotation; #74 target readiness/identity; #87 repository security review enforcement
 - **Future PR:** #1 remains draft; no blanket promotion from source CI
-- **Next safe action:** verify resulting main and the source checkpoint; continue authorized source development. Target provisioning/certification is separate.
+- **Next safe action:** verify exact-head MySQL CI and obtain independent review of the source reconciliation; target provisioning/certification remains separate.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

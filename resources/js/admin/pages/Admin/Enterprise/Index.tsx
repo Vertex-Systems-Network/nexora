@@ -10,11 +10,18 @@ type Org={id:string;name:string;slug:string;status:string;is_default:boolean;mem
 type Props={current:{id:string;name:string;slug:string;status:string;timezone:string;locale:string}|null;organizations:Org[];canManage:boolean;canImpersonate:boolean};
 export default function EnterpriseIndex({current,organizations,canManage}:Props){
  const[open,setOpen]=useState(false);const form=useForm({name:"",slug:"",timezone:"UTC",locale:"en"});
+ const manageOrganization=(organization:Org)=>{
+  if(current?.id===organization.id){router.visit(`/admin/enterprise/organizations/${organization.id}`);return;}
+  router.post('/admin/enterprise/switch',{organization_id:organization.id},{
+   preserveScroll:false,
+   onSuccess:()=>router.visit(`/admin/enterprise/organizations/${organization.id}`),
+  });
+ };
  const cols=useMemo<Column<Org>[]>(()=>[
   {key:"name",label:"Organization",render:o=><div><p className="font-semibold text-[var(--nx-text)]">{o.name}</p><p className="mt-1 text-xs text-[var(--nx-text-muted)]">{o.slug}{o.is_default?" · Default organization":""}</p></div>},
   {key:"status",label:"Status",render:o=><Badge>{o.status}</Badge>},{key:"members",label:"Members",render:o=><span>{o.members_count}</span>},
   {key:"current",label:"Current",render:o=>current?.id===o.id?<Badge>Selected</Badge>:<Button size="sm" variant="secondary" onClick={()=>router.post('/admin/enterprise/switch',{organization_id:o.id},{preserveScroll:true})}>Switch</Button>},
-  {key:"action",label:"",render:o=><Button size="sm" variant="ghost" onClick={()=>router.visit(`/admin/enterprise/organizations/${o.id}`)}>Manage</Button>},
+  {key:"action",label:"",render:o=><Button size="sm" variant="ghost" onClick={()=>manageOrganization(o)}>Manage</Button>},
  ],[current?.id]);
  return <AdminLayout><Head title="Enterprise"/><PageHeader eyebrow="Enterprise" title="Organizations & tenancy" description="Isolate tenant data, members, domains and identity configuration without duplicating the Nexora platform runtime." actions={canManage?<Button onClick={()=>setOpen(true)}>Create organization</Button>:undefined}/>
  <div className="grid gap-4 sm:grid-cols-3"><Card className="p-5"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--nx-text-muted)]">Current organization</p><p className="mt-2 text-lg font-semibold text-[var(--nx-text)]">{current?.name??"Not resolved"}</p><p className="mt-1 text-xs text-[var(--nx-text-muted)]">{current?.slug??"No tenant context"}</p></Card><Card className="p-5"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--nx-text-muted)]">Organizations</p><p className="mt-2 text-2xl font-semibold text-[var(--nx-text)]">{organizations.length}</p></Card><Card className="p-5"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--nx-text-muted)]">Isolation model</p><p className="mt-2 text-sm font-semibold text-[var(--nx-text)]">Tenant context + scoped records</p><p className="mt-1 text-xs text-[var(--nx-text-muted)]">Verified domain/session membership resolution</p></Card></div>

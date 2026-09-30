@@ -59,30 +59,52 @@ export default function ThemesPage({ themes, canRollback, permissions }: { theme
     const [installOpen, setInstallOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [previewing, setPreviewing] = useState<number | null>(null);
+    const [previewError, setPreviewError] = useState<string | null>(null);
     const [activating, setActivating] = useState<number | null>(null);
     const [selectedVersions, setSelectedVersions] = useState<Record<number, string>>(() => Object.fromEntries(themes.map((theme) => [theme.id, String(theme.activeVersionId ?? theme.versions[0]?.id ?? "")])));
     const upload = useForm<{ package: File | null }>({ package: null });
     const active = themes.find((theme) => theme.status === "active") ?? themes[0];
 
+    const closeInstall = () => {
+        setInstallOpen(false);
+        setFile(null);
+        upload.reset();
+        upload.clearErrors();
+    };
+
     const install = () => {
         if (!file) return;
+        upload.clearErrors();
         upload.post("/admin/appearance/themes/install", {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => { setInstallOpen(false); setFile(null); upload.reset(); },
+            onSuccess: closeInstall,
         });
     };
 
     const preview = async (versionId: number) => {
         setPreviewing(versionId);
+        setPreviewError(null);
         try {
             const response = await fetch(`/admin/appearance/themes/versions/${versionId}/preview`, {
                 method: "POST",
-                headers: { Accept: "application/json", "X-CSRF-TOKEN": document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? "" },
+                credentials: "same-origin",
+                headers: {
+                    Accept: "application/json",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRF-TOKEN": document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? "",
+                },
             });
-            const body = await response.json().catch(() => ({}));
-            if (response.ok && body.url) window.open(body.url, "_blank", "noopener,noreferrer");
-        } finally { setPreviewing(null); }
+            const body = await response.json().catch(() => ({} as { url?: string; message?: string }));
+            if (!response.ok || !body.url) {
+                throw new Error(body.message || `Theme preview could not be created (${response.status}).`);
+            }
+            window.open(body.url, "_blank", "noopener,noreferrer");
+        } catch (reason) {
+            setPreviewError(reason instanceof Error ? reason.message : "Theme preview could not be created.");
+        } finally {
+            setPreviewing(null);
+        }
     };
 
     const activate = (versionId: number) => {
@@ -97,8 +119,10 @@ export default function ThemesPage({ themes, canRollback, permissions }: { theme
                 eyebrow="Appearance"
                 title="Themes"
                 description="Install Sentinel-verified, non-executable themes. Preview privately, switch atomically, customize design tokens and roll back without changing document or SEO semantics."
-                actions={permissions.install ? <Button onClick={() => setInstallOpen(true)} leadingIcon={<Icon name="plus" className="h-4 w-4" />}>Install theme</Button> : undefined}
+                actions={permissions.install ? <Button onClick={() => { upload.clearErrors(); setInstallOpen(true); }} leadingIcon={<Icon name="plus" className="h-4 w-4" />}>Install theme</Button> : undefined}
             />
+
+            {previewError && <Card className="mb-5 border-red-300/60 bg-red-50 p-4 dark:border-red-500/30 dark:bg-red-500/10"><div role="alert" className="flex items-start gap-3 text-sm text-red-800 dark:text-red-100"><Icon name="alert" className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-semibold">Theme preview failed</p><p className="mt-1">{previewError}</p></div></div></Card>}
 
             <div className="mb-5 grid gap-3 md:grid-cols-3">
                 <Card className="p-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--nx-brand-soft)] text-[var(--nx-brand)]"><Icon name="palette" className="h-4 w-4" /></span><div><div className="text-xs text-[var(--nx-text-muted)]">Installed themes</div><div className="mt-0.5 text-lg font-semibold text-[var(--nx-text)]">{themes.length}</div></div></div></Card>
@@ -137,9 +161,16 @@ export default function ThemesPage({ themes, canRollback, permissions }: { theme
 
             {active && <div className="mt-5"><ThemeTokenEditor theme={active} canManage={permissions.manage} /></div>}
 
-            <Modal open={installOpen} onClose={() => setInstallOpen(false)} title="Install theme" description="Every uploaded theme enters Sentinel quarantine first. Only an ALLOW decision reaches the Theme Engine." footer={<><Button variant="secondary" onClick={() => setInstallOpen(false)}>Cancel</Button><Button loading={upload.processing} disabled={!file} onClick={install}>Scan & install theme</Button></>}>
-                <FilePicker label="Theme package" description="Upload a Nexora theme ZIP containing nexora.json, theme.json, declared HTML templates and static CSS/image assets." accept=".zip,application/zip" file={file} onChange={(next) => { setFile(next); upload.setData("package", next); }} />
-                <div className="mt-4 rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-3 text-xs leading-5 text-[var(--nx-text-muted)]"><strong className="text-[var(--nx-text)]">N0.20 security boundary:</strong> themes cannot ship PHP, JavaScript, executable scripts or undeclared files. Interactive behavior will come later through separately permissioned extensions/Studio capabilities.</div>
+            <Modal open={installOpen} onClose={closeInstall} title="Install theme" description="Every uploaded theme enters Sentinel quarantine first. Only an ALLOW decision reaches the Theme Engine." footer={<><Button variant="secondary" onClick={closeInstall}>Cancel</Button><Button loading={upload.processing} disabled={!file} onClick={install}>Scan & install theme</Button></>}>
+                <FilePicker
+                    label="Theme package"
+                    description="Upload a Nexora theme ZIP containing nexora.json, theme.json, declared HTML templates and static CSS/image assets."
+                    accept=".zip,application/zip"
+                    file={file}
+                    error={upload.errors.package}
+                    onChange={(next) => { setFile(next); upload.setData("package", next); upload.clearErrors("package"); }}
+                />
+                <div className="mt-4 rounded-xl border border-[var(--nx-border)] bg-[var(--nx-surface-subtle)] p-3 text-xs leading-5 text-[var(--nx-text-muted)]"><strong className="text-[var(--nx-text)]">N0.20 security boundary:</strong> themes cannot ship PHP, JavaScript, executable scripts or undeclared files. Interactive behavior comes through separately permissioned extensions/Studio capabilities.</div>
             </Modal>
         </AdminLayout>
     );

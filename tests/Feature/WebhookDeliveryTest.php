@@ -19,13 +19,14 @@ final class WebhookDeliveryTest extends TestCase
 
     public function test_outbound_webhook_is_signed_and_redirects_are_not_followed(): void
     {
-        Http::fake(['https://example.com/hooks/nexora'=>Http::response('',204)]);
-        $destination=WebhookDestination::query()->create(['uuid'=>(string)Str::uuid(),'name'=>'Example','url'=>'https://example.com/hooks/nexora','secret'=>'outbound-secret','enabled'=>true,'timeout_seconds'=>5,'max_attempts'=>3,'headers'=>[]]);
+        // A public literal IP keeps the real destination policy active without external DNS.
+        Http::fake(['https://1.1.1.1/hooks/nexora'=>Http::response('',204)]);
+        $destination=WebhookDestination::query()->create(['uuid'=>(string)Str::uuid(),'name'=>'Example','url'=>'https://1.1.1.1/hooks/nexora','secret'=>'outbound-secret','enabled'=>true,'timeout_seconds'=>5,'max_attempts'=>3,'headers'=>[]]);
         $delivery=WebhookDelivery::query()->create(['uuid'=>(string)Str::uuid(),'webhook_destination_id'=>$destination->id,'event_key'=>'document.published','idempotency_key'=>'delivery-test-1','payload'=>['hello'=>'world'],'status'=>'queued']);
         app(WebhookDeliveryService::class)->deliver($delivery->load('destination'));
         self::assertSame('delivered',$delivery->fresh()->status);
         Http::assertSent(function (ClientRequest $request): bool {
-            return $request->url()==='https://example.com/hooks/nexora'
+            return $request->url()==='https://1.1.1.1/hooks/nexora'
                 && str_starts_with((string)$request->header('X-Nexora-Signature')[0],'v1=')
                 && $request->header('Idempotency-Key')[0]==='delivery-test-1';
         });

@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin\Security;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\AssignRequestId;
 use App\Models\QuarantinePackage;
 use App\Models\SecurityScan;
 use App\Models\SupplyChainArtifact;
 use App\Nexora\Security\Audit\AuditManager;
 use App\Nexora\Security\Sentinel\Support\QuarantineManager;
 use App\Nexora\Security\Sentinel\Support\ScanRecorder;
+use App\Nexora\Security\Sentinel\Support\SentinelApprovalGuard;
+use App\Nexora\Security\Sentinel\Support\SentinelFailureReference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -24,6 +27,8 @@ final class SentinelController extends Controller
         private QuarantineManager $quarantine,
         private ScanRecorder $recorder,
         private AuditManager $audit,
+        private SentinelApprovalGuard $approval,
+        private SentinelFailureReference $failures,
     ) {
     }
 
@@ -98,8 +103,22 @@ final class SentinelController extends Controller
                 ->with($scan->decision === 'allow' ? 'success' : 'warning', "Sentinel scan completed with decision: {$scan->decision}.");
         } catch (Throwable $exception) {
             report($exception);
-            $scan = $package->scans()->latest()->first();
-            $this->audit->record('sentinel.scan.failed', $scan ?? $package, ['error' => $exception->getMessage()]);
+            $scan = $package->scans()->latest('created_at')->first();
+            $failure = is_array($scan?->summary)
+                ? (array) ($scan->summary['failure'] ?? [])
+                : [];
+            if (! is_string($failure['reference'] ?? null) || $failure['reference'] === '') {
+                $requestId = (string) ($request->attributes->get(AssignRequestId::ATTRIBUTE) ?: 'no-request-id');
+                $generated = $this->failures->for($exception, $requestId);
+                $failure = [
+                    'reference' => $generated['reference'],
+                    'class_fingerprint' => $generated['class_fingerprint'],
+                ];
+            }
+            $this->audit->record('sentinel.scan.failed', $scan ?? $package, [
+                'error_reference' => (string) ($failure['reference'] ?? 'unavailable'),
+                'exception_class_sha256' => (string) ($failure['class_fingerprint'] ?? ''),
+            ]);
 
             if ($scan) {
                 return redirect()->route('admin.security.sentinel.show', $scan)
@@ -113,7 +132,10 @@ final class SentinelController extends Controller
     public function show(Request $request, SecurityScan $scan): Response
     {
         $severity = $request->string('severity')->toString();
-        $findingsQuery = $scan->findings()->orderByRaw("FIELD(severity, 'critical', 'high', 'medium', 'low', 'info')")->orderBy('file_path')->orderBy('line_start');
+        $findingsQuery = $scan->findings()
+            ->orderByRaw("CASE severity WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 WHEN 'low' THEN 4 WHEN 'info' THEN 5 ELSE 6 END")
+            ->orderBy('file_path')
+            ->orderBy('line_start');
         if (in_array($severity, ['critical', 'high', 'medium', 'low', 'info'], true)) {
             $findingsQuery->where('severity', $severity);
         }
@@ -135,6 +157,7 @@ final class SentinelController extends Controller
 
         $scan->load(['requester:id,name,email', 'quarantinePackage:id,original_name,status,size_bytes,sha256,scanned_at']);
         $supplyChain = SupplyChainArtifact::query()->where('scan_id', $scan->id)->with(['publisher:id,name,key_id,trust_tier,status'])->withCount('components')->first();
+        $promotion = $this->promotionFor($request, $scan, $supplyChain);
 
         return Inertia::render('Admin/Security/Sentinel/Show', [
             'scan' => [
@@ -162,11 +185,22 @@ final class SentinelController extends Controller
             'findings' => $findings,
             'filters' => ['severity' => $severity],
             'supplyChain' => $supplyChain ? [
-                'id'=>$supplyChain->id,'signature_status'=>$supplyChain->signature_status,'provenance_status'=>$supplyChain->provenance_status,
-                'trust_tier'=>$supplyChain->trust_tier,'sandbox_profile'=>$supplyChain->sandbox_profile,'components_count'=>$supplyChain->components_count,
-                'content_sha256'=>$supplyChain->content_sha256,'verification_error'=>$supplyChain->verification_error,
-                'publisher'=>$supplyChain->publisher ? ['name'=>$supplyChain->publisher->name,'key_id'=>$supplyChain->publisher->key_id,'trust_tier'=>$supplyChain->publisher->trust_tier,'status'=>$supplyChain->publisher->status] : null,
+                'id' => $supplyChain->id,
+                'signature_status' => $supplyChain->signature_status,
+                'provenance_status' => $supplyChain->provenance_status,
+                'trust_tier' => $supplyChain->trust_tier,
+                'sandbox_profile' => $supplyChain->sandbox_profile,
+                'components_count' => $supplyChain->components_count,
+                'content_sha256' => $supplyChain->content_sha256,
+                'verification_error' => $supplyChain->verification_error,
+                'publisher' => $supplyChain->publisher ? [
+                    'name' => $supplyChain->publisher->name,
+                    'key_id' => $supplyChain->publisher->key_id,
+                    'trust_tier' => $supplyChain->publisher->trust_tier,
+                    'status' => $supplyChain->publisher->status,
+                ] : null,
             ] : null,
+            'promotion' => $promotion,
             'canRescan' => $request->user()?->hasPermission('security.sentinel.scan') ?? false,
             'canDelete' => $request->user()?->hasPermission('security.quarantine.manage') ?? false,
         ]);
@@ -192,5 +226,48 @@ final class SentinelController extends Controller
         $this->audit->record('sentinel.quarantine.deleted', $package, ['name' => $name, 'sha256' => $sha256]);
 
         return redirect()->route('admin.security.sentinel.index')->with('success', "Quarantined package [{$name}] was permanently removed.");
+    }
+
+    /** @return array{kind:string,label:string,url:string,payload:array<string,string>}|null */
+    private function promotionFor(Request $request, SecurityScan $scan, ?SupplyChainArtifact $supplyChain): ?array
+    {
+        if ($scan->quarantinePackage === null || $scan->quarantinePackage->status === 'installed') {
+            return null;
+        }
+
+        try {
+            $this->approval->assertCurrent($scan->quarantinePackage, $scan);
+        } catch (Throwable) {
+            return null;
+        }
+
+        $type = is_string($scan->manifest['type'] ?? null) ? (string) $scan->manifest['type'] : '';
+        if ($type === 'theme' && ($request->user()?->hasPermission('themes.install') ?? false)) {
+            return [
+                'kind' => 'theme',
+                'label' => 'Install theme',
+                'url' => route('admin.themes.install'),
+                'payload' => ['scan_id' => (string) $scan->id],
+            ];
+        }
+
+        if (in_array($type, ['extension', 'app', 'integration', 'studio-pack'], true)
+            && $supplyChain !== null
+            && (string) $supplyChain->scan_id === (string) $scan->id
+            && ($request->user()?->hasPermission('extensions.install') ?? false)) {
+            return [
+                'kind' => 'extension',
+                'label' => match ($type) {
+                    'app' => 'Install app',
+                    'integration' => 'Install integration',
+                    'studio-pack' => 'Install Studio pack',
+                    default => 'Install extension',
+                },
+                'url' => route('admin.extensions.install', $supplyChain),
+                'payload' => [],
+            ];
+        }
+
+        return null;
     }
 }

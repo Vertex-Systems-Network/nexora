@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Jobs\ExecuteWorkflowRunJob;
+use App\Models\EnterpriseOrganization;
+use App\Models\EnterpriseOrganizationMember;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\WebhookEndpoint;
@@ -32,6 +34,7 @@ final class AutomationFlowTest extends TestCase
         Queue::fake();
         $admin = User::factory()->create(['email_verified_at'=>now()]);
         $admin->roles()->attach(Role::query()->where('slug','administrator')->value('id'));
+        $this->addMember($this->defaultOrganization(), $admin, 'admin');
 
         $this->actingAs($admin)->post('/admin/automation', [
             'name'=>'Notify operations','slug'=>'notify-operations','description'=>'Manual notification test','status'=>'active','trigger_key'=>'manual','trigger_config'=>[],
@@ -71,5 +74,21 @@ final class AutomationFlowTest extends TestCase
         $endpoint = WebhookEndpoint::query()->create(['uuid'=>(string)Str::uuid(),'name'=>'Secure','slug'=>'secure','secret'=>'correct-secret','enabled'=>true,'allowed_ips'=>[]]);
         $this->withHeaders(['X-Nexora-Timestamp'=>(string)now()->timestamp,'X-Nexora-Signature'=>'v1=invalid'])->postJson('/hooks/'.$endpoint->uuid,['hello'=>'world'])->assertUnauthorized();
         self::assertSame(0, WebhookReceipt::query()->count());
+    }
+
+    private function defaultOrganization(): EnterpriseOrganization
+    {
+        return EnterpriseOrganization::query()->where('is_default', true)->firstOrFail();
+    }
+
+    private function addMember(EnterpriseOrganization $organization, User $user, string $role = 'member'): void
+    {
+        EnterpriseOrganizationMember::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $user->id,
+            'role' => $role,
+            'status' => 'active',
+            'joined_at' => now(),
+        ]);
     }
 }

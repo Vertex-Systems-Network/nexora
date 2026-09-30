@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use PHPUnit\Framework\Attributes\Test;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 final class LocaleSwitchTest extends TestCase
 {
+    use RefreshDatabase;
+
     #[Test]
     public function locale_can_be_changed_while_the_application_is_not_installed(): void
     {

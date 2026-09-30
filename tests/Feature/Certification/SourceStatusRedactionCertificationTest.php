@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature\Certification;
 
 use PHPUnit\Framework\Attributes\Test;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 final class SourceStatusRedactionCertificationTest extends TestCase
 {
+    use RefreshDatabase;
+
     #[Test]
     public function public_source_status_is_redacted_and_cannot_acknowledge_without_a_token(): void
     {

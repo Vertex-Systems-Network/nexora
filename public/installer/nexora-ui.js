@@ -14,9 +14,117 @@
         return provider === 'aws' ? cloud : database;
     };
 
+    function enhanceDatabaseFields(select) {
+        if (!select || select.dataset.databaseFieldsEnhanced === '1') return;
+        select.dataset.databaseFieldsEnhanced = '1';
+        const form = select.form;
+        if (!form) return;
+
+        const fields = {
+            host: form.elements.db_host,
+            port: form.elements.db_port,
+            database: form.elements.db_database,
+            username: form.elements.db_username,
+            password: form.elements.db_password,
+            create: form.elements.db_create,
+        };
+        const testResult = document.getElementById('db-result');
+        const testButton = document.getElementById('test-database');
+        let previous = select.selectedOptions[0] || null;
+        let internalSync = false;
+
+        const optionMeta = (option) => ({
+            host: option?.dataset.defaultHost ?? '',
+            port: option?.dataset.defaultPort ?? '',
+            database: option?.dataset.defaultDatabase ?? '',
+            username: option?.dataset.defaultUsername ?? '',
+            network: (option?.dataset.network ?? '1') === '1',
+            supportsCreate: (option?.dataset.supportsCreate ?? '0') === '1',
+            managed: (option?.dataset.managed ?? '0') === '1',
+        });
+        const replaceIfDefault = (field, oldValue, newValue) => {
+            if (!field) return;
+            const current = String(field.value ?? '').trim();
+            if (current === '' || current === String(oldValue ?? '').trim()) field.value = String(newValue ?? '');
+        };
+        const markDirty = () => {
+            form.dataset.nxDatabaseTestCurrent = '0';
+            if (testResult) {
+                testResult.classList.remove('good');
+                if (testResult.classList.contains('visible')) testResult.textContent = 'Database settings changed. Test the connection again before continuing.';
+            }
+        };
+        const syncDriver = (initial = false) => {
+            const current = select.selectedOptions[0] || null;
+            const oldMeta = optionMeta(previous);
+            const meta = optionMeta(current);
+            internalSync = true;
+            if (!initial) {
+                replaceIfDefault(fields.host, oldMeta.host, meta.host);
+                replaceIfDefault(fields.port, oldMeta.port, meta.port);
+                replaceIfDefault(fields.database, oldMeta.database, meta.database);
+                replaceIfDefault(fields.username, oldMeta.username, meta.username);
+                if (fields.password) fields.password.value = '';
+            }
+            [fields.host, fields.port, fields.username, fields.password].forEach((field) => {
+                if (field) field.disabled = !meta.network;
+            });
+            if (fields.create) {
+                fields.create.disabled = !meta.supportsCreate;
+                if (!meta.supportsCreate) fields.create.checked = false;
+            }
+            if (fields.host) fields.host.placeholder = meta.network ? (meta.managed ? 'Managed database endpoint' : meta.host) : 'Not used for SQLite';
+            if (fields.port) fields.port.placeholder = meta.network ? meta.port : 'Not used';
+            if (fields.username) fields.username.placeholder = meta.network ? meta.username : 'Not used';
+            internalSync = false;
+            previous = current;
+            if (!initial) markDirty();
+        };
+
+        select.addEventListener('change', () => syncDriver(false));
+        [fields.host, fields.port, fields.database, fields.username, fields.password, fields.create]
+            .filter(Boolean)
+            .forEach((field) => {
+                const eventName = field === fields.create ? 'change' : 'input';
+                field.addEventListener(eventName, () => { if (!internalSync) markDirty(); });
+            });
+
+        if (testResult && window.MutationObserver) {
+            new MutationObserver(() => {
+                const ready = testResult.classList.contains('good') && /Database connection ready\./.test(testResult.textContent || '');
+                if (ready) form.dataset.nxDatabaseTestCurrent = '1';
+                else if (testResult.classList.contains('bad')) form.dataset.nxDatabaseTestCurrent = '0';
+            }).observe(testResult, { attributes: true, childList: true, characterData: true, subtree: true });
+        }
+        if (testButton) testButton.addEventListener('click', () => { form.dataset.nxDatabaseTestCurrent = '0'; }, { capture: true });
+
+        const blockStaleContinuation = (event) => {
+            const databaseStep = document.querySelector('.wizard-step[data-step="1"].active');
+            if (!databaseStep || form.dataset.nxDatabaseTestCurrent === '1') return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            alert('Test the current database settings before continuing.');
+        };
+        document.getElementById('next')?.addEventListener('click', blockStaleContinuation, { capture: true });
+        document.querySelectorAll('[data-step-nav]').forEach((button) => button.addEventListener('click', (event) => {
+            const target = Number(button.dataset.stepNav ?? -1);
+            if (target > 1) blockStaleContinuation(event);
+        }, { capture: true }));
+        form.addEventListener('submit', (event) => {
+            if (form.dataset.nxDatabaseTestCurrent !== '1') {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                alert('Database settings changed after the last successful test. Test the connection again before installing Nexora.');
+            }
+        }, { capture: true });
+
+        syncDriver(true);
+    }
+
     function enhanceSelect(select) {
         if (!select || select.dataset.enhanced === '1') return;
         select.dataset.enhanced = '1';
+        if (select.dataset.nxSelect === 'database') enhanceDatabaseFields(select);
         const root = document.createElement('div');
         root.className = 'nx-select-ready';
         select.parentNode.insertBefore(root, select);

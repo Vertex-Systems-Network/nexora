@@ -200,3 +200,11 @@ Every meaningful pass updates `.ai/state.json`, `.ai/handoff/current.md`, the ac
 Before every user-facing development handoff, read and follow `.ai/NEXT-ACTION-OPTIONS.md`.
 
 If the user sends only this repository's GitHub URL, perform the policy's read-only bootstrap and return shuffled numbered next-action options. A URL-only message never authorizes a repository mutation. A later numeric selection must revalidate live repository state before acting.
+
+## Development carrier compatibility
+
+Never merge a target-unverified or failing PR. Only after all required exact-head source governance and applicable target/release evidence genuinely pass, mark it Ready for review and merge it without waiting for a separate merge confirmation. Native independent review requirements still apply. Source reconciliation may be prepared independently; this does not promote target or release evidence.
+
+## Detailed progress evidence synchronization
+
+Read `NEXORA_PROGRESS.md` in full before a material source or evidence apply, together with canonical `.ai/state.json` and the README ledger. After each material apply, update `NEXORA_PROGRESS.md` immediately with the exact tested source/run and remaining gates. Its archived checkpoint sections are historical; the current checkpoint must agree with canonical state. Never increase Target Power from source CI alone. Numeric legacy scores do not establish current product completion.

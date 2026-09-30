@@ -9,13 +9,17 @@ use App\Models\AdminNotification;
 use App\Models\WebhookDelivery;
 use App\Models\WebhookDestination;
 use App\Models\WorkflowRun;
+use App\Nexora\Enterprise\Services\TenantMemberDirectory;
 use App\Nexora\Security\Audit\AuditManager;
 use Illuminate\Support\Str;
 use RuntimeException;
 
 final class WorkflowActionExecutor
 {
-    public function __construct(private AuditManager $audit) {}
+    public function __construct(
+        private AuditManager $audit,
+        private TenantMemberDirectory $tenantMembers,
+    ) {}
 
     /** @param array<string,mixed> $action */
     public function execute(WorkflowRun $run, array $action): array
@@ -32,8 +36,13 @@ final class WorkflowActionExecutor
 
     private function notification(WorkflowRun $run, array $config): array
     {
+        $userId = (int) ($config['user_id'] ?? 0);
+        if (! $this->tenantMembers->contains($userId)) {
+            throw new RuntimeException('Automation notification target is not an active member of the current organization.');
+        }
+
         $notification = AdminNotification::query()->create([
-            'user_id'=>(int) ($config['user_id'] ?? 0),
+            'user_id'=>$userId,
             'type'=>'automation',
             'title'=>$this->render((string) ($config['title'] ?? 'Automation notification'), (array) $run->context),
             'message'=>$this->render((string) ($config['message'] ?? ''), (array) $run->context),

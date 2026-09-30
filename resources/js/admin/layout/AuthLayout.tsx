@@ -14,7 +14,7 @@ export function AuthLayout({ children, title, description }: { children: ReactNo
             <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8">
                 <div className="w-full max-w-md">
                     <div className="mb-10 flex items-center justify-between gap-3">
-                        <div className="flex min-w-0 items-center gap-3"><img src="/brand/nexora-mark.svg" alt="" className="h-10 w-10 rounded-xl shadow-sm" /><div className="min-w-0"><p className="truncate text-sm font-semibold text-[var(--nx-text)]">{app.name}</p><p className="text-xs text-[var(--nx-text-muted)]">Secure modular platform</p></div></div>
+                        <div className="flex min-w-0 items-center gap-3"><img src={app.logoUrl} alt="" className="h-10 w-10 rounded-xl object-contain shadow-sm" /><div className="min-w-0"><p className="truncate text-sm font-semibold text-[var(--nx-text)]">{app.name}</p><p className="text-xs text-[var(--nx-text-muted)]">Secure modular platform</p></div></div>
                         <div className="flex items-center gap-2"><ThemeSwitcher /><LanguageSwitcher localization={localization} /></div>
                     </div>
                     <div className="mb-7">

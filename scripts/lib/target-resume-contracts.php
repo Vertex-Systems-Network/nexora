@@ -12,7 +12,7 @@ function nexoraAnalyzeTargetResumeContracts(string $root): array
     ];
     foreach($required as $file) if(!is_file($root.'/'.$file)||filesize($root.'/'.$file)===0) $errors[]="missing RC23 target bootstrap/resume artifact [{$file}]";
     $bootstrap=(string)@file_get_contents($root.'/scripts/target-environment-bootstrap.php');
-    foreach(['php_ini_loaded_file','composer.lock','package-lock.json','ext-','certified range','refresh-dependency-locks.bat','--write'] as $marker) if(!str_contains($bootstrap,$marker)) $errors[]="target bootstrap missing marker [{$marker}]";
+    foreach(['php_ini_loaded_file','composer.lock','package-lock.json','ext-','certified range','dependency-lock refresh workflow','--write'] as $marker) if(!str_contains($bootstrap,$marker)) $errors[]="target bootstrap missing marker [{$marker}]";
     if(preg_match('/https?:\/\//i',$bootstrap)===1) $errors[]='target bootstrap may diagnose tools but must not auto-download executables/dependencies';
     $runner=(string)@file_get_contents($root.'/scripts/target-runtime-run.php');
     foreach(['--resume-latest','--resume=','source_tree_sha256','vendor_installed_sha256','node_modules_lock_sha256','resume_from','target-environment-bootstrap.php'] as $marker) if(!str_contains($runner,$marker)) $errors[]="target runtime resume boundary missing marker [{$marker}]";

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Tests\Architecture;
+
 use PHPUnit\Framework\TestCase;
 
 final class N100V41ResourceEnvelopeArchitectureTest extends TestCase
