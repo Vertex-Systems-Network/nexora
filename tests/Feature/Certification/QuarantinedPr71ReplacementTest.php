@@ -96,7 +96,7 @@ final class QuarantinedPr71ReplacementTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->component('Admin/Dashboard')
                 ->where('summary.users', $users)
                 ->where('summary.modules', $modules)
-                ->where('database.driver', 'sqlite')
+                ->where('database.driver', (string) config('database.connections.'.config('database.default').'.driver'))
                 ->where('database.connected', true));
     }
 
