@@ -32,7 +32,7 @@ if(!is_file($root.'/composer.lock')||!is_file($root.'/package-lock.json')) $acti
 elseif(($lockJson['status']??'fail')!=='pass') $actions[]='Resolve lock review errors and explicitly accept the exact hashes with dependency-lock-review.bat --accept --reviewer=<name> --confirm=REVIEWED.';
 else $actions[]='Verify reviewed-lock attestation with dependency-lock-review.bat --verify-attestation before target dependency installation.';
 $status=($bootstrap['exit_code']===0 && ($lock['exit_code']===0||(!is_file($root.'/composer.lock')&&!is_file($root.'/package-lock.json'))))?'ready':'blocked';
-$payload=['schema'=>1,'platform_version'=>$version,'status'=>$status,'checked_at'=>gmdate(DATE_ATOM),'os_family'=>PHP_OS_FAMILY,'project_root'=>$root,'php_binary'=>PHP_BINARY,'php_ini'=>$ini,'php_ini_scanned'=>$scanned,'extension_dir'=>ini_get('extension_dir')?:null,'bootstrap'=>$bootstrapJson,'lock_review'=>$lockJson,'actions'=>$actions];
+$payload=['schema'=>1,'platform_version'=>$version,'status'=>$status,'checked_at'=>gmdate(DATE_ATOM),'os_family'=>PHP_OS_FAMILY,'target_environment_detected'=>false,'project_root'=>$root,'php_binary'=>PHP_BINARY,'php_ini'=>$ini,'php_ini_scanned'=>$scanned,'extension_dir'=>ini_get('extension_dir')?:null,'bootstrap'=>$bootstrapJson,'lock_review'=>$lockJson,'actions'=>$actions];
 $dir=$root.'/storage/app/nexora/target-intake';
 if(!is_dir($dir)&&!mkdir($dir,0775,true)&&!is_dir($dir)) throw new RuntimeException('Unable to create target intake directory.');
 file_put_contents($dir.'/latest.json',json_encode($payload,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR).PHP_EOL);
