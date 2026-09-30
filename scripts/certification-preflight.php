@@ -38,7 +38,7 @@ foreach ($browserUxContracts['warnings'] as $warning) $warnings[] = 'browser-ux.
 
 require_once $root.'/scripts/lib/inertia-frontend-contracts.php';
 $inertiaFrontendContracts = nexoraAnalyzeInertiaFrontendContracts($root);
-$record('inertia-frontend.contracts', $inertiaFrontendContracts['ok'], $inertiaFrontendContracts['ok'] ? $inertiaFrontendContracts['metrics']['target-environment_error_files'].' target environment build-error files; Inertia form/router/NavLink contracts aligned' : implode('; ', $inertiaFrontendContracts['errors']));
+$record('inertia-frontend.contracts', $inertiaFrontendContracts['ok'], $inertiaFrontendContracts['ok'] ? $inertiaFrontendContracts['metrics']['target_environment_error_files'].' target environment build-error files; Inertia form/router/NavLink contracts aligned' : implode('; ', $inertiaFrontendContracts['errors']));
 foreach ($inertiaFrontendContracts['warnings'] as $warning) $warnings[] = 'inertia-frontend.contracts: '.$warning;
 
 require_once $root.'/scripts/lib/performance-contracts.php';
