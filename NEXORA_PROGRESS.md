@@ -1,3 +1,7 @@
+# Disposable runtime checkpoint — 2026-09-30
+
+Fresh SQLite installer and real HTTP login/admin pass after separating runtime SQLite data from source attestation. Local regression/source certification pass. Post-source-activation service convergence has an observed unresolved mismatch. Remote CI pending; no full target/release promotion. See `docs/disposable-runtime-verification-2026-09-30.md`. Earlier entries below remain historical.
+
 # Source reconciliation checkpoint — 2026-09-30
 
 The current working branch reconciles protected main `9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5` with draft #1 head `f6629d010626bb52be16fd9c3257f41b656be748`. All 38 conflict paths are resolved. Isolated local suites pass; local combined artisan execution has cache/throttle interference. Initial canonical MySQL CI #1132 passed; supplemental QA #173 failed on three textual contracts, now corrected locally. Follow-up exact-head CI and independent review remain pending. Target acceptance remains BLOCKED; no deployment, key invalidation, or formal Core QA promotion is claimed. See `docs/source-reconciliation-2026-09-30.md` for evidence and decisions. Earlier checkpoints below are historical.

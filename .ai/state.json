@@ -252,5 +252,15 @@
       "correction": "three textual contracts corrected locally"
     },
     "local_combined_suite": "failed: HTTP throttling interference; isolated suites pass"
+  },
+  "disposable_runtime_verification": {
+    "base_sha": "84feada170f0529078984821f4a6706a830a1b1d",
+    "unit": "SYS-RUNTIME-IDENTITY",
+    "sqlite_attestation_fix": "locally verified; remote CI pending",
+    "fresh_install": "pass",
+    "http_login_admin": "pass: POST 302, authenticated GET 200",
+    "post_activation_service_identity": "unresolved observed mismatch",
+    "acceptance": "disposable local HTTP only; target/release remain BLOCKED",
+    "report": "docs/disposable-runtime-verification-2026-09-30.md"
   }
 }

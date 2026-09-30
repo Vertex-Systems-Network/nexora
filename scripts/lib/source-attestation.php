@@ -36,6 +36,9 @@ function nexoraSourceAttestationExcluded(string $relative): bool
         'vendor/',
         'node_modules/',
     ] as $prefix) if(str_starts_with($relative,$prefix)) return true;
+    // SQLite data and its sidecars are mutable runtime state, not packaged source.
+    // Only direct database files are excluded; migrations, seeders and fixtures remain attested.
+    if (preg_match('~^database/[^/]+\\.sqlite(?:3)?(?:-(?:wal|shm|journal))?$~i', $relative) === 1) return true;
     return in_array($relative,['public/hot'],true);
 }
 
