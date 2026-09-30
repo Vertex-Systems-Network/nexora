@@ -16,11 +16,6 @@ $write = ! in_array('--no-write', $argv, true);
 
 $ini = php_ini_loaded_file() ?: null;
 $extensionDir = (string) (ini_get('extension_dir') ?: '');
-$laragonRoots = NexoraBootstrapProcessEnvironment::laragonRoots($root);
-$laragonDetected = $laragonRoots !== []
-    || stripos(str_replace('\\', '/', PHP_BINARY), '/laragon/') !== false
-    || stripos(str_replace('\\', '/', $root), '/laragon/') !== false;
-
 $manifest = json_decode((string) file_get_contents($root.'/composer.json'), true, 512, JSON_THROW_ON_ERROR);
 $requiredExtensions = [];
 foreach ((array) ($manifest['require'] ?? []) as $name => $constraint) {
@@ -66,13 +61,13 @@ $restartTicket = null;
 if ($missingRows !== []) {
     $status = 'blocked';
     if ($ini === null || ! is_file($ini)) {
-        $actions[] = 'Active php.ini is not a readable file; select the intended Laragon PHP build and rerun.';
+        $actions[] = 'Active php.ini is not a readable file; select the intended PHP runtime and rerun.';
     } else {
         foreach ($missingRows as $row) {
             if ($row['dll_present']) {
                 $actions[] = "Enable extension={$row['name']} in {$ini}; matching DLL is present at {$row['dll']}.";
             } else {
-                $actions[] = "PHP extension {$row['name']} is missing and no matching DLL was found in the active extension_dir; select/install a Laragon PHP build that includes it.";
+                $actions[] = "PHP extension {$row['name']} is missing and no matching DLL was found in the active extension_dir; install a PHP build that includes it.";
             }
         }
     }
@@ -81,15 +76,15 @@ if ($missingRows !== []) {
 if (! $composerAvailable) {
     $status = 'blocked';
     if ($composerCandidates !== []) {
-        $actions[] = 'Trusted Laragon Composer candidate(s) were found but none executed successfully. Review the generated session helper/candidate and the PHP extension prerequisites; no global PATH mutation is performed by Nexora.';
+        $actions[] = 'Trusted Composer candidate(s) were found but none executed successfully. Review the generated session helper/candidate and the PHP extension prerequisites; no global PATH mutation is performed by Nexora.';
     } else {
-        $actions[] = 'Composer 2.x was not found in PATH or Laragon bin/composer. Install/enable trusted Composer manually, then rerun target intake.';
+        $actions[] = 'Composer 2.x was not found in PATH or configured toolchain directories. Install/enable trusted Composer manually, then rerun target intake.';
     }
 }
 
 if ($applyExtensions) {
-    if (PHP_OS_FAMILY !== 'Windows' || ! $laragonDetected) {
-        fwrite(STDERR, "[Nexora Target Remediation] --apply-extensions is restricted to an explicitly detected Windows/Laragon target.\n");
+    if (PHP_OS_FAMILY !== 'Windows') {
+        fwrite(STDERR, "[Nexora Target Remediation] --apply-extensions is restricted to Windows hosts because it edits php.ini; on other hosts edit the active PHP configuration through the host's supported mechanism.\n");
         exit(2);
     }
     if ($ini === null || ! is_file($ini) || ! is_readable($ini) || ! is_writable($ini)) {
@@ -183,7 +178,7 @@ if ($applyExtensions) {
         file_put_contents($dir.'/restart-ticket.json', json_encode($restartTicket, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL);
         @unlink($dir.'/restart-verified.json');
         $actions = [
-            'Restart Laragon completely and open a fresh terminal so PHP reloads the updated php.ini.',
+            'Restart the active PHP/web process completely and open a fresh terminal so PHP reloads the updated php.ini.',
             'Run scripts\\target-prerequisite-restart-verify.bat (or the master runner); only continue when the restart ticket verifies PASS.',
         ];
     }
