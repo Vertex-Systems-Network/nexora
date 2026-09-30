@@ -51,7 +51,7 @@ This clean execution host has no Composer executable, `vendor/`, or `node_module
 - TypeScript semantic typecheck and production Vite build;
 - browser zero-install, accessibility, responsive/RTL, backup/restore, or multi-node HA evidence.
 
-Run on the target Laragon environment:
+Run on the target target environment environment:
 
 ```bat
 composer install

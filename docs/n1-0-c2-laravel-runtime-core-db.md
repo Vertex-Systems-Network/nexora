@@ -4,7 +4,7 @@ C2 owns the dependency-backed Laravel/application runtime and the primary isolat
 
 C2 requires a PASS from N1.0-C1 on the **same platform version, exact source-tree SHA-256, reviewed lockfiles, installed dependency graph, frontend build, dependency audit/provenance and asset-budget evidence**.
 
-Primary Windows/Laragon command:
+Primary Windows/target environment command:
 
 ```bat
 scripts\n1-c2-laravel-runtime-certify.bat

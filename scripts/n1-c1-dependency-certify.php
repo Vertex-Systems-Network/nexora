@@ -236,7 +236,7 @@ $viteBuildDiagnostics = null;
 if ($applyExtensions) {
     $passed = $runStep(
         'extension-remediation',
-        'Explicit Laragon PHP extension remediation',
+        'Explicit target environment PHP extension remediation',
         [PHP_BINARY, 'scripts/target-prerequisite-remediate.php', '--apply-extensions'],
     );
     $status = $passed ? 'restart-required' : 'blocked';

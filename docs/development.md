@@ -1,6 +1,6 @@
 # Developer Onboarding
 
-## Local Laragon defaults
+## Local target environment defaults
 
 ```text
 Host: 127.0.0.1

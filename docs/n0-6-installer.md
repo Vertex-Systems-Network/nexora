@@ -62,7 +62,7 @@ The browser wizard:
 
 The persistent marker is `storage/app/nexora/installed.lock`. Once present, `/install` redirects to login and normal application routes no longer pass through installation mode.
 
-## Zero test on Laragon
+## Zero test on target environment
 
 ```bat
 scripts\setup-zero.bat

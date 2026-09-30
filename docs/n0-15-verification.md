@@ -17,4 +17,4 @@ Source-level release checks performed before packaging:
 - N0.15 source guard regressions: PASS
 - Runtime `.env`, install locks, database backups, vendor, node_modules and public/build are not included in this source package
 
-Dependency-backed `npm run build`, full Laravel feature tests, and live integration tests against every supported database/service are not claimed as PASS in this build environment because project dependencies and all external database services are not available here. The Windows/Laragon zero-install run remains the integration gate.
+Dependency-backed `npm run build`, full Laravel feature tests, and live integration tests against every supported database/service are not claimed as PASS in this build environment because project dependencies and all external database services are not available here. The Windows/target environment zero-install run remains the integration gate.

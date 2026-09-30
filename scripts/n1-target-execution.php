@@ -30,7 +30,7 @@ foreach($argv as $arg){
     elseif(str_starts_with($arg,'--confirm-refresh='))$confirmRefresh=trim(substr($arg,18));
     elseif(str_starts_with($arg,'--confirm-review='))$confirmReview=trim(substr($arg,17));
 }
-if($applyExtensions&&($install||$refreshLocks||$reviewLocks||$verifyRestart)){fwrite(STDERR,"[N1.0 Target Execution] Run --apply-extensions alone, restart Laragon, then use --refresh-locks or --install-deps in a fresh terminal.\n");exit(2);}
+if($applyExtensions&&($install||$refreshLocks||$reviewLocks||$verifyRestart)){fwrite(STDERR,"[N1.0 Target Execution] Run --apply-extensions alone, restart target environment, then use --refresh-locks or --install-deps in a fresh terminal.\n");exit(2);}
 if($refreshLocks&&($install||$reviewLocks)){fwrite(STDERR,"[N1.0 Target Execution] --refresh-locks cannot be combined with --install-deps or --review-locks; refreshed locks require a separate human review step before installation.\n");exit(2);}
 if($reviewLocks&&($reviewer===''||$confirmReview!=='REVIEWED')){fwrite(STDERR,"[N1.0 Target Execution] --review-locks requires --reviewer=<name> and explicit --confirm-review=REVIEWED.\n");exit(2);}
 if($refreshLocks&&$confirmRefresh!=='REFRESH'){fwrite(STDERR,"[N1.0 Target Execution] --refresh-locks requires explicit --confirm-refresh=REFRESH.\n");exit(2);}
@@ -60,7 +60,7 @@ $progressCheckpoint=static function(string $label)use($root):void{
 // Source proof first, then restart/review handoffs and resumable automated C1-C3 in strict order.
 if(!$run('source-certification','Exact-source certification/preflight',[PHP_BINARY,'scripts/certify-release.php','--source-only'])){}
 $restartTicket=$root.'/storage/app/nexora/target-remediation/restart-ticket.json';
-if($status==='pass'&&($verifyRestart||is_file($restartTicket)))$run('restart-verification','Verify remediated Laragon PHP restart ticket',[PHP_BINARY,'scripts/target-prerequisite-restart-verify.php']);
+if($status==='pass'&&($verifyRestart||is_file($restartTicket)))$run('restart-verification','Verify remediated target environment PHP restart ticket',[PHP_BINARY,'scripts/target-prerequisite-restart-verify.php']);
 if($status==='pass'&&$refreshLocks){
     $run('prerequisite-remediation','Target prerequisite remediation review',[PHP_BINARY,'scripts/target-prerequisite-remediate.php','--no-write']);
     if($status==='pass')$run('lock-refresh','Refresh Composer/npm lockfiles for explicit human review',[PHP_BINARY,'scripts/dependency-lock-refresh.php','--confirm='.$confirmRefresh]);

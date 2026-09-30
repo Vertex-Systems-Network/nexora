@@ -43,4 +43,4 @@ Observed toolchain on this host: PHP `8.4.23`, Node `v22.16.0`, npm `10.9.2`. Co
 
 ## Required target action
 
-On a trusted Laragon/maintainer checkout, intentionally generate/review the initial lockfiles with `scripts\\refresh-dependency-locks.bat`, then commit/preserve both lockfiles. After that, use locked installs (`composer install ...` and `npm ci`) and rerun the final target certification. N1.0 remains CERTIFYING until those dependency-backed and operator evidence gates are actually green.
+On a trusted target environment/maintainer checkout, intentionally generate/review the initial lockfiles with `scripts\\refresh-dependency-locks.bat`, then commit/preserve both lockfiles. After that, use locked installs (`composer install ...` and `npm ci`) and rerun the final target certification. N1.0 remains CERTIFYING until those dependency-backed and operator evidence gates are actually green.

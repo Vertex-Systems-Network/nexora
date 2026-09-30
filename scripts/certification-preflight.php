@@ -38,7 +38,7 @@ foreach ($browserUxContracts['warnings'] as $warning) $warnings[] = 'browser-ux.
 
 require_once $root.'/scripts/lib/inertia-frontend-contracts.php';
 $inertiaFrontendContracts = nexoraAnalyzeInertiaFrontendContracts($root);
-$record('inertia-frontend.contracts', $inertiaFrontendContracts['ok'], $inertiaFrontendContracts['ok'] ? $inertiaFrontendContracts['metrics']['laragon_error_files'].' Laragon build-error files; Inertia form/router/NavLink contracts aligned' : implode('; ', $inertiaFrontendContracts['errors']));
+$record('inertia-frontend.contracts', $inertiaFrontendContracts['ok'], $inertiaFrontendContracts['ok'] ? $inertiaFrontendContracts['metrics']['target_environment_error_files'].' target environment build-error files; Inertia form/router/NavLink contracts aligned' : implode('; ', $inertiaFrontendContracts['errors']));
 foreach ($inertiaFrontendContracts['warnings'] as $warning) $warnings[] = 'inertia-frontend.contracts: '.$warning;
 
 require_once $root.'/scripts/lib/performance-contracts.php';
@@ -68,7 +68,7 @@ $record('target-intake.contracts', $targetIntakeContracts['errors'] === [], $tar
 
 require_once $root.'/scripts/lib/target-remediation-contracts.php';
 $targetRemediationContracts = nexoraAnalyzeTargetRemediationContracts($root);
-$record('target-remediation.contracts', $targetRemediationContracts['errors'] === [], $targetRemediationContracts['errors'] === [] ? $targetRemediationContracts['metrics']['wrappers'].' wrappers; reversible Laragon prerequisite remediation aligned' : implode('; ', $targetRemediationContracts['errors']));
+$record('target-remediation.contracts', $targetRemediationContracts['errors'] === [], $targetRemediationContracts['errors'] === [] ? $targetRemediationContracts['metrics']['wrappers'].' wrappers; reversible target environment prerequisite remediation aligned' : implode('; ', $targetRemediationContracts['errors']));
 
 require_once $root.'/scripts/lib/n1-c1-contracts.php';
 $c1Contracts=nexoraAnalyzeN10C1Contracts($root);

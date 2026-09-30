@@ -2,7 +2,7 @@
 
 ## Historical target baseline
 
-The authoritative Laragon build incident contained 76 TypeScript diagnostics across 11 Admin TS/TSX files. The source-side remediation ledger preserves the exact per-file distribution and known error-code families.
+The authoritative target environment build incident contained 76 TypeScript diagnostics across 11 Admin TS/TSX files. The source-side remediation ledger preserves the exact per-file distribution and known error-code families.
 
 ## Truth model
 

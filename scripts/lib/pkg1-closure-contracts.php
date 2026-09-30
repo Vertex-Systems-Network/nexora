@@ -168,7 +168,7 @@ function nexoraAnalyzePkg1ClosureContracts(string $root): array
         $errors[] = 'legacy primary PowerShell launcher must not ship';
     }
     $launcherContract = $read('scripts/pkg1-launcher-contract-verify.php');
-    foreach (['primary Laragon launcher is PHP-only', 'ParseFile', 'nexoraPkg1LauncherStopOnBlock'] as $marker) {
+    foreach (['primary target environment launcher is PHP-only', 'ParseFile', 'nexoraPkg1LauncherStopOnBlock'] as $marker) {
         if (! str_contains($launcherContract, $marker)) {
             $errors[] = "PKG-1 launcher contract verifier missing [{$marker}]";
         }

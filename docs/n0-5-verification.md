@@ -15,4 +15,4 @@
 ## Dependency-backed gates not claimed in artifact environment
 The artifact environment did not have Composer dependencies, Node dependencies, PHP `ext-zip`, or MySQL PDO available. Therefore this artifact does not falsely claim that migrations, Laravel tests, Sentinel ZIP tests, strict TypeScript semantics or the production Vite build were executed here.
 
-Run `scripts\setup-zero.bat` on a clean Laragon copy, or `scripts\quality-check.bat` on an existing copy. The first failing gate should be treated as the source of truth.
+Run `scripts\setup-zero.bat` on a clean target environment copy, or `scripts\quality-check.bat` on an existing copy. The first failing gate should be treated as the source of truth.

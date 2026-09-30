@@ -52,7 +52,7 @@ function nexoraAnalyzeInertiaFrontendContracts(string $root): array
     ];
     foreach($requiredMarkers as $relative=>$markers){
         $path=$root.'/'.$relative;
-        if(!is_file($path)){ $errors[]="missing Laragon build-fix target {$relative}"; continue; }
+        if(!is_file($path)){ $errors[]="missing target environment build-fix target {$relative}"; continue; }
         $source=(string)file_get_contents($path);
         foreach($markers as $marker) if(!str_contains($source,$marker)) $errors[]="{$relative}: missing frontend type-contract marker [{$marker}]";
     }
@@ -74,7 +74,7 @@ function nexoraAnalyzeInertiaFrontendContracts(string $root): array
         'warnings'=>array_values(array_unique($warnings)),
         'metrics'=>[
             'admin_ts_files'=>count($files),
-            'laragon_error_files'=>11,
+            'target_environment_error_files'=>11,
             'transform_chains'=>$transformChains,
             'unsafe_router_payloads'=>$unsafeRouterPayloads,
             'navlink_children'=>$navLinkChildren,

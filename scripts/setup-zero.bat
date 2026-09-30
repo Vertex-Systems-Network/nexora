@@ -3,7 +3,7 @@ setlocal EnableExtensions
 cd /d "%~dp0\.."
 
 echo ======================================================
-echo Nexora TRUE ZERO browser installation test - Windows / Laragon
+echo Nexora TRUE ZERO browser installation test - Windows / target environment
 echo MySQL: 127.0.0.1:3306 / nexora / root
 echo WARNING: database "nexora", dependencies/build, private bootstrap tools,
 echo and all local installer/deployment state will be removed.

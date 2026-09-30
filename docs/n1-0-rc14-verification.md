@@ -27,7 +27,7 @@
 
 Composer and `vendor/` are unavailable on this execution host. Node 22.16.0 and npm 10.9.2 are available, but `node_modules/` is absent. A real `npm run build` was attempted and stopped at TypeScript error TS2688 because `vite/client` is unavailable without installed npm dependencies. Therefore Laravel package discovery, migrations, PHP tests, real Vite build, cached `nexora:environment:doctor`, browser evidence, restore evidence and HA evidence are **not claimed PASS** here.
 
-Run on Laragon:
+Run on target environment:
 
 ```bat
 composer install

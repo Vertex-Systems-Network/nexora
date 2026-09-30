@@ -87,13 +87,13 @@ The recovery controls do not:
 Dry-run:
 
 ```bat
-npm run runtime:recover -- --target="D:\laragon\www\nexora"
+npm run runtime:recover -- --target="D:\target-environment\www\nexora"
 ```
 
 Authorized closure attempt:
 
 ```bat
-npm run runtime:recover -- --target="D:\laragon\www\nexora" --apply --confirm=RECOVER-RUNTIME
+npm run runtime:recover -- --target="D:\target-environment\www\nexora" --apply --confirm=RECOVER-RUNTIME
 ```
 
 If a required target runtime path such as `vendor/autoload.php` reaches an outside location through a parent symlink/junction, apply fails during target validation: no target `artisan` child is run, no apply lock is acquired, and no recovery receipt is created. The CI behavioral contract exercises this with a disposable redirected `vendor` parent.

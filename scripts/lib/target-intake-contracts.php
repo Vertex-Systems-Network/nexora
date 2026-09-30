@@ -13,7 +13,7 @@ function nexoraAnalyzeTargetIntakeContracts(string $root): array
     ];
     foreach($required as $file) if(!is_file($root.'/'.$file)||filesize($root.'/'.$file)===0) $errors[]="missing RC24 target intake artifact [{$file}]";
     $intake=(string)@file_get_contents($root.'/scripts/target-prerequisite-intake.php');
-    foreach(['php_ini_loaded_file','php_ini_scanned_files','extension_dir','laragon_detected','dependency-lock-review.php','refresh-dependency-locks.bat','target-intake'] as $marker) if(!str_contains($intake,$marker)) $errors[]="target intake missing marker [{$marker}]";
+    foreach(['php_ini_loaded_file','php_ini_scanned_files','extension_dir','target_environment_detected','dependency-lock-review.php','refresh-dependency-locks.bat','target-intake'] as $marker) if(!str_contains($intake,$marker)) $errors[]="target intake missing marker [{$marker}]";
     if(preg_match('/https?:\/\//i',$intake)===1) $errors[]='target intake must not auto-download tools or dependencies';
     $review=(string)@file_get_contents($root.'/scripts/dependency-lock-review.php');
     foreach(['--accept','--reviewer=','--confirm=','REVIEWED','--verify-attestation','composer validate --strict --check-lock','composer_manifest_sha256','package_manifest_sha256','composer_lock_sha256','package_lock_sha256','npm_integrity_missing'] as $marker) if(!str_contains($review,$marker)) $errors[]="dependency lock review missing marker [{$marker}]";
