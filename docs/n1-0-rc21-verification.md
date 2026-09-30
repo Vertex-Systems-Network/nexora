@@ -5,7 +5,7 @@ Status: **CERTIFYING — RC21 TARGET FRONTEND TYPECHECK**
 
 ## Target evidence that triggered RC21
 
-The supplied Laragon `npm run build` output ran `tsc --noEmit && vite build` and reported **76 TypeScript errors across 11 Admin files**. The error families were concentrated in:
+The supplied target environment `npm run build` output ran `tsc --noEmit && vite build` and reported **76 TypeScript errors across 11 Admin files**. The error families were concentrated in:
 
 - Inertia `useForm` nested values typed as `Record<string, unknown>`, which are not valid `FormDataType<T>` values;
 - `form.transform(...).post/put()` chaining even though Inertia v3 `transform()` returns `void`;
@@ -28,7 +28,7 @@ The reported per-file distribution was Automation 50, Cloud 1, Discovery 1, Dist
 
 ## Executed verification on this source tree
 
-- Inertia frontend contracts: **PASS** — 121 Admin TS/TSX files; 11 Laragon error targets guarded; 0 chained transforms; 0 unsafe router payload boundaries; 0 NavLink-child violations; 0 unsafe immediate useForm unknown-record boundaries.
+- Inertia frontend contracts: **PASS** — 121 Admin TS/TSX files; 11 target environment error targets guarded; 0 chained transforms; 0 unsafe router payload boundaries; 0 NavLink-child violations; 0 unsafe immediate useForm unknown-record boundaries.
 - Unified RC1–RC21 source certification: **PASS**.
 - Exact certified runtime source attestation: **986 files / SHA-256 `1e4d4cbd30864717365c5302b4fc6a82a41d2df8f6c02d134775b767feb67ca7`**.
 - RC source preflight: **PASS**.
@@ -45,10 +45,10 @@ The reported per-file distribution was Automation 50, Cloud 1, Discovery 1, Dist
 
 ## Dependency-backed build status on this execution host
 
-A real `npm run build` was attempted after RC21. It stops before project typechecking because this clean source host intentionally has no reviewed `package-lock.json` and no `node_modules`; TypeScript reports that `vite/client` type definitions are unavailable. This is **not** a production Vite/typecheck PASS and does not replace the Laragon rerun.
+A real `npm run build` was attempted after RC21. It stops before project typechecking because this clean source host intentionally has no reviewed `package-lock.json` and no `node_modules`; TypeScript reports that `vite/client` type definitions are unavailable. This is **not** a production Vite/typecheck PASS and does not replace the target environment rerun.
 
-RC15 dependency policy remains fail-closed: RC21 does not fabricate a lockfile or resolve an unlocked dependency graph. The authoritative next evidence is the updated RC21 package on Laragon with reviewed locks and `npm ci`, followed by `npm run build`.
+RC15 dependency policy remains fail-closed: RC21 does not fabricate a lockfile or resolve an unlocked dependency graph. The authoritative next evidence is the updated RC21 package on target environment with reviewed locks and `npm ci`, followed by `npm run build`.
 
 ## N1.0 closure status
 
-N1.0 is **not DONE**. After the updated Laragon build is green, remaining closure evidence is still required: locked Composer/npm install, Laravel migrations/seeds/tests, strict five-DB matrix, zero-install/recovery, existing-install upgrade rehearsal, browser/A11y/RTL, HTTP/performance, backup/restore, real multi-node HA, final evidence aggregation and the independently verified production ZIP.
+N1.0 is **not DONE**. After the updated target environment build is green, remaining closure evidence is still required: locked Composer/npm install, Laravel migrations/seeds/tests, strict five-DB matrix, zero-install/recovery, existing-install upgrade rehearsal, browser/A11y/RTL, HTTP/performance, backup/restore, real multi-node HA, final evidence aggregation and the independently verified production ZIP.

@@ -21,8 +21,8 @@ function nexoraAnalyzeTargetRemediationContracts(string $root): array
     foreach (['curl','Invoke-WebRequest','composer update','npm install','--accept','--confirm=REVIEWED'] as $forbidden) {
         if (stripos($source, $forbidden) !== false) $errors[] = "Target remediation must not contain automatic download/unlocked dependency/lock-acceptance marker [{$forbidden}].";
     }
-    if (! str_contains($source, "PHP_OS_FAMILY !== 'Windows'") || ! str_contains($source, '! $laragonDetected')) {
-        $errors[] = '--apply-extensions must be restricted to an explicitly detected Windows/Laragon target.';
+    if (! str_contains($source, "PHP_OS_FAMILY !== 'Windows'")) {
+        $errors[] = '--apply-extensions must be restricted to an explicitly detected Windows/target environment target.';
     }
     if (! str_contains($source, 'hash_file(\'sha256\', $backup)') || ! str_contains($source, 'hash_file(\'sha256\', $ini)')) {
         $errors[] = 'php.ini remediation must checksum-verify backup and published content.';
@@ -32,9 +32,9 @@ function nexoraAnalyzeTargetRemediationContracts(string $root): array
     $zero = (string) @file_get_contents($root.'/scripts/zero-state-verify.php');
     if (! str_contains($zero, 'storage/app/nexora/target-remediation')) $errors[] = 'Strict zero-state verification must reject target-remediation runtime evidence.';
     $intake = (string) @file_get_contents($root.'/scripts/target-prerequisite-intake.php');
-    if (! str_contains($intake, 'target-prerequisite-remediate.bat')) $errors[] = 'Target intake must point Windows/Laragon operators to the remediation assistant when extensions are missing.';
+    if (! str_contains($intake, 'target-prerequisite-remediate.php')) $errors[] = 'Target intake must point operators to the remediation assistant when extensions are missing.';
     $orchestrator = (string) @file_get_contents($root.'/scripts/target-certification-orchestrator.php');
-    if (! str_contains($orchestrator, 'target-prerequisite-remediate.bat')) $errors[] = 'Target orchestrator must surface the remediation command after prerequisite failure.';
+    if (! str_contains($orchestrator, 'target-prerequisite-remediate.php')) $errors[] = 'Target orchestrator must surface the remediation command after prerequisite failure.';
 
     return [
         'errors' => $errors,

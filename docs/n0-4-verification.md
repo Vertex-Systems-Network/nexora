@@ -14,7 +14,7 @@
 
 On the developer/CI machine:
 
-### Windows CMD / Laragon
+### Windows CMD / target environment
 
 ```bat
 scripts\quality-check.bat

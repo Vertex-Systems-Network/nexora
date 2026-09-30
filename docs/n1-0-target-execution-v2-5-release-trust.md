@@ -57,4 +57,4 @@ After signed artifacts pass independent verification, C6 records a separate sess
 
 ## Current status
 
-Source contracts are certifiable without dependency-backed target claims. Real Laragon dependencies/build, Laravel runtime/database tests, five-database matrix, operator/browser/Web-Vitals evidence and real 2+ node HA evidence remain required before N1.0 and the production package can be marked PASS.
+Source contracts are certifiable without dependency-backed target claims. Real target environment dependencies/build, Laravel runtime/database tests, five-database matrix, operator/browser/Web-Vitals evidence and real 2+ node HA evidence remain required before N1.0 and the production package can be marked PASS.

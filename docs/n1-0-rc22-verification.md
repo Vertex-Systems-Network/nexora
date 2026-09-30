@@ -5,7 +5,7 @@ Status: **CERTIFYING — RC22 TARGET RUNTIME CLOSURE**
 
 ## RC22 purpose
 
-RC22 adds a fail-fast target-runtime release gate. It does not claim that RC21's real Laragon build has already passed because no fresh post-RC21 target log was supplied before this implementation. Source certification and target certification remain separate states.
+RC22 adds a fail-fast target-runtime release gate. It does not claim that RC21's real target environment build has already passed because no fresh post-RC21 target log was supplied before this implementation. Source certification and target certification remain separate states.
 
 ## Implemented
 
@@ -42,7 +42,7 @@ The RC22 runner itself contains no `migrate:fresh` or `migrate:reset`; destructi
 - RC preflight: **PASS**
 - Source Guard: **PASS**
 - Target runtime contracts: **PASS — 3 wrappers; isolated destructive delegate**
-- Inertia frontend contracts: **PASS — 121 Admin TS/TSX files; 11 Laragon error targets guarded; 0 transform chains; 0 unsafe router payloads; 0 NavLink-child violations; 0 unsafe immediate useForm unknown records**
+- Inertia frontend contracts: **PASS — 121 Admin TS/TSX files; 11 target environment error targets guarded; 0 transform chains; 0 unsafe router payloads; 0 NavLink-child violations; 0 unsafe immediate useForm unknown records**
 - Core module graph: **PASS — 24 modules**
 - Laravel runtime source contracts: **PASS — middleware 12/13, aliases 2, scheduled commands 11, callbacks 2, queue jobs 4, providers 2**
 - Database source contracts: **PASS — 25 migrations, 136 tables, 75 foreign targets, 51/51 tenant tables/models**
@@ -99,7 +99,7 @@ Therefore real dependency-backed TypeScript/Vite, Laravel migrations/seeds/PHPUn
 
 N1.0 remains open.
 
-## Next authoritative Laragon command
+## Next authoritative target environment command
 
 ```bat
 scripts\target-runtime-run.bat --install-deps

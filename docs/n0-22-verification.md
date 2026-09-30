@@ -23,4 +23,4 @@ The clean source artifact intentionally does not include `vendor`, `node_modules
 - `npm run build`
 - browser publishing/scheduling lifecycle test
 
-Run `scripts\\quality-check.bat` on the target Laragon/Windows environment after zero installation for the dependency-backed integration gate.
+Run `scripts\\quality-check.bat` on the target target environment/Windows environment after zero installation for the dependency-backed integration gate.

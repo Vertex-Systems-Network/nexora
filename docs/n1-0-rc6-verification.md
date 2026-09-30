@@ -54,7 +54,7 @@ TS2688: Cannot find type definition file for 'vite/client'.
 
 That result reflects the missing dependency tree on this host, not a production TypeScript/Vite build pass.
 
-## Target Laragon certification commands
+## Target target environment certification commands
 
 ```bat
 composer install

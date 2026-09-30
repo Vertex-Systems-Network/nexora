@@ -48,7 +48,7 @@ TS2688: Cannot find type definition file for 'vite/client'.
 
 This is recorded as a dependency-availability block, not a production TypeScript/Vite build pass or a new RC7 source error.
 
-## Target Laragon certification commands
+## Target target environment certification commands
 
 ```bat
 composer install

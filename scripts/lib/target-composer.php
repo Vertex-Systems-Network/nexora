@@ -46,8 +46,8 @@ function nexoraLocateTargetComposer(string $root): array
         .DIRECTORY_SEPARATOR.'composer.phar';
     $add($localComposer, 'Nexora-local');
 
-    foreach (NexoraBootstrapProcessEnvironment::laragonRoots($root) as $laragon) {
-        $base = $laragon.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'composer';
+    foreach (NexoraBootstrapProcessEnvironment::toolchainRoots($root) as $toolchain) {
+        $base = $toolchain.DIRECTORY_SEPARATOR.'composer';
         if (! is_dir($base)) continue;
         try {
             $iterator = new RecursiveIteratorIterator(
@@ -58,11 +58,11 @@ function nexoraLocateTargetComposer(string $root): array
                 if (! $file->isFile()) continue;
                 $name = strtolower($file->getFilename());
                 if (in_array($name, ['composer', 'composer.bat', 'composer.cmd', 'composer.exe', 'composer.phar'], true)) {
-                    $add($file->getPathname(), 'Laragon');
+                    $add($file->getPathname(), 'configured toolchain');
                 }
             }
         } catch (Throwable) {
-            // An unreadable optional Laragon tool directory must not become a fatal bootstrap error.
+            // An unreadable optional tool directory must not become a fatal bootstrap error.
         }
     }
 

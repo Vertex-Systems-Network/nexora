@@ -48,7 +48,7 @@ Composer is not installed in this execution environment and the clean source art
 - queue/scheduler multi-process integration test
 - browser accessibility/performance certification
 
-Run the project quality gate on the target Laragon/server environment after dependencies are installed.
+Run the project quality gate on the target target environment/server environment after dependencies are installed.
 
 ## Target integration commands
 

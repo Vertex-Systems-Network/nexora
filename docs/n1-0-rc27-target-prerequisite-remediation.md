@@ -1,4 +1,4 @@
-# N1.0 RC27 — Laragon Prerequisite Remediation
+# N1.0 RC27 — target environment Prerequisite Remediation
 
 RC27 is a target-closure utility, not a new product feature. It turns the prerequisite failures isolated by RC26 into a reversible operator workflow without downloading software, changing global PATH, accepting dependency locks, or silently modifying PHP configuration.
 
@@ -10,15 +10,15 @@ Review the active target and produce a remediation plan:
 scripts\target-prerequisite-remediate.bat
 ```
 
-On an explicitly detected Windows/Laragon target, after reviewing the plan and confirming the matching DLLs exist in the active PHP `extension_dir`, enable only the missing required PHP extensions:
+On an explicitly detected Windows/target environment target, after reviewing the plan and confirming the matching DLLs exist in the active PHP `extension_dir`, enable only the missing required PHP extensions:
 
 ```bat
 scripts\target-prerequisite-remediate.bat --apply-extensions
 ```
 
-The apply mode creates and SHA-256 verifies a timestamped backup of the active `php.ini`, stages the updated file, publishes it, verifies the published checksum, and then returns `restart_required`. Restart Laragon and open a new terminal before rerunning prerequisite intake.
+The apply mode creates and SHA-256 verifies a timestamped backup of the active `php.ini`, stages the updated file, publishes it, verifies the published checksum, and then returns `restart_required`. Restart target environment and open a new terminal before rerunning prerequisite intake.
 
-If Composer exists inside Laragon but is not callable on PATH, RC27 may generate:
+If Composer exists inside target environment but is not callable on PATH, RC27 may generate:
 
 ```text
 storage/app/nexora/target-remediation/nexora-target-env.cmd

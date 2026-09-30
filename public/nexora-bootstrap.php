@@ -375,9 +375,9 @@ function nxCommandPath(string $path): string
 }
 
 /** @return list<string> */
-function nxLaragonRoots(string $root): array
+function nxConfiguredToolchainRoots(string $root): array
 {
-    return NexoraBootstrapProcessEnvironment::laragonRoots($root);
+    return NexoraBootstrapProcessEnvironment::toolchainRoots($root);
 }
 
 
@@ -441,10 +441,10 @@ function nxResolvePhpCli(string $root): ?array
         }
     }
 
-    foreach (nxLaragonRoots($root) as $laragon) {
-        foreach (glob($laragon.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'php'.DIRECTORY_SEPARATOR.'*'.DIRECTORY_SEPARATOR.'php.exe') ?: [] as $candidate) {
+    foreach (nxConfiguredToolchainRoots($root) as $toolchain) {
+        foreach (glob($toolchain.DIRECTORY_SEPARATOR.'php'.DIRECTORY_SEPARATOR.'*'.DIRECTORY_SEPARATOR.'php.exe') ?: [] as $candidate) {
             if (is_file($candidate)) {
-                $candidates[] = [$candidate, 'Laragon'];
+                $candidates[] = [$candidate, 'configured toolchain'];
             }
         }
     }
@@ -499,15 +499,15 @@ function nxResolveComposer(string $root, ?array $phpCli = null): ?array
     }
 
     if ($phpCli !== null && PHP_OS_FAMILY === 'Windows') {
-        foreach (nxLaragonRoots($root) as $laragon) {
-            $direct = $laragon.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'composer'.DIRECTORY_SEPARATOR.'composer.phar';
+        foreach (nxConfiguredToolchainRoots($root) as $toolchain) {
+            $direct = $toolchain.DIRECTORY_SEPARATOR.'composer'.DIRECTORY_SEPARATOR.'composer.phar';
             if (is_file($direct)) {
-                $candidates[] = [$direct, $phpCli['command'].' '.nxCommandPath($direct), 'Laragon'];
+                $candidates[] = [$direct, $phpCli['command'].' '.nxCommandPath($direct), 'configured toolchain'];
             }
-            $globbed = glob($laragon.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'composer'.DIRECTORY_SEPARATOR.'*'.DIRECTORY_SEPARATOR.'composer.phar') ?: [];
+            $globbed = glob($toolchain.DIRECTORY_SEPARATOR.'composer'.DIRECTORY_SEPARATOR.'*'.DIRECTORY_SEPARATOR.'composer.phar') ?: [];
             usort($globbed, static fn (string $a, string $b): int => strnatcasecmp($b, $a));
             foreach ($globbed as $candidate) {
-                $candidates[] = [$candidate, $phpCli['command'].' '.nxCommandPath($candidate), 'Laragon'];
+                $candidates[] = [$candidate, $phpCli['command'].' '.nxCommandPath($candidate), 'configured toolchain'];
             }
         }
     }
@@ -556,11 +556,11 @@ function nxResolveNode(string $root): ?array
     }
 
     if (PHP_OS_FAMILY === 'Windows') {
-        foreach (nxLaragonRoots($root) as $laragon) {
-            foreach (glob($laragon.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'nodejs'.DIRECTORY_SEPARATOR.'*'.DIRECTORY_SEPARATOR.'node.exe') ?: [] as $candidate) {
-                $candidates[] = [$candidate, 'Laragon'];
+        foreach (nxConfiguredToolchainRoots($root) as $toolchain) {
+            foreach (glob($toolchain.DIRECTORY_SEPARATOR.'nodejs'.DIRECTORY_SEPARATOR.'*'.DIRECTORY_SEPARATOR.'node.exe') ?: [] as $candidate) {
+                $candidates[] = [$candidate, 'configured toolchain'];
             }
-            $candidates[] = [$laragon.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'nodejs'.DIRECTORY_SEPARATOR.'node.exe', 'Laragon'];
+            $candidates[] = [$toolchain.DIRECTORY_SEPARATOR.'nodejs'.DIRECTORY_SEPARATOR.'node.exe', 'configured toolchain'];
         }
         foreach ([(string) getenv('ProgramFiles'), (string) getenv('ProgramFiles(x86)')] as $programFiles) {
             if ($programFiles !== '') {
@@ -1511,7 +1511,7 @@ function nxStreamDeploymentTask(string $task, string $root): void
         nxDeploymentStreamEvent([
             'type' => 'step', 'step' => 'preflight', 'label' => 'Preflight & tool validation',
             'status' => 'completed', 'progress' => 8,
-            'message' => 'Preflight passed. Resolved available OS/Laragon/private tools.',
+            'message' => 'Preflight passed. Resolved available OS and configured private tools.',
         ]);
 
         $selected = match ($task) {
@@ -2131,7 +2131,7 @@ $runtimePaths = [
 <?php if (!$ready): ?>
 <?php if (!$authorized): ?>
 <div class="security" style="margin-bottom:16px"><?= nxIcon('shield') ?><span><strong><?= nxh(nxT('deployment.access')) ?>.</strong> <?= nxh(nxT('deployment.access_help')) ?></span></div>
-<form method="post"><input type="hidden" name="_token" value="<?= nxh((string)$_SESSION['csrf']) ?>"><input type="hidden" name="action" value="authorize_deployment"><div class="field full"><label><?= nxh(nxT('deployment.access_key')) ?></label><input name="deployment_key" autocomplete="off" spellcheck="false" required placeholder="XXXXXX-XXXXXX-XXXXXX-XXXXXX"><div class="detail">Remote source builds: open <code>storage/app/nexora/deployment-access.key</code> using your hosting file manager. Local Laragon/localhost requests are authorized automatically.</div></div><button class="btn" type="submit"><?= nxIcon('shield') ?><?= nxh(nxT('deployment.authorize')) ?></button></form>
+<form method="post"><input type="hidden" name="_token" value="<?= nxh((string)$_SESSION['csrf']) ?>"><input type="hidden" name="action" value="authorize_deployment"><div class="field full"><label><?= nxh(nxT('deployment.access_key')) ?></label><input name="deployment_key" autocomplete="off" spellcheck="false" required placeholder="XXXXXX-XXXXXX-XXXXXX-XXXXXX"><div class="detail">Remote source builds: open <code>storage/app/nexora/deployment-access.key</code> using your hosting file manager. Local target environment/localhost requests are authorized automatically.</div></div><button class="btn" type="submit"><?= nxIcon('shield') ?><?= nxh(nxT('deployment.authorize')) ?></button></form>
 <?php endif; ?>
 <?php if ($authorized): ?><div class="notice good" style="margin-top:16px"><?= nxIcon('check-circle') ?><span><?= nxh(nxT('deployment.authorized')) ?></span></div>
 <form method="post" style="margin-bottom:14px"><input type="hidden" name="_token" value="<?= nxh((string)$_SESSION['csrf']) ?>"><button class="btn" name="action" value="download_diagnostics"><?= nxIcon('download') ?><?= nxh(nxT('deployment.diagnostics')) ?></button><div class="detail" style="margin-top:6px"><?= nxh(nxT('deployment.diagnostics_help')) ?></div></form>

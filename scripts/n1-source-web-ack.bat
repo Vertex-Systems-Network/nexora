@@ -20,7 +20,7 @@ for /f "usebackq delims=" %%T in (`php artisan nexora:source:status --web-token 
 
 if "!ACK_TOKEN!"=="" (
   echo [Nexora Source Web Ack] FAIL - no current one-time acknowledgement token is available.
-  echo Run scripts\n1-source-activate.bat first, then restart/reload Laragon PHP/web.
+  echo Run scripts\n1-source-activate.bat first, then restart/reload target environment PHP/web.
   exit /b 1
 )
 
@@ -32,7 +32,7 @@ curl.exe --fail --silent --show-error --no-cache ^
 if errorlevel 1 (
   echo.
   echo [Nexora Source Web Ack] FAIL - secure web source acknowledgement was rejected.
-  echo Confirm Laragon was restarted and the URL points at this exact Nexora installation.
+  echo Confirm target environment was restarted and the URL points at this exact Nexora installation.
   exit /b 1
 )
 
@@ -42,7 +42,7 @@ php artisan nexora:source:status --require-web-ack
 if errorlevel 1 (
   echo.
   echo [Nexora Source Web Ack] FAIL - CLI and web runtime generations do not converge.
-  echo Restart/reload Laragon Apache/Nginx/PHP and repeat activation.
+  echo Restart/reload target environment Apache/Nginx/PHP and repeat activation.
   exit /b 1
 )
 

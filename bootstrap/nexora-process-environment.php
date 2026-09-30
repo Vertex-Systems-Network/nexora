@@ -12,27 +12,17 @@ declare(strict_types=1);
 final class NexoraBootstrapProcessEnvironment
 {
     /** @return list<string> */
-    public static function laragonRoots(string $root): array
+    public static function toolchainRoots(string $root): array
     {
-        if (PHP_OS_FAMILY !== 'Windows') {
-            return [];
-        }
-
         $candidates = [];
-        $normalized = str_replace('\\', '/', $root);
-        if (preg_match('#^(.+?)/www(?:/|$)#i', $normalized, $match) === 1) {
-            $candidates[] = str_replace('/', DIRECTORY_SEPARATOR, $match[1]);
-        }
-
-        foreach (['LARAGON_ROOT', 'LARAGON_HOME'] as $key) {
-            $value = trim((string) getenv($key));
-            if ($value !== '') {
-                $candidates[] = rtrim($value, "\\/");
+        $configured = trim((string) getenv('NEXORA_TOOLCHAIN_DIRS'));
+        if ($configured !== '') {
+            foreach (explode(PATH_SEPARATOR, $configured) as $directory) {
+                $directory = trim($directory, " \t\n\r\0\x0B\"'");
+                if ($directory !== '') {
+                    $candidates[] = rtrim($directory, "\\/");
+                }
             }
-        }
-
-        foreach (['C:\\laragon', 'D:\\laragon', 'E:\\laragon'] as $common) {
-            $candidates[] = $common;
         }
 
         $unique = [];
@@ -173,9 +163,9 @@ final class NexoraBootstrapProcessEnvironment
         if (defined('PHP_BINARY') && is_file(PHP_BINARY)) {
             $pathEntries[] = dirname(PHP_BINARY);
         }
-        foreach (self::laragonRoots($root) as $laragon) {
-            foreach (['php', 'composer', 'nodejs'] as $tool) {
-                foreach (glob($laragon.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.$tool.DIRECTORY_SEPARATOR.'*') ?: [] as $dir) {
+        foreach (self::toolchainRoots($root) as $toolchain) {
+            foreach (['php', 'composer', 'nodejs', 'bin'] as $tool) {
+                foreach (glob($toolchain.DIRECTORY_SEPARATOR.$tool.DIRECTORY_SEPARATOR.'*') ?: [] as $dir) {
                     if (is_dir($dir)) {
                         $pathEntries[] = $dir;
                     }

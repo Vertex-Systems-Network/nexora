@@ -24,4 +24,4 @@ A clean copy with no `vendor/`, no production Vite manifest and no `.env` was se
 
 ## Not claimed as executed here
 
-The build environment has no Composer binary and outbound npm dependency resolution timed out. Therefore this report does not claim a successful real Composer dependency install, npm dependency install, Laravel migration/test suite or Vite production build. Those are intentionally exercised by the zero-browser flow on the target Laragon/server and by `scripts/quality-check.bat` after installation.
+The build environment has no Composer binary and outbound npm dependency resolution timed out. Therefore this report does not claim a successful real Composer dependency install, npm dependency install, Laravel migration/test suite or Vite production build. Those are intentionally exercised by the zero-browser flow on the target target environment/server and by `scripts/quality-check.bat` after installation.

@@ -6,7 +6,7 @@ RC3 is the Runtime Middleware + Frontend Semantic Stabilization pass inside N1.0
 
 ### Runtime middleware crash
 
-The target Laragon runtime reported `RuntimeNodeHeartbeat::handle()` receiving the normal Laravel middleware request/next pair while the middleware required four arguments. RC3 moves `NodeIdentity` and `NodeManager` to constructor injection and restores the middleware contract to `handle(Request $request, Closure $next): Response`.
+The target target environment runtime reported `RuntimeNodeHeartbeat::handle()` receiving the normal Laravel middleware request/next pair while the middleware required four arguments. RC3 moves `NodeIdentity` and `NodeManager` to constructor injection and restores the middleware contract to `handle(Request $request, Closure $next): Response`.
 
 A permanent frontend/runtime contract verifier and Architecture test now reject a regression to extra required `handle()` service parameters.
 
@@ -62,9 +62,9 @@ This execution environment does not have the project's installed Composer/npm de
 - Vite production build
 - browser/installer certification
 
-The patches are based directly on the dependency-backed target Laragon failures supplied for RC3; the target machine must now rerun those gates.
+The patches are based directly on the dependency-backed target target environment failures supplied for RC3; the target machine must now rerun those gates.
 
-## Target Laragon verification
+## Target target environment verification
 
 ```bat
 composer install

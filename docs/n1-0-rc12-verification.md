@@ -50,7 +50,7 @@ The collector completed and generated a report instead of aborting. It correctly
 
 This environment does not provide Composer/vendor dependencies or the required PHP extensions, so RC12 does not claim dependency-backed Laravel migrations/tests, a real Vite production build, target HTTP/browser evidence, disposable restore evidence, multi-node HA evidence, final N1.0 closure, or a certified production package.
 
-## Laragon diagnostic command
+## target environment diagnostic command
 
 ```bat
 scripts\target-diagnostics.bat --install-deps --full

@@ -132,7 +132,7 @@ if($environment['node_available']) $run('node-version','Node version',['node','-
 if($environment['npm_available']) $run('npm-version','npm version',['npm','--version'],'toolchain'); else $recordIssue('npm-version','npm version','toolchain','npm executable not found in PATH.');
 $run('dependency-runtime','Dependency runtime/lockfile compatibility',[PHP_BINARY,'scripts/dependency-runtime-verify.php'],'toolchain');
 
-// Optional dependency installation. Every install log is captured for Laragon troubleshooting.
+// Optional dependency installation. Every install log is captured for target environment troubleshooting.
 if($install){
     if(!$environment['composer_lock_sha256']) $recordIssue('composer-lock-required','Composer lockfile','dependencies','composer.lock is required; diagnostics/certification never resolves an unlocked dependency graph.');
     elseif($environment['composer_available']) $run('composer-install','Composer install from lock',['composer','install','--no-interaction','--prefer-dist','--optimize-autoloader','--no-progress'],'dependencies');

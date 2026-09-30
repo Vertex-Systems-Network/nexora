@@ -40,4 +40,4 @@ Verification completed against the clean N0.27 source tree derived from the user
 - `php artisan migrate:fresh --seed`
 - queue-worker / real network Webhook integration
 
-Run the project quality runner on the target Laragon environment after extraction for the dependency-backed integration gate.
+Run the project quality runner on the target target environment environment after extraction for the dependency-backed integration gate.

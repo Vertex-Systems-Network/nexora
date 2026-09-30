@@ -5,7 +5,7 @@ Status: **CERTIFYING — RC24 TARGET PREREQUISITE / LOCK INTAKE**
 
 ## RC24 implementation
 
-- Added `target-prerequisite-intake` with BAT/PowerShell/shell wrappers. It reports the active PHP binary, loaded/scanned `php.ini`, extension directory, OS/Laragon detection, Composer/Node/npm readiness and exact next actions without auto-editing or auto-downloading the toolchain.
+- Added `target-prerequisite-intake` with BAT/PowerShell/shell wrappers. It reports the active PHP binary, loaded/scanned `php.ini`, extension directory, OS/target environment detection, Composer/Node/npm readiness and exact next actions without auto-editing or auto-downloading the toolchain.
 - Added `dependency-lock-review` with BAT/PowerShell/shell wrappers. Lockfile presence is no longer treated as reviewed dependency evidence.
 - Review acceptance requires explicit `--accept --reviewer=<name> --confirm=REVIEWED` and is SHA-256-bound to `composer.json`, `package.json`, `composer.lock`, and `package-lock.json`.
 - npm lock review checks root manifest parity, lockfileVersion >=3, package integrity metadata and rejects link/git/file/workspace resolved packages.
@@ -26,7 +26,7 @@ Status: **CERTIFYING — RC24 TARGET PREREQUISITE / LOCK INTAKE**
 - Laravel runtime source contracts: **PASS — middleware 12/13, aliases 2, scheduled commands 11, callbacks 2, queue jobs 4, providers 2**.
 - Database source contracts: **PASS — 25 migrations, 136 tables, 75 foreign targets, 51/51 tenant tables/models**.
 - Browser/UX/RTL source contracts: **PASS — 121 Admin TS/TSX files**.
-- RC21 Inertia regression gate: **PASS — 11 known Laragon targets guarded; 0 transform chains, 0 unsafe router payloads, 0 NavLink-child violations, 0 unsafe immediate unknown-record useForm boundaries**.
+- RC21 Inertia regression gate: **PASS — 11 known target environment targets guarded; 0 transform chains, 0 unsafe router payloads, 0 NavLink-child violations, 0 unsafe immediate unknown-record useForm boundaries**.
 - Filesystem contracts: **PASS — 1508 paths, max relative path 80 chars, 508 PSR-4 classes, 1514 App imports, 0 case/Windows path conflicts**.
 - Transfer, runtime safety, concurrency, security, final-integrity, zero-install, performance/packaging, HA/final-evidence and upgrade source contracts: **PASS**.
 - PHP syntax lint: **798 files, 0 syntax errors**.
@@ -45,4 +45,4 @@ An actual `npm run build` was attempted. It exits with code 2 because `node_modu
 
 ## Remaining release boundary
 
-N1.0 is not DONE. The trusted Laragon target must first pass prerequisite intake, intentionally generate/review/accept exact locks, install only from those locks, then complete target runtime/full certification, the strict five-DB matrix, zero-install/recovery, existing-install upgrade rehearsal, browser/A11y/RTL, HTTP/performance, backup/restore, real multi-node HA, final evidence aggregation and independently verified production packaging.
+N1.0 is not DONE. The trusted target environment target must first pass prerequisite intake, intentionally generate/review/accept exact locks, install only from those locks, then complete target runtime/full certification, the strict five-DB matrix, zero-install/recovery, existing-install upgrade rehearsal, browser/A11y/RTL, HTTP/performance, backup/restore, real multi-node HA, final evidence aggregation and independently verified production packaging.

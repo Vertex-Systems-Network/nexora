@@ -26,4 +26,4 @@ Required source gates:
 - direct `/nexora-bootstrap.php`: HTTP 302 back to `/`
 - authorized streamed `npm_build` smoke request emitted valid NDJSON `start → stages → complete` events and failed visibly/cleanly because `node_modules` was intentionally absent
 
-Full dependency-backed Laravel/MySQL tests are still the responsibility of the zero test on the target Laragon environment, because this source artifact intentionally contains neither `vendor/` nor `node_modules/` nor a production build.
+Full dependency-backed Laravel/MySQL tests are still the responsibility of the zero test on the target target environment environment, because this source artifact intentionally contains neither `vendor/` nor `node_modules/` nor a production build.

@@ -35,7 +35,7 @@ Composer is not installed in this execution environment, so the following were n
 - Laravel/Pest feature and architecture suites with framework dependencies loaded.
 - Browser-level SSO/SCIM/domain/impersonation integration tests.
 
-Run the project quality runner on the target Laragon environment after dependency installation for the dependency-backed release gate.
+Run the project quality runner on the target target environment environment after dependency installation for the dependency-backed release gate.
 
 ## Recommended target-environment gate
 
