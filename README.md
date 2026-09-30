@@ -20,6 +20,8 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## AI-Native Progress Ledger
 
+- **Unified nine-point closure batch:** BLOCKED / NOT COMPLETE; measured draft #1 reconciliation has 38 content-conflict records. See [batch acceptance plan](docs/nine-point-closure-batch.md). Native approval baseline is applied; key lifecycle, independent review, actual target and final release evidence remain pending.
+
 - **Observed:** 2026-09-30
 - **Last verified source baseline:** `d8e83e87305bc8c11d8b073b42f13cb69414c550` — protected-main #1125 / `36689146406` **SUCCESS**
 - **Product acceptance stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
