@@ -16,10 +16,15 @@ function nexoraPerformanceBuildLocalLeaks(string $source): array
 {
     $leaks = [];
 
-    foreach (['localhost:5173', '127.0.0.1:5173', 'D:\\target-environment\\'] as $literal) {
+    foreach (['localhost:5173', '127.0.0.1:5173'] as $literal) {
         if (str_contains($source, $literal)) {
             $leaks[] = $literal;
         }
+    }
+
+    // Drive-rooted paths are machine-local regardless of the chosen stack.
+    if (preg_match('~(?<![A-Za-z0-9_])[A-Za-z]:[\\\\/]~', $source) === 1) {
+        $leaks[] = '<windows-absolute-path>';
     }
 
     if (preg_match('~(?<![A-Za-z0-9_.-])/Users/[^/\\\\\s]+(?:/|\\\\)~', $source) === 1) {
