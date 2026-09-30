@@ -3,26 +3,26 @@ repository: Vertex-Systems-Network/nexora
 compact_state_path: .ai/resume
 observed_main:
   branch: main
-  sha: fde0667b150de551184ec5c5261a34f18538ceed
-  observed_at: "2026-09-22"
-  semantics: "last source/governance baseline verified by protected-main certification #986; always re-read live main before mutation because later state-only reconciliation may advance the branch without changing the target verdict"
+  sha: 131addac09e888961989448e6415124dd3321215
+  observed_at: "2026-09-30"
+  semantics: "observed main after #100; last verified push baseline d8e83e87305bc8c11d8b073b42f13cb69414c550 / #1125 success; subsequent CI is not assumed"
 active_issue:
   number: 74
   title: "RUNTIME-CLOSURE: target readiness and identity coordination"
 active_pr: null
-active_branch: main
+active_branch: codex/source-batch-checkpoint-20260930
 current_stage:
   id: RUNTIME-CLOSURE-001
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: TARGET-EVIDENCE-WAIT-008
-  title: "Execute target-environment recovery/identity/login evidence and credential rotation"
-  status: WAITING_EXTERNAL_TARGET
+  id: SOURCE-BATCH-PORTABILITY-009
+  title: "Reconcile environment-neutral source batch and current-target availability"
+  status: VERIFYING
 last_completed_milestone:
-  main_commit: fde0667b150de551184ec5c5261a34f18538ceed
-  summary: "PR #83 exact head passed #985, merged, and resulting-main #986 completed SUCCESS; no active source/governance carrier remains"
-exact_next_safe_action: "On the authorized target environment run npm run runtime:recover -- --target=\"<operator-provided-target-path>\" --apply --confirm=RECOVER-RUNTIME, retain non-secret machine-readable evidence, and separately rotate the credential exposed by PR #71 through the authorized provider/target path. Do not start CORE-QA before TARGET_VERIFIED."
+  main_commit: 131addac09e888961989448e6415124dd3321215
+  summary: "#99 and #100 merged after fresh exact-head certification; source checkpoint pending"
+exact_next_safe_action: "Verify post-#100 main and source checkpoint CI; continue authorized source work. No current target is provisioned. Target/provider evidence remains separate."
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:
@@ -51,9 +51,14 @@ readme_progress_sync:
   ledger_path: "README.md#ai-native-progress-ledger"
   missing_sync_blocks_completion_claim: true
 state_drift:
-  detected: false
+  detected: true
   notes:
-    - "No active source/governance carrier remains for RUNTIME-CLOSURE-001."
+    - "Source portability/dependency batch integrated; source checkpoint in preparation."
     - "PR #1 is FUTURE_CARRIER_FROZEN and is not active runtime-closure work."
     - "Issue #72 remains open solely for real target/provider credential rotation."
     - "Issue #74 source lanes are complete; target W03/W04/W07 remain evidence-gated."
+
+future_target_input:
+  placeholder: "<operator-provided-target-path>"
+  availability: NOT_PROVISIONED
+  semantics: "Future operator input only; not an existing installation or current execution instruction."

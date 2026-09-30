@@ -1,6 +1,6 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-updated_at: "2026-09-22"
+updated_at: "2026-09-30"
 items:
   - id: NEX-ORCH-74
     source: "Issue #74"
@@ -27,3 +27,14 @@ items:
     status: CLOSED_DEFERRED
     priority: 4
     note: "Closed stale dependency carriers; recreate/rebase from then-current main after runtime target closure."
+
+  - id: NEX-SOURCE-BATCH-009
+    source: "PR #94/#95/#96/#97/#98/#99/#100"
+    status: SOURCE_INTEGRATED
+    priority: 1
+    note: "User-authorized GitHub source batch integrated; checkpoint and final main push CI remain separate verification. No current target is provisioned."
+  - id: NEX-SECURITY-87
+    source: "Issue #87"
+    status: OPEN
+    priority: 1
+    note: "Repository-enforced independent high-risk review remains unresolved; no protection change or waiver is claimed."

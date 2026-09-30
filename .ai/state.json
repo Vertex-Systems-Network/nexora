@@ -4,8 +4,8 @@
   "control_plane_revision": 7,
   "control_plane_branch": "main",
   "base_branch": "main",
-  "base_sha": "fde0667b150de551184ec5c5261a34f18538ceed",
-  "last_verified_source_sha": "fde0667b150de551184ec5c5261a34f18538ceed",
+  "base_sha": "131addac09e888961989448e6415124dd3321215",
+  "last_verified_source_sha": "d8e83e87305bc8c11d8b073b42f13cb69414c550",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
   "source_generation": "n1-v5.29",
@@ -32,10 +32,11 @@
     }
   ],
   "current_target": {
-    "environment": "operator-provided target environment",
-    "path": "<operator-provided-target-path>",
-    "installed_release": "1.0.0-rc.93",
-    "expected_source_release_after_clean_upgrade_or_install": "1.0.0-rc.94"
+    "environment": "not provisioned",
+    "path": null,
+    "installed_release": null,
+    "expected_source_release_after_clean_upgrade_or_install": "1.0.0-rc.94",
+    "basis": "User clarified on 2026-09-30 that this product currently exists only on GitHub; no current installation path or URL."
   },
   "runtime_closure_evidence": {
     "evidence_date": "2026-08-25",
@@ -57,7 +58,8 @@
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "On the operator-provided rc.93 target environment, obtain fresh post-install-status --assert-ready with status=pass, ready=true, runtime_ready=true, receipt_current=true, errors=[].",
+    "Verify post-#100 main push CI and this source checkpoint; continue user-authorized source development without assuming a target installation exists.",
+    "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
     "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",
     "Rotate the credential exposed by quarantined PR #71 through an authorized target/provider path without recording the replacement secret.",
@@ -196,5 +198,36 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-09-23T01:56:00+05:00"
+  "updated_at": "2026-09-30T08:25:00Z",
+  "historical_current_target": {
+    "environment": "operator-provided target environment",
+    "path": "<operator-provided-target-path>",
+    "installed_release": "1.0.0-rc.93",
+    "expected_source_release_after_clean_upgrade_or_install": "1.0.0-rc.94"
+  },
+  "source_batch_checkpoint": {
+    "date": "2026-09-30",
+    "verified_main_sha": "d8e83e87305bc8c11d8b073b42f13cb69414c550",
+    "push_run_id": 36689146406,
+    "push_run_number": 1125,
+    "conclusion": "success",
+    "merged_prs": [
+      97,
+      98,
+      94,
+      95,
+      96,
+      99,
+      100
+    ],
+    "active_maintenance_pr": null,
+    "scope": "GitHub source development; no target/provider execution",
+    "target_acceptance": "unchanged BLOCKED; historical rc.93 evidence is not current-target verification",
+    "observed_main_sha": "131addac09e888961989448e6415124dd3321215",
+    "parser_pr_evidence": {
+      "head": "2a95badaacc254981e478ea682ff0f12feee5cfa",
+      "run_id": 36689540542,
+      "conclusion": "success"
+    }
+  }
 }

@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-22):** source/governance closure is integrated and verified through protected-main baseline `fde0667b150de551184ec5c5261a34f18538ceed`. PR #83 final exact head `75d5436b0394f246bdca626571666abe77cd4012` passed release certification #985 / `35673582569`, merged under scoped admin waiver `WVR-NEX-PR83-MAIN-REVIEW-001`, and resulting-main certification #986 / `35767459733` completed **SUCCESS**. No active source/governance carrier remains for `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY`. The stage remains **BLOCKED** only on target-environment readiness/current receipt, exact target↔web identity, authoritative `/login`, and rotation of the credential exposed by PR #71. PR #1 remains frozen future work and is not part of the active runtime-closure path. Live `main` must always be re-read before mutation; later state-only documentation commits do not by themselves change this Source/Target verdict.
+> **Canonical current status (2026-09-30):** GitHub source development continues under user authorization. Protected-main `d8e83e87305bc8c11d8b073b42f13cb69414c550` passed push certification #1125 / `36689146406`. Environment-neutral tooling and source maintenance PRs #94–#99 are integrated. Parser maintenance #100 merged after exact-head #1126 SUCCESS; resulting-main push CI must be verified separately. No current installation path or live URL has been provisioned. Historical rc.93 evidence is not current target verification; runtime target acceptance remains **BLOCKED**. Provider rotation (#72), target identity/readiness (#74), repository review enforcement (#87), and draft #1 remain distinct outstanding gates.
 
 ## AI development startup gate
 
@@ -20,16 +20,14 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## AI-Native Progress Ledger
 
-- **Observed:** 2026-09-22
-- **Last verified source/governance baseline:** `fde0667b150de551184ec5c5261a34f18538ceed` — protected-main #986 / `35767459733` **SUCCESS**
-- **Active stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Active runtime/product source carrier:** none; control-plane maintenance does not change the target verdict
-- **Open remediation Issues:** #72 — target/provider credential rotation; #74 — target-environment readiness and identity coordination
-- **Future PR:** PR #1 — **FUTURE_CARRIER_FROZEN**
-- **Closed stale maintenance:** PR #75 and PR #81 closed unmerged; recreate/rebase only after target verification if still applicable
-- **Current blockers:** target-environment readiness/current receipt; exact target↔web identity; authoritative `/login`; credential rotation after PR #71
-- **Target-path portability guard:** Source Guard enforced — active target-contract surfaces must stay operator-neutral and reject machine-local target binding
-- **Next safe action:** execute the governed `runtime:recover` apply path against the operator-provided target path; separately complete authorized credential rotation; do not start CORE-QA before TARGET_VERIFIED
+- **Observed:** 2026-09-30
+- **Last verified source baseline:** `d8e83e87305bc8c11d8b073b42f13cb69414c550` — protected-main #1125 / `36689146406` **SUCCESS**
+- **Product acceptance stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
+- **Current source batch:** environment-neutral tooling and reviewed dependency maintenance; #94–#99 integrated, #100 merged after fresh exact-head #1126 SUCCESS; resulting-main push CI must be verified separately
+- **Current deployment:** not provisioned; user scope is GitHub source development
+- **Open remediation Issues:** #72 provider credential rotation; #74 target readiness/identity; #87 repository security review enforcement
+- **Future PR:** #1 remains draft; no blanket promotion from source CI
+- **Next safe action:** verify resulting main and the source checkpoint; continue authorized source development. Target provisioning/certification is separate.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

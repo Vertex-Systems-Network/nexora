@@ -1,6 +1,6 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-updated_at: "2026-09-22"
+updated_at: "2026-09-30"
 rules:
   registration_grants_execution_authority: false
   exact_source_sha_required_before_running_or_terminal_evidence: true
@@ -175,3 +175,48 @@ tasks:
     deterministic_dedup_key: "nexora:main:c938f3cca6525da4f6f5bdc167963abd3a3dc883:postmerge-certification"
     status: PASS
     immutable_evidence: "run #988 / 35783620497 conclusion=success"
+
+  - id: RB-NEX-BATCH009-PR99
+    source_work: "source portability and dependency batch"
+    source_issue_or_pr: "PR #99 exact-head"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "PR #99 exact-head"
+    source_sha: "5da4856ac3315ee4a6b676dff0434680c689b59c"
+    environment_matrix_input_fixture: "GitHub-hosted release certification as defined at this source SHA"
+    authorization_state: "repository automatic CI"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:5da4856ac3315ee4a6b676dff0434680c689b59c:36688755980"
+    status: PASS
+    immutable_evidence: "GitHub workflow run 36688755980 completed conclusion=success"
+
+  - id: RB-NEX-BATCH009-PR100
+    source_work: "source portability and dependency batch"
+    source_issue_or_pr: "PR #100 exact-head"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "PR #100 exact-head"
+    source_sha: "2a95badaacc254981e478ea682ff0f12feee5cfa"
+    environment_matrix_input_fixture: "GitHub-hosted release certification as defined at this source SHA"
+    authorization_state: "repository automatic CI"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:2a95badaacc254981e478ea682ff0f12feee5cfa:36689540542"
+    status: PASS
+    immutable_evidence: "GitHub workflow run 36689540542 completed conclusion=success"
+
+  - id: RB-NEX-BATCH009-MAIN99
+    source_work: "source portability and dependency batch"
+    source_issue_or_pr: "main after #99"
+    command_or_workflow: "Nexora release certification"
+    source_ref: "main after #99"
+    source_sha: "d8e83e87305bc8c11d8b073b42f13cb69414c550"
+    environment_matrix_input_fixture: "GitHub-hosted release certification as defined at this source SHA"
+    authorization_state: "repository automatic CI"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:d8e83e87305bc8c11d8b073b42f13cb69414c550:36689146406"
+    status: PASS
+    immutable_evidence: "GitHub workflow run 36689146406 completed conclusion=success"
