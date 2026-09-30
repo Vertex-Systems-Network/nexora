@@ -32,9 +32,9 @@ function nexoraAnalyzeTargetRemediationContracts(string $root): array
     $zero = (string) @file_get_contents($root.'/scripts/zero-state-verify.php');
     if (! str_contains($zero, 'storage/app/nexora/target-remediation')) $errors[] = 'Strict zero-state verification must reject target-remediation runtime evidence.';
     $intake = (string) @file_get_contents($root.'/scripts/target-prerequisite-intake.php');
-    if (! str_contains($intake, 'target-prerequisite-remediate.bat')) $errors[] = 'Target intake must point Windows/target environment operators to the remediation assistant when extensions are missing.';
+    if (! str_contains($intake, 'target-prerequisite-remediate.php')) $errors[] = 'Target intake must point operators to the remediation assistant when extensions are missing.';
     $orchestrator = (string) @file_get_contents($root.'/scripts/target-certification-orchestrator.php');
-    if (! str_contains($orchestrator, 'target-prerequisite-remediate.bat')) $errors[] = 'Target orchestrator must surface the remediation command after prerequisite failure.';
+    if (! str_contains($orchestrator, 'target-prerequisite-remediate.php')) $errors[] = 'Target orchestrator must surface the remediation command after prerequisite failure.';
 
     return [
         'errors' => $errors,
