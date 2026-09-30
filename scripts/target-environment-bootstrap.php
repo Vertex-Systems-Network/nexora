@@ -14,17 +14,10 @@ $jsonOnly=in_array('--json',$argv,true);
 
 $env=NexoraBootstrapProcessEnvironment::build($root,$_ENV);
 $commandVersion=static function(string $command,array $args=['--version']) use($root,$env):array{
-    $parts=array_merge([$command],$args);
-    $cmd=implode(' ',array_map(static fn(string $v):string=>escapeshellarg($v),$parts));
-    $proc=@proc_open($cmd,[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes,$root,$env,['bypass_shell'=>false]);
-    if(!is_resource($proc)) return ['available'=>false,'version'=>null,'raw'=>null];
-    fclose($pipes[0]);
-    $stdout=(string)stream_get_contents($pipes[1]);fclose($pipes[1]);
-    $stderr=(string)stream_get_contents($pipes[2]);fclose($pipes[2]);
-    $exit=proc_close($proc);
-    $raw=trim($stdout!==''?$stdout:$stderr);
+    $result=nexoraRunTargetCommand(array_merge([$command],$args),$root,$env);
+    $raw=trim($result['stdout']!==''?$result['stdout']:$result['stderr']);
     preg_match('/(\d+\.\d+(?:\.\d+)?)/',$raw,$m);
-    return ['available'=>$exit===0,'version'=>$m[1]??null,'raw'=>$raw!==''?$raw:null];
+    return ['available'=>$result['exit_code']===0,'version'=>$m[1]??null,'raw'=>$raw!==''?$raw:null];
 };
 $versionInRange=static function(?string $value,string $min,string $max):bool{
     return is_string($value)&&version_compare($value,$min,'>=')&&version_compare($value,$max,'<');
@@ -64,17 +57,17 @@ $add('composer.range',$composer['available']&&$versionInRange($composer['version
     'Use a Composer version inside the certified range.');
 $add('node.range',$node['available']&&$majorInRange($node['version'],(int)$policy['node']['minimum_major'],(int)$policy['node']['maximum_major_exclusive']),
     'Node '.($node['version']??'not found').'; certified majors '.$policy['node']['minimum_major'].' - <'.$policy['node']['maximum_major_exclusive'].'.',
-    'Install/select a certified Node major.');
+    'Install/select a certified Node major and expose it on PATH.');
 $add('npm.range',$npm['available']&&$majorInRange($npm['version'],(int)$policy['npm']['minimum_major'],(int)$policy['npm']['maximum_major_exclusive']),
     'npm '.($npm['version']??'not found').'; certified majors '.$policy['npm']['minimum_major'].' - <'.$policy['npm']['maximum_major_exclusive'].'.',
-    'Use the npm major declared by packageManager/engines.');
+    'Use the npm major declared by packageManager/engines and expose it through the active Node installation.');
 
 $composerLock=$root.'/'.(string)$policy['lockfiles']['composer'];
 $npmLock=$root.'/'.(string)$policy['lockfiles']['npm'];
 $add('lock.composer',is_file($composerLock),'composer.lock: '.(is_file($composerLock)?'present':'missing'),
-    'On a trusted maintainer machine run scripts\\refresh-dependency-locks.bat, review the diff, then commit the lockfile.');
+    'On a trusted maintainer machine run the dependency-lock refresh workflow, review the diff, then commit the reviewed lockfile.');
 $add('lock.npm',is_file($npmLock),'package-lock.json: '.(is_file($npmLock)?'present':'missing'),
-    'On a trusted maintainer machine run scripts\\refresh-dependency-locks.bat, review the diff, then commit the lockfile.');
+    'On a trusted maintainer machine run the dependency-lock refresh workflow, review the diff, then commit the reviewed lockfile.');
 
 $ok=!in_array(false,array_column($checks,'ok'),true);
 $payload=[

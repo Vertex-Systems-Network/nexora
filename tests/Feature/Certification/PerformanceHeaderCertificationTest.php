@@ -22,7 +22,7 @@ final class PerformanceHeaderCertificationTest extends TestCase
 
     public function test_sensitive_and_health_responses_are_not_cacheable_and_have_security_headers(): void
     {
-        $response=$this->withServerVariables(['HTTPS'=>'on'])->get('/login');
+        $response=$this->get('https://localhost/login');
         $response->assertStatus(200);
         $response->assertHeader('X-Content-Type-Options','nosniff');
         $response->assertHeader('X-Frame-Options','SAMEORIGIN');

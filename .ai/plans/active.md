@@ -1,3 +1,27 @@
+# Nine-point evidence reconciliation — 2026-09-30
+
+Protected main `3439ac7e324e867046674044ba4ad1586bd963af` after #105: exact-main certification `36742999910` SUCCESS; #105 release/development QA SUCCESS; 480 backend tests / 4607 assertions + 6 frontend tests PASS. Exact published #105 head disposable installation, readiness, CLI↔web proof, recovery, login/admin and drift-negative checks PASS. #87 closed NOT_PLANNED per owner approval-rule removal; no independent-review implementation claimed. Current #102 plan is reconciled against completed source work. #72 historical key and #74 actual target acceptance remain OPEN; global runtime/release stage BLOCKED and Core QA locked. Nine-point acceptance table: `docs/nine-point-closure-batch.md`. Earlier checkpoints are historical. Final #102 CI pending at preparation; later results belong on PR/Issue to avoid status-only head churn.
+
+# Stable runtime diagnosis and authentication throttle repair — 2026-09-30
+
+Unit: SYS-RUNTIME-IDENTITY; stage RUNTIME-CLOSURE-001 remains BLOCKED. Base: main@186138b0f7b7ca0da1ce3b2bb37b051edc75c855. Method: DMAIC defect correction, not Core QA activation.
+
+Measurement: changing only ephemeral workspace proxy ports exactly reproduces both prior sealed service fingerprints. Stable no-proxy loopback QA passes real installation, activation, one-time web acknowledgement, CLI re-verification, readiness and governed recovery. Subsequent actual login POST fails 429 after benign public/health requests because numeric Laravel throttles share the domain/IP key without prefixes.
+
+Authorized repair: place existing four guest authentication mutation routes in one auth-prefixed bucket. Preserve combined five attempts per minute, IP keying, guest/auth, CSRF, validation and runtime identity controls. Public request counters cannot exhaust this authentication budget. No new route, dependency, permission, migration or secret scope. Threat: isolate unrelated traffic without increasing authentication attempts; test sixth request rejection and shared auth budget. Graph: existing public→throttle→auth edges only, no new product graph provider. Performance: constant prefix, existing cache operations; unchanged public 2000ms smoke ceiling. Data/privacy: no new persistence or identifiers; existing hashed IP signature. Rollback: revert route prefix; re-seal only fresh disposable source fixtures through installer, never modify existing locks to force PASS.
+
+Verified: red public-health/login regression before repair; green 10 tests / 40 assertions plus fresh corrected install/activation/recovery/login/admin/current readiness. Critical route manifest and installer binding regenerated canonically. Final remote CI pending. Verification contract: demonstrate regression fails before repair; prove public traffic followed by valid login succeeds, sixth auth mutation remains 429, and auth endpoints retain shared budget. Re-run fresh installer, activation/recovery and real cookie/CSRF login/admin on corrected source. Remote exact-head CI and main CI are separate. No production/TLS/five-engine/key-rotation acceptance.
+
+Earlier checkpoints below remain historical.
+
+# Disposable runtime checkpoint — 2026-09-30
+
+Fresh SQLite installer and real HTTP login/admin pass after separating runtime SQLite data from source attestation. Local regression/source certification pass. Post-source-activation service convergence has an observed unresolved mismatch. Remote CI pending; no full target/release promotion. See `docs/disposable-runtime-verification-2026-09-30.md`. Earlier entries below remain historical.
+
+# Source reconciliation checkpoint — 2026-09-30
+
+The current working branch reconciles protected main `9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5` with draft #1 head `f6629d010626bb52be16fd9c3257f41b656be748`. All 38 conflict paths are resolved; local source tests pass. Remote exact-head CI and independent review remain pending. Target acceptance remains BLOCKED; no deployment, key invalidation, or formal Core QA promotion is claimed. See `docs/source-reconciliation-2026-09-30.md` for evidence and decisions. Earlier checkpoints below are historical.
+
 # Source Batch Checkpoint — 2026-09-30
 
 - Observed protected main after #100: `131addac09e888961989448e6415124dd3321215`.

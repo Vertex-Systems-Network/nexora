@@ -2,7 +2,9 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-30):** GitHub source development continues under user authorization. Protected-main `d8e83e87305bc8c11d8b073b42f13cb69414c550` passed push certification #1125 / `36689146406`. Environment-neutral tooling and source maintenance PRs #94–#99 are integrated. Parser maintenance #100 merged after exact-head #1126 SUCCESS; resulting-main push CI must be verified separately. No current installation path or live URL has been provisioned. Historical rc.93 evidence is not current target verification; runtime target acceptance remains **BLOCKED**. Provider rotation (#72), target identity/readiness (#74), repository review enforcement (#87), and draft #1 remain distinct outstanding gates.
+> **Canonical current status (2026-09-30):** protected main `3439ac7e324e867046674044ba4ad1586bd963af` includes merged #103 source reconciliation, #104 SQLite provenance fix and #105 authentication throttle repair. Exact resulting-main release certification `36742999910` **SUCCESS**. Source CI: 480 backend tests / 4607 assertions + 6 frontend tests PASS. Source is verified; live Target/Release remain **BLOCKED**.
+
+> **Nine-point batch:** source reconciliation and disposable SQLite install/readiness/CLI↔web identity/login/recovery PASS. Approval-enforcement proposal #87 closed **NOT_PLANNED** under the owner decision. Historical key acceptance #72, live target #74 and final-release prerequisites remain incomplete. [Measured nine-point table](docs/nine-point-closure-batch.md) and [runtime proof](docs/stable-runtime-verification-2026-09-30.md). This PR reconciles the plan; it does not complete the product.
 
 ## AI development startup gate
 
@@ -20,16 +22,14 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## AI-Native Progress Ledger
 
-- **Unified nine-point closure batch:** BLOCKED / NOT COMPLETE; measured draft #1 reconciliation has 38 content-conflict records. See [batch acceptance plan](docs/nine-point-closure-batch.md). Native approval baseline is applied; key lifecycle, independent review, actual target and final release evidence remain pending.
-
 - **Observed:** 2026-09-30
-- **Last verified source baseline:** `d8e83e87305bc8c11d8b073b42f13cb69414c550` — protected-main #1125 / `36689146406` **SUCCESS**
+- **Last verified source baseline:** `3439ac7e324e867046674044ba4ad1586bd963af` — protected-main release certification `36742999910` **SUCCESS**
 - **Product acceptance stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Current source batch:** environment-neutral tooling and reviewed dependency maintenance; #94–#99 integrated, #100 merged after fresh exact-head #1126 SUCCESS; resulting-main push CI must be verified separately
-- **Current deployment:** not provisioned; user scope is GitHub source development
-- **Open remediation Issues:** #72 provider credential rotation; #74 target readiness/identity; #87 repository security review enforcement
-- **Future PR:** #1 remains draft; no blanket promotion from source CI
-- **Next safe action:** verify resulting main and the source checkpoint; continue authorized source development. Target provisioning/certification is separate.
+- **Current source batch:** nine-point plan/evidence reconciliation in #102; #103/#104/#105 integrated and exact source/main CI verified
+- **Current deployment:** disposable SQLite/loopback HTTP tested; no live target provisioned
+- **Open remediation Issues:** #72 historical bootstrap-key non-use/rotation; #74 live runtime acceptance; #87 closed NOT_PLANNED
+- **Open planning PR:** #102 is current plan reconciliation; #1 closed; #103/#104/#105 merged
+- **Next safe action:** verify and integrate the updated #102 plan/evidence; target/key/release acceptance remains separate.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

@@ -13,6 +13,7 @@ use App\Nexora\Media\Contracts\MediaManagerContract;
 use App\Nexora\Media\Services\MediaUploadPolicy;
 use App\Http\Middleware\AssignRequestId;
 use App\Nexora\Security\Audit\AuditManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -24,17 +25,30 @@ use Inertia\Response;
 
 final class MediaController extends Controller
 {
-    public function index(Request $request, MediaManagerContract $media, MediaUploadPolicy $policy): Response
+    public function index(Request $request, MediaManagerContract $media, MediaUploadPolicy $policy): Response|JsonResponse
     {
         $search = trim((string) $request->query('search', ''));
         $type = (string) $request->query('type', '');
         $folderId = (int) $request->query('folder', 0);
-        $view = (string) $request->query('view', 'library');
+        $picker = $request->boolean('picker');
+        $view = $picker ? 'library' : (string) $request->query('view', 'library');
         $query = MediaAsset::query()->with(['folder:id,name','uploader:id,name'])->withCount('usages')->latest('id');
         if ($view === 'trash') $query->onlyTrashed();
         if ($search !== '') $query->where(fn ($q) => $q->where('original_name','like',"%{$search}%")->orWhere('title','like',"%{$search}%")->orWhere('alt_text','like',"%{$search}%"));
         if (in_array($type, ['image','video','audio','document'], true)) $query->where('media_type',$type);
         if ($folderId > 0) $query->where('folder_id',$folderId);
+
+        if ($picker) {
+            $limit = max(1, min(60, (int) $request->query('limit', 48)));
+            $items = $query->limit($limit)->get()->map(fn (MediaAsset $asset): array => array_merge($media->present($asset), ['uploader'=>$asset->uploader?->name]));
+
+            return response()->json([
+                'assets'=>$items->values(),
+                'filters'=>['search'=>$search,'type'=>$type,'folder'=>$folderId ?: ''],
+                'limit'=>$limit,
+            ]);
+        }
+
         $assets = $query->paginate(24)->withQueryString();
         $assets->through(fn (MediaAsset $asset): array => array_merge($media->present($asset), ['uploader'=>$asset->uploader?->name]));
 

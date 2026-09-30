@@ -1,40 +1,58 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-updated_at: "2026-09-30"
+updated_at: '2026-09-30'
 items:
-  - id: NEX-ORCH-74
-    source: "Issue #74"
-    status: ACTIVE_TARGET_CLOSURE
-    priority: 1
-    note: "W01/W02/W05/W06 source lanes are complete; W03/W04 target-environment evidence and W07 closure remain blocked on target/provider access."
-  - id: NEX-AUDIT-72
-    source: "Issue #72"
-    status: BLOCKED_EXTERNAL_TARGET
-    priority: 1
-    note: "Repository/source remediation complete; exposed credential still requires real target/provider rotation with non-secret evidence."
-  - id: NEX-MAIN-981
-    source: "main@87210e7674f67fb75e046c185206573bebd906f9"
-    status: PASS
-    priority: 2
-    note: "Protected-main push certification #981 / 35672290666 completed SUCCESS; retained as terminal source evidence."
-  - id: NEX-FINAL-1
-    source: "PR #1"
-    status: FUTURE_CARRIER_FROZEN
-    priority: 3
-    note: "Large future product carrier; reconcile by registered stage/unit only after runtime target verification."
-  - id: NEX-DEPS-75-81
-    source: "PR #75 / PR #81"
-    status: CLOSED_DEFERRED
-    priority: 4
-    note: "Closed stale dependency carriers; recreate/rebase from then-current main after runtime target closure."
-
-  - id: NEX-SOURCE-BATCH-009
-    source: "PR #94/#95/#96/#97/#98/#99/#100"
-    status: SOURCE_INTEGRATED
-    priority: 1
-    note: "User-authorized GitHub source batch integrated; checkpoint and final main push CI remain separate verification. No current target is provisioned."
-  - id: NEX-SECURITY-87
-    source: "Issue #87"
-    status: OPEN
-    priority: 1
-    note: "Repository-enforced independent high-risk review remains unresolved; no protection change or waiver is claimed."
+- id: NEX-ORCH-74
+  source: 'Issue #74'
+  status: ACTIVE_TARGET_CLOSURE
+  priority: 1
+  note: W01/W02/W05/W06 source lanes are complete; W03/W04 target-environment evidence
+    and W07 closure remain blocked on target/provider access.
+- id: NEX-AUDIT-72
+  source: 'Issue #72'
+  status: BLOCKED_EXTERNAL_TARGET
+  priority: 1
+  note: Historical bootstrap APP_KEY non-use/rotation acceptance unresolved. No external-provider
+    credential assumed.
+- id: NEX-MAIN-981
+  source: main@87210e7674f67fb75e046c185206573bebd906f9
+  status: PASS
+  priority: 2
+  note: 'Protected-main push certification #981 / 35672290666 completed SUCCESS; retained
+    as terminal source evidence.'
+- id: NEX-FINAL-1
+  source: 'PR #1'
+  status: CLOSED_RECONCILED
+  priority: 3
+  note: 'PR #1 closed; source reconciliation integrated through #103; global runtime
+    acceptance remains separate.'
+- id: NEX-DEPS-75-81
+  source: 'PR #75 / PR #81'
+  status: CLOSED_DEFERRED
+  priority: 4
+  note: Closed stale dependency carriers; recreate/rebase from then-current main after
+    runtime target closure.
+- id: NEX-SOURCE-BATCH-009
+  source: 'PR #94/#95/#96/#97/#98/#99/#100'
+  status: SOURCE_INTEGRATED
+  priority: 1
+  note: User-authorized GitHub source batch integrated; checkpoint and final main
+    push CI remain separate verification. No current target is provisioned.
+- id: NEX-SECURITY-87
+  source: 'Issue #87'
+  status: CLOSED_NOT_PLANNED
+  priority: 1
+  note: Owner explicitly removed mandatory approval; native governance/thread/history
+    protections retained. Not remediation acceptance.
+- id: NEX-DISPOSABLE-RUNTIME-010
+  source: codex/stable-runtime-verification
+  status: SOURCE_INTEGRATED_LOCAL_VERIFIED
+  priority: 1
+  note: 'Merged #105; exact PR and main CI PASS; local runtime proof PASS; #74 actual
+    target remains open.'
+- id: NEX-NINE-POINT-102
+  source: 'PR #102'
+  status: VERIFYING
+  priority: 1
+  note: 'Refresh stale plan with verified #103/#104/#105 evidence and honest remaining
+    target/key/release gates.'

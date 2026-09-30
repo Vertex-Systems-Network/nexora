@@ -1,3 +1,11 @@
+# Nine-point evidence reconciliation — 2026-09-30
+
+Protected main `3439ac7e324e867046674044ba4ad1586bd963af` after #105: exact-main certification `36742999910` SUCCESS; #105 release/development QA SUCCESS; 480 backend tests / 4607 assertions + 6 frontend tests PASS. Exact published #105 head disposable installation, readiness, CLI↔web proof, recovery, login/admin and drift-negative checks PASS. #87 closed NOT_PLANNED per owner approval-rule removal; no independent-review implementation claimed. Current #102 plan is reconciled against completed source work. #72 historical key and #74 actual target acceptance remain OPEN; global runtime/release stage BLOCKED and Core QA locked. Nine-point acceptance table: `docs/nine-point-closure-batch.md`. Earlier checkpoints are historical. Final #102 CI pending at preparation; later results belong on PR/Issue to avoid status-only head churn.
+
+# Stable runtime / auth throttle checkpoint — 2026-09-30
+
+Main `186138b0f7b7ca0da1ce3b2bb37b051edc75c855`: #104 merged and exact-main certification 36735105784 SUCCESS. Prior service mismatch reproduced by proxy-port drift only; stable disposable activation/recovery PASS. Fixed real public→auth throttle interference while preserving shared five/minute/IP auth limit. Regression red before patch; 10 tests / 40 assertions PASS afterwards. Fresh corrected candidate `5cfa5a6a54907e85d0cee8e90f04c38e486dd0a3`: source certification, real install, activation/web acknowledgement/CLI proof, governed recovery, public smoke, login 302/admin 200 and final readiness/current receipt PASS. Final published-source CI pending at preparation. Product target/release remains BLOCKED; no production/TLS/other-engine/key-rotation acceptance. Open #102 remains draft; #1 closed. Evidence: `docs/stable-runtime-verification-2026-09-30.md` and `.ai/evidence/stable-runtime-verification-2026-09-30.json`. Earlier checkpoints below remain historical.
+
 # Source Batch Checkpoint — 2026-09-30
 
 - Observed protected main after #100: `131addac09e888961989448e6415124dd3321215`.

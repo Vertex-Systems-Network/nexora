@@ -1,80 +1,35 @@
-# Nine-point closure batch — measured plan
+# Nine-point closure batch — current measured acceptance
 
-Status: BLOCKED / NOT COMPLETE. Date: 2026-09-30.
+Observed 2026-09-30. Verified protected source: `3439ac7e324e867046674044ba4ad1586bd963af`; resulting-main release certification `36742999910` SUCCESS. Source integration and scoped disposable execution are accepted below. The nine-point product/release batch is PARTIALLY VERIFIED, not complete.
 
-## Source binding and evidence
-
-- Protected main: 9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5; final source certification run 36692809871 SUCCESS.
-- Product draft #1: f6629d010626bb52be16fd9c3257f41b656be748, target main; historical head QA 33566801077 SUCCESS.
-- Reconciliation: 746 ahead / 148 behind; complete tree comparison 292 changed existing blobs, 161 additions, 30 removals.
-- After fetching full Git history, git merge-tree reports 38 content-conflict records. No conflicts are resolved or runtime behavior verified by this plan.
-- Git source access is available. Earlier shallow-history merge failure was corrected by fetching full history; it is not a repository unrelated-history defect.
-- Native approval baseline is applied: one approval, stale approval dismissal, latest-push approval, strict governance, resolved threads, no bypass actors.
-- PR #71 exposed the installation-local environment bootstrap key. An external provider account is not established as necessary. No secret values are retained here.
-
-## Batch acceptance and execution order
-
-| Point | Work | Required acceptance | Current result |
+| Point | Work | Verified evidence | Remaining acceptance |
 |---|---|---|---|
-| 1 | Security review enforcement (#87) | Eligible independent reviewer; exact-head approval; selective risk/waiver/base-binding requirements verified | Native baseline applied; full issue incomplete |
-| 2 | Exposed local key (#72) | Establish affected installation/key lifecycle; accepted invalidation or non-use evidence; preserve encrypted data | Credential identified; lifecycle unresolved |
-| 3 | Disposable current-source installation | Real installer commit on bound source/environment; cleanup/recovery controls | No target provisioned |
-| 4 | Runtime readiness (#74) | Fresh status=pass, ready=true, runtime_ready=true, receipt_current=true, errors=[] | Not executed |
-| 5 | CLI/web identity (#74) | Fresh one-time challenge consumed and verified by exact target | Not executed |
-| 6 | Login (#74) | Same proven origin, verified TLS, no redirect substitution, correct authentication behavior | Not executed |
-| 7 | Core functional QA | Registered Core QA scope, meaningful positive/negative role/tenant/workflow tests; fresh controlled runner evidence | Formal target gate pending |
-| 8 | Draft #1 reconciliation | Resolve every conflict by contract, retain main security/tooling controls and intended product behavior, review exact combined diff and required CI | 38 conflicts measured; unresolved |
-| 9 | Final release | Applicable five-engine DB matrix, provider/HA, backup/restore/upgrade rehearsal, browsers/assistive technology/performance/accessibility and signed release/provenance evidence | Not executed |
+| 1 | Approval-enforcement proposal (#87) | Owner explicitly removed mandatory approval; native review count 0 observed, strict governance/resolved-thread/deletion/non-fast-forward/code-quality rules active | Closed NOT_PLANNED under owner decision; no independent-approval implementation claimed |
+| 2 | Historical exposed local application key (#72) | Quarantined PR #71 never merged; source controls and key lifecycle audited | Determine affected historical use; safe invalidation/rotation or accepted non-use evidence. OPEN; bootstrap-file deletion alone is insufficient |
+| 3 | Disposable current-source installation | Fresh real SQLite migrations/seeding/admin/install lock committed on exact published #105 head | Full installer UI and other database engines not observed |
+| 4 | Runtime readiness (#74) | Fresh final status pass, ready/runtime_ready/receipt_current true, errors empty | Disposable loopback target only; real deployment acceptance separate |
+| 5 | CLI/web identity (#74) | Fresh one-time token web acknowledgement + independent exact-target CLI proof + governed recovery PASS | Live deployment identity separate |
+| 6 | Login/authentication (#74) | Real cookie/CSRF POST 302 to /admin; authenticated GET 200; public smoke PASS; shared auth/public throttle bug fixed; proxy drift correctly rejected | Loopback HTTP is not live HTTPS/browser acceptance |
+| 7 | Core functional QA | Exact source CI: 480 backend tests / 4607 assertions and 6 frontend tests PASS | Formal stage remains locked; this is source regression coverage, not complete Core target QA |
+| 8 | Product draft reconciliation | All 38 measured conflicts resolved through merged #103; intended product/source/security controls preserved; #1 closed; #104/#105 verified fixes merged | DONE SOURCE-SIDE; not a whole-product runtime claim |
+| 9 | Final release | Source/type/build/certification controls PASS on #105 and exact resulting main | Five-engine target matrix, applicable HA/provider/backup/restore/upgrade rehearsal, browser/AT/performance/accessibility and signed release evidence not accepted |
 
-Execute source reconciliation on an isolated branch/worktree. For each conflict, compare merge-base/main/draft contracts and tests; record chosen behavior. Do not choose one side globally or weaken assertions. Runtime, security and workflow conflicts require independent review. Refresh source manifest bindings only after final code decisions. Preserve historical evidence as historical.
+## Source and runtime evidence
 
-Then execute fresh source certification on the exact combined head. Provision disposable targets through an available authorized execution capability; hosted source QA alone is not Target or Release acceptance. Accept target evidence only through current source-bound readiness/identity/login and relevant certification tools. Resolve key lifecycle before runtime stage promotion. Perform formal Core QA and final release only when their dependencies are genuinely accepted.
+- #103 source reconciliation merged to 84feada170f0529078984821f4a6706a830a1b1d; exact-main run 36720382700 SUCCESS.
+- #104 real SQLite runtime-data provenance fix merged to 186138b0f7b7ca0da1ce3b2bb37b051edc75c855; exact-main run 36735105784 SUCCESS.
+- #105 exact published head 670ecac569fe6572b7546236e728ffab38175a14: release run 36742228583 and development QA run 36742228213 SUCCESS. Runtime re-execution of this exact head passed install, activation, web acknowledgement, CLI proof, governed recovery, public smoke, actual login/admin and final readiness.
+- #105 merged to `3439ac7e324e867046674044ba4ad1586bd963af`; resulting-main run `36742999910` SUCCESS. Canonical PR logs record 480 backend tests / 4607 assertions and 6 frontend tests; no skipped live target gate is included as PASS.
+- Prior local service mismatch was reproduced by substituting only the original ephemeral proxy endpoint. Fresh stable local environment converges. Negative proxy drift fails closed and restoring the original environment restores readiness without changing the sealed lock.
+- Actual public health traffic caused auth POST 429 in the old shared numeric throttle bucket. `auth:` now isolates public counters while preserving the combined five/minute/IP auth budget across login/register/password request/reset; negative limit regression remains PASS.
+- Details: [source reconciliation](source-reconciliation-2026-09-30.md), [SQLite install proof](disposable-runtime-verification-2026-09-30.md), [stable runtime proof](stable-runtime-verification-2026-09-30.md), and PR #105 final-head evidence. Original failures remain historical observations, never edited into success.
 
-## Impact and rollback
+## Execution and trust boundary
 
-This change is planning/documentation only. No runtime code, workflows, permissions, schema, dependency locks or secrets are changed. Existing stage/target/release gates are preserved. No new implementation unit begins in this patch; later source reconciliation must bind existing registered unit IDs and the active plan to its exact write scope before mutation. Rollback is a normal revert of this documentation change.
+This reconciliation refreshes the previously stale draft #102 plan from current protected main. It does not add runtime code, change policy assertions, start Core QA, provision hosting, inspect/rotate historical keys or publish a release. No live installation URL/path is provided. Future target path is operator input `<operator-provided-target-path>`; disposable fixture paths are not canonical deployment identity.
 
-## Conflict inventory
+Current source status SOURCE_DONE; live Target and Release acceptance remain BLOCKED. #72 and #74 stay OPEN. #87 is NOT_PLANNED, not remediated. Native approving count 0 reflects the owner decision; extra approval for unattributed changes remains true, and independent human review is not claimed.
 
-- .ai/handoff/current.md
-- .ai/plans/active.md
-- .ai/state.json
-- .github/workflows/release-certification.yml
-- AGENTS.md
-- NEXORA_AI_PROJECT_STATE.md
-- app/Console/Commands/Nexora/SourceActivateCommand.php
-- app/Http/Middleware/RuntimeNodeHeartbeat.php
-- app/Jobs/SendNewsletterDelivery.php
-- app/Nexora/Installation/InstallationRunControl.php
-- app/Nexora/Installation/SourceActivationIdentity.php
-- app/Nexora/Modules/Core/PublishingModule.php
-- app/Nexora/Publishing/Services/ArticlePublishingManager.php
-- bootstrap/nexora-source-manifest.json
-- config/installer.php
-- scripts/lib/target-composer.php
-- scripts/n1-source-activate.bat
-- scripts/performance-build-verify.php
-- scripts/target-environment-bootstrap.php
-- tests/Architecture/N015DataConnectionsArchitectureTest.php
-- tests/Architecture/N027AutomationArchitectureTest.php
-- tests/Architecture/N100C5BrowserAccessibilityPerformanceArchitectureTest.php
-- tests/Architecture/N100Rc5DatabaseArchitectureTest.php
-- tests/Architecture/N100V30DistributedUpgradeArchitectureTest.php
-- tests/Architecture/N100V35RuntimeActivationArchitectureTest.php
-- tests/Architecture/N100V39ServiceDataPlaneArchitectureTest.php
-- tests/Architecture/N100V40HostClockArchitectureTest.php
-- tests/Architecture/N100V41ResourceEnvelopeArchitectureTest.php
-- tests/Architecture/N100V42PolicyPlaneArchitectureTest.php
-- tests/Architecture/N100V56InstallerRuntimeReadinessArchitectureTest.php
-- tests/Feature/Certification/InstallerRecoveryCertificationTest.php
-- tests/Feature/Certification/SecurityBoundaryCertificationTest.php
-- tests/Feature/IdentityAccessFlowTest.php
-- tests/Feature/Media/MediaLibraryFlowTest.php
-- tests/Feature/SettingsFlowTest.php
-- tests/Feature/Themes/ThemeEngineFlowTest.php
-- tests/Unit/Cloud/HaReadinessServiceTest.php
-- tests/Unit/Security/PasswordStrengthEvaluatorTest.php
+Next safe work is accepted evidence for the actual target/key/release prerequisites, using existing governed tools and preserved security controls. Do not re-solve completed conflicts, request an imaginary external credential provider, repeatedly rerun green source CI, or promote later stages from local HTTP/source tests. A documentation-only plan does not complete the missing target work.
 
-## Human/capability boundary
-
-The author cannot supply the independent approval required by protected main. No current target, PHP/Composer/container runtime or provider lifecycle evidence is available in the current execution workspace. Missing capabilities are not PASS or N/A waivers. No blanket 9-point completion, credential invalidation, target verification or release approval is claimed.
+Rollback: ordinary revert of this evidence reconciliation; historical machine/test evidence remains retained.

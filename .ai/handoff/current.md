@@ -1,3 +1,19 @@
+# Nine-point evidence reconciliation — 2026-09-30
+
+Protected main `3439ac7e324e867046674044ba4ad1586bd963af` after #105: exact-main certification `36742999910` SUCCESS; #105 release/development QA SUCCESS; 480 backend tests / 4607 assertions + 6 frontend tests PASS. Exact published #105 head disposable installation, readiness, CLI↔web proof, recovery, login/admin and drift-negative checks PASS. #87 closed NOT_PLANNED per owner approval-rule removal; no independent-review implementation claimed. Current #102 plan is reconciled against completed source work. #72 historical key and #74 actual target acceptance remain OPEN; global runtime/release stage BLOCKED and Core QA locked. Nine-point acceptance table: `docs/nine-point-closure-batch.md`. Earlier checkpoints are historical. Final #102 CI pending at preparation; later results belong on PR/Issue to avoid status-only head churn.
+
+# Stable runtime / auth throttle checkpoint — 2026-09-30
+
+Main `186138b0f7b7ca0da1ce3b2bb37b051edc75c855`: #104 merged and exact-main certification 36735105784 SUCCESS. Prior service mismatch reproduced by proxy-port drift only; stable disposable activation/recovery PASS. Fixed real public→auth throttle interference while preserving shared five/minute/IP auth limit. Regression red before patch; 10 tests / 40 assertions PASS afterwards. Fresh corrected candidate `5cfa5a6a54907e85d0cee8e90f04c38e486dd0a3`: source certification, real install, activation/web acknowledgement/CLI proof, governed recovery, public smoke, login 302/admin 200 and final readiness/current receipt PASS. Final published-source CI pending at preparation. Product target/release remains BLOCKED; no production/TLS/other-engine/key-rotation acceptance. Open #102 remains draft; #1 closed. Evidence: `docs/stable-runtime-verification-2026-09-30.md` and `.ai/evidence/stable-runtime-verification-2026-09-30.json`. Earlier checkpoints below remain historical.
+
+# Disposable runtime checkpoint — 2026-09-30
+
+Fresh SQLite installer and real HTTP login/admin pass after separating runtime SQLite data from source attestation. Local regression/source certification pass. Post-source-activation service convergence has an observed unresolved mismatch. Remote CI pending; no full target/release promotion. See `docs/disposable-runtime-verification-2026-09-30.md`. Earlier entries below remain historical.
+
+# Source reconciliation checkpoint — 2026-09-30
+
+The current working branch reconciles protected main `9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5` with draft #1 head `f6629d010626bb52be16fd9c3257f41b656be748`. All 38 conflict paths are resolved; local source tests pass. Remote exact-head CI and independent review remain pending. Target acceptance remains BLOCKED; no deployment, key invalidation, or formal Core QA promotion is claimed. See `docs/source-reconciliation-2026-09-30.md` for evidence and decisions. Earlier checkpoints below are historical.
+
 # Source Batch Checkpoint — 2026-09-30
 
 - Observed protected main after #100: `131addac09e888961989448e6415124dd3321215`.

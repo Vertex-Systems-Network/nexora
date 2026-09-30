@@ -95,6 +95,12 @@ final class Document extends Model
             ->withPivot('position')->withTimestamps();
     }
 
+    public function collections(): BelongsToMany
+    {
+        return $this->belongsToMany(ContentCollection::class, 'nx_content_collection_documents', 'document_id', 'collection_id')
+            ->withPivot(['position', 'data'])->withTimestamps()->orderByPivot('position');
+    }
+
     public function mediaUsages(): HasMany
     {
         return $this->hasMany(MediaUsage::class, 'resource_id')->where('resource_type', 'document');

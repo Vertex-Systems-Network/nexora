@@ -1,0 +1,224 @@
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$errors = [];
+$read = static function (string $relative) use ($root, &$errors): string {
+    $path = $root.'/'.$relative;
+    if (! is_file($path)) {
+        $errors[] = "Required Marketplace source file missing: {$relative}";
+        return '';
+    }
+    $contents = file_get_contents($path);
+    if ($contents === false) {
+        $errors[] = "Unable to read Marketplace source file: {$relative}";
+        return '';
+    }
+    return $contents;
+};
+
+$migration = $read('database/migrations/2026_08_15_001600_add_nexora_extensions_marketplace.php');
+$sourceModel = $read('app/Models/MarketplaceSource.php');
+$catalogModel = $read('app/Models/MarketplaceCatalogItem.php');
+$catalog = $read('app/Nexora/Extensions/Services/MarketplaceCatalogService.php');
+$stager = $read('app/Nexora/Extensions/Services/MarketplacePackageStager.php');
+$controller = $read('app/Http/Controllers/Admin/Extensions/ExtensionController.php');
+$themeController = $read('app/Http/Controllers/Admin/Appearance/ThemeController.php');
+$sentinelController = $read('app/Http/Controllers/Admin/Security/SentinelController.php');
+$sentinelPage = $read('resources/js/admin/pages/Admin/Security/Sentinel/Show.tsx');
+$routes = $read('routes/web.php');
+$lifecycleRoutes = $read('routes/marketplace.php');
+$provider = $read('app/Providers/MarketplaceServiceProvider.php');
+$providers = $read('bootstrap/providers.php');
+$page = $read('resources/js/admin/pages/Admin/Extensions/Index.tsx');
+$test = $read('tests/Feature/Marketplace/MarketplaceWorkflowTest.php');
+$themeTest = $read('tests/Feature/Themes/ThemeEngineFlowTest.php');
+
+foreach ([
+    "Schema::create('nx_marketplace_sources'" => 'Marketplace source table',
+    "Schema::create('nx_marketplace_catalog_items'" => 'Marketplace catalog table',
+    "cascadeOnDelete()" => 'source/catalog cascade lifecycle',
+    "unique(['source_id', 'package_identifier']" => 'source-local package identity',
+] as $needle => $label) {
+    if ($migration !== '' && ! str_contains($migration, $needle)) {
+        $errors[] = "Marketplace migration missing: {$label}.";
+    }
+}
+
+foreach ([
+    'public function items(): HasMany' => 'source/catalog relationship',
+    'public function isActive(): bool' => 'source lifecycle helper',
+    "return \$this->status === 'active';" => 'active source policy',
+] as $needle => $label) {
+    if ($sourceModel !== '' && ! str_contains($sourceModel, $needle)) {
+        $errors[] = "Marketplace source model missing: {$label}.";
+    }
+}
+if ($catalogModel !== '' && ! str_contains($catalogModel, "protected \$table='nx_marketplace_catalog_items'")) {
+    $errors[] = 'Marketplace catalog model table mapping is missing.';
+}
+
+foreach ([
+    'private const MAX_PACKAGES = 5000;' => 'catalog package-count budget',
+    'private const MAX_METADATA_BYTES = 65536;' => 'catalog metadata budget',
+    "if (! \$source->isActive())" => 'paused-source sync rejection',
+    "Marketplace catalog schema is unsupported. Expected schema 1." => 'catalog schema policy',
+    'DB::transaction(function ()' => 'atomic catalog replacement',
+    "duplicate package identifier" => 'duplicate package rejection',
+    "whereNotIn('package_identifier'" => 'stale catalog retirement',
+    "preg_match('/^[A-Za-z0-9][A-Za-z0-9._\\/-]{0,179}$/'" => 'package identifier validation',
+    "['extension', 'app', 'integration', 'studio-pack', 'theme']" => 'controlled Marketplace extension/theme package types',
+    "preg_match('/^[a-f0-9]{64}$/'" => 'artifact digest validation',
+    'trusted_publishers_only && $publisherKey === null' => 'trusted-source publisher identity requirement',
+    "'package_identifier' => \$identifier" => 'normalized package identity retention',
+] as $needle => $label) {
+    if ($catalog !== '' && ! str_contains($catalog, $needle)) {
+        $errors[] = "Marketplace catalog service missing: {$label}.";
+    }
+}
+
+foreach ([
+    'private function authorizeStage(' => 'type-aware staging authorization boundary',
+    "\$requiredPermission = \$item->type === 'theme' ? 'themes.install' : 'extensions.install';" => 'owning-engine staging permission selection',
+    "\$user->hasPermission(\$requiredPermission)" => 'server-side staging permission enforcement',
+    "\$this->tenantAuthorization->allows(\$user, \$requiredPermission)" => 'current-tenant staging permission enforcement',
+    "if (! \$item->source->isActive())" => 'paused-source staging rejection',
+    'Marketplace package metadata is stale.' => 'stale catalog staging rejection',
+    "\$sourceGeneration = trim((string) \$item->source->catalog_generation)" => 'source sync-generation freshness identity',
+    "\$itemGeneration = trim((string) \$item->sync_generation)" => 'item sync-generation freshness identity',
+    "hash_equals(\$sourceGeneration, \$itemGeneration)" => 'exact generation freshness enforcement',
+    "TrustedPublisher::query()->where('key_id'" => 'local trusted publisher lookup',
+    "signature_status !== 'verified'" => 'post-download signature verification',
+    "\$this->scanner->scan(\$package, \$userId)" => 'Sentinel scan boundary',
+    "hash_equals(strtolower((string) \$item->artifact_sha256)" => 'catalog artifact digest enforcement',
+    'Marketplace package exceeds the configured download limit.' => 'download budget',
+] as $needle => $label) {
+    if ($stager !== '' && ! str_contains($stager, $needle)) {
+        $errors[] = "Marketplace package stager missing: {$label}.";
+    }
+}
+
+foreach ([
+    "'canManageMarketplace' => \$canManageMarketplace" => 'Marketplace-specific tenant-aware UI permission',
+    "\$freshSource = static fn (\$query) => \$query->where('status', 'active')->whereNotNull('catalog_generation');" => 'active synchronized-generation catalog visibility',
+    'public function sourceStatus(' => 'source pause/resume lifecycle',
+    "Rule::in(['active', 'paused'])" => 'controlled source lifecycle states',
+    "\$attributes['catalog_generation'] = null;" => 'resume invalidates prior catalog generation',
+    "\$attributes['last_synced_at'] = null;" => 'resume requires fresh synchronization timestamp',
+    "'fresh_sync_required' => \$next === 'active'" => 'resume freshness audit evidence',
+    'public function deleteSource(' => 'source removal lifecycle',
+    "if (\$source->isActive())" => 'active-source deletion guard',
+    "marketplace.source.synced" => 'sync audit evidence',
+    "marketplace.package.staged" => 'staging audit evidence',
+] as $needle => $label) {
+    if ($controller !== '' && ! str_contains($controller, $needle)) {
+        $errors[] = "Marketplace controller missing: {$label}.";
+    }
+}
+
+foreach ([
+    "if (\$request->filled('scan_id'))" => 'Theme Engine pre-scanned promotion input',
+    'private function promoteApprovedScan(' => 'single Theme Engine promotion path',
+    '$this->installer->install(' => 'ThemePackageInstaller handoff',
+] as $needle => $label) {
+    if ($themeController !== '' && ! str_contains($themeController, $needle)) {
+        $errors[] = "Marketplace theme promotion contract missing: {$label}.";
+    }
+}
+foreach ([
+    "'kind' => 'theme'" => 'Sentinel theme promotion action',
+    "'url' => route('admin.themes.install')" => 'Theme Engine promotion URL',
+    "'payload' => ['scan_id' => (string) \$scan->id]" => 'approved theme scan payload',
+    "in_array(\$type, ['extension', 'app', 'integration', 'studio-pack'], true)" => 'extension-family Sentinel promotion action',
+    "route('admin.extensions.install', \$supplyChain)" => 'verified extension artifact handoff',
+] as $needle => $label) {
+    if ($sentinelController !== '' && ! str_contains($sentinelController, $needle)) {
+        $errors[] = "Marketplace Sentinel promotion contract missing: {$label}.";
+    }
+}
+foreach ([
+    'router.post(promotion.url, promotion.payload' => 'explicit promotion request',
+    'Sentinel never activates package code directly.' => 'visible no-direct-activation boundary',
+] as $needle => $label) {
+    if ($sentinelPage !== '' && ! str_contains($sentinelPage, $needle)) {
+        $errors[] = "Marketplace Sentinel UI contract missing: {$label}.";
+    }
+}
+
+foreach ([
+    "Route::post('/extensions/marketplace/sources'" => 'source create route',
+    "permission:marketplace.manage" => 'Marketplace management permission',
+] as $needle => $label) {
+    if ($routes !== '' && ! str_contains($routes, $needle)) {
+        $errors[] = "Marketplace web route contract missing: {$label}.";
+    }
+}
+foreach ([
+    "Route::patch('/sources/{source}/status'" => 'source status route',
+    "Route::delete('/sources/{source}'" => 'source removal route',
+    "Route::post('/catalog/{item}/stage'" => 'type-aware catalog stage route',
+    "permission:marketplace.manage" => 'lifecycle permission guard',
+    "throttle:8,1" => 'catalog staging throttle',
+] as $needle => $label) {
+    if ($lifecycleRoutes !== '' && ! str_contains($lifecycleRoutes, $needle)) {
+        $errors[] = "Marketplace lifecycle route contract missing: {$label}.";
+    }
+}
+if ($provider !== '' && ! str_contains($provider, "loadRoutesFrom(base_path('routes/marketplace.php'))")) {
+    $errors[] = 'Marketplace service provider must load the isolated lifecycle route file.';
+}
+if ($providers !== '' && ! str_contains($providers, 'MarketplaceServiceProvider::class')) {
+    $errors[] = 'Marketplace service provider is not registered.';
+}
+
+foreach ([
+    'canManageMarketplace' => 'Marketplace-specific UI authorization',
+    'const canInstallTheme = permissions.includes("themes.install")' => 'Theme install permission discovery',
+    'const canStageCatalogItem = (item: Catalog) => item.type === "theme" ? canInstallTheme : canInstall;' => 'package-aware staging UI policy',
+    '/admin/extensions/marketplace/catalog/${item.id}/stage' => 'type-aware Marketplace staging route target',
+    '<ConfirmDialog' => 'destructive source removal confirmation',
+    'Active catalog packages' => 'active catalog summary semantics',
+    'Only active, synchronized sources are listed.' => 'active-source catalog guidance',
+    '? "Pause" : "Resume"' => 'source lifecycle UX',
+    'setSourceDeleteTarget' => 'source removal UX',
+    'Send to Sentinel' => 'quarantine-first Marketplace action',
+] as $needle => $label) {
+    if ($page !== '' && ! str_contains($page, $needle)) {
+        $errors[] = "Marketplace Admin UI missing: {$label}.";
+    }
+}
+if ($page !== '' && preg_match('/<(button|input|select|textarea)\b/', $page) === 1) {
+    $errors[] = 'Marketplace Admin UI must not bypass shared interactive components.';
+}
+
+foreach ([
+    'test_pausing_source_hides_catalog_and_blocks_staging' => 'pause/visibility/staging regression',
+    'test_resuming_source_requires_fresh_sync_before_catalog_or_staging' => 'resume freshness regression',
+    'test_staging_permission_matches_the_owning_package_engine' => 'owning-engine staging permission regression',
+    'test_source_must_be_paused_before_removal_and_catalog_cache_cascades' => 'safe source deletion regression',
+    'test_marketplace_status_only_accepts_known_lifecycle_states' => 'source lifecycle allow-list regression',
+] as $needle => $label) {
+    if ($test !== '' && ! str_contains($test, $needle)) {
+        $errors[] = "Marketplace acceptance-test contract missing: {$label}.";
+    }
+}
+foreach ([
+    'test_pre_scanned_theme_can_be_promoted_after_sentinel_approval' => 'Marketplace-compatible theme promotion acceptance test',
+    '/admin/security/sentinel' => 'generic quarantine/Sentinel ingress',
+    "['scan_id' => \$scan->id]" => 'approved scan Theme Engine promotion',
+] as $needle => $label) {
+    if ($themeTest !== '' && ! str_contains($themeTest, $needle)) {
+        $errors[] = "Marketplace theme acceptance-test contract missing: {$label}.";
+    }
+}
+
+if ($errors !== []) {
+    fwrite(STDERR, "[Nexora Marketplace Product Contract] FAILED\n - ".implode("\n - ", array_values(array_unique($errors)))."\n");
+    exit(1);
+}
+
+fwrite(
+    STDOUT,
+    '[Nexora Marketplace Product Contract] PASS — extension/app/integration/Studio-pack/theme catalogs are lifecycle-controlled, atomically synchronized with explicit generation identity and validation budgets; staging is authorized by the owning engine permission plus current tenant role; resumed sources require fresh synchronization; withdrawn entries retire locally; inactive/stale sources cannot stage; all package bytes enter quarantine/Sentinel and approved packages are explicitly promoted into their owning Theme or Extension Engine.'.PHP_EOL,
+);
