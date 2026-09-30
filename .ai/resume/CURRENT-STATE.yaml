@@ -57,3 +57,8 @@ state_drift:
     - "PR #1 is FUTURE_CARRIER_FROZEN and is not active runtime-closure work."
     - "Issue #72 remains open solely for real target/provider credential rotation."
     - "Issue #74 source lanes are complete; target W03/W04/W07 remain evidence-gated."
+
+future_target_input:
+  placeholder: "<operator-provided-target-path>"
+  availability: NOT_PROVISIONED
+  semantics: "Future operator input only; not an existing installation or current execution instruction."

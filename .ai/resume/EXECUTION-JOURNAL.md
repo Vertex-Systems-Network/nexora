@@ -82,3 +82,7 @@
 - Module and overall numeric progress are unavailable; no percentage is inferred.
 
 Fresh required CI followed each material merge/base transition. No workflow was rerun for a chat timeout. #100 was reconciled after #99 to preserve accepted lock updates. State-only reconciliation preserves all target and security acceptance gates.
+
+## 2026-09-30 — checkpoint Source Guard correction
+
+Exact-head certification #1128 / 36690188429 FAILED because CURRENT-STATE.yaml lacked the required operator-neutral target placeholder. Restore it as explicitly future/unprovisioned input; no source guard, test, runtime or acceptance gate is changed. PHPUnit did not run; its absent diagnostic upload was a downstream consequence. Fresh exact-head CI is required; the failed result is retained.
