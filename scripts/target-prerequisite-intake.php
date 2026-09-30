@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 $root=dirname(__DIR__);
-$laragonDetected=false;
+$targetEnvironmentDetected=false;
 require_once $root.'/bootstrap/nexora-process-environment.php';
 $platform=require $root.'/config/nexora.php';
 $version=(string)($platform['version']??'unknown');
@@ -36,7 +36,7 @@ $payload=['schema'=>1,'platform_version'=>$version,'status'=>$status,'checked_at
 $dir=$root.'/storage/app/nexora/target-intake';
 if(!is_dir($dir)&&!mkdir($dir,0775,true)&&!is_dir($dir)) throw new RuntimeException('Unable to create target intake directory.');
 file_put_contents($dir.'/latest.json',json_encode($payload,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR).PHP_EOL);
-$md="# Nexora {$version} target prerequisite intake\n\nStatus: **".strtoupper($status)."**\n\n- OS: `".PHP_OS_FAMILY."`\n- Laragon detected: **".($laragonDetected?'yes':'no')."**\n- PHP binary: `".PHP_BINARY."`\n- php.ini: `".($ini??'not loaded')."`\n- extension_dir: `".(ini_get('extension_dir')?:'unknown')."`\n\n## Next actions\n";
+$md="# Nexora {$version} target prerequisite intake\n\nStatus: **".strtoupper($status)."**\n\n- OS: `".PHP_OS_FAMILY."`\n- target environment detected: **".($targetEnvironmentDetected?'yes':'no')."**\n- PHP binary: `".PHP_BINARY."`\n- php.ini: `".($ini??'not loaded')."`\n- extension_dir: `".(ini_get('extension_dir')?:'unknown')."`\n\n## Next actions\n";
 foreach($actions as $action) $md.="- {$action}\n";
 file_put_contents($dir.'/latest.md',$md);
 fwrite(STDOUT,"[Nexora Target Prerequisite Intake] ".strtoupper($status)." — {$version}\nEvidence: storage/app/nexora/target-intake/latest.md\n");
