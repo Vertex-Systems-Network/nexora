@@ -9,5 +9,5 @@ if(!$result['ok']){
     exit(1);
 }
 $m=$result['metrics'];
-fwrite(STDOUT,"[Nexora Inertia Frontend Contracts] PASS — {$m['admin_ts_files']} Admin TS/TSX files; {$m['target-environment_error_files']} target environment error targets guarded; transform chains {$m['transform_chains']}; unsafe router payloads {$m['unsafe_router_payloads']}; NavLink children {$m['navlink_children']}; unsafe useForm unknown {$m['unsafe_useform_unknown']}.\n");
+fwrite(STDOUT,"[Nexora Inertia Frontend Contracts] PASS — {$m['admin_ts_files']} Admin TS/TSX files; {$m['target_environment_error_files']} target environment error targets guarded; transform chains {$m['transform_chains']}; unsafe router payloads {$m['unsafe_router_payloads']}; NavLink children {$m['navlink_children']}; unsafe useForm unknown {$m['unsafe_useform_unknown']}.\n");
 foreach($result['warnings'] as $warning) fwrite(STDOUT,"[WARN] {$warning}\n");
