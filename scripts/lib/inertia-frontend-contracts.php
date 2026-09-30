@@ -74,7 +74,7 @@ function nexoraAnalyzeInertiaFrontendContracts(string $root): array
         'warnings'=>array_values(array_unique($warnings)),
         'metrics'=>[
             'admin_ts_files'=>count($files),
-            'target-environment_error_files'=>11,
+            'target_environment_error_files'=>11,
             'transform_chains'=>$transformChains,
             'unsafe_router_payloads'=>$unsafeRouterPayloads,
             'navlink_children'=>$navLinkChildren,
