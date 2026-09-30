@@ -16,7 +16,7 @@ final class N100Rc21FrontendTypeContractArchitectureTest extends TestCase
         require_once $root.'/scripts/lib/inertia-frontend-contracts.php';
         $result=\nexoraAnalyzeInertiaFrontendContracts($root);
         self::assertSame([], $result['errors'], implode("\n",$result['errors']));
-        self::assertSame(11,$result['metrics']['laragon_error_files']);
+        self::assertSame(11,$result['metrics']['target-environment_error_files']);
         self::assertSame(0,$result['metrics']['transform_chains']);
         self::assertSame(0,$result['metrics']['unsafe_router_payloads']);
         self::assertSame(0,$result['metrics']['navlink_children']);
