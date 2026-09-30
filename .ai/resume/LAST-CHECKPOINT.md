@@ -1,3 +1,17 @@
+# Source Batch Checkpoint — 2026-09-30
+
+- Observed protected main after #100: `131addac09e888961989448e6415124dd3321215`.
+- Last verified protected source baseline: `d8e83e87305bc8c11d8b073b42f13cb69414c550`; push certification #1125 / 36689146406 completed SUCCESS.
+- Integrated source work: environment-neutral toolchain discovery (#97), generic drive-rooted build-path detection (#98), upload-artifact action update (#94), Vite/Vitest lock update (#95), icon library update (#96), and Pint patch update (#99).
+- PR #100 merged after exact head `2a95badaacc254981e478ea682ff0f12feee5cfa` passed certification #1126 / 36689540542. Resulting main is `131addac09e888961989448e6415124dd3321215`; its push CI is a separate pending check at preparation.
+- User scope: source development on GitHub; no current installation path or live URL has been provisioned. Historical rc.93 repair evidence is retained as historical, not current-target truth.
+- Runtime target acceptance remains BLOCKED. No current target/provider/browser evidence or credential rotation is claimed.
+- Issue #87 remains open for repository-enforced independent security review. Issues #72/#74 retain provider/target acceptance requirements. PR #1 remains draft and must be reconciled by registered unit before promotion.
+- Next action: verify resulting main and source/governance checkpoint certification. Continue authorized source work without assuming an existing target. Provisioning and target certification remain separate.
+- Module and overall numeric progress are unavailable; no percentage is inferred.
+
+## Historical checkpoint
+
 # Last Checkpoint — TARGET-EVIDENCE-WAIT-008
 
 The last verified source/governance baseline is `fde0667b150de551184ec5c5261a34f18538ceed`.
