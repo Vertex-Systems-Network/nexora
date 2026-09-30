@@ -35,7 +35,7 @@ New scheduled cluster work must be leader-gated unless every node must execute i
 
 ## Release-candidate gates
 
-Before proposing platform changes during N1.0, run `php scripts/certify-release.php --source-only`. On a fully provisioned Laragon/server development host run `scripts\quality-check.bat` (or the PowerShell/shell equivalent). Do not bypass the isolated certification database or hand-edit a certification report to make production packaging pass.
+Before proposing platform changes during N1.0, run `php scripts/certify-release.php --source-only`. On a fully provisioned target environment/server development host run `scripts\quality-check.bat` (or the PowerShell/shell equivalent). Do not bypass the isolated certification database or hand-edit a certification report to make production packaging pass.
 
 ## RC9 build-budget gate
 
