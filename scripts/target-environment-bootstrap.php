@@ -52,13 +52,13 @@ $add=static function(string $id,bool $ok,string $message,string $action='') use(
 };
 $add('php.range',$versionInRange(PHP_VERSION,(string)$policy['php']['minimum'],(string)$policy['php']['maximum_exclusive']),
     'PHP '.PHP_VERSION.'; certified range '.$policy['php']['minimum'].' - <'.$policy['php']['maximum_exclusive'].'.',
-    'Select a Laragon PHP build inside the certified range.');
+    'Select a target environment PHP build inside the certified range.');
 foreach($extensions as $extension){
     $add('php.ext.'.$extension['name'],$extension['loaded'],'PHP extension '.$extension['name'].': '.($extension['loaded']?'loaded':'missing'),
-        'Enable extension='.$extension['name'].' in the active php.ini and restart the Laragon terminal/web server.');
+        'Enable extension='.$extension['name'].' in the active php.ini and restart the target environment terminal/web server.');
 }
 $add('composer.available',$composer['available'],'Composer: '.($composer['raw']??'not found'),
-    'Install Composer 2.x or place a trusted Composer binary/phar under Laragon bin/composer; Nexora may invoke a discovered Laragon candidate directly without mutating global PATH.');
+    'Install Composer 2.x or place a trusted Composer binary/phar under target environment bin/composer; Nexora may invoke a discovered target environment candidate directly without mutating global PATH.');
 $add('composer.range',$composer['available']&&$versionInRange($composer['version'],(string)$policy['composer']['minimum'],(string)$policy['composer']['maximum_exclusive']),
     'Composer version '.($composer['version']??'unavailable').'; certified range '.$policy['composer']['minimum'].' - <'.$policy['composer']['maximum_exclusive'].'.',
     'Use a Composer version inside the certified range.');
@@ -79,7 +79,7 @@ $add('lock.npm',is_file($npmLock),'package-lock.json: '.(is_file($npmLock)?'pres
 $ok=!in_array(false,array_column($checks,'ok'),true);
 $payload=[
     'schema'=>1,'platform_version'=>$version,'status'=>$ok?'ready':'blocked','checked_at'=>gmdate(DATE_ATOM),
-    'os_family'=>PHP_OS_FAMILY,'laragon_detected'=>(stripos(str_replace('\\','/',PHP_BINARY),'/laragon/')!==false || stripos(str_replace('\\','/',$root),'/laragon/')!==false),'php_binary'=>PHP_BINARY,'php_ini'=>php_ini_loaded_file()?:null,'php_ini_scanned'=>php_ini_scanned_files()?:null,'extension_dir'=>ini_get('extension_dir')?:null,
+    'os_family'=>PHP_OS_FAMILY,'target_environment_detected'=>(stripos(str_replace('\\','/',PHP_BINARY),'/target-environment/')!==false || stripos(str_replace('\\','/',$root),'/target-environment/')!==false),'php_binary'=>PHP_BINARY,'php_ini'=>php_ini_loaded_file()?:null,'php_ini_scanned'=>php_ini_scanned_files()?:null,'extension_dir'=>ini_get('extension_dir')?:null,
     'composer'=>$composer,'node'=>$node,'npm'=>$npm,'extensions'=>$extensions,
     'composer_lock_sha256'=>is_file($composerLock)?(hash_file('sha256',$composerLock)?:null):null,
     'package_lock_sha256'=>is_file($npmLock)?(hash_file('sha256',$npmLock)?:null):null,
