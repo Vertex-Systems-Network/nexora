@@ -49,6 +49,28 @@ final class SourceAttestationTest extends TestCase
         }
     }
 
+    #[Test]
+    public function sqlite_runtime_data_is_excluded_while_database_code_remains_attested(): void
+    {
+        require_once base_path('scripts/lib/source-attestation.php');
+        $root = storage_path('framework/testing-sqlite-attestation-'.bin2hex(random_bytes(4)));
+        try {
+            mkdir($root.'/database/migrations', 0775, true);
+            file_put_contents($root.'/database/migrations/example.php', '<?php // original');
+            $before = \nexoraComputeSourceAttestation($root);
+            foreach (['database.sqlite', 'custom.sqlite3', 'database.sqlite-wal', 'database.sqlite-shm', 'database.sqlite-journal'] as $name) {
+                file_put_contents($root.'/database/'.$name, random_bytes(64));
+            }
+            $after = \nexoraComputeSourceAttestation($root);
+            self::assertSame($before['tree_sha256'], $after['tree_sha256']);
+            self::assertSame($before['file_count'], $after['file_count']);
+            file_put_contents($root.'/database/migrations/example.php', '<?php // changed');
+            self::assertNotSame($before['tree_sha256'], \nexoraComputeSourceAttestation($root)['tree_sha256']);
+        } finally {
+            $this->removeDirectory($root);
+        }
+    }
+
     private function removeDirectory(string $path): void
     {
         if(!is_dir($path)) return;
