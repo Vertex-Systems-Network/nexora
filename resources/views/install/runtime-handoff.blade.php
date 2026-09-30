@@ -28,7 +28,7 @@
         </div>
     @endif
 
-    <p>Restart or reload Laragon/PHP first if the source or activation generation changed, then run:</p>
+    <p>Restart or reload target environment/PHP first if the source or activation generation changed, then run:</p>
     <code>php artisan nexora:source:status --require-web-ack</code>
     <code>php artisan nexora:runtime:post-install-reconcile --confirm=RECONCILE</code>
     <code>php artisan nexora:runtime:post-install-status --assert-ready</code>
