@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 $root = dirname(__DIR__);
+$targetEnvironmentDetected = false;
 require_once $root.'/bootstrap/nexora-process-environment.php';
 require_once $root.'/scripts/lib/target-composer.php';
 require_once $root.'/scripts/lib/source-attestation.php';
@@ -233,7 +234,6 @@ $payload = [
     'status' => $status,
     'checked_at' => gmdate(DATE_ATOM),
     'os_family' => PHP_OS_FAMILY,
-    'laragon_detected' => $laragonDetected,
     'php_binary' => PHP_BINARY,
     'php_ini' => $ini,
     'extension_dir' => $extensionDir !== '' ? $extensionDir : null,
