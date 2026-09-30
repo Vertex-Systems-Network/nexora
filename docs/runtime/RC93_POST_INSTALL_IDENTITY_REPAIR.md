@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This is a one-purpose external recovery utility for the already-installed Nexora `1.0.0-rc.93` Windows/Laragon target whose final post-install runtime identity was sealed before the installed environment fully stabilized.
+This is a one-purpose external recovery utility for the already-installed Nexora `1.0.0-rc.93` Windows/target environment target whose final post-install runtime identity was sealed before the installed environment fully stabilized.
 
 It is **not** an upgrade utility and must not be used on rc.94 or any other release.
 
@@ -43,13 +43,13 @@ The receipt is repair evidence only. It does **not** replace the required indepe
 From a checkout containing this repair pack:
 
 ```powershell
-php scripts/rc93-post-install-identity-repair.php --target="D:\laragon\www\nexora"
+php scripts/rc93-post-install-identity-repair.php --target="D:\target-environment\www\nexora"
 ```
 
 or:
 
 ```powershell
-.\scripts\rc93-post-install-identity-repair.ps1 -Target "D:\laragon\www\nexora"
+.\scripts\rc93-post-install-identity-repair.ps1 -Target "D:\target-environment\www\nexora"
 ```
 
 Expected dry-run result is `status=pass`, `mode=dry-run`, the known mismatch list, the pre-repair sealed-lock SHA-256 and the bounded metadata fields that would be updated. Dry-run performs no mutation.
@@ -59,13 +59,13 @@ Expected dry-run result is `status=pass`, `mode=dry-run`, the known mismatch lis
 Only after dry-run preflight passes:
 
 ```powershell
-php scripts/rc93-post-install-identity-repair.php --target="D:\laragon\www\nexora" --apply --confirm=REPAIR-RC93
+php scripts/rc93-post-install-identity-repair.php --target="D:\target-environment\www\nexora" --apply --confirm=REPAIR-RC93
 ```
 
 or:
 
 ```powershell
-.\scripts\rc93-post-install-identity-repair.ps1 -Target "D:\laragon\www\nexora" -Apply -Confirm REPAIR-RC93
+.\scripts\rc93-post-install-identity-repair.ps1 -Target "D:\target-environment\www\nexora" -Apply -Confirm REPAIR-RC93
 ```
 
 A successful apply records protected backup/receipt paths and the before/after installation-lock hashes.
@@ -75,7 +75,7 @@ A successful apply records protected backup/receipt paths and the before/after i
 Run from the installed rc.93 target:
 
 ```powershell
-cd D:\laragon\www\nexora
+cd D:\target-environment\www\nexora
 php artisan nexora:runtime:compatibility-status --deep
 ```
 

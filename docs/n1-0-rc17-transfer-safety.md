@@ -1,6 +1,6 @@
 # N1.0 RC17 — Large-File / Transfer Safety
 
-RC17 is an operational-hardening pass. It does not add a product domain. Its purpose is to make Nexora's large/untrusted byte-transfer paths bounded, integrity-checked and fail-closed across Windows Laragon and Linux deployments.
+RC17 is an operational-hardening pass. It does not add a product domain. Its purpose is to make Nexora's large/untrusted byte-transfer paths bounded, integrity-checked and fail-closed across Windows target environment and Linux deployments.
 
 ## Transfer boundary
 

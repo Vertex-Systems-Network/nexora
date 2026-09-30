@@ -44,7 +44,7 @@ AI reviewer provenance used in this workstream is `AI:GPT-5.6-Sol@ChatGPT`. No h
 
 Before any PR #30 merge, require fresh release certification and fresh exact-head review on the head containing this receipt. If the repository requires an independent actor/runtime beyond the current AI context for critical recovery-control review, that remains a merge gate.
 
-Even a fully green source head does **not** complete `RUNTIME-CLOSURE-001`. Still required on the exact Windows/Laragon rc.93 target:
+Even a fully green source head does **not** complete `RUNTIME-CLOSURE-001`. Still required on the exact deployment rc.93 target:
 
 1. fresh final readiness/current-receipt PASS;
 2. fresh target-local CLI↔web acknowledgement bound to the exact target source/runtime;

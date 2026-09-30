@@ -24,7 +24,7 @@ Status: **CERTIFYING — RC23 TARGET BOOTSTRAP / RESUME**
 - Database source contracts: **PASS — 25 migrations, 136 tables, 75 foreign targets, 51/51 tenant tables/models**.
 - Zero-install contracts: **PASS**.
 - Browser/UX/RTL source contracts: **PASS — 121 Admin TS/TSX files**.
-- RC21 Inertia frontend regression contracts: **PASS — 11 known Laragon targets guarded; 0 transform chains; 0 unsafe router payloads; 0 NavLink-child violations; 0 unsafe useForm unknown-record boundaries**.
+- RC21 Inertia frontend regression contracts: **PASS — 11 known target environment targets guarded; 0 transform chains; 0 unsafe router payloads; 0 NavLink-child violations; 0 unsafe useForm unknown-record boundaries**.
 - RC22 fail-fast target runtime contracts: **PASS — 3 wrappers**.
 - RC23 target bootstrap/resume/evidence contracts: **PASS — 3 bootstrap wrappers, 6 resume fingerprints, 3 evidence bindings**.
 - Performance/packaging, HA/final-evidence, final-closure, target-diagnostics, upgrade, environment, dependency-policy, filesystem, transfer, runtime-safety, concurrency, security and frontend source contracts: **PASS**.

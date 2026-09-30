@@ -7,7 +7,7 @@
 | DEV-0 | Package/bootstrap determinism | 90% | In progress; final dependency review remains last-stage work |
 | DEV-1 | Installer functional closure | 100% source | Fresh-request post-install identity handoff implemented |
 | DEV-2A | Historical TypeScript remediation | 100% | Done |
-| DEV-2B | Target TypeScript/Vite build | 100% target-reported | Clean on current Laragon run |
+| DEV-2B | Target TypeScript/Vite build | 100% target-reported | Clean on current target environment run |
 | DEV-3 | Laravel runtime/install closure | 75% | Install committed; rc.94 fixes one-time post-install fingerprint stabilization |
 | DEV-4 | Login/admin/core functional QA | 30% | Static Laravel/security/browser/database gates PASS; live login next |
 | DEV-5 | DB/services portability | 60% | SQL primary + auxiliary services implemented; broader matrix remains |

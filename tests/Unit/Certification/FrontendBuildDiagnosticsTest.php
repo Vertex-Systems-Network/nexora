@@ -15,13 +15,13 @@ final class FrontendBuildDiagnosticsTest extends TestCase
         require_once base_path('scripts/lib/n1-frontend-build-diagnostics.php');
 
         $output = <<<'LOG'
-D:\laragon\www\nexora\resources\js\admin\pages\Admin\Automation\Form.tsx:17:196 - error TS2322: Example Windows diagnostic.
+D:\target-environment\www\nexora\resources\js\admin\pages\Admin\Automation\Form.tsx:17:196 - error TS2322: Example Windows diagnostic.
 resources/js/admin/pages/Admin/Cloud/Index.tsx(27,102): error TS2345: Example standard diagnostic.
 LOG;
 
         $diagnostics = \nexoraParseTypeScriptDiagnostics(
             $output,
-            'D:/laragon/www/nexora',
+            'D:/target-environment/www/nexora',
         );
 
         self::assertCount(2, $diagnostics);

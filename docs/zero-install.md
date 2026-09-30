@@ -1,4 +1,4 @@
-# Zero Installation Test — Windows / Laragon
+# Zero Installation Test — Windows / target environment
 
 ## Local standard
 
@@ -27,7 +27,7 @@ https://nexora/
 
 If Composer dependencies or production assets are missing, Nexora **stays on the same site URL** and renders Deployment Preparation internally. Do not browse to a bootstrap PHP filename.
 
-For the current Laragon convention verify MySQL using `root / root`, then click **Prepare everything automatically**. Nexora first discovers and smoke-tests OS/PATH tools, then ComposerSetup/user installs, Laragon, and finally Nexora-private fallbacks. Apache/FastCGI often lacks `APPDATA`, `HOME` or `COMPOSER_HOME`; N0.10 retains N0.9 portable environment handling and now streams every long-running Composer/npm/Vite stage back to the browser with live output, stage percentage, elapsed time and a server heartbeat. If Composer is genuinely absent it can install a verified private Composer copy; if Node/npm are absent it can install a checksum-verified private Node.js LTS runtime on supported hosts. If process execution is unavailable, upload a prebuilt Nexora production release instead; that release already contains `vendor/` and `public/build/`.
+For the current target environment convention verify MySQL using `root / root`, then click **Prepare everything automatically**. Nexora first discovers and smoke-tests OS/PATH tools, then ComposerSetup/user installs, target environment, and finally Nexora-private fallbacks. Apache/FastCGI often lacks `APPDATA`, `HOME` or `COMPOSER_HOME`; N0.10 retains N0.9 portable environment handling and now streams every long-running Composer/npm/Vite stage back to the browser with live output, stage percentage, elapsed time and a server heartbeat. If Composer is genuinely absent it can install a verified private Composer copy; if Node/npm are absent it can install a checksum-verified private Node.js LTS runtime on supported hosts. If process execution is unavailable, upload a prebuilt Nexora production release instead; that release already contains `vendor/` and `public/build/`.
 
 While deployment preparation is running, keep the browser open and watch the live progress panel. If a command fails, the failed stage and output remain visible instead of leaving an indefinite spinner. When deployment readiness is green, continue to `/install` and complete:
 

@@ -11,4 +11,4 @@ Verification performed in the packaging environment:
 - Writer/Admin shell required artifacts: required.
 - Runtime-generated `.env`, sessions, private tool caches, deployment state, `vendor`, `node_modules` and `public/build`: excluded from clean source package.
 
-The packaging environment does not have the project's npm dependencies installed, so dependency-backed `npm run build` is not falsely reported as PASS. The known `ButtonLink` TypeScript collision is fixed by omitting `size` from `InertiaLinkProps` before declaring `ButtonSize`. The user's Laragon `npm run build` remains the final dependency-backed integration gate.
+The packaging environment does not have the project's npm dependencies installed, so dependency-backed `npm run build` is not falsely reported as PASS. The known `ButtonLink` TypeScript collision is fixed by omitting `size` from `InertiaLinkProps` before declaring `ButtonSize`. The user's target environment `npm run build` remains the final dependency-backed integration gate.

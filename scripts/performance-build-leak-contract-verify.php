@@ -36,9 +36,9 @@ $cases = [
         'expected' => ['127.0.0.1:5173'],
     ],
     [
-        'name' => 'laragon development path is rejected',
-        'source' => 'const source = "D:\\laragon\\www\\nexora\\resources\\js\\app.tsx";',
-        'expected' => ['D:\\laragon\\'],
+        'name' => 'target-environment development path is rejected',
+        'source' => 'const source = "D:\\target-environment\\www\\nexora\\resources\\js\\app.tsx";',
+        'expected' => ['D:\\target-environment\\'],
     ],
 ];
 

@@ -4,7 +4,7 @@ RC12 is a stabilization aid for the final target-environment run. It does not in
 
 ## Goal
 
-Capture the first real Laragon/production-like integration failures without losing context after the first command exits. The diagnostics bundle records source contracts, toolchain versions, Composer/npm install output when requested, Laravel bootstrap commands when `vendor/` exists, frontend type/test/build output when `node_modules/` exists, optional full isolated certification, and the final closure ledger.
+Capture the first real target environment/production-like integration failures without losing context after the first command exits. The diagnostics bundle records source contracts, toolchain versions, Composer/npm install output when requested, Laravel bootstrap commands when `vendor/` exists, frontend type/test/build output when `node_modules/` exists, optional full isolated certification, and the final closure ledger.
 
 ## Windows
 

@@ -441,7 +441,7 @@ if ($source['exit_code'] !== 0) {
             'waiting-source-restart',
             'source-identity',
             68,
-            'C1 is PASS. Restart/reload Laragon Apache/Nginx/PHP, then rerun this same PKG-1 command; it will consume the existing one-time web-ack token automatically.',
+            'C1 is PASS. Restart/reload target environment Apache/Nginx/PHP, then rerun this same PKG-1 command; it will consume the existing one-time web-ack token automatically.',
         );
     }
 }

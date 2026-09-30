@@ -92,7 +92,7 @@ if ($statusOnly) {
 $lockState = (array) ($initialPlan['locks'] ?? []);
 $prerequisites = (array) ($initialPlan['prerequisites'] ?? []);
 if (($prerequisites['restart_ticket'] ?? false) === true) {
-    fwrite(STDERR, "[N1.0 Fast Track] A Laragon restart ticket is pending. Verify the restart first; fast-track will not pretend the new PHP runtime is active.\n");
+    fwrite(STDERR, "[N1.0 Fast Track] A target environment restart ticket is pending. Verify the restart first; fast-track will not pretend the new PHP runtime is active.\n");
     exit(2);
 }
 if (($prerequisites['composer_available'] ?? false) !== true) {
