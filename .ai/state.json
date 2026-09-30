@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 7,
-  "control_plane_branch": "codex/nine-point-closure-batch",
+  "control_plane_revision": 8,
+  "control_plane_branch": "codex/pr71-clean-replacement",
   "base_branch": "main",
-  "base_sha": "9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5",
+  "base_sha": "55c249c06621fe7dc14868b3a5740b657bcb6b7a",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
@@ -58,7 +58,7 @@
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "Verify post-#100 main push CI and this source checkpoint; continue user-authorized source development without assuming a target installation exists.",
+    "Verify clean PR #71 replacement source preparation and exact-head CI; map remaining original requirements without claiming global target acceptance.",
     "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
     "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",
@@ -198,7 +198,7 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-09-30T17:24:49.596730+00:00",
+  "updated_at": "2026-10-01",
   "historical_current_target": {
     "environment": "operator-provided target environment",
     "path": "<operator-provided-target-path>",
