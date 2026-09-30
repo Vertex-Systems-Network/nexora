@@ -140,8 +140,8 @@ try {
     $run('inertia-frontend-contract','Inertia 3 form/router/frontend type contracts',$php.' '.$quote($root.'/scripts/inertia-frontend-contract-verify.php'));
     $run('target-runtime-contract','Fail-fast target runtime closure runner contracts',$php.' '.$quote($root.'/scripts/target-runtime-contract-verify.php'));
     $run('target-resume-contract','Target bootstrap/resume/evidence contracts',$php.' '.$quote($root.'/scripts/target-resume-contract-verify.php'));
-    $run('target-intake-contract','Laragon prerequisite/lockfile intake contracts',$php.' '.$quote($root.'/scripts/target-intake-contract-verify.php'));
-$run('target-remediation-contract','Laragon prerequisite remediation contracts',$php.' '.$quote($root.'/scripts/target-remediation-contract-verify.php'));
+    $run('target-intake-contract','target environment prerequisite/lockfile intake contracts',$php.' '.$quote($root.'/scripts/target-intake-contract-verify.php'));
+$run('target-remediation-contract','target environment prerequisite remediation contracts',$php.' '.$quote($root.'/scripts/target-remediation-contract-verify.php'));
     $run('n1-c1-contract','N1.0-C1 target environment/dependency chunk contracts',$php.' '.$quote($root.'/scripts/n1-c1-contract-verify.php'));
     $run('n1-c2-contract','N1.0-C2 Laravel runtime/core database chunk contracts',$php.' '.$quote($root.'/scripts/n1-c2-contract-verify.php'));
     $run('n1-c3-contract','N1.0-C3 strict five-database matrix chunk contracts',$php.' '.$quote($root.'/scripts/n1-c3-contract-verify.php'));
