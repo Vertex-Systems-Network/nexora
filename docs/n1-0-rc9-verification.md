@@ -52,7 +52,7 @@ Composer is not installed on the execution host and `vendor/` is absent. Therefo
 TS2688: Cannot find type definition file for 'vite/client'.
 ```
 
-Because a Vite build was not produced, `performance-build-verify.php` was not falsely reported as PASS. On the target Laragon/server environment it is a required gate after `npm run build` and before production packaging.
+Because a Vite build was not produced, `performance-build-verify.php` was not falsely reported as PASS. On the target target environment/server environment it is a required gate after `npm run build` and before production packaging.
 
 ## Target integration commands
 
