@@ -161,7 +161,7 @@ function nexoraAnalyzeTenantSeedTypeScriptContracts(string $root): array
 
     foreach ($historicalTargets as $file) {
         if (! is_file($root.'/'.$file)) {
-            $errors[] = "Historical Laragon TypeScript target is missing [{$file}].";
+            $errors[] = "Historical target environment TypeScript target is missing [{$file}].";
         }
     }
 
