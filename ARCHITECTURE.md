@@ -319,7 +319,7 @@ Enterprise identity is adapter-driven. OIDC and SAML integrations implement `Ent
 
 ## N0.34 Cloud / HA / Distributed Runtime architecture
 
-N0.34 keeps Nexora valid on a single shared-hosting/Laragon node while introducing contracts and coordination needed for horizontal deployments. `NodeIdentity` provides a stable runtime-node key, `NodeManager` records heartbeats and drain/maintenance state, and public readiness fails closed with HTTP 503 when a node should be removed from load balancing. Drain mode is cooperative: it does not terminate in-flight PHP requests or kill workers.
+N0.34 keeps Nexora valid on a single shared-hosting/target environment node while introducing contracts and coordination needed for horizontal deployments. `NodeIdentity` provides a stable runtime-node key, `NodeManager` records heartbeats and drain/maintenance state, and public readiness fails closed with HTTP 503 when a node should be removed from load balancing. Drain mode is cooperative: it does not terminate in-flight PHP requests or kill workers.
 
 Scheduled cluster maintenance uses a database-backed `scheduler-leader` lease. Every node continues to heartbeat, but publishing, distribution, analytics, crawler, automation, membership, Helpdesk and runtime-maintenance schedules run only while the node holds the leader lease. Critical extension/runtime sections consume `DistributedLockContract`, which is backed by Laravel atomic cache locks and can therefore move from local cache to Redis or another supported shared lock store without changing feature code.
 
@@ -363,7 +363,7 @@ RC13 treats an existing installation upgrade as a protected operational transact
 
 ### N1.0 RC12 target diagnostics boundary
 
-RC12 does not add a product feature or weaken the RC11 closure ledger. `scripts/target-diagnostics.php` is a failure-capture harness for real target environments such as Laragon. It runs dependency-free contracts first, records toolchain availability, optionally captures Composer/npm installation, then records Laravel package discovery/routes/scheduler and frontend type/test/build output when dependencies exist. `--full` delegates to the existing isolated certification database runner. Logs are written per step, environment secrets are not dumped, credential-shaped values are redacted, and the diagnostic bundle is useful even when one or more commands fail. Source-only diagnostics are never accepted as final N1.0 evidence.
+RC12 does not add a product feature or weaken the RC11 closure ledger. `scripts/target-diagnostics.php` is a failure-capture harness for real target environments such as target environment. It runs dependency-free contracts first, records toolchain availability, optionally captures Composer/npm installation, then records Laravel package discovery/routes/scheduler and frontend type/test/build output when dependencies exist. `--full` delegates to the existing isolated certification database runner. Logs are written per step, environment secrets are not dumped, credential-shaped values are redacted, and the diagnostic bundle is useful even when one or more commands fail. Source-only diagnostics are never accepted as final N1.0 evidence.
 
 
 ### Dependency reproducibility boundary
@@ -397,7 +397,7 @@ RC20 does not add a product domain. It converts the release gate from version-on
 
 ### RC21 frontend type-contract boundary
 
-RC21 does not add a product domain. The real Laragon TypeScript failure set is converted into a source contract: Inertia form data must be recursively serializable, router payloads must satisfy `RequestPayload`, `transform()` cannot be chained because Inertia v3 returns void, and shared navigation components must be used according to their declared API. The dependency-backed `tsc --noEmit && vite build` target run remains the authoritative build evidence.
+RC21 does not add a product domain. The real target environment TypeScript failure set is converted into a source contract: Inertia form data must be recursively serializable, router payloads must satisfy `RequestPayload`, `transform()` cannot be chained because Inertia v3 returns void, and shared navigation components must be used according to their declared API. The dependency-backed `tsc --noEmit && vite build` target run remains the authoritative build evidence.
 
 
 ### RC23 target bootstrap, resume and evidence boundary
@@ -429,7 +429,7 @@ C6 is the final orchestration boundary after C1-C5. Final evidence now permanent
 
 ## N1.0 Target Execution Pack
 
-C1-C6 code-side certification chunks are orchestrated on real targets by `scripts/n1-target-execution.php` and its BAT/PowerShell/sh wrappers. The pack is fail-closed and does not constitute a C7 feature chunk. The v2 dependency-preparation boundary centralizes trusted Composer discovery (PATH first, then executable Laragon `bin/composer` candidates including `composer.phar`) and lock refresh. Lock refresh may resolve metadata only after explicit `REFRESH` confirmation, never installs the dependency graph, never accepts locks, and always returns control for human diff review before C1 can install dependencies.
+C1-C6 code-side certification chunks are orchestrated on real targets by `scripts/n1-target-execution.php` and its BAT/PowerShell/sh wrappers. The pack is fail-closed and does not constitute a C7 feature chunk. The v2 dependency-preparation boundary centralizes trusted Composer discovery (PATH first, then executable target environment `bin/composer` candidates including `composer.phar`) and lock refresh. Lock refresh may resolve metadata only after explicit `REFRESH` confirmation, never installs the dependency graph, never accepts locks, and always returns control for human diff review before C1 can install dependencies.
 
 
 ## N1.0 Target Support Capsule
@@ -438,7 +438,7 @@ The target execution layer emits a bounded, redacted, ZIP-independent JSON suppo
 
 ## N1.0 Target Execution Pack v2.2
 
-The target executor now combines three operational handoffs: source-bound PHP restart verification after safe Laragon extension remediation, explicit reviewed-lock acceptance/continuation from the latest lock-refresh handoff, and exact-evidence C1-C3 resume. `--refresh-locks` still cannot be combined with review/install, and stale chunk evidence is never reused.
+The target executor now combines three operational handoffs: source-bound PHP restart verification after safe target environment extension remediation, explicit reviewed-lock acceptance/continuation from the latest lock-refresh handoff, and exact-evidence C1-C3 resume. `--refresh-locks` still cannot be combined with review/install, and stale chunk evidence is never reused.
 
 
 ## N1.0 Target Execution v2.3 — Maximum Closure Batch
@@ -448,7 +448,7 @@ The remaining code-side closure safeguards are consolidated at `1.0.0-rc.38`. `s
 
 ## N1.0 Target Execution v2.4 — Session Integrity & Final Release Seal
 
-The current target-certification flow now uses a single exact-source/reviewed-lock certification session for C4-C6 operator evidence, rejects concurrent master target runs, enforces bounded future-clock skew and session freshness, and produces a sanitized certification evidence bundle plus external release seal alongside the production ZIP. The existing eleven-domain closure count is unchanged: `production_package` now represents the independently verified production ZIP + evidence bundle + release seal as one sealed release domain. Real Laragon/browser/HA observations remain mandatory.
+The current target-certification flow now uses a single exact-source/reviewed-lock certification session for C4-C6 operator evidence, rejects concurrent master target runs, enforces bounded future-clock skew and session freshness, and produces a sanitized certification evidence bundle plus external release seal alongside the production ZIP. The existing eleven-domain closure count is unchanged: `production_package` now represents the independently verified production ZIP + evidence bundle + release seal as one sealed release domain. Real target environment/browser/HA observations remain mandatory.
 
 
 ## N1.0 Target Execution v2.5 — Signed Release Trust
@@ -611,7 +611,7 @@ Tenant context is request/process state, not durable tenancy truth. Installer mi
 
 Tenant-scoped model creation validates an explicit or active tenant ID against `nx_enterprise_organizations` before insertion. If an active context points at a deleted/replaced organization, Nexora fails closed with an actionable runtime exception rather than silently falling back to another tenant or surfacing a raw FK error. No-context console seeding may use the current default organization only.
 
-The frontend stabilization boundary retains the 11 historical Laragon compiler targets as permanent Inertia regression inputs. Source-only parser/contracts are evidence of source shape, not a substitute for the real reviewed-dependency TypeScript compiler stage.
+The frontend stabilization boundary retains the 11 historical target environment compiler targets as permanent Inertia regression inputs. Source-only parser/contracts are evidence of source shape, not a substitute for the real reviewed-dependency TypeScript compiler stage.
 
 
 ## N1.0 Target Execution v4.6 — Tenant Execution Boundary
@@ -659,7 +659,7 @@ The resume fingerprint is intentionally non-secret and deterministic: platform v
 
 Nexora now exposes two independent progress layers. **Strict chunk certification** remains the final C1–C6 truth and is never inferred from source changes. **Granular gate progress** counts exact-source PASS/reused-PASS step IDs from the canonical C1–C6 evidence files, rejecting evidence whose platform version or source-tree SHA differs from the running source. The current denominator is 105 target gates (14/52/5/7/7/20).
 
-Historical TypeScript remediation is a third diagnostic ledger: it records the 76 errors observed across 11 Laragon files and checks the exact current-source failure patterns. This proves source remediation only. Real-target verification remains zero until C1 independently records successful dependency-backed `typecheck` and `vite-build` steps for the exact source identity.
+Historical TypeScript remediation is a third diagnostic ledger: it records the 76 errors observed across 11 target environment files and checks the exact current-source failure patterns. This proves source remediation only. Real-target verification remains zero until C1 independently records successful dependency-backed `typecheck` and `vite-build` steps for the exact source identity.
 
 
 ## N1.0 Target Execution v5.2 — Exact Source Activation Boundary
@@ -673,7 +673,7 @@ The installer UI shows the executing version/protocol/generation and disables fo
 
 Source activation is now a two-dimensional invariant: **source-set integrity** and **process convergence**. `SourceSetIntegrity` verifies a sealed manifest covering 14 critical installation-path files, preventing mixed-generation deployments where only Installer.php is current. `SourceActivationIdentity` combines protocol, generation, loaded Installer path/hash, and critical-source-set fingerprint into a fail-closed pre-database identity.
 
-`SourceActivationHandshake` issues an atomic, short-lived CLI activation nonce tied to the critical source set. The web `/install/source-status` endpoint acknowledges that exact nonce after Laragon/PHP reload; a sealed web acknowledgement records web SAPI and source fingerprint. CLI verification with `--require-web-ack` therefore proves CLI and web processes execute the same source set, rather than assuming CLI OPcache cleanup affected a separate web process.
+`SourceActivationHandshake` issues an atomic, short-lived CLI activation nonce tied to the critical source set. The web `/install/source-status` endpoint acknowledges that exact nonce after target environment/PHP reload; a sealed web acknowledgement records web SAPI and source fingerprint. CLI verification with `--require-web-ack` therefore proves CLI and web processes execute the same source set, rather than assuming CLI OPcache cleanup affected a separate web process.
 
 Installation completion progress is deliberately separate from N1.0 certification evidence. `n1-installation-progress.php` derives the latest installer-control state and maps the permanent-lock stage to 98% until the sealed installed.lock commit exists. Fast-track renders that bar before the existing granular 105-gate target bar. No new C1-C6 denominator was introduced.
 
@@ -764,7 +764,7 @@ Final PKG-1 evidence is sealed and source-bound. A modified C1 report, reviewed 
 
 ## PKG-1 verified Composer bootstrap boundary
 
-The clean-package dependency stage may execute before Laravel/vendor dependencies exist. Composer discovery therefore has a framework-independent bootstrap boundary. `target-composer.php` prefers `PATH`, then the verified Nexora-local PHAR, then Laragon Composer candidates. `composer-bootstrap.php` writes the local PHAR only under runtime storage, verifies the current official installer using its SHA-384 signature before execution, constrains the result to the certified Composer major range, and emits a runtime bootstrap attestation. The local tool remains outside source/release archives and is subsequently bound by the v5.12 dependency-toolchain fingerprint. Failure at this boundary leaves both root lockfiles untouched.
+The clean-package dependency stage may execute before Laravel/vendor dependencies exist. Composer discovery therefore has a framework-independent bootstrap boundary. `target-composer.php` prefers `PATH`, then the verified Nexora-local PHAR, then target environment Composer candidates. `composer-bootstrap.php` writes the local PHAR only under runtime storage, verifies the current official installer using its SHA-384 signature before execution, constrains the result to the certified Composer major range, and emits a runtime bootstrap attestation. The local tool remains outside source/release archives and is subsequently bound by the v5.12 dependency-toolchain fingerprint. Failure at this boundary leaves both root lockfiles untouched.
 
 ## PKG-1 rc.79 — production environment and build-input identity
 
@@ -786,7 +786,7 @@ PKG-1 now evaluates terminal and reusable evidence before dependency/network wor
 
 ## PKG-1 operator state-machine launcher (v5.17)
 
-`pkg1-run.ps1` is a Windows/Laragon operator shell around the existing immutable PKG-1 state machine, not a second certification implementation. It consumes `pkg1-status.php --json` and dispatches the existing canonical scripts. Safe states (`READY_COMPOSER_BOOTSTRAP`, `READY_CANDIDATE_GENERATION`, `STALE_CANDIDATE`, `READY_C1`, `READY_SOURCE_RESUME`, `WAITING_POST_INSTALL`) can advance automatically. Human-bound states cannot: `WAITING_REVIEW` requires explicit dossier/lock review and the literal `PROMOTE-REVIEWED` confirmation; `WAITING_RECOVERY` requires `ROLLBACK`; `WAITING_INSTALL` opens the browser installer and waits; `WAITING_AUTH_SMOKE` delegates to the SecureString login finalizer. `COMPLETE` is accepted only after `pkg1-closure-evidence-verify.php` passes again.
+`pkg1-run.ps1` is a Windows/target environment operator shell around the existing immutable PKG-1 state machine, not a second certification implementation. It consumes `pkg1-status.php --json` and dispatches the existing canonical scripts. Safe states (`READY_COMPOSER_BOOTSTRAP`, `READY_CANDIDATE_GENERATION`, `STALE_CANDIDATE`, `READY_C1`, `READY_SOURCE_RESUME`, `WAITING_POST_INSTALL`) can advance automatically. Human-bound states cannot: `WAITING_REVIEW` requires explicit dossier/lock review and the literal `PROMOTE-REVIEWED` confirmation; `WAITING_RECOVERY` requires `ROLLBACK`; `WAITING_INSTALL` opens the browser installer and waits; `WAITING_AUTH_SMOKE` delegates to the SecureString login finalizer. `COMPLETE` is accepted only after `pkg1-closure-evidence-verify.php` passes again.
 
 ## v5.18 Windows PowerShell parser-safe operator boundary
 
@@ -795,7 +795,7 @@ The Windows PKG-1 launcher is an ASCII-only source artifact and the `.bat` entry
 
 ## v5.19 PHP-first operator execution boundary
 
-The Windows/Laragon entrypoint now terminates the primary PowerShell dependency: `pkg1-run.bat` dispatches directly to `pkg1-run.php`. The PHP launcher is the thin interactive driver over `pkg1-status.php`, `pkg1-usable-closure.php`, recovery, installer and closure verification. It stops immediately when canonical closure evidence reports `blocked`, preventing retry storms against a persistent DNS/toolchain failure. PowerShell is retained only for SecureString password capture during the final live authentication smoke; both the PHP launcher and manual finalizer batch parser-check that finalizer before execution.
+The Windows/target environment entrypoint now terminates the primary PowerShell dependency: `pkg1-run.bat` dispatches directly to `pkg1-run.php`. The PHP launcher is the thin interactive driver over `pkg1-status.php`, `pkg1-usable-closure.php`, recovery, installer and closure verification. It stops immediately when canonical closure evidence reports `blocked`, preventing retry storms against a persistent DNS/toolchain failure. PowerShell is retained only for SecureString password capture during the final live authentication smoke; both the PHP launcher and manual finalizer batch parser-check that finalizer before execution.
 
 
 ## v5.20 Windows npm executable bridge
@@ -817,4 +817,4 @@ For frontend typing, recursive JSON models remain strongly typed at their domain
 
 ## v5.23 development-first installer boundary
 
-The installer presents a small default interaction surface while preserving advanced recovery and data-safety controls behind conditionally visible sections. Installation UI is independent of Laragon; Laragon is one supported local environment, not an architectural dependency. `development-readiness.php` is a non-certifying development health check and is intentionally separate from dependency review/promotion and final C1-C6 certification.
+The installer presents a small default interaction surface while preserving advanced recovery and data-safety controls behind conditionally visible sections. Installation UI is independent of target environment; target environment is one supported local environment, not an architectural dependency. `development-readiness.php` is a non-certifying development health check and is intentionally separate from dependency review/promotion and final C1-C6 certification.
