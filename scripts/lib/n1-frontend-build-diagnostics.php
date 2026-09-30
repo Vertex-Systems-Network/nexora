@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Historical Laragon TypeScript failure baseline captured from the authoritative
+ * Historical target environment TypeScript failure baseline captured from the authoritative
  * target build. This is a regression ledger, not certification evidence.
  *
  * @return array<string,array{historical_errors:int,codes:array<string,int>,family:string}>
