@@ -1,6 +1,6 @@
 # N1.0 RC22 — Target Runtime Closure Runner
 
-RC22 does not add a product domain. It adds the fail-fast target-runtime gate needed after RC21 converted the real Laragon TypeScript failures into source contracts.
+RC22 does not add a product domain. It adds the fail-fast target-runtime gate needed after RC21 converted the real target environment TypeScript failures into source contracts.
 
 `target-diagnostics.php` remains a keep-going troubleshooting collector. `target-runtime-run.php` is intentionally different: it stops at the first required release blocker unless `--keep-going` is explicitly requested, preserves redacted per-step logs, and never treats source-only checks as dependency-backed evidence.
 
