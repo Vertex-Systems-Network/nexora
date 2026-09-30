@@ -35,7 +35,7 @@ One-time post-install finalization is allowed only before `post_install_identity
 
 ## Target limitation
 
-This container does not reproduce the user's Laragon/Windows runtime dependencies. Real browser/login/runtime evidence remains a target execution gate and is not pre-marked as PASS here.
+This container does not reproduce the user's target environment/Windows runtime dependencies. Real browser/login/runtime evidence remains a target execution gate and is not pre-marked as PASS here.
 
 ## Source seals
 
