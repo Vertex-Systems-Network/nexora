@@ -1,3 +1,15 @@
+# Stable runtime diagnosis and authentication throttle repair — 2026-09-30
+
+Unit: SYS-RUNTIME-IDENTITY; stage RUNTIME-CLOSURE-001 remains BLOCKED. Base: main@186138b0f7b7ca0da1ce3b2bb37b051edc75c855. Method: DMAIC defect correction, not Core QA activation.
+
+Measurement: changing only ephemeral workspace proxy ports exactly reproduces both prior sealed service fingerprints. Stable no-proxy loopback QA passes real installation, activation, one-time web acknowledgement, CLI re-verification, readiness and governed recovery. Subsequent actual login POST fails 429 after benign public/health requests because numeric Laravel throttles share the domain/IP key without prefixes.
+
+Authorized repair: place existing four guest authentication mutation routes in one auth-prefixed bucket. Preserve combined five attempts per minute, IP keying, guest/auth, CSRF, validation and runtime identity controls. Public request counters cannot exhaust this authentication budget. No new route, dependency, permission, migration or secret scope. Threat: isolate unrelated traffic without increasing authentication attempts; test sixth request rejection and shared auth budget. Graph: existing public→throttle→auth edges only, no new product graph provider. Performance: constant prefix, existing cache operations; unchanged public 2000ms smoke ceiling. Data/privacy: no new persistence or identifiers; existing hashed IP signature. Rollback: revert route prefix; re-seal only fresh disposable source fixtures through installer, never modify existing locks to force PASS.
+
+Verified: red public-health/login regression before repair; green 10 tests / 40 assertions plus fresh corrected install/activation/recovery/login/admin/current readiness. Critical route manifest and installer binding regenerated canonically. Final remote CI pending. Verification contract: demonstrate regression fails before repair; prove public traffic followed by valid login succeeds, sixth auth mutation remains 429, and auth endpoints retain shared budget. Re-run fresh installer, activation/recovery and real cookie/CSRF login/admin on corrected source. Remote exact-head CI and main CI are separate. No production/TLS/five-engine/key-rotation acceptance.
+
+Earlier checkpoints below remain historical.
+
 # Disposable runtime checkpoint — 2026-09-30
 
 Fresh SQLite installer and real HTTP login/admin pass after separating runtime SQLite data from source attestation. Local regression/source certification pass. Post-source-activation service convergence has an observed unresolved mismatch. Remote CI pending; no full target/release promotion. See `docs/disposable-runtime-verification-2026-09-30.md`. Earlier entries below remain historical.

@@ -1,56 +1,72 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-updated_at: "2026-09-30"
+updated_at: '2026-09-30'
 claims:
-  - id: MAIN-HEAD
-    value: "131addac09e888961989448e6415124dd3321215"
-    status: OBSERVED
-    evidence: "live GitHub protected main after PR #100 merge"
-  - id: ACTIVE-STAGE
-    value: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
-    status: BLOCKED
-    evidence: ".ai/state.json + unresolved target-environment readiness/identity/login and credential rotation"
-  - id: OPEN-ISSUES
-    value: [72, 74, 87]
-    status: OBSERVED
-    evidence: "live GitHub intake on 2026-09-30"
-  - id: OPEN-PRS
-    value: [1]
-    status: OBSERVED
-    evidence: "Snapshot after #100 merge and before source checkpoint PR creation; PR #1 remains draft"
-  - id: PR82-MERGE
-    value: "5d727efe1ba2810c590e8a86ebc3f122a0c998cf -> 87210e7674f67fb75e046c185206573bebd906f9"
-    status: SOURCE_INTEGRATED
-    evidence: "PR #82 #980 SUCCESS; scoped admin waiver WVR-NEX-PR82-MAIN-REVIEW-002; GitHub merge result"
-  - id: MAIN-PUSH-CI
-    value: "d8e83e87305bc8c11d8b073b42f13cb69414c550 / run 36689146406"
-    status: PASS
-    evidence: "Nexora release certification #1125 event=push conclusion=success on exact protected main; later main push result is separate"
-  - id: ISSUE72
-    value: "source remediation complete; real target/provider credential rotation pending"
-    status: BLOCKED_EXTERNAL_TARGET
-    evidence: "Issue #72 reconciliation comment + protected main source controls"
-  - id: ISSUE74
-    value: "W01/W02/W05/W06 done; W03/W04/W07 target-gated"
-    status: ACTIVE_TARGET_CLOSURE
-    evidence: "Issue #74 lane reconciliation after PR #82 merge"
-  - id: PR1
-    value: "Draft future carrier; 355 files; not active runtime closure"
-    status: FUTURE_CARRIER_FROZEN
-    evidence: "live main...PR1 divergence audit"
-  - id: DEPENDENCY-MAINTENANCE
-    value: "PR #75 and PR #81 closed unmerged"
-    status: DEFERRED_BY_TARGET_GATE
-    evidence: "stale/conflicted maintenance; fresh recreation required after target closure"
-  - id: NUMERIC-PROGRESS
-    value: null
-    status: UNAVAILABLE
-    evidence: "no current canonical numeric module/overall metric"
-  - id: README-PROGRESS-SYNC
-    value: "required every material engineering milestone"
-    status: GOVERNED
-    evidence: ".ai/governance/engineering-supervisor.md + README AI-Native Progress Ledger"
+- id: MAIN-HEAD
+  value: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855
+  status: OBSERVED
+  evidence: 'live GitHub protected main after PR #104 merge'
+- id: ACTIVE-STAGE
+  value: RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY
+  status: BLOCKED
+  evidence: .ai/state.json + unresolved target-environment readiness/identity/login
+    and credential rotation
+- id: OPEN-ISSUES
+  value:
+  - 72
+  - 74
+  - 87
+  status: OBSERVED
+  evidence: live GitHub intake on 2026-09-30
+- id: OPEN-PRS
+  value:
+  - 102
+  status: OBSERVED
+  evidence: 'live GitHub intake on 2026-09-30; PR #102 draft planning carrier'
+- id: PR82-MERGE
+  value: 5d727efe1ba2810c590e8a86ebc3f122a0c998cf -> 87210e7674f67fb75e046c185206573bebd906f9
+  status: SOURCE_INTEGRATED
+  evidence: 'PR #82 #980 SUCCESS; scoped admin waiver WVR-NEX-PR82-MAIN-REVIEW-002;
+    GitHub merge result'
+- id: MAIN-PUSH-CI
+  value: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855 / run 36735105784
+  status: PASS
+  evidence: exact protected-main release certification conclusion success
+- id: ISSUE72
+  value: bootstrap key historical non-use/rotation acceptance pending; not an external-provider
+    credential
+  status: BLOCKED_EXTERNAL_TARGET
+  evidence: 'Issue #72 lifecycle clarification; installer APP_KEY persistence audit'
+- id: ISSUE74
+  value: W01/W02/W05/W06 done; W03/W04/W07 target-gated
+  status: ACTIVE_TARGET_CLOSURE
+  evidence: 'Issue #74 lane reconciliation after PR #82 merge'
+- id: PR1
+  value: 'Closed after source reconciliation through PR #103'
+  status: CLOSED_RECONCILED
+  evidence: live intake; source reconciliation report
+- id: DEPENDENCY-MAINTENANCE
+  value: 'PR #75 and PR #81 closed unmerged'
+  status: DEFERRED_BY_TARGET_GATE
+  evidence: stale/conflicted maintenance; fresh recreation required after target closure
+- id: NUMERIC-PROGRESS
+  value: null
+  status: UNAVAILABLE
+  evidence: no current canonical numeric module/overall metric
+- id: README-PROGRESS-SYNC
+  value: required every material engineering milestone
+  status: GOVERNED
+  evidence: .ai/governance/engineering-supervisor.md + README AI-Native Progress Ledger
 rules:
   chat_memory_never_overrides_repository: true
   inferred_runtime_truth_forbidden: true
   pending_or_running_never_equals_pass: true
+current_checkpoint:
+  open_prs:
+  - 102
+  merged_prs:
+  - 103
+  - 104
+  exact_main_ci: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855 / 36735105784 SUCCESS
+  disposable_runtime_evidence: .ai/evidence/stable-runtime-verification-2026-09-30.json
+  global_target_acceptance: BLOCKED

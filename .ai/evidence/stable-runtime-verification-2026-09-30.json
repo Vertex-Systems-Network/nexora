@@ -1,0 +1,61 @@
+{
+  "source_sha": "5cfa5a6a54907e85d0cee8e90f04c38e486dd0a3",
+  "scope": "disposable loopback HTTP / SQLite / stable no-proxy QA",
+  "steps": {
+    "stable-fixed-source-certification": {
+      "exit_code": 0
+    },
+    "stable-fixed-install": {
+      "exit_code": 0
+    },
+    "handoff": {
+      "final_http_status": 200
+    },
+    "stable-fixed-readiness-before": {
+      "exit_code": 0
+    },
+    "stable-fixed-activate": {
+      "exit_code": 0
+    },
+    "activation-web-ack": {
+      "http_status": 200,
+      "ack_header": "acknowledged",
+      "status": "pass",
+      "authorized": true
+    },
+    "stable-fixed-source-ack-verify": {
+      "exit_code": 0
+    },
+    "stable-fixed-readiness-after": {
+      "exit_code": 0
+    },
+    "stable-fixed-recovery": {
+      "exit_code": 0
+    },
+    "stable-fixed-usable": {
+      "exit_code": 0
+    },
+    "usable": {
+      "status": "pass",
+      "live_auth_smoke": {
+        "status": "pass",
+        "email": "qa@example.test",
+        "login_http_status": 302,
+        "login_redirect": "http://127.0.0.1:8787/admin",
+        "admin_http_status": 200,
+        "reason": null
+      }
+    },
+    "stable-fixed-readiness-final": {
+      "exit_code": 0
+    },
+    "final-readiness": {
+      "status": "pass",
+      "ready": true,
+      "runtime_ready": true,
+      "receipt_current": true,
+      "errors": []
+    }
+  },
+  "status": "pass"
+}
