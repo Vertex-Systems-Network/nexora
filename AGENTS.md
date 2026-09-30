@@ -204,3 +204,7 @@ If the user sends only this repository's GitHub URL, perform the policy's read-o
 ## Development carrier compatibility
 
 Never merge a target-unverified or failing PR. Only after all required exact-head source governance and applicable target/release evidence genuinely pass, mark it Ready for review and merge it without waiting for a separate merge confirmation. Native independent review requirements still apply. Source reconciliation may be prepared independently; this does not promote target or release evidence.
+
+## Detailed progress evidence synchronization
+
+Read `NEXORA_PROGRESS.md` in full before a material source or evidence apply, together with canonical `.ai/state.json` and the README ledger. After each material apply, update `NEXORA_PROGRESS.md` immediately with the exact tested source/run and remaining gates. Its archived checkpoint sections are historical; the current checkpoint must agree with canonical state. Never increase Target Power from source CI alone. Numeric legacy scores do not establish current product completion.

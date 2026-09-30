@@ -42,3 +42,9 @@ Machine-readable local results: `docs/evidence/source-reconciliation-2026-09-30/
 5. Issues #74/#87 and formal stage promotion require their actual acceptance evidence. Old draft #1 is not blindly promoted; this branch is the reconciled proposal.
 
 No percentage or whole-product completion is inferred from these checks.
+
+## Exact-head CI and follow-up corrections
+
+Initial remote head `bbcbdf239ba531a8d20fc4f3f6a8bb7804621d47`: canonical release certification run `36714271582` (#1132) SUCCESS, including the complete backend suite on MySQL. Supplemental development run `36714271530` (#173) FAILED on three textual source-contract mismatches; its full PHPUnit, frontend tests and build checks passed. The DEV-4 login contract now matches main's explicit middleware exceptions. AGENTS now requires full detailed-progress reading, immediate updates and forbids target-score increases from source CI. All 33 supplemental source contracts pass locally after these corrections. Follow-up remote CI is still required.
+
+Local full-suite execution through artisan FAILED (460/477, 15 failures plus 2 errors), despite the isolated suites passing. Repeating with an ephemeral .env.testing did not remove the local HTTP 429/throttling interference. The extracted installer/bootstrap environment and persistent local cache differ from fresh hosted CI. This local combined result is not represented as PASS; remote MySQL full-suite success is separately scoped. No production throttle control was disabled.

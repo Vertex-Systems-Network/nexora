@@ -231,7 +231,7 @@
     }
   },
   "source_reconciliation": {
-    "status": "LOCAL_SOURCE_VERIFIED_CI_PENDING",
+    "status": "CONTRACT_CORRECTIONS_VERIFIED_CI_PENDING",
     "base_sha": "9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5",
     "draft_1_head": "f6629d010626bb52be16fd9c3257f41b656be748",
     "resolved_conflict_paths": 38,
@@ -240,6 +240,17 @@
     "database": "disposable SQLite :memory:",
     "target_acceptance": "BLOCKED",
     "independent_review": "required; pending",
-    "report": "docs/source-reconciliation-2026-09-30.md"
+    "report": "docs/source-reconciliation-2026-09-30.md",
+    "initial_remote_head": "bbcbdf239ba531a8d20fc4f3f6a8bb7804621d47",
+    "canonical_run": {
+      "id": 36714271582,
+      "conclusion": "success"
+    },
+    "supplemental_run": {
+      "id": 36714271530,
+      "conclusion": "failure",
+      "correction": "three textual contracts corrected locally"
+    },
+    "local_combined_suite": "failed: HTTP throttling interference; isolated suites pass"
   }
 }

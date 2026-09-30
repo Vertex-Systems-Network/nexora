@@ -24,7 +24,7 @@ $read = static function (string $relative) use ($root, &$errors): string {
 $routes = $read('routes/web.php');
 
 $routeContracts = [
-    "Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');" => 'login GET route',
+    "Route::get('/login', [AuthenticatedSessionController::class, 'create'])\n        ->withoutMiddleware([RuntimeNodeHeartbeat::class, ResolveEnterpriseOrganization::class])\n        ->name('login');" => 'login GET route',
     "Route::post('/login', [AuthenticatedSessionController::class, 'store'])" => 'login POST route',
     "Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');" => 'registration GET route',
     "Route::post('/register', [RegisteredUserController::class, 'store'])" => 'registration POST route',

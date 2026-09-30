@@ -2,7 +2,7 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-30):** Source reconciliation is locally verified on `codex/product-source-reconciliation`, based on protected main `9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5` and draft #1. 38 conflicts resolved; 477 backend tests and 6 frontend tests pass; TypeScript/Vite build and source certification pass. Exact-head remote CI and independent review are pending. No current hosting target is provisioned; target acceptance remains **BLOCKED**. See [source reconciliation evidence](docs/source-reconciliation-2026-09-30.md).
+> **Canonical current status (2026-09-30):** Source reconciliation is locally verified on `codex/product-source-reconciliation`, based on protected main `9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5` and draft #1. 38 conflicts resolved; 477 backend tests and 6 frontend tests pass; TypeScript/Vite build and source certification pass. Initial canonical MySQL CI #1132 passed; supplemental QA #173 failed on three textual contracts, corrected locally. Follow-up remote CI and independent review are pending. Isolated local backend suites pass; combined local artisan execution has HTTP throttling interference. No current hosting target is provisioned; target acceptance remains **BLOCKED**. See [source reconciliation evidence](docs/source-reconciliation-2026-09-30.md).
 
 ## AI development startup gate
 
