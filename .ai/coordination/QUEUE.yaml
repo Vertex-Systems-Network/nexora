@@ -40,13 +40,19 @@ items:
     push CI remain separate verification. No current target is provisioned.
 - id: NEX-SECURITY-87
   source: 'Issue #87'
-  status: OPEN
+  status: CLOSED_NOT_PLANNED
   priority: 1
-  note: Repository-enforced independent high-risk review remains unresolved; no protection
-    change or waiver is claimed.
+  note: Owner explicitly removed mandatory approval; native governance/thread/history
+    protections retained. Not remediation acceptance.
 - id: NEX-DISPOSABLE-RUNTIME-010
   source: codex/stable-runtime-verification
-  status: LOCAL_VERIFIED_REMOTE_PENDING
+  status: SOURCE_INTEGRATED_LOCAL_VERIFIED
   priority: 1
-  note: 'Service drift diagnosed; auth bucket defect fixed; fresh local runtime proof
-    PASS. Global #74 stays open.'
+  note: 'Merged #105; exact PR and main CI PASS; local runtime proof PASS; #74 actual
+    target remains open.'
+- id: NEX-NINE-POINT-102
+  source: 'PR #102'
+  status: VERIFYING
+  priority: 1
+  note: 'Refresh stale plan with verified #103/#104/#105 evidence and honest remaining
+    target/key/release gates.'

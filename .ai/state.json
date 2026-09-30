@@ -2,10 +2,10 @@
   "schema_version": "1.0",
   "project": "Nexora",
   "control_plane_revision": 7,
-  "control_plane_branch": "codex/stable-runtime-verification",
+  "control_plane_branch": "codex/nine-point-closure-batch",
   "base_branch": "main",
   "base_sha": "9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5",
-  "last_verified_source_sha": "186138b0f7b7ca0da1ce3b2bb37b051edc75c855",
+  "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
   "source_generation": "n1-v5.29",
@@ -198,7 +198,7 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-09-30T16:03:42.331416+00:00",
+  "updated_at": "2026-09-30T17:24:49.596730+00:00",
   "historical_current_target": {
     "environment": "operator-provided target environment",
     "path": "<operator-provided-target-path>",
@@ -272,6 +272,20 @@
       "errors": []
     },
     "evidence": ".ai/evidence/stable-runtime-verification-2026-09-30.json",
-    "source_ci": "local SOURCE PASS; final PR exact-head CI pending"
+    "source_ci": "PR #105 both workflows SUCCESS; exact main 36742999910 SUCCESS",
+    "published_runtime_sha": "670ecac569fe6572b7546236e728ffab38175a14"
+  },
+  "nine_point_closure": {
+    "status": "PARTIALLY_VERIFIED",
+    "report": "docs/nine-point-closure-batch.md",
+    "source_baseline": "3439ac7e324e867046674044ba4ad1586bd963af",
+    "main_ci": "36742999910",
+    "approval_enforcement": "#87 closed NOT_PLANNED under explicit owner decision",
+    "remaining_issues": [
+      72,
+      74
+    ],
+    "source_regression": "480 backend / 4607 assertions + 6 frontend PASS",
+    "target_release": "BLOCKED; no live or final release promotion"
   }
 }

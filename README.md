@@ -2,9 +2,9 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-30):** protected main `186138b0f7b7ca0da1ce3b2bb37b051edc75c855` includes merged PR #103 source reconciliation and PR #104 SQLite provenance correction. Exact main release certification 36735105784 SUCCESS. No current live hosting target is provisioned; product acceptance remains **BLOCKED**.
+> **Canonical current status (2026-09-30):** protected main `3439ac7e324e867046674044ba4ad1586bd963af` includes merged #103 source reconciliation, #104 SQLite provenance fix and #105 authentication throttle repair. Exact resulting-main release certification `36742999910` **SUCCESS**. Source CI: 480 backend tests / 4607 assertions + 6 frontend tests PASS. Source is verified; live Target/Release remain **BLOCKED**.
 
-> **Stable disposable runtime batch:** prior service mismatch reproduced by workspace proxy port only. Authentication public-counter interference fixed with the shared five/minute/IP auth budget preserved. Fresh installation, activation, exact CLI↔web proof, governed recovery, public HTTP smoke, login POST 302, admin GET 200 and final readiness/current receipt PASS. Local 10 tests / 40 assertions and source certification PASS; final PR CI pending. [Measured report](docs/stable-runtime-verification-2026-09-30.md).
+> **Nine-point batch:** source reconciliation and disposable SQLite install/readiness/CLI↔web identity/login/recovery PASS. Approval-enforcement proposal #87 closed **NOT_PLANNED** under the owner decision. Historical key acceptance #72, live target #74 and final-release prerequisites remain incomplete. [Measured nine-point table](docs/nine-point-closure-batch.md) and [runtime proof](docs/stable-runtime-verification-2026-09-30.md). This PR reconciles the plan; it does not complete the product.
 
 ## AI development startup gate
 
@@ -23,13 +23,13 @@ This rule applies on every AI development start, including work resumed from an 
 ## AI-Native Progress Ledger
 
 - **Observed:** 2026-09-30
-- **Last verified source baseline:** `186138b0f7b7ca0da1ce3b2bb37b051edc75c855` — protected-main release certification `36735105784` **SUCCESS**
+- **Last verified source baseline:** `3439ac7e324e867046674044ba4ad1586bd963af` — protected-main release certification `36742999910` **SUCCESS**
 - **Product acceptance stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Current source batch:** stable runtime verification + auth throttle repair on `codex/stable-runtime-verification`; local checks and fresh disposable runtime PASS; final remote CI pending
+- **Current source batch:** nine-point plan/evidence reconciliation in #102; #103/#104/#105 integrated and exact source/main CI verified
 - **Current deployment:** disposable SQLite/loopback HTTP tested; no live target provisioned
-- **Open remediation Issues:** #72 historical bootstrap-key non-use/rotation; #74 live runtime acceptance; #87 review enforcement reconciliation
-- **Open planning PR:** #102 remains draft; #1 closed; #103/#104 merged
-- **Next safe action:** exact-head CI/review and integration of this bounded repair; provisioned TLS target, other engines and key acceptance remain separate.
+- **Open remediation Issues:** #72 historical bootstrap-key non-use/rotation; #74 live runtime acceptance; #87 closed NOT_PLANNED
+- **Open planning PR:** #102 is current plan reconciliation; #1 closed; #103/#104/#105 merged
+- **Next safe action:** verify and integrate the updated #102 plan/evidence; target/key/release acceptance remains separate.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

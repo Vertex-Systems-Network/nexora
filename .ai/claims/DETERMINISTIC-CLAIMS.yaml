@@ -3,9 +3,9 @@ repository: Vertex-Systems-Network/nexora
 updated_at: '2026-09-30'
 claims:
 - id: MAIN-HEAD
-  value: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855
+  value: 3439ac7e324e867046674044ba4ad1586bd963af
   status: OBSERVED
-  evidence: 'live GitHub protected main after PR #104 merge'
+  evidence: 'live main after #105'
 - id: ACTIVE-STAGE
   value: RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY
   status: BLOCKED
@@ -15,23 +15,22 @@ claims:
   value:
   - 72
   - 74
-  - 87
   status: OBSERVED
-  evidence: live GitHub intake on 2026-09-30
+  evidence: 'live intake after #87 owner-decision closure'
 - id: OPEN-PRS
   value:
   - 102
   status: OBSERVED
-  evidence: 'live GitHub intake on 2026-09-30; PR #102 draft planning carrier'
+  evidence: 'existing #102 being reconciled with current source acceptance'
 - id: PR82-MERGE
   value: 5d727efe1ba2810c590e8a86ebc3f122a0c998cf -> 87210e7674f67fb75e046c185206573bebd906f9
   status: SOURCE_INTEGRATED
   evidence: 'PR #82 #980 SUCCESS; scoped admin waiver WVR-NEX-PR82-MAIN-REVIEW-002;
     GitHub merge result'
 - id: MAIN-PUSH-CI
-  value: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855 / run 36735105784
+  value: 3439ac7e324e867046674044ba4ad1586bd963af / run 36742999910
   status: PASS
-  evidence: exact protected-main release certification conclusion success
+  evidence: exact main release certification success
 - id: ISSUE72
   value: bootstrap key historical non-use/rotation acceptance pending; not an external-provider
     credential
@@ -67,6 +66,11 @@ current_checkpoint:
   merged_prs:
   - 103
   - 104
-  exact_main_ci: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855 / 36735105784 SUCCESS
+  - 105
+  exact_main_ci: 3439ac7e324e867046674044ba4ad1586bd963af / 36742999910 SUCCESS
   disposable_runtime_evidence: .ai/evidence/stable-runtime-verification-2026-09-30.json
   global_target_acceptance: BLOCKED
+  open_issues:
+  - 72
+  - 74
+  issue87: CLOSED_NOT_PLANNED

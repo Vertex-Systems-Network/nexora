@@ -2,24 +2,24 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 observed_main:
   branch: main
-  sha: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855
+  sha: 3439ac7e324e867046674044ba4ad1586bd963af
   observed_at: "2026-09-30"
-  semantics: "#104 merged; release certification 36735105784 SUCCESS"
+  semantics: "#105 merged; release certification 36742999910 SUCCESS"
 active_issue:
   number: 74
-active_pr: null
-active_branch: codex/stable-runtime-verification
+active_pr: 102
+active_branch: codex/nine-point-closure-batch
 current_stage:
   id: RUNTIME-CLOSURE-001
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: DISPOSABLE-RUNTIME-CLOSURE-010
-  status: LOCAL_VERIFIED_REMOTE_PENDING
+  id: NINE-POINT-EVIDENCE-RECONCILIATION-011
+  status: VERIFYING
 last_completed_milestone:
-  main_commit: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855
-  summary: "#104 SQLite provenance fix; exact main CI SUCCESS"
-exact_next_safe_action: "Review bounded auth throttle repair and final exact-head CI; integrate only green. Live TLS/other engines/key acceptance remain separate."
+  main_commit: 3439ac7e324e867046674044ba4ad1586bd963af
+  summary: "#105 auth/runtime fix; exact main CI SUCCESS"
+exact_next_safe_action: "Verify updated #102 plan/evidence CI, integrate green; actual target/key/release remain blocked."
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:
@@ -44,7 +44,7 @@ state_drift:
   detected: false
   notes:
     - "Prior #1 future-carrier and pending #104 descriptions are historical."
-    - "Disposable candidate verified; final source CI remains separate."
+    - "Exact #105 source/main CI and disposable runtime verified; updated #102 plan CI remains separate."
 
 future_target_input:
   placeholder: "<operator-provided-target-path>"

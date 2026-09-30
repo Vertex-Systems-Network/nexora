@@ -1,3 +1,7 @@
+# Nine-point evidence reconciliation — 2026-09-30
+
+Protected main `3439ac7e324e867046674044ba4ad1586bd963af` after #105: exact-main certification `36742999910` SUCCESS; #105 release/development QA SUCCESS; 480 backend tests / 4607 assertions + 6 frontend tests PASS. Exact published #105 head disposable installation, readiness, CLI↔web proof, recovery, login/admin and drift-negative checks PASS. #87 closed NOT_PLANNED per owner approval-rule removal; no independent-review implementation claimed. Current #102 plan is reconciled against completed source work. #72 historical key and #74 actual target acceptance remain OPEN; global runtime/release stage BLOCKED and Core QA locked. Nine-point acceptance table: `docs/nine-point-closure-batch.md`. Earlier checkpoints are historical. Final #102 CI pending at preparation; later results belong on PR/Issue to avoid status-only head churn.
+
 # Stable runtime diagnosis and authentication throttle repair — 2026-09-30
 
 Unit: SYS-RUNTIME-IDENTITY; stage RUNTIME-CLOSURE-001 remains BLOCKED. Base: main@186138b0f7b7ca0da1ce3b2bb37b051edc75c855. Method: DMAIC defect correction, not Core QA activation.
