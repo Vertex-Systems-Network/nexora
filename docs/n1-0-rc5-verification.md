@@ -42,7 +42,7 @@ Composer is not installed in the execution environment and `vendor/` is absent, 
 
 `npm install --no-audit --no-fund` was attempted and timed out after 120 seconds; `node_modules/` and `package-lock.json` were not produced. Therefore a production TypeScript/Vite build is not claimed as PASS on this host.
 
-Target Laragon integration gate:
+Target target environment integration gate:
 
 ```bat
 composer install
