@@ -128,8 +128,8 @@ if ($statusOnly) {
     if (! $run('prerequisite-intake', 'target environment/target prerequisite intake', [PHP_BINARY, 'scripts/target-prerequisite-intake.php'])) {
         $status = 'blocked';
         fwrite(STDOUT, "
-Remediation helper: scripts\\target-prerequisite-remediate.bat
-Review-only by default; --apply-extensions is explicit and Windows/target environment-only.
+Remediation helper: php scripts/target-prerequisite-remediate.php
+Review-only by default; --apply-extensions is explicit and host-specific.
 ");
     }
     if ($status === 'pass' && ! $run('reviewed-locks', 'Reviewed dependency lock attestation', [PHP_BINARY, 'scripts/dependency-lock-review.php', '--verify-attestation'])) $status = 'blocked';
