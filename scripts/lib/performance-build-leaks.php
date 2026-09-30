@@ -16,7 +16,7 @@ function nexoraPerformanceBuildLocalLeaks(string $source): array
 {
     $leaks = [];
 
-    foreach (['localhost:5173', '127.0.0.1:5173', 'D:\\laragon\\'] as $literal) {
+    foreach (['localhost:5173', '127.0.0.1:5173', 'D:\\target-environment\\'] as $literal) {
         if (str_contains($source, $literal)) {
             $leaks[] = $literal;
         }
