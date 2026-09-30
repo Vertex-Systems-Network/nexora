@@ -26,6 +26,6 @@ The clean source release intentionally excludes `vendor`, `node_modules`, `publi
 - `php artisan migrate:fresh --seed` on the user's selected database engine
 - Complete Laravel/Pest suite
 - `npm run build`
-- Browser analytics/crawler/search integration against the target Laragon web server
+- Browser analytics/crawler/search integration against the target target environment web server
 
-Run `scripts\\quality-check.bat` after zero installation on the target Windows/Laragon environment for the final integration gate.
+Run `scripts\\quality-check.bat` after zero installation on the target Windows/target environment environment for the final integration gate.
