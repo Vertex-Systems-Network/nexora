@@ -47,7 +47,7 @@ scripts\build-production-release.bat
 
 The builder requires `composer.lock`, `package-lock.json`, `vendor/autoload.php` and `public/build/manifest.json`, then emits a production ZIP plus SHA-256 sidecar. The ZIP contains `nexora-release.json` with lock/build hashes. The standalone bootstrap verifies those hashes before treating a prebuilt release as ready.
 
-## Zero test on Laragon
+## Zero test on target environment
 
 ```bat
 scripts\setup-zero.bat

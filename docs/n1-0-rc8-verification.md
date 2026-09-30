@@ -79,7 +79,7 @@ TS2688: Cannot find type definition file for 'vite/client'.
 
 This is a missing dependency-tree block on the execution host. RC8 does **not** claim the Laravel test suite, Vitest component suite, TypeScript semantic typecheck, Vite production build, real-browser matrix, screen-reader audit or WCAG 2.2 AA certification as PASS here.
 
-## Target Laragon gate
+## Target target environment gate
 
 ```bat
 composer install

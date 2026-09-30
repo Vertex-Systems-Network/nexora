@@ -1,6 +1,6 @@
 # N1.0 — Release Candidate Certification
 
-N1.0 is a stabilization gate. It does not add a new product domain. The current RC line converts the accumulated N0.x platform into a repeatable, fail-closed certification process. RC22 adds a fail-fast target-runtime closure gate after RC21 stabilized the real Laragon TypeScript error inventory; RC20 exact-source attestation, DB isolation, strict final DB matrix and production artifact re-validation remain intact.
+N1.0 is a stabilization gate. It does not add a new product domain. The current RC line converts the accumulated N0.x platform into a repeatable, fail-closed certification process. RC22 adds a fail-fast target-runtime closure gate after RC21 stabilized the real target environment TypeScript error inventory; RC20 exact-source attestation, DB isolation, strict final DB matrix and production artifact re-validation remain intact.
 
 ## Platform identity
 
@@ -80,7 +80,7 @@ Credentials use `NEXORA_CERT_<DRIVER>_HOST`, `_PORT`, `_USERNAME`, and `_PASSWOR
 
 `scripts/setup-zero.*` now removes the root `.env` and deliberately does not copy `.env.example` back before the browser flow. `scripts/zero-state-verify.php` confirms that installer/deployment locks and a root `.env` are absent. This certifies the actual clean-ZIP bootstrap path rather than a pre-seeded Laravel environment.
 
-For Laragon the target browser URL remains:
+For target environment the target browser URL remains:
 
 ```text
 https://nexora/
@@ -112,7 +112,7 @@ RC1 removed those four classes of drift and made Source Guard reject their retur
 
 Automated certification is not the same as final stable certification. Before Nexora can move from N1.0 CERTIFYING to a stable release, evidence is still required for:
 
-- clean browser installation on supported Windows/Laragon and server targets;
+- clean browser installation on supported Windows/target environment and server targets;
 - WCAG 2.2 AA browser/manual audit;
 - responsive + RTL browser matrix;
 - backup/restore rehearsal using disposable data;
@@ -135,7 +135,7 @@ Production certification is lockfile-driven. `composer.lock` and `package-lock.j
 
 ## RC16 filesystem / path portability
 
-RC16 makes Windows Laragon and Linux filesystem behavior part of the release boundary. `scripts/filesystem-contract-verify.php` checks repository case-fold collisions, Windows-invalid names, PSR-4 filename/class casing, local App import casing and hard-coded path separators. `AtomicFileWriter` centralizes crash-aware state publication with destination-local temporary files, flush/fsync and Windows-safe replacement. `nexora:filesystem:doctor` probes required runtime paths. Theme/Extension ZIP installers reject case-insensitive duplicate entries and symbolic-link entries before extraction.
+RC16 makes Windows target environment and Linux filesystem behavior part of the release boundary. `scripts/filesystem-contract-verify.php` checks repository case-fold collisions, Windows-invalid names, PSR-4 filename/class casing, local App import casing and hard-coded path separators. `AtomicFileWriter` centralizes crash-aware state publication with destination-local temporary files, flush/fsync and Windows-safe replacement. `nexora:filesystem:doctor` probes required runtime paths. Theme/Extension ZIP installers reject case-insensitive duplicate entries and symbolic-link entries before extraction.
 
 ## RC17 large-file / transfer safety
 
@@ -159,7 +159,7 @@ RC20 binds every automated and operator evidence stage to the exact source-tree 
 
 ## RC21 target frontend typecheck
 
-RC21 guards the target build regressions reported by Laragon: recursively serializable Inertia `useForm` data, `RequestPayload` router payloads, non-chainable `transform()` semantics, Writer nested form values and the shared navigation component API. `scripts/inertia-frontend-contract-verify.php` is a dependency-free early gate; the real `npm run build` on the reviewed locked dependency graph remains mandatory before N1.0 can close.
+RC21 guards the target build regressions reported by target environment: recursively serializable Inertia `useForm` data, `RequestPayload` router payloads, non-chainable `transform()` semantics, Writer nested form values and the shared navigation component API. `scripts/inertia-frontend-contract-verify.php` is a dependency-free early gate; the real `npm run build` on the reviewed locked dependency graph remains mandatory before N1.0 can close.
 
 
 ## RC22 target runtime closure runner

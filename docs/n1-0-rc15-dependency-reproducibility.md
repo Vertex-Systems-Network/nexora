@@ -15,4 +15,4 @@ RC15 closes mutable dependency-resolution gaps before N1.0 can ship.
 
 ## Current limitation
 
-The RC15 source artifact does not fabricate lockfiles. The current execution host cannot resolve Composer/npm dependencies, so lockfiles remain pending until generated/reviewed on the trusted Laragon/maintainer environment. Therefore dependency-backed/full certification remains BLOCKED here by design.
+The RC15 source artifact does not fabricate lockfiles. The current execution host cannot resolve Composer/npm dependencies, so lockfiles remain pending until generated/reviewed on the trusted target environment/maintainer environment. Therefore dependency-backed/full certification remains BLOCKED here by design.

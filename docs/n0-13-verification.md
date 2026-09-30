@@ -17,7 +17,7 @@ Verified in the build container before packaging:
 
 ## Dependency-backed build status
 
-An actual `npm install --no-audit --no-fund` was attempted in this build environment but the package registry request timed out before dependencies were installed. Therefore this report does **not** claim that `npm run build`, Vitest, Laravel tests, or MySQL migrations passed here. The user’s clean Laragon zero-install run remains the dependency-backed integration gate.
+An actual `npm install --no-audit --no-fund` was attempted in this build environment but the package registry request timed out before dependencies were installed. Therefore this report does **not** claim that `npm run build`, Vitest, Laravel tests, or MySQL migrations passed here. The user’s clean target environment zero-install run remains the dependency-backed integration gate.
 
 The two reported TypeScript defects were addressed directly in source:
 

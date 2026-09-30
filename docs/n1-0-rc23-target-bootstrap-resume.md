@@ -4,7 +4,7 @@ RC23 is an operational closure pass, not a product-domain release. It sits on to
 
 ## Goals
 
-- Diagnose Laragon/Windows target prerequisites before dependency installation.
+- Diagnose target environment/Windows target prerequisites before dependency installation.
 - Never auto-download Composer/PHP/Node or silently resolve an unlocked dependency graph.
 - Record the active PHP binary/php.ini, required PHP extensions and certified toolchain ranges.
 - Resume selected expensive PASS steps only when platform, exact source SHA, both lock hashes and installed dependency fingerprints still match.
@@ -14,7 +14,7 @@ RC23 is an operational closure pass, not a product-domain release. It sits on to
 
 ## Operator flow
 
-Windows/Laragon:
+Windows/target environment:
 
 ```bat
 scripts\target-environment-bootstrap.bat

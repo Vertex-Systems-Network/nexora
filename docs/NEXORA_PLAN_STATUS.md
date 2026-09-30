@@ -107,7 +107,7 @@ C1 consolidates the former RC24-RC27 prerequisite/dependency work into one execu
 
 C1 owns: active target PHP/extensions, Composer/Node/npm policy, reviewed `composer.lock` + `package-lock.json`, locked installs, installed dependency graph verification, Inertia source contract, TypeScript, Vitest, Vite production build, dependency provenance/audit and RC9 build-asset budgets. Composer dependency installation uses `--no-scripts`; Laravel/application runtime boot is deliberately deferred to C2.
 
-C1 never refreshes lockfiles, never accepts reviewed locks, never downloads PHP/Composer, and never modifies php.ini unless the operator explicitly invokes the existing Windows/Laragon-only `--apply-extensions` path.
+C1 never refreshes lockfiles, never accepts reviewed locks, never downloads PHP/Composer, and never modifies php.ini unless the operator explicitly invokes the existing Windows/target environment-only `--apply-extensions` path.
 
 Primary target command:
 
@@ -148,14 +148,14 @@ Primary command after C1-C5 target PASS:
 scripts\n1-c6-final-certify.bat --base-url=https://TARGET --evidence=<C6-HA-KIT-DIR>
 ```
 
-## N1.0 Release Candidate certification — RC27 Laragon prerequisite remediation status
+## N1.0 Release Candidate certification — RC27 target environment prerequisite remediation status
 
 RC27 does not add a product feature. It adds an explicit, reversible remediation layer for the prerequisite blockers isolated by the RC26 one-command target gate:
 
 - platform version `1.0.0-rc.27`;
-- `scripts/target-prerequisite-remediate.*` inspects the active PHP binary, loaded `php.ini`, extension directory, required extension DLL availability and Laragon Composer candidates without downloading or installing software;
-- review-only is the default; `--apply-extensions` is explicit, Windows/Laragon-only, enables only required extensions whose matching DLL exists, checksum-verifies a timestamped `php.ini` backup and the published result, then requires a Laragon restart;
-- if trusted Laragon Composer files exist but are not callable on PATH, RC27 writes a session-only `nexora-target-env.cmd` helper under protected runtime storage rather than changing global/user PATH;
+- `scripts/target-prerequisite-remediate.*` inspects the active PHP binary, loaded `php.ini`, extension directory, required extension DLL availability and target environment Composer candidates without downloading or installing software;
+- review-only is the default; `--apply-extensions` is explicit, Windows/target environment-only, enables only required extensions whose matching DLL exists, checksum-verifies a timestamped `php.ini` backup and the published result, then requires a target environment restart;
+- if trusted target environment Composer files exist but are not callable on PATH, RC27 writes a session-only `nexora-target-env.cmd` helper under protected runtime storage rather than changing global/user PATH;
 - target intake and the RC26 orchestrator now surface the remediation command when prerequisite intake fails; lockfile acceptance remains a separate explicit maintainer action.
 - `scripts/target-certification-orchestrator.{bat,ps1,sh}` runs prerequisite intake, reviewed-lock verification, target runtime readiness/full isolated certification, optional operator-evidence validation/sealing, closure dashboard and optional final production sealing in a fixed order;
 - the orchestrator never accepts dependency locks on behalf of a maintainer, never edits php.ini, never runs `composer update`/unlocked npm install, and never calls destructive database reset/fresh commands directly;
@@ -180,7 +180,7 @@ N1.0 remains **CERTIFYING — TARGET EXECUTION / C1-C6 REAL EVIDENCE**, not DONE
 
 ## N1.0 Release Candidate certification — RC24 target prerequisite / lock intake status
 
-N1.0 is intentionally a stabilization/certification gate rather than a broad feature release. RC24 adds Laragon-aware prerequisite intake and explicit reviewed-lock attestation on top of RC23 target bootstrap/resume and RC22 fail-fast runtime closure; it preserves RC21 frontend stabilization, RC20 final-closure integrity and RC19 concurrency protections:
+N1.0 is intentionally a stabilization/certification gate rather than a broad feature release. RC24 adds target environment-aware prerequisite intake and explicit reviewed-lock attestation on top of RC23 target bootstrap/resume and RC22 fail-fast runtime closure; it preserves RC21 frontend stabilization, RC20 final-closure integrity and RC19 concurrency protections:
 
 - platform version `1.0.0-rc.24`; built-in theme/Forge package compatibility window remains compatible with N0.34-controlled packages through the 1.x release-candidate line;
 - one cross-platform `scripts/certify-release.php` runner for source preflight, package discovery, route/scheduler boot, isolated destructive certification database, migrations, seed, runtime sync/cache, PHP tests, Pint, TypeScript typecheck, frontend tests, production build, framework optimize smoke, optional HTTP smoke and certified production packaging;
@@ -196,7 +196,7 @@ N1.0 is intentionally a stabilization/certification gate rather than a broad fea
 - RC2 fixes the Enterprise dependency typo from the nonexistent `nexora.identity` module to the registered `nexora.identity-access ^0.5` module, which was blocking Composer `package:discover`.
 
 - RC3 fixes `RuntimeNodeHeartbeat` to use Laravel's standard two-argument middleware `handle(Request, Closure)` contract and constructor-inject runtime services, eliminating the reported four-argument middleware crash.
-- RC3 performs the first dependency-backed frontend error sweep from the target Laragon build log: 76 TypeScript errors across 11 files were traced to Inertia v3 form-data constraints, non-chainable `transform()`, request payload typing, sidebar `NavLink` misuse, and recursive Writer payload typing.
+- RC3 performs the first dependency-backed frontend error sweep from the target target environment build log: 76 TypeScript errors across 11 files were traced to Inertia v3 form-data constraints, non-chainable `transform()`, request payload typing, sidebar `NavLink` misuse, and recursive Writer payload typing.
 - RC3 adds `scripts/frontend-contract-verify.php` and certification/Source Guard rules so middleware signature regressions, chained Inertia transforms, known `Record<string, unknown>` form regressions, and horizontal NavLink misuse fail before production packaging.
 
 - RC4 adds a dependency-free Laravel runtime-contract analyzer across every local HTTP middleware, bootstrap middleware declaration/custom alias, scheduled command/callback, queued job and service provider before framework boot.
@@ -239,7 +239,7 @@ N1.0 is intentionally a stabilization/certification gate rather than a broad fea
 - RC11 adds `closure-status.json` / `closure-status.md`, which fail closed across automated certification, build assets, target HTTP performance, browser matrix, disposable-target restore, multi-node HA, final evidence and production package sealing.
 - RC11 keeps production packaging locked in `--final` mode until `NEXORA_CERT_FINAL_EVIDENCE=1` evidence passes for the exact platform version; placeholder/missing evidence remains BLOCKED rather than SKIP/PASS.
 - RC12 adds `scripts/target-diagnostics.php` plus BAT/PowerShell/Linux wrappers. It captures source contracts, toolchain identity, Composer/Laravel bootstrap, frontend type/test/build output, optional full isolated certification and the final closure ledger into redacted per-step logs.
-- RC12 diagnostics never dumps `.env` or ambient environment variables; password/token/cookie-shaped values are redacted, and the collector still produces a bundle when commands fail so the first real Laragon blocker can be diagnosed without losing later context.
+- RC12 diagnostics never dumps `.env` or ambient environment variables; password/token/cookie-shaped values are redacted, and the collector still produces a bundle when commands fail so the first real target environment blocker can be diagnosed without losing later context.
 - `--install-deps` captures Composer/npm installation failures. `--full` additionally invokes the existing isolated certification database/test runner; it does not weaken destructive database-name safeguards.
 - RC13 adds `nexora:upgrade:preflight`, `nexora:upgrade:plan`, `nexora:upgrade:apply --yes` and `nexora:upgrade:status` for existing installations. The current source tree never assumes that replacing files makes the database safe to migrate.
 - RC13 compares the installed lock version with the target source tree, rejects downgrades/out-of-window sources, checks pending core migrations, validates enabled extension and active-theme Nexora constraints, and surfaces forward-only extension migration rollback barriers.
@@ -259,13 +259,13 @@ N1.0 is intentionally a stabilization/certification gate rather than a broad fea
 - RC15 removes unlocked npm fallback from final target certification. Dependency installation is deterministic: Composer installs the locked graph and npm uses `npm ci`; certification never creates or mutates lockfiles. A separate maintainer-only lock refresh workflow exists for intentional dependency updates.
 - RC15 records and enforces certified PHP/Composer/Node/npm runtime ranges, checks package-manager metadata, and adds Composer/npm vulnerability audit evidence bound to the exact SHA-256 hashes of both lockfiles.
 - RC15 production packaging now requires matching `dependency-audit.json` and `dependency-provenance.json` evidence and seals the dependency-policy, audit/provenance reports, Composer lock and npm lock hashes into `nexora-release.json`.
-- The current RC15 source package intentionally remains unable to claim dependency-backed PASS while lockfiles/dependencies are absent on this execution host; the target Laragon run must create/review the lockfiles on a trusted maintainer machine and commit them before final certification.
+- The current RC15 source package intentionally remains unable to claim dependency-backed PASS while lockfiles/dependencies are absent on this execution host; the target target environment run must create/review the lockfiles on a trusted maintainer machine and commit them before final certification.
 
 - RC16 adds `AtomicFileWriter`, `PortablePath`, `FilesystemDoctor` and `nexora:filesystem:doctor`; critical installation/environment/node/upgrade/backup metadata writes use destination-local temporary files, flush/fsync where available, and fail closed instead of silently falling back to partial in-place writes.
 - RC16 source certification rejects case-insensitive repository collisions, Windows reserved/trailing-dot/trailing-space/colon path components, over-budget relative paths, PSR-4 filename/class-case drift, missing case-sensitive `App\...` imports and hard-coded backslash separators inside Laravel path helpers.
 - Theme and Extension package installation now rejects archive path traversal, Windows-nonportable names, case-insensitive duplicate paths and ZIP symbolic-link entries before publication, preventing packages that behave differently on Windows versus Linux.
 - The pre-Laravel deployment/installer bootstrap uses an equivalent dependency-free atomic-state path for deployment access/state/recovery journals and bootstrap APP_KEY persistence. Mutable installation journals retain explicit `flock` concurrency and now flush/fsync state writes.
-- RC16 retains the RC15 rule that missing reviewed lockfiles/dependencies block dependency-backed certification; filesystem source PASS is not a substitute for real Laragon/Linux runtime evidence.
+- RC16 retains the RC15 rule that missing reviewed lockfiles/dependencies block dependency-backed certification; filesystem source PASS is not a substitute for real target environment/Linux runtime evidence.
 
 - RC17 adds `config/nexora-transfers.php`, `TransferSafety`, `TransferDoctor` and `php artisan nexora:transfer:doctor`; protected transfer staging uses bounded chunked copies, destination-local atomic publication, partial-write loops, free-space preflight and fail-closed cleanup.
 - Media uploads now verify stored byte count and streaming SHA-256 after publication, clean failed/partial objects, and cap GD image-variant source bytes before in-memory decode instead of claiming unbounded streaming image transforms.
@@ -292,7 +292,7 @@ RC10 was the final feature-scale implementation block inside N1.0. RC11–RC25 a
 - Workflow, outbound-webhook and newsletter workers take transaction-backed processing claims with stale-claim TTLs. Concurrent duplicate workers return without repeating the same action. External SMTP/HTTP effects remain explicitly **at-least-once**; Nexora does not claim impossible cross-provider exactly-once semantics.
 - Document and Studio optimistic concurrency checks now run against `lockForUpdate()` rows inside the write transaction, closing the time-of-check/time-of-use overwrite window. Document revision numbering and Studio revision numbering are serialized by the parent-row lock.
 
-- RC21 formalizes the real Laragon frontend build failure as a release-candidate gate: the supplied target log reported 76 TypeScript errors across 11 Admin files.
+- RC21 formalizes the real target environment frontend build failure as a release-candidate gate: the supplied target log reported 76 TypeScript errors across 11 Admin files.
 - Inertia v3 `useForm` nested payloads now use `FormDataConvertible`-compatible values, router helpers use `RequestPayload`, and recursive Writer payloads stay FormData-compatible instead of `Record<string, unknown>`.
 - `useForm.transform()` is treated as a void mutator and may not be chained into `post/put/patch/delete`; known normalization sites transform first and submit separately.
 - Helpdesk/Membership horizontal navigation uses shared `ButtonLink` instead of violating the sidebar `NavLink` label+icon contract.
@@ -301,13 +301,13 @@ RC10 was the final feature-scale implementation block inside N1.0. RC11–RC25 a
 - RC22 adds `scripts/target-runtime-run.php` plus Windows/PowerShell/Linux wrappers as the fail-fast counterpart to RC12 diagnostics: diagnostics keep collecting after failures, while the target runtime gate stops at the first required blocker by default.
 - RC22 refuses unlocked dependency resolution, optionally installs only the reviewed Composer/npm lock graphs, then runs real TypeScript/Vitest/Vite/build-budget gates before Laravel package discovery, route/scheduler boot and all current runtime doctors.
 - RC22 `--full` delegates destructive migrations/seeding/PHPUnit to the existing isolated certification database engine; the target-runtime runner itself never runs `migrate:fresh` or `migrate:reset` against the ambient project database.
-- RC22 writes redacted per-step logs, machine-readable `first_blocker` evidence and an optional ZIP bundle so the next Laragon failure can be fixed from one artifact rather than copied terminal fragments.
+- RC22 writes redacted per-step logs, machine-readable `first_blocker` evidence and an optional ZIP bundle so the next target environment failure can be fixed from one artifact rather than copied terminal fragments.
 
 - RC23 adds `scripts/target-environment-bootstrap.php` plus BAT/PowerShell/shell wrappers. It reports active PHP/php.ini, required PHP extensions, Composer/Node/npm range compatibility and reviewed lockfile presence without auto-downloading tools or mutating dependency locks.
 - RC23 target-runtime evidence is bound to platform version, exact source-tree SHA-256, Composer/npm lock hashes and installed dependency fingerprints. `--resume-latest` / `--resume=<run-id>` may reuse only selected heavy frontend/install PASS steps when those exact fingerprints still match; Laravel/runtime doctors rerun so environment drift is not hidden.
 - RC23 adds `target-runtime-evidence-verify.php` to reject unsafe ZIP paths, wrong-version/source/lock evidence, missing step logs and fake PASS bundles; exact PASS evidence can be sealed under protected certification storage.
 
-- RC24 adds `target-prerequisite-intake` plus BAT/PowerShell/shell wrappers to report the active PHP binary, loaded/scanned php.ini, extension directory, Laragon detection and exact prerequisite remediation without auto-editing or auto-downloading the toolchain.
+- RC24 adds `target-prerequisite-intake` plus BAT/PowerShell/shell wrappers to report the active PHP binary, loaded/scanned php.ini, extension directory, target environment detection and exact prerequisite remediation without auto-editing or auto-downloading the toolchain.
 - RC24 distinguishes lockfile presence from lockfile review: `dependency-lock-review` binds explicit maintainer acceptance to SHA-256 of `composer.json`, `package.json`, `composer.lock` and `package-lock.json`; any manifest/lock drift invalidates the attestation.
 - Target runtime and full certification require the reviewed-lock attestation before deterministic dependency installation/certification. Intake/review evidence remains runtime-local, zero-state-cleaned and excluded from production archives.
 - Generated target-bootstrap and target-runtime evidence remains excluded from true-zero source packages and certified production archives.
@@ -577,7 +577,7 @@ Implemented in N0.30:
 
 ## RC24 immediate operator order
 
-1. Run `scripts\target-prerequisite-intake.bat` on the trusted Laragon target.
+1. Run `scripts\target-prerequisite-intake.bat` on the trusted target environment target.
 2. Fix the active PHP/Composer prerequisites it reports; rerun until the toolchain portion is green.
 3. Run `scripts\refresh-dependency-locks.bat` only for the intentional dependency-lock refresh, then review the generated lockfile diff.
 4. Explicitly accept those exact hashes with `scripts\dependency-lock-review.bat --accept --reviewer=<name> --confirm=REVIEWED`.
@@ -588,7 +588,7 @@ Implemented in N0.30:
 
 ## RC25 immediate operator order
 
-1. Run `scripts\target-prerequisite-intake.bat` on Laragon and close PHP/Composer prerequisites.
+1. Run `scripts\target-prerequisite-intake.bat` on target environment and close PHP/Composer prerequisites.
 2. Generate/review locks and accept them with `scripts\dependency-lock-review.bat --accept --reviewer="..." --confirm=REVIEWED`.
 3. Run `scripts\target-runtime-run.bat --install-deps`, then `--full` once readiness is green.
 4. Collect real operator evidence using the existing fail-closed templates for zero-install, upgrade, browser/A11y/RTL, backup/restore and multi-node HA.
@@ -610,7 +610,7 @@ The remaining code-side closure safeguards are consolidated at `1.0.0-rc.39`. `s
 
 ## N1.0 Target Execution v2.4 — Session Integrity & Final Release Seal
 
-The current target-certification flow now uses a single exact-source/reviewed-lock certification session for C4-C6 operator evidence, rejects concurrent master target runs, enforces bounded future-clock skew and session freshness, and produces a sanitized certification evidence bundle plus external release seal alongside the production ZIP. The existing eleven-domain closure count is unchanged: `production_package` now represents the independently verified production ZIP + evidence bundle + release seal as one sealed release domain. Real Laragon/browser/HA observations remain mandatory.
+The current target-certification flow now uses a single exact-source/reviewed-lock certification session for C4-C6 operator evidence, rejects concurrent master target runs, enforces bounded future-clock skew and session freshness, and produces a sanitized certification evidence bundle plus external release seal alongside the production ZIP. The existing eleven-domain closure count is unchanged: `production_package` now represents the independently verified production ZIP + evidence bundle + release seal as one sealed release domain. Real target environment/browser/HA observations remain mandatory.
 
 
 ## N1.0 Target Execution v2.5 — Signed Release Trust & Offline Verification
@@ -624,7 +624,7 @@ The current target-certification flow now uses a single exact-source/reviewed-lo
 | Portable/offline release verification | APPLIED / SOURCE PASS |
 | Production/evidence ZIP archive hygiene | APPLIED / SOURCE PASS |
 | Certification-session finalization receipt | APPLIED / SOURCE PASS |
-| Real Laragon C1-C3 target execution | REQUIRED |
+| Real target environment C1-C3 target execution | REQUIRED |
 | C4-C5 operator/browser evidence | REQUIRED |
 | C6 real 2+ node HA evidence | REQUIRED |
 | Signed production customer release | BLOCKED until all target evidence passes |
@@ -685,7 +685,7 @@ N1.0 remains CERTIFYING. v2.8 does not claim a recovery PASS until a real prior 
 | Safe stale maintenance-lease cleanup command | APPLIED / SOURCE PASS |
 | C4 evidence expanded for failure/recovery drill | APPLIED / SOURCE PASS |
 | Automatic database rollback/restore | DISABLED |
-| Real Laragon C1-C3 target execution | REQUIRED |
+| Real target environment C1-C3 target execution | REQUIRED |
 | Real C4 protected-stage failure/recovery rehearsal | REQUIRED |
 | C5 browser/performance evidence | REQUIRED |
 | C6 real HA + signed production release | REQUIRED |
@@ -714,7 +714,7 @@ N1.0 remains CERTIFYING. v2.9 is source-certified upgrade safety code; it is not
 | C4 evidence expanded for distributed rehearsal | APPLIED / SOURCE PASS |
 | Automatic peer drain | DISABLED |
 | Automatic destructive DB rollback | DISABLED |
-| Real C1-C3 Laragon execution | REQUIRED |
+| Real C1-C3 target environment execution | REQUIRED |
 | Real C4 distributed/failure rehearsal | REQUIRED |
 | C5 browser/performance evidence | REQUIRED |
 | C6 real multi-node HA / signed release | REQUIRED |
@@ -763,7 +763,7 @@ N1.0 remains CERTIFYING. v3.0 proves source-level distributed upgrade invariants
 | C6 HA observations | 14 REQUIRED ON REAL 2+ NODE TARGET |
 | Automatic cache purge | DISABLED |
 | Same-version wrong-generation compatibility | DISABLED |
-| Real C1-C3 Laragon execution | REQUIRED |
+| Real C1-C3 target environment execution | REQUIRED |
 | Real C4 cutover/deployment-generation rehearsal | REQUIRED |
 | C5 browser/A11y/RTL/Web-Vitals evidence | REQUIRED |
 | C6 HA + signed production release | REQUIRED |
@@ -817,7 +817,7 @@ N1.0 remains target certification. v3.3 strengthens source/runtime invariants; i
 | Automatic PHP-FPM restart | DISABLED |
 | Automatic traffic restoration | DISABLED |
 | Automatic destructive database rollback | DISABLED |
-| C1-C3 real Laragon execution | REQUIRED |
+| C1-C3 real target environment execution | REQUIRED |
 | C4/C5/C6 real evidence | REQUIRED |
 | N1.1 | BLOCKED until N1.0 real PASS |
 
@@ -848,7 +848,7 @@ N1.0 remains TARGET CERTIFICATION. v3.5 source certification proves activation/c
 | Real C4/C5/C6 operator evidence | REQUIRED |
 | N1.1 | BLOCKED until N1.0 real PASS |
 
-N1.0 remains TARGET CERTIFICATION. v3.6 proves source-level runtime-engine identity/fencing only; it does not claim the real Laragon/FPM/CLI/multi-node engine profile has passed.
+N1.0 remains TARGET CERTIFICATION. v3.6 proves source-level runtime-engine identity/fencing only; it does not claim the real target environment/FPM/CLI/multi-node engine profile has passed.
 
 
 ## N1.0 Target Execution v3.7 — Database Data Plane / Schema Attestation
@@ -954,7 +954,7 @@ N1.0 remains TARGET CERTIFICATION. v3.9 proves source-level service/network iden
 | N1.0 | TARGET CERTIFICATION |
 | N1.1 | BLOCKED until N1.0 real PASS |
 
-N1.0 remains target certification. v4.0 is a source-level hardening claim only; it does not claim real Laragon clock skew, filesystem semantics or multi-node host convergence has passed.
+N1.0 remains target certification. v4.0 is a source-level hardening claim only; it does not claim real target environment clock skew, filesystem semantics or multi-node host convergence has passed.
 
 
 ## N1.0 Target Execution v4.1 — Runtime Resource / Capacity Envelope
@@ -988,7 +988,7 @@ N1.0 remains target certification. v4.0 is a source-level hardening claim only; 
 | N1.0 | TARGET CERTIFICATION |
 | N1.1 | BLOCKED until N1.0 real PASS |
 
-N1.0 remains TARGET CERTIFICATION. v4.1 proves source-level resource-policy identity and admission contracts only; it does not claim the real Laragon/production host has sufficient memory, disk, file descriptors, backup scratch space or multi-node capacity headroom.
+N1.0 remains TARGET CERTIFICATION. v4.1 proves source-level resource-policy identity and admission contracts only; it does not claim the real target environment/production host has sufficient memory, disk, file descriptors, backup scratch space or multi-node capacity headroom.
 
 
 ## N1.0 Target Execution v4.2 — Runtime Policy Plane Convergence
@@ -1011,7 +1011,7 @@ N1.0 remains TARGET CERTIFICATION. v4.1 proves source-level resource-policy iden
 | Deployment-generation policy-plane binding | APPLIED / SOURCE PASS |
 | Release/provenance/seal policy-plane binding | APPLIED / SOURCE PASS |
 | Runtime policy status command | APPLIED / SOURCE PASS |
-| Historical Laragon Inertia regression class | GUARDED — 122 Admin TS/TSX / 11 targets |
+| Historical target environment Inertia regression class | GUARDED — 122 Admin TS/TSX / 11 targets |
 | C2 runtime certification | 40 GATES DEFINED / REAL TARGET REQUIRED |
 | C4 operator rehearsal | 121 CHECKS DEFINED / REAL TARGET REQUIRED |
 | C6 HA rehearsal | 27 CHECKS DEFINED / REAL 2+ NODE TARGET REQUIRED |
@@ -1032,7 +1032,7 @@ Percentages below are milestone completion, not production-certification claims.
 - N1.2–N1.26: **0% — planned** `░░░░░░░░░░░░░░░░░░░░`
 - N2.0 Stable Production: **0% — blocked** `░░░░░░░░░░░░░░░░░░░░`
 
-N1.0 remains TARGET CERTIFICATION. The historical Laragon build proved target TypeScript execution was attempted, but the current rc.57 source still requires a fresh dependency-backed C1 rerun before any C1 percentage can become certified.
+N1.0 remains TARGET CERTIFICATION. The historical target environment build proved target TypeScript execution was attempted, but the current rc.57 source still requires a fresh dependency-backed C1 rerun before any C1 percentage can become certified.
 
 ## N1.0 Target Execution v4.3 — Operational Process Plane / Process-Role Liveness
 
@@ -1059,7 +1059,7 @@ N1.0 remains TARGET CERTIFICATION. The historical Laragon build proved target Ty
 | Deployment/cutover/lineage process visibility | APPLIED / SOURCE PASS |
 | Admin System Health process-policy visibility | APPLIED / SOURCE PASS |
 | Production process defaults | APPLIED / SOURCE PASS |
-| Historical Laragon Inertia regression class | GUARDED — fresh rc.58 C1 rerun required |
+| Historical target environment Inertia regression class | GUARDED — fresh rc.58 C1 rerun required |
 | C2 runtime certification | 41 GATES DEFINED / REAL TARGET REQUIRED |
 | C4 operator rehearsal | 131 CHECKS DEFINED / REAL TARGET REQUIRED |
 | C6 HA rehearsal | 31 CHECKS DEFINED / REAL 2+ NODE TARGET REQUIRED |
@@ -1128,7 +1128,7 @@ N1.0 remains TARGET CERTIFICATION. A future Laravel 13.x minor/patch dependency 
 | Stale active tenant write fail-closed validation | APPLIED / SOURCE PASS |
 | TenantContext scoped restoration | APPLIED / SOURCE PASS |
 | Tenant regression Feature tests | 3 DEFINED / REAL TARGET REQUIRED |
-| Historical Laragon TypeScript targets | 11 GUARDED |
+| Historical target environment TypeScript targets | 11 GUARDED |
 | Human-readable high-density TypeScript targets | 8 REFACTORED / GUARDED |
 | Inertia source contract | PASS |
 | TypeScript syntax parser | SOURCE PASS / REAL TSC REQUIRED |
@@ -1326,7 +1326,7 @@ Fastest real-target path after reviewed locks are ready: `scripts\n1-target-fast
 - Strict N1.0 chunks in a clean source archive: **0/6** `░░░░░░░░░░░░░░░░░░░░`
 - Granular N1.0 target gates in a clean source archive: **0/105** `░░░░░░░░░░░░░░░░░░░░`
 
-The last two values are intentionally zero in a clean source package because target evidence is generated on the authoritative Laragon/browser/database/HA environments and is not bundled into the source archive. Unlike the previous display, a partial target run now moves the granular percentage immediately even when the enclosing C1–C6 chunk has not yet reached full PASS.
+The last two values are intentionally zero in a clean source package because target evidence is generated on the authoritative target environment/browser/database/HA environments and is not bundled into the source archive. Unlike the previous display, a partial target run now moves the granular percentage immediately even when the enclosing C1–C6 chunk has not yet reached full PASS.
 
 
 ## N1.0 Target Execution v5.2 — Exact Source Activation & Stale Web-Process Guard
@@ -1344,7 +1344,7 @@ The last two values are intentionally zero in a clean source package because tar
 | `nexora:source:status --assert-current` | APPLIED / SOURCE PASS |
 | `nexora:source:activate --assert-current` | APPLIED / SOURCE PASS |
 | Windows source activation helper | APPLIED / SOURCE PASS |
-| Automatic Laragon web-service restart | DISABLED / OPERATOR-CONTROLLED |
+| Automatic target environment web-service restart | DISABLED / OPERATOR-CONTROLLED |
 | Granular target denominator | **105 / UNCHANGED** |
 | Strict C1–C6 denominator | **6 / UNCHANGED** |
 
@@ -1375,7 +1375,7 @@ The last two values are intentionally zero in a clean source package because tar
 | Granular target denominator | **105 — UNCHANGED** |
 | Strict chunk denominator | **6 — UNCHANGED** |
 | Source implementation | 100% / SOURCE CERTIFIED TARGET |
-| Real target evidence | CONTINUES ON LARAGON |
+| Real target evidence | CONTINUES ON TARGET_ENVIRONMENT |
 | N1.1 | BLOCKED until N1.0 real PASS |
 
 ### Progress semantics
@@ -1418,7 +1418,7 @@ The last two values are intentionally zero in a clean source package because tar
 - Real granular target evidence in a clean source archive: **0/105** `░░░░░░░░░░░░░░░░░░░░`
 - Strict target chunks in a clean source archive: **0/6** `░░░░░░░░░░░░░░░░░░░░`
 
-The real target bars are intentionally not advanced by source-only diagnostics. On the authoritative Laragon target, source activation is considered converged only after disk `22/22`, loaded runtime `20/20`, and the secure one-time CLI/web acknowledgement all pass.
+The real target bars are intentionally not advanced by source-only diagnostics. On the authoritative target environment target, source activation is considered converged only after disk `22/22`, loaded runtime `20/20`, and the secure one-time CLI/web acknowledgement all pass.
 
 
 ## N1.0 Target Execution v5.5 — Installer Host/Clock Preflight Stabilization
@@ -1443,7 +1443,7 @@ The real target bars are intentionally not advanced by source-only diagnostics. 
 | N1.0 | TARGET CERTIFICATION |
 | N1.1 | BLOCKED until N1.0 real PASS |
 
-This batch fixes the observed late host/clock installation blocker source-side. It does not claim the real Laragon host clock is within strict C2/C6 certification tolerance until target evidence is collected.
+This batch fixes the observed late host/clock installation blocker source-side. It does not claim the real target environment host clock is within strict C2/C6 certification tolerance until target evidence is collected.
 
 
 ## N1.0 Target Execution v5.6 — Installer Runtime Readiness Preflight
@@ -1541,14 +1541,14 @@ The reported ~17,999,982 ms skew is approximately +05:00 and matches the previou
 | N1.0 | TARGET CERTIFICATION |
 | N1.1 | BLOCKED until N1.0 real PASS |
 
-The v5.9 batch closes source/runtime drift and post-commit recovery ambiguity. It does not convert source validation into real target evidence; C1-C6 still require exact-source Laragon/database/browser/operator/HA execution.
+The v5.9 batch closes source/runtime drift and post-commit recovery ambiguity. It does not convert source validation into real target evidence; C1-C6 still require exact-source target environment/database/browser/operator/HA execution.
 
 
 ## N1.0 Target Execution v5.10 — Frontend Build Closure & Exact C1 Diagnostics
 
 | Item | Status |
 |---|---|
-| Historical Laragon compiler baseline | 76 ERRORS / 11 FILES / LOCKED |
+| Historical target environment compiler baseline | 76 ERRORS / 11 FILES / LOCKED |
 | Per-file historical distribution | 50,1,1,1,3,14,1,1,1,1,2 |
 | Source remediation | 76/76 / SOURCE PASS |
 | Real target compiler verification | PENDING EXACT TARGET RUN |
@@ -1616,7 +1616,7 @@ The exact target lock path is now: `refresh-dependency-locks.bat --confirm=REFRE
 | N1.0 | TARGET CERTIFICATION |
 | N1.1 | BLOCKED until real N1.0 PASS |
 
-The authoritative Laragon target still has to provide Composer/network/cache access so a real reproducible lock pair can be generated. Source certification does not fabricate lockfiles or claim C1 PASS.
+The authoritative target environment target still has to provide Composer/network/cache access so a real reproducible lock pair can be generated. Source certification does not fabricate lockfiles or claim C1 PASS.
 
 
 ## PKG-1 — Usable Release + C1 Closure
@@ -1644,7 +1644,7 @@ PKG-1 final live-login closure on Windows uses `scripts\pkg1-finalize-login-smok
 
 ### PKG-1 Composer bootstrap enhancement
 
-PKG-1 now self-bootstraps a verified local Composer when no system/Laragon Composer is available. This removes the manual Composer-install prerequisite while preserving fail-closed TLS/signature verification, dependency-toolchain fingerprinting and zero root-lock mutation before candidate review. PKG-1 target closure still requires real C1 14/14 and installer/login evidence.
+PKG-1 now self-bootstraps a verified local Composer when no system/target environment Composer is available. This removes the manual Composer-install prerequisite while preserving fail-closed TLS/signature verification, dependency-toolchain fingerprinting and zero root-lock mutation before candidate review. PKG-1 target closure still requires real C1 14/14 and installer/login evidence.
 
 ### PKG-1 rc.79 — environment + build provenance closure
 
@@ -1667,21 +1667,21 @@ PKG-1 target execution now short-circuits verified final closure and reusable C1
 
 ## PKG-1 rc.82 / v5.17 operator fast path
 
-The canonical Laragon command is now `scripts\pkg1-run.bat "REAL NAME" http://nexora`. It drives the existing resumable state machine automatically while preserving explicit human review, recovery, installer, and credential checkpoints. This changes no certification denominator: C1 remains 14 gates and N1.0 remains 105.
+The canonical target environment command is now `scripts\pkg1-run.bat "REAL NAME" http://nexora`. It drives the existing resumable state machine automatically while preserving explicit human review, recovery, installer, and credential checkpoints. This changes no certification denominator: C1 remains 14 gates and N1.0 remains 105.
 
 ## PKG-1 rc.83 / v5.18 Windows launcher parser fix
 
-The Laragon one-command launcher is now Windows PowerShell 5.1-safe: `pkg1-run.ps1` is ASCII-only/CRLF and `pkg1-run.bat` parses it with the installed Windows PowerShell parser before execution. This is a launcher compatibility fix only; C1 remains 14 gates and N1.0 remains 105.
+The target environment one-command launcher is now Windows PowerShell 5.1-safe: `pkg1-run.ps1` is ASCII-only/CRLF and `pkg1-run.bat` parses it with the installed Windows PowerShell parser before execution. This is a launcher compatibility fix only; C1 remains 14 gates and N1.0 remains 105.
 
 
 ## PKG-1 rc.84 / v5.19 PHP-first launcher
 
-The canonical Laragon command remains `scripts\pkg1-run.bat "REAL NAME" http://nexora`, but the batch entrypoint now runs the PHP state-machine launcher directly. Primary PKG-1 execution no longer depends on Windows PowerShell parsing. A canonical BLOCKED result stops after one failed attempt with the exact blocker instead of looping. PowerShell remains only for the hidden-password final login smoke and is parser-guarded. C1 stays 14 and the total denominator stays 105.
+The canonical target environment command remains `scripts\pkg1-run.bat "REAL NAME" http://nexora`, but the batch entrypoint now runs the PHP state-machine launcher directly. Primary PKG-1 execution no longer depends on Windows PowerShell parsing. A canonical BLOCKED result stops after one failed attempt with the exact blocker instead of looping. PowerShell remains only for the hidden-password final login smoke and is parser-guarded. C1 stays 14 and the total denominator stays 105.
 
 
 ## PKG-1 rc.85 / v5.20 Windows npm bridge
 
-The Laragon blocker where Composer passed but npm was reported unavailable is fixed at the central command-runner boundary. Windows `npm.cmd` / `npx.cmd` are translated to `node.exe + npm-cli.js` / `npx-cli.js`; the executed npm payload is fingerprinted, and `pkg1-status` checks the full toolchain before candidate generation. C1 remains 14 and the total target denominator remains 105.
+The target environment blocker where Composer passed but npm was reported unavailable is fixed at the central command-runner boundary. Windows `npm.cmd` / `npx.cmd` are translated to `node.exe + npm-cli.js` / `npx-cli.js`; the executed npm payload is fingerprinted, and `pkg1-status` checks the full toolchain before candidate generation. C1 remains 14 and the total target denominator remains 105.
 
 
 ## PKG-1 rc.86 / v5.21 npm bundled-integrity coverage

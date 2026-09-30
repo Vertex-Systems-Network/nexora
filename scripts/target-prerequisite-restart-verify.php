@@ -25,7 +25,7 @@ if (($ticket['source_tree_sha256']??null)!==$source['tree_sha256']) $fail('Resta
 $normalize = static fn (?string $path): string => strtolower(str_replace('\\','/',trim((string)$path)));
 $activeIni = php_ini_loaded_file() ?: null;
 if ($activeIni===null || !is_file($activeIni)) $fail('No active readable php.ini is loaded after restart.');
-if ($normalize($activeIni)!==$normalize((string)($ticket['php_ini']??''))) $fail('Active php.ini path changed after remediation; review the selected Laragon PHP build and rerun remediation.');
+if ($normalize($activeIni)!==$normalize((string)($ticket['php_ini']??''))) $fail('Active php.ini path changed after remediation; review the selected target environment PHP build and rerun remediation.');
 if ($normalize(PHP_BINARY)!==$normalize((string)($ticket['php_binary']??''))) $fail('Active PHP binary changed after remediation; rerun remediation for the selected PHP build.');
 $expectedIni=(string)($ticket['php_ini_sha256_after']??'');
 $actualIni=hash_file('sha256',$activeIni)?:'';

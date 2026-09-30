@@ -4,7 +4,7 @@
   "source_tree_sha256": "replace-with-source-attestation-sha256",
   "operator": "operator-name",
   "completed_at": "2026-08-17T19:30:00+05:00",
-  "target": "fresh-disposable-laragon-or-linux-target",
+  "target": "fresh-disposable-target-environment-or-linux-target",
   "checks": {
     "fresh_source_no_env": "fail",
     "browser_installer_reached": "fail",

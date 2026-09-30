@@ -15,7 +15,7 @@ if not exist "%HOME%" mkdir "%HOME%" >nul 2>&1
 if not defined APPDATA if defined USERPROFILE if exist "%USERPROFILE%\AppData\Roaming" set "APPDATA=%USERPROFILE%\AppData\Roaming"
 
 echo ======================================================
-echo Nexora Source Bootstrap - Windows / Laragon
+echo Nexora Source Bootstrap - Windows / target environment
 echo This prepares Composer + frontend build for the UI wizard.
 echo It does NOT run database migrations.
 echo ======================================================

@@ -4,13 +4,13 @@ This is not a seventh product/certification chunk. It is the operator execution 
 
 ## Dependency preparation phase
 
-The pack can now locate a trusted Composer executable or `composer.phar` under Laragon `bin/composer` without requiring a permanent PATH change. If lockfiles are missing or intentionally need refresh, run `scripts\n1-target-execution.bat --refresh-locks --confirm-refresh=REFRESH`. Lock generation uses Composer `--no-install` and npm `--package-lock-only`, writes a review dossier, and stops with `LOCK-REVIEW-REQUIRED`; it never creates reviewed-lock attestation automatically. Review the lockfile diff and explicitly run `scripts\dependency-lock-review.bat --accept --reviewer="REAL NAME" --confirm=REVIEWED`.
+The pack can now locate a trusted Composer executable or `composer.phar` under target environment `bin/composer` without requiring a permanent PATH change. If lockfiles are missing or intentionally need refresh, run `scripts\n1-target-execution.bat --refresh-locks --confirm-refresh=REFRESH`. Lock generation uses Composer `--no-install` and npm `--package-lock-only`, writes a review dossier, and stops with `LOCK-REVIEW-REQUIRED`; it never creates reviewed-lock attestation automatically. Review the lockfile diff and explicitly run `scripts\dependency-lock-review.bat --accept --reviewer="REAL NAME" --confirm=REVIEWED`.
 
 ## Automated phase
 
 Run `scripts\n1-target-execution.bat --install-deps --prepare-kits --operator="REAL NAME"`. The runner proves the exact source, then runs C1, C2 and C3 in order. It stops on the first blocker. It never accepts dependency locks, runs `composer update`, or owns destructive database commands directly.
 
-If Laragon PHP extension remediation is required, run `scripts\n1-target-execution.bat --apply-extensions`, restart Laragon, then rerun the normal command.
+If target environment PHP extension remediation is required, run `scripts\n1-target-execution.bat --apply-extensions`, restart target environment, then rerun the normal command.
 
 ## Operator phase
 
@@ -18,7 +18,7 @@ After C1-C3 PASS, the runner can create deterministic fail-closed C4/C5/C6 evide
 
 Then run `scripts\n1-target-execution.bat --base-url=https://TARGET --operator="REAL NAME" --c4-evidence=... --c5-evidence=... --c6-evidence=...`. C4, C5 and C6 execute in strict order; C6 owns final evidence aggregation and production packaging.
 
-Exit 0 means final N1.0 production closure passed. Exit 1 means a required gate failed. Exit 2 means an operator action, lock review, or Laragon restart is required.
+Exit 0 means final N1.0 production closure passed. Exit 1 means a required gate failed. Exit 2 means an operator action, lock review, or target environment restart is required.
 
 
 ## One-file support capsule

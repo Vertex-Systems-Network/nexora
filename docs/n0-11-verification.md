@@ -17,4 +17,4 @@ Verified in the build environment:
 - production release builder excludes protected environment runtime state
 - source tree was cleaned of `.env`, bootstrap key, fallback environment, active marker, sessions, private tool cache, `vendor`, `node_modules`, and generated frontend build before packaging
 
-Dependency-backed Laravel tests, Composer package discovery, MySQL migrations and the production Vite build are not claimed as executed in this build environment because Composer/MySQL extensions/tooling were not available here. The Windows/Laragon zero-install run remains the integration source of truth for those gates.
+Dependency-backed Laravel tests, Composer package discovery, MySQL migrations and the production Vite build are not claimed as executed in this build environment because Composer/MySQL extensions/tooling were not available here. The Windows/target environment zero-install run remains the integration source of truth for those gates.

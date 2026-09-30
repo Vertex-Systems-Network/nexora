@@ -1,4 +1,4 @@
-# N1.0 RC21 — Laragon Frontend Type Contract Stabilization
+# N1.0 RC21 — target environment Frontend Type Contract Stabilization
 
 RC21 is based on the real target `npm run build` error inventory. The target reported 76 TypeScript errors across 11 Admin files. The dominant failure classes were Inertia v3 form-data serialization constraints, `transform()` chaining, router payload typing, recursive Writer form values, and a shared `NavLink` API mismatch.
 

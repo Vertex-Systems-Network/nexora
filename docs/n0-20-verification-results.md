@@ -32,6 +32,6 @@ The clean source artifact intentionally does not contain `vendor`, `node_modules
 - `php artisan migrate:fresh --seed`
 - full Laravel/Pest suite
 - `npm run build`
-- browser-level Theme install/preview/activate/rollback against the user's Laragon/MySQL runtime
+- browser-level Theme install/preview/activate/rollback against the user's target environment/MySQL runtime
 
 Those remain mandatory integration gates through Nexora's zero-install / quality-check workflow on the target environment.

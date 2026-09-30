@@ -36,9 +36,24 @@ $cases = [
         'expected' => ['127.0.0.1:5173'],
     ],
     [
-        'name' => 'laragon development path is rejected',
-        'source' => 'const source = "D:\\laragon\\www\\nexora\\resources\\js\\app.tsx";',
-        'expected' => ['D:\\laragon\\'],
+        'name' => 'target-environment development path is rejected',
+        'source' => 'const source = "D:\\target-environment\\www\\nexora\\resources\\js\\app.tsx";',
+        'expected' => ['<windows-absolute-path>'],
+    ],
+    [
+        'name' => 'arbitrary Windows toolchain path is rejected',
+        'source' => 'C:\\dev\\projects\\nexora\\app.tsx',
+        'expected' => ['<windows-absolute-path>'],
+    ],
+    [
+        'name' => 'forward slash Windows path is rejected',
+        'source' => 'E:/workspace/nexora/resources/js/app.tsx',
+        'expected' => ['<windows-absolute-path>'],
+    ],
+    [
+        'name' => 'URL scheme and relative route remain valid',
+        'source' => 'https://example.com/Admin/Users/Form.tsx',
+        'expected' => [],
     ],
 ];
 

@@ -50,4 +50,4 @@ Therefore these are not falsely reported as PASS here:
 - Laravel/Pest suite
 - browser extension lifecycle/Marketplace integration test
 
-On the target Laragon environment, run `npm install`, `npm run build`, `php artisan migrate:fresh --seed`, `php artisan test`, and `scripts\\quality-check.bat` for the final integration gate.
+On the target target environment environment, run `npm install`, `npm run build`, `php artisan migrate:fresh --seed`, `php artisan test`, and `scripts\\quality-check.bat` for the final integration gate.

@@ -55,4 +55,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "[Nexora PKG-1 Launcher Contract] PASS - primary Laragon launcher is PHP-only, blocker-aware, human gates remain explicit, and the hidden-password PowerShell boundary is parser-guarded.\n");
+fwrite(STDOUT, "[Nexora PKG-1 Launcher Contract] PASS - primary target environment launcher is PHP-only, blocker-aware, human gates remain explicit, and the hidden-password PowerShell boundary is parser-guarded.\n");

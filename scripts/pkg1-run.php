@@ -141,7 +141,7 @@ function nexoraPkg1LauncherInteractiveProcess(array $command, string $cwd): int
 function nexoraPkg1LauncherAuthSmoke(string $root, string $operator, string $baseUrl): int
 {
     if (PHP_OS_FAMILY !== 'Windows') {
-        fwrite(STDERR, "[PKG-1 Launcher] Hidden-password auth smoke requires the authoritative Windows/Laragon target.\n");
+        fwrite(STDERR, "[PKG-1 Launcher] Hidden-password auth smoke requires the authoritative Windows/target environment target.\n");
         return 2;
     }
     $finalizer = $root.'/scripts/pkg1-finalize-login-smoke.ps1';
@@ -235,7 +235,7 @@ for ($step = 1; $step <= $options['max_steps']; $step++) {
     }
 
     if ($state === 'WAITING_SOURCE_RESTART') {
-        fwrite(STDOUT, "Reload or restart the Laragon web stack (Apache/Nginx/PHP) now.\n");
+        fwrite(STDOUT, "Reload or restart the target environment web stack (Apache/Nginx/PHP) now.\n");
         nexoraPkg1LauncherPrompt('After reload, press Enter to continue: ');
         $code = $runClosure();
         if ($code !== 0 && $code !== 2) exit($code);

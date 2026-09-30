@@ -31,7 +31,7 @@ Vitest
 Vite production build
 ```
 
-Run the current MySQL quality runner on the Laragon/developer machine:
+Run the current MySQL quality runner on the target environment/developer machine:
 
 ```bat
 scripts\quality-check.bat

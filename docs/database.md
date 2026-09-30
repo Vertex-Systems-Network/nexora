@@ -13,7 +13,7 @@ DB_USERNAME=root
 DB_PASSWORD=root
 ```
 
-These are local Laragon defaults for this project, not production credentials.
+These are local target environment defaults for this project, not production credentials.
 
 Quality/test automation uses a separate database:
 

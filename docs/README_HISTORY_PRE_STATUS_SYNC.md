@@ -99,7 +99,7 @@ Nexora is a secure modular Laravel application platform. The N0.x Core feature r
 - clean-domain deployment preparation at `/`
 - Laravel runtime-directory auto-repair before framework boot
 - deterministic `storage/framework/views` compiled-view path
-- Windows/Laragon/system Composer and Node/npm discovery
+- Windows/target environment/system Composer and Node/npm discovery
 - isolated Composer/npm environment fallback for Apache/FastCGI
 - verified private Composer fallback
 - checksum-verified private Node.js LTS fallback
@@ -132,7 +132,7 @@ Password:       root
 
 `nexora_testing` is the only database destructively refreshed by quality gates.
 
-## Fresh Laragon / Windows zero test
+## Fresh target environment / Windows zero test
 
 Extract into a clean project directory and run:
 
@@ -310,7 +310,7 @@ Run `php artisan nexora:environment:doctor --production` before and after rebuil
 
 ### N1.0 RC11 final target runner + RC12 diagnostics
 
-For a Laragon diagnostic bundle that keeps running long enough to capture the real blocker:
+For a target environment diagnostic bundle that keeps running long enough to capture the real blocker:
 
 ```bat
 scripts\target-diagnostics.bat --install-deps --full
@@ -345,29 +345,29 @@ RC18 adds `php artisan nexora:runtime:doctor`, a 64 MiB default application requ
 RC20 closes release-integrity gaps discovered by the total audit: exact-source SHA-256 attestation from certification through packaging, PHPUnit certification DB binding checks, strict five-family DB matrix in final mode, observed zero-install and existing-install upgrade rehearsals, server minimum-version enforcement, and independent production ZIP re-validation. RC19 concurrency protections remain intact.
 
 
-### N1.0 RC21 Laragon frontend type contracts
+### N1.0 RC21 target environment frontend type contracts
 
-RC21 is driven by the real Laragon `npm run build` failure inventory. It locks Inertia v3 form-data compatibility, non-chainable `transform()` semantics, RequestPayload-safe router helpers, recursive Writer form payloads and shared navigation component contracts into source certification. RC20 exact-source/final-closure integrity remains in force; N1.0 is not DONE until the updated dependency-backed Laragon build and remaining operator evidence are green.
+RC21 is driven by the real target environment `npm run build` failure inventory. It locks Inertia v3 form-data compatibility, non-chainable `transform()` semantics, RequestPayload-safe router helpers, recursive Writer form payloads and shared navigation component contracts into source certification. RC20 exact-source/final-closure integrity remains in force; N1.0 is not DONE until the updated dependency-backed target environment build and remaining operator evidence are green.
 
 
 ### N1.0 RC23 Target bootstrap / resume
 
-Run `scripts\target-environment-bootstrap.bat` first on Windows/Laragon. It diagnoses the active PHP/php.ini, required PHP extensions, Composer/Node/npm policy and reviewed lockfile presence without downloading tools or resolving unlocked dependency graphs. Use `scripts\target-runtime-run.bat --install-deps` for the fail-fast target gate, then `--resume-latest` after fixing a blocker. Resume reuse is limited to exact source/lock/dependency fingerprints. Use `php scripts/target-runtime-evidence-verify.php --input=<bundle> --require-pass --seal` to validate and seal exact target evidence.
+Run `scripts\target-environment-bootstrap.bat` first on Windows/target environment. It diagnoses the active PHP/php.ini, required PHP extensions, Composer/Node/npm policy and reviewed lockfile presence without downloading tools or resolving unlocked dependency graphs. Use `scripts\target-runtime-run.bat --install-deps` for the fail-fast target gate, then `--resume-latest` after fixing a blocker. Resume reuse is limited to exact source/lock/dependency fingerprints. Use `php scripts/target-runtime-evidence-verify.php --input=<bundle> --require-pass --seal` to validate and seal exact target evidence.
 
 ### N1.0 RC22 Target runtime closure runner
 
-Run `scripts\target-runtime-run.bat --install-deps` on Laragon after reviewing/committing `composer.lock` and `package-lock.json`. The runner fails at the first required target blocker, records redacted step logs, and validates the real frontend build plus Laravel boot/doctors. Use `--full` only when ready to delegate migrations/seeding/PHPUnit to the isolated certification database. N1.1 remains blocked until the complete N1.0 closure ledger is green.
+Run `scripts\target-runtime-run.bat --install-deps` on target environment after reviewing/committing `composer.lock` and `package-lock.json`. The runner fails at the first required target blocker, records redacted step logs, and validates the real frontend build plus Laravel boot/doctors. Use `--full` only when ready to delegate migrations/seeding/PHPUnit to the isolated certification database. N1.1 remains blocked until the complete N1.0 closure ledger is green.
 
 
 ## N1.0 target certification
 
-On Windows/Laragon use `scripts\target-certification-orchestrator.bat --install-deps` for readiness and `scripts\target-certification-orchestrator.bat --full` after reviewed locks/dependencies are present. `--final` is fail-closed and requires `--full`.
+On Windows/target environment use `scripts\target-certification-orchestrator.bat --install-deps` for readiness and `scripts\target-certification-orchestrator.bat --full` after reviewed locks/dependencies are present. `--final` is fail-closed and requires `--full`.
 
 ## N1.0 certification chunks
 
 N1.0 closure now executes in large chunks rather than micro-RC operator steps. C1 is implemented but still requires dependency-backed target PASS. **N1.0-C2 — Laravel Runtime + Core Database Certification** is now code-ready and fail-closed behind exact C1 PASS evidence.
 
-On the trusted Laragon target, after explicitly reviewing dependency locks, run:
+On the trusted target environment target, after explicitly reviewing dependency locks, run:
 
 ```bat
 scripts\n1-c1-dependency-certify.bat --install-deps
@@ -400,7 +400,7 @@ Generate a fail-closed HA kit with `php scripts/n1-c6-evidence-prepare.php --ope
 
 C1-C6 code-side certification chunks are orchestrated on real targets by `scripts/n1-target-execution.php` and its BAT/PowerShell/sh wrappers. The pack is fail-closed and does not constitute a C7 feature chunk.
 
-Target Execution Pack v2 adds trusted Laragon Composer discovery and a review-gated lock refresh path. Use `scripts\n1-target-execution.bat --refresh-locks --confirm-refresh=REFRESH` only when lockfiles must be generated/refreshed. The command uses Composer `--no-install` plus npm `--package-lock-only`, writes `storage/app/nexora/dependency-intake/lock-refresh.md`, and stops for human review. It never accepts locks. After reviewing the exact diff, explicitly run `scripts\dependency-lock-review.bat --accept --reviewer="REAL NAME" --confirm=REVIEWED`, then continue with `--install-deps`.
+Target Execution Pack v2 adds trusted target environment Composer discovery and a review-gated lock refresh path. Use `scripts\n1-target-execution.bat --refresh-locks --confirm-refresh=REFRESH` only when lockfiles must be generated/refreshed. The command uses Composer `--no-install` plus npm `--package-lock-only`, writes `storage/app/nexora/dependency-intake/lock-refresh.md`, and stops for human review. It never accepts locks. After reviewing the exact diff, explicitly run `scripts\dependency-lock-review.bat --accept --reviewer="REAL NAME" --confirm=REVIEWED`, then continue with `--install-deps`.
 
 
 ### N1.0 target support capsule
@@ -409,7 +409,7 @@ Every `scripts\n1-target-execution.bat` run writes a ZIP-independent, redacted `
 
 ## N1.0 Target Execution Pack v2.2
 
-The target executor now combines three operational handoffs: source-bound PHP restart verification after safe Laragon extension remediation, explicit reviewed-lock acceptance/continuation from the latest lock-refresh handoff, and exact-evidence C1-C3 resume. `--refresh-locks` still cannot be combined with review/install, and stale chunk evidence is never reused.
+The target executor now combines three operational handoffs: source-bound PHP restart verification after safe target environment extension remediation, explicit reviewed-lock acceptance/continuation from the latest lock-refresh handoff, and exact-evidence C1-C3 resume. `--refresh-locks` still cannot be combined with review/install, and stale chunk evidence is never reused.
 
 
 ## N1.0 Target Execution v2.3 — Maximum Closure Batch
@@ -419,7 +419,7 @@ The remaining code-side closure safeguards are consolidated at `1.0.0-rc.38`. `s
 
 ## N1.0 Target Execution v2.4 — Session Integrity & Final Release Seal
 
-The current target-certification flow now uses a single exact-source/reviewed-lock certification session for C4-C6 operator evidence, rejects concurrent master target runs, enforces bounded future-clock skew and session freshness, and produces a sanitized certification evidence bundle plus external release seal alongside the production ZIP. The existing eleven-domain closure count is unchanged: `production_package` now represents the independently verified production ZIP + evidence bundle + release seal as one sealed release domain. Real Laragon/browser/HA observations remain mandatory.
+The current target-certification flow now uses a single exact-source/reviewed-lock certification session for C4-C6 operator evidence, rejects concurrent master target runs, enforces bounded future-clock skew and session freshness, and produces a sanitized certification evidence bundle plus external release seal alongside the production ZIP. The existing eleven-domain closure count is unchanged: `production_package` now represents the independently verified production ZIP + evidence bundle + release seal as one sealed release domain. Real target environment/browser/HA observations remain mandatory.
 
 
 ## N1.0 Target Execution v2.5 — Signed Release Trust & Offline Verification
@@ -523,7 +523,7 @@ C4 real rehearsal must now prove zero in-flight activity, zero configured queue 
 
 Queue payload compatibility is now fail-closed: newly created payloads use schema 2, legacy payloads without Nexora metadata are rejected, and an old payload from another Nexora platform version is rejected even when it shares the same major version. This matches the existing requirement that configured queues be empty before schema mutation. Web admission failure returns HTTP 503 with `X-Nexora-Cutover-Barrier: active`; scheduled-task activity admission no longer swallows a barrier refusal. `php artisan nexora:upgrade:cutover-status` reports the barrier, live activity, queue backlog and queue-payload policy without mutating runtime state.
 
-The Laragon build log from the prior branch exposed an Inertia React v3 migration cluster across 11 files. The v3.1 source already contains those repairs; v3.2 converts them into permanent source contracts covering serializable `useForm` payloads, `RequestPayload`, non-chained `transform()`, recursive writer data, typed enterprise SSO forms and horizontal `ButtonLink` navigation. Dependency-backed `tsc`/Vite PASS is still a real-target C1 requirement.
+The target environment build log from the prior branch exposed an Inertia React v3 migration cluster across 11 files. The v3.1 source already contains those repairs; v3.2 converts them into permanent source contracts covering serializable `useForm` payloads, `RequestPayload`, non-chained `transform()`, recursive writer data, typed enterprise SSO forms and horizontal `ButtonLink` navigation. Dependency-backed `tsc`/Vite PASS is still a real-target C1 requirement.
 
 
 ## N1.0 Target Execution v3.3 — Deployment Generation & Client/Cache/Session Fencing
@@ -652,7 +652,7 @@ Dependency reconciliation clears framework caches, commits the new generation, r
 
 `TenantContext` now has explicit `clear()` and scoped `runWith()` lifecycle methods. The installer clears stale tenant state after migrations and before `db:seed`. `NexoraCoreSeeder` clears ambient tenant state, resolves the freshly-created default organization, then seeds CRM pipeline/stages, Helpdesk SLA policies and the default Newsletter list inside an explicit scoped tenant context. `BelongsToTenant` validates explicit/active tenant IDs before writes and fails with a descriptive domain exception instead of reaching a raw foreign-key failure. Regression tests cover stale-context schema replacement, deleted active organizations and scoped-context restoration.
 
-The historical Laragon dependency-backed build error surface remains guarded across all 11 reported Admin TypeScript files. Eight high-density targets were additionally rewritten into human-readable TypeScript/TSX during this batch while preserving Inertia-safe form/payload/submit patterns. Source syntax parsing and Inertia contracts do not replace a dependency-backed `tsc --noEmit`; a fresh rc.60 target run is still mandatory.
+The historical target environment dependency-backed build error surface remains guarded across all 11 reported Admin TypeScript files. Eight high-density targets were additionally rewritten into human-readable TypeScript/TSX during this batch while preserving Inertia-safe form/payload/submit patterns. Source syntax parsing and Inertia contracts do not replace a dependency-backed `tsc --noEmit`; a fresh rc.60 target run is still mandatory.
 
 C2 now defines 44 ordered runtime gates including the Enterprise tenant-seed regression test. C4 defines 147 real install/upgrade observations including stale-tenant reset, default-organization re-resolution and CRM/Helpdesk/Newsletter FK/idempotency checks.
 
@@ -702,23 +702,23 @@ The target execution workflow also gains `scripts\n1-target-fast-track.bat` (plu
 
 `1.0.0-rc.66` fixes the roadmap visibility problem without weakening certification semantics. C1–C6 remain strict chunk-level PASS/FAIL boundaries, but Nexora now also computes exact-source granular gate progress from the canonical target-runner evidence. The current runners define 105 certification gates: C1 14, C2 52, C3 5, C4 7, C5 7 and C6 20. `n1-target-fast-track` prints both strict chunk status and granular gate progress, while `n1-target-execution` emits a fresh progress checkpoint after every C1–C6 stage. `n1-target-plan` exposes the same granular snapshot for dashboards/reporting.
 
-The historical Laragon compiler incident is now represented by a permanent remediation ledger instead of a generic source-contract claim. The observed build contained 76 TypeScript errors across 11 files. v5.1 verifies that the corresponding current-source failure families are removed and reports `76/76 source remediated`; it will report `76/76 real target verified` only after exact-source C1 evidence contains successful `typecheck` and `vite-build` gates. Source remediation can never auto-promote to target verification.
+The historical target environment compiler incident is now represented by a permanent remediation ledger instead of a generic source-contract claim. The observed build contained 76 TypeScript errors across 11 files. v5.1 verifies that the corresponding current-source failure families are removed and reports `76/76 source remediated`; it will report `76/76 real target verified` only after exact-source C1 evidence contains successful `typecheck` and `vite-build` gates. Source remediation can never auto-promote to target verification.
 
-This means a clean source archive can honestly show `0/105` real target gates because it intentionally contains no real Laragon evidence, while still showing completed source remediation. After a real target run, partial progress moves immediately—for example C1 can display `4/14` even when the whole C1 chunk is still pending.
+This means a clean source archive can honestly show `0/105` real target gates because it intentionally contains no real target environment evidence, while still showing completed source remediation. After a real target run, partial progress moves immediately—for example C1 can display `4/14` even when the whole C1 chunk is still pending.
 
 
 ## N1.0 Target Execution v5.2 — Exact Source Activation & Stale Web-Process Guard
 
 `1.0.0-rc.67` closes the deployment ambiguity exposed by an installer target that continued to emit the historical reviewed-dependency final-lock exception even though the exact string no longer existed in current `Installer.php`. The installer now has three explicit source-activation coordinates: protocol `v5.2`, source generation `n1-v5.2`, and the sealed SHA-256 of the executing `Installer.php`. `/install` renders those values before the user can touch the database, `/install/source-status` exposes the running web-process identity with no-store headers, and installation fails before the database stage when the executing class/path/hash does not match the package.
 
-`php artisan nexora:source:status --assert-current` inspects the current PHP process. `php artisan nexora:source:activate --assert-current` clears Laravel caches, records a CLI activation receipt and reports whether a Laragon web-service reload may still be required. `scripts\n1-source-activate.bat` wraps the same flow for Windows. This source-activation layer does **not** add new C1–C6 denominator gates; the granular target denominator remains 105 so progress does not move backward simply because diagnostics became stronger.
+`php artisan nexora:source:status --assert-current` inspects the current PHP process. `php artisan nexora:source:activate --assert-current` clears Laravel caches, records a CLI activation receipt and reports whether a target environment web-service reload may still be required. `scripts\n1-source-activate.bat` wraps the same flow for Windows. This source-activation layer does **not** add new C1–C6 denominator gates; the granular target denominator remains 105 so progress does not move backward simply because diagnostics became stronger.
 
 
 ## N1.0 Target Execution v5.3 — Critical Source Set Integrity & CLI/Web Activation Handshake
 
 `1.0.0-rc.68` strengthens v5.2 from a single-file Installer.php identity check into a sealed 14-file critical installer source set. `bootstrap/nexora-source-manifest.json` records SHA-256 hashes for the installer, controller, dependency-trust services, installation state, source-identity/handshake services, source commands, installer Blade view, web routes and Nexora service provider. The manifest itself is sealed in `config/installer.php`. A partial deployment therefore fails before database mutation even when the new Installer.php was copied successfully but another installer-path file remained stale.
 
-Source activation now has an explicit CLI-to-web handshake. `nexora:source:activate` issues a short-lived sealed nonce tied to the exact critical-source-set fingerprint. After Laragon/PHP reload, `/install/source-status` acknowledges that same nonce from the web process. `php artisan nexora:source:status --require-web-ack` proves both PHP execution contexts have converged to the same platform/protocol/generation/source set. `scripts\n1-source-web-ack.bat [base-url]` automates the HTTP acknowledgement and verification.
+Source activation now has an explicit CLI-to-web handshake. `nexora:source:activate` issues a short-lived sealed nonce tied to the exact critical-source-set fingerprint. After target environment/PHP reload, `/install/source-status` acknowledges that same nonce from the web process. `php artisan nexora:source:status --require-web-ack` proves both PHP execution contexts have converged to the same platform/protocol/generation/source set. `scripts\n1-source-web-ack.bat [base-url]` automates the HTTP acknowledgement and verification.
 
 Installation progress is now persisted separately at `storage/app/nexora/n1-target-execution/installation-progress.json` and rendered above C1-C6 fast-track progress. A failed permanent-lock stage is therefore visible as installation ~98% while target certification remains independently measured. The N1.0 granular target denominator remains 105 and strict chunk denominator remains 6; v5.3 adds diagnostic certainty without moving the goalposts.
 
@@ -761,7 +761,7 @@ After `installed.lock` is committed, Nexora forgets the pre-install memoized dep
 
 ## N1.0 Target Execution v5.8 — Clock Semantics & Writable Temp Portability
 
-`1.0.0-rc.73` fixes a real Windows/Laragon installation-readiness failure where MySQL/MariaDB clock skew could be reported at almost exactly the local UTC offset. `UNIX_TIMESTAMP(UTC_TIMESTAMP(6))` is unsafe when the database session timezone is non-UTC because the UTC datetime is fed back into a session-timezone conversion. Nexora now uses `UNIX_TIMESTAMP(CURRENT_TIMESTAMP(6))`, preserving epoch semantics across session timezones while keeping the strict 5-second C2/C6 clock policy unchanged.
+`1.0.0-rc.73` fixes a real Windows/target environment installation-readiness failure where MySQL/MariaDB clock skew could be reported at almost exactly the local UTC offset. `UNIX_TIMESTAMP(UTC_TIMESTAMP(6))` is unsafe when the database session timezone is non-UTC because the UTC datetime is fed back into a session-timezone conversion. Nexora now uses `UNIX_TIMESTAMP(CURRENT_TIMESTAMP(6))`, preserving epoch semantics across session timezones while keeping the strict 5-second C2/C6 clock policy unchanged.
 
 Installer filesystem safety no longer hard-depends on `sys_get_temp_dir()`. `RuntimeWritableTempDirectory` prefers an optional configured installation temp path, then app-local `storage/framework/nexora-temp`, then `storage/app/nexora/tmp`, and finally PHP system temp. Every candidate is verified with an actual write probe. Host installation probes and installer resource-capacity checks share this resolved path; strict production host/resource diagnostics can still observe the PHP system temp independently. The readiness JSON now exposes the selected temp path, fallback source and candidate failures.
 
@@ -779,7 +779,7 @@ Post-commit runtime handoff is no longer treated as generic bookkeeping. A commi
 
 ## N1.0 Target Execution v5.10 — Frontend Build Closure & Exact C1 Diagnostics
 
-`1.0.0-rc.75` turns the historical Laragon TypeScript incident into an exact, machine-readable C1 regression boundary without changing the 105-gate target denominator. The recorded target baseline remains **76 compiler diagnostics across 11 Admin TS/TSX files** with the original per-file distribution `50,1,1,1,3,14,1,1,1,1,2`. Source remediation remains distinct from target verification: static source contracts can prove the known unsafe patterns are gone, but only dependency-backed `tsc --noEmit` plus the Vite build can mark the baseline target-verified.
+`1.0.0-rc.75` turns the historical target environment TypeScript incident into an exact, machine-readable C1 regression boundary without changing the 105-gate target denominator. The recorded target baseline remains **76 compiler diagnostics across 11 Admin TS/TSX files** with the original per-file distribution `50,1,1,1,3,14,1,1,1,1,2`. Source remediation remains distinct from target verification: static source contracts can prove the known unsafe patterns are gone, but only dependency-backed `tsc --noEmit` plus the Vite build can mark the baseline target-verified.
 
 `scripts/n1-c1-frontend-build-doctor.php` parses both Windows and standard TypeScript diagnostic formats, normalizes target paths, groups diagnostics by file/code, identifies recurrence inside the 11 historical targets, detects missing dependency-graph failures, and can either inspect an existing build log or run the current target typecheck/build. It is diagnostic-only and never promotes C1. The canonical `n1-c1-dependency-certify.php` remains authoritative.
 
@@ -826,7 +826,7 @@ PKG-1 no longer requires a system-wide Composer installation before the first cl
 The bootstrap remains fail-closed: TLS peer verification is never disabled, an invalid installer signature is rejected, a Composer version outside the certified `>=2.7 <3.0` range is rejected, and DNS/TLS/download failures stop PKG-1 before any root dependency lock mutation. Pre-vendor PKG-1 dependency scripts also avoid optional `mbstring` calls so bootstrap can reach deterministic dependency installation on minimal PHP hosts.
 
 ### PKG-1 offline Composer handoff
-If the target cannot reach Composer over DNS/TLS and no system/Laragon Composer is available, supply a trusted local Composer PHAR explicitly. Nexora requires an exact SHA-256 and copies the verified PHAR into its private runtime-tool directory before executing it.
+If the target cannot reach Composer over DNS/TLS and no system/target environment Composer is available, supply a trusted local Composer PHAR explicitly. Nexora requires an exact SHA-256 and copies the verified PHAR into its private runtime-tool directory before executing it.
 
 Windows example:
 
@@ -840,7 +840,7 @@ The external PHAR is never accepted without the exact SHA-256, and dependency lo
 
 ## PKG-1 rc.79 — production environment + build provenance closure
 
-`1.0.0-rc.79` / installer protocol `v5.14` restores the release environment templates that the clean PKG-1 archive must carry. `.env.production.example` is secret-free and HTTPS/session-safe by default, pins queue payload schema 13, and exposes fail-closed defaults for cutover, activation, database/storage/service/host/resource/policy/process runtime planes. `.env.example` carries the same current runtime safety keys for a clean Laragon bootstrap without embedding credentials.
+`1.0.0-rc.79` / installer protocol `v5.14` restores the release environment templates that the clean PKG-1 archive must carry. `.env.production.example` is secret-free and HTTPS/session-safe by default, pins queue payload schema 13, and exposes fail-closed defaults for cutover, activation, database/storage/service/host/resource/policy/process runtime planes. `.env.example` carries the same current runtime safety keys for a clean target environment bootstrap without embedding credentials.
 
 Normal `npm run build` is now provenance-wrapped. `scripts/pkg1-build.php` emits `NEXORA_BUILD_IDENTITY`, binds the exact source tree, reviewed lock pair, TypeScript/Vite configuration and all 11 historical TypeScript remediation files, then executes the unchanged compiler chain through `npm run build:raw` (`tsc --noEmit && vite build`). A successful build writes `storage/app/nexora/certification/pkg1-build-input.json`; C1 and the final PKG-1 closure both reject stale or drifted build identity. C1 remains 14 gates and total N1.0 remains 105 gates.
 
@@ -858,7 +858,7 @@ Each isolated refresh workspace runs `composer audit --locked --no-interaction -
 
 ## PKG-1 single-command interactive launcher (rc.82)
 
-Windows/Laragon operators can now drive the complete PKG-1 usability closure with one command:
+Windows/target environment operators can now drive the complete PKG-1 usability closure with one command:
 
 ```bat
 scripts\pkg1-run.bat "REAL NAME" http://nexora
@@ -870,17 +870,17 @@ The launcher opens `/install` when required, waits for web/PHP reload at the sou
 
 ## PKG-1 rc.83 - Windows PowerShell 5.1 parser compatibility
 
-`1.0.0-rc.83` / protocol `v5.18` fixes the Laragon launcher parse failure seen on Windows PowerShell 5.1. `scripts/pkg1-run.ps1` is now deliberately ASCII-only and CRLF-normalized so Windows PowerShell cannot reinterpret UTF-8 multi-byte punctuation as smart quote tokens. `scripts/pkg1-run.bat` first invokes `System.Management.Automation.Language.Parser.ParseFile()` using the same Windows PowerShell engine and refuses to execute the launcher if any parser error exists. The final auth smoke is invoked directly in the current PowerShell process instead of spawning a nested parser process. Human review, installer, recovery, and credential boundaries remain unchanged.
+`1.0.0-rc.83` / protocol `v5.18` fixes the target environment launcher parse failure seen on Windows PowerShell 5.1. `scripts/pkg1-run.ps1` is now deliberately ASCII-only and CRLF-normalized so Windows PowerShell cannot reinterpret UTF-8 multi-byte punctuation as smart quote tokens. `scripts/pkg1-run.bat` first invokes `System.Management.Automation.Language.Parser.ParseFile()` using the same Windows PowerShell engine and refuses to execute the launcher if any parser error exists. The final auth smoke is invoked directly in the current PowerShell process instead of spawning a nested parser process. Human review, installer, recovery, and credential boundaries remain unchanged.
 
 
-## PKG-1 rc.84 - PHP-first Laragon launcher
+## PKG-1 rc.84 - PHP-first target environment launcher
 
 The canonical `scripts\pkg1-run.bat "REAL NAME" http://nexora` entrypoint no longer executes a PowerShell state-machine launcher. The batch file now invokes `php scripts/pkg1-run.php` directly, so normal dependency, C1, source, installer and resume flow is independent of Windows PowerShell encoding/parser behavior. The PHP launcher consumes the existing status/closure contracts, preserves explicit `PROMOTE-REVIEWED` and `ROLLBACK` confirmations, opens the browser installer, stops after the first exact BLOCKED result instead of retrying a failing step repeatedly, and re-verifies sealed closure evidence before terminal success. PowerShell remains only at the hidden-password login smoke boundary; that small ASCII-only finalizer is parser-checked immediately before execution.
 
 
 ## PKG-1 rc.85 - Windows npm command bridge
 
-Laragon/Windows exposes npm and npx primarily through `.cmd` launchers. The dependency intake path intentionally uses `proc_open(..., bypass_shell=true)` for argument integrity, but Windows cannot execute a `.cmd` file directly through CreateProcess. rc.85 normalizes npm/npx commands to `node.exe + node_modules/npm/bin/npm-cli.js` (or `npx-cli.js`) before execution. Candidate lock generation, npm audit, support diagnostics and dependency-toolchain probes therefore use the same shell-independent execution boundary.
+target environment/Windows exposes npm and npx primarily through `.cmd` launchers. The dependency intake path intentionally uses `proc_open(..., bypass_shell=true)` for argument integrity, but Windows cannot execute a `.cmd` file directly through CreateProcess. rc.85 normalizes npm/npx commands to `node.exe + node_modules/npm/bin/npm-cli.js` (or `npx-cli.js`) before execution. Candidate lock generation, npm audit, support diagnostics and dependency-toolchain probes therefore use the same shell-independent execution boundary.
 
 The dependency-toolchain fingerprint now binds the npm CLI JS payload actually executed (with Node fingerprinted separately) and records `execution_mode=node-cli` on Windows. `pkg1-status` validates Composer + Node + npm together before reporting `READY_CANDIDATE_GENERATION`; otherwise it returns `BLOCKED_TOOLCHAIN` with the exact errors. npm remains pinned to the package policy (`>=10 <11`, packageManager `npm@10.9.2`). C1 remains 14 gates and N1.0 remains 105.
 
@@ -892,7 +892,7 @@ The dependency-toolchain fingerprint now binds the npm CLI JS payload actually e
 
 ## PKG-1 rc.87 — semantic lock reproducibility + TS2589 closure
 
-`1.0.0-rc.87` / protocol `v5.22` addresses the two blockers observed on the Laragon target after rc.86. Independent lock workspaces now record raw SHA-256 hashes but decide reproducibility from canonical JSON semantics: associative key ordering and Composer package-list ordering are normalized while actual package names/versions/integrity/source data remain digest-bound. If canonical semantics differ, PKG-1 still blocks and reports A/B dependency version differences. The promoted candidate remains the exact workspace-A raw lock pair and its raw hashes are sealed by review/promotion.
+`1.0.0-rc.87` / protocol `v5.22` addresses the two blockers observed on the target environment target after rc.86. Independent lock workspaces now record raw SHA-256 hashes but decide reproducibility from canonical JSON semantics: associative key ordering and Composer package-list ordering are normalized while actual package names/versions/integrity/source data remain digest-bound. If canonical semantics differ, PKG-1 still blocks and reports A/B dependency version differences. The promoted candidate remains the exact workspace-A raw lock pair and its raw hashes are sealed by review/promotion.
 
 The same release also removes four observed TypeScript `TS2589` instantiation-depth failures. Automation workflow configuration now uses a finite scalar record instead of recursively nesting Inertia `FormDataConvertible`; the document writer keeps its recursive `DocumentContent` payload opaque at the Inertia form generic boundary and restores the concrete type at BlockEditor/statistics consumers. Runtime payload shape and server validation are unchanged. C1 remains 14 and N1.0 remains 105.
 
@@ -904,7 +904,7 @@ This development-first package closes installer UX and auxiliary connection gaps
 
 ## rc.88 development-first closure
 
-The default installer is now a four-step general-purpose wizard: Requirements -> Database -> Application & Super Admin -> Review & Install. Existing-database backup/reset and interrupted-install recovery are shown only when database inspection requires them; source/runtime diagnostics are secondary rather than dominating the normal path. The installer remains driver-based and is not Laragon-specific.
+The default installer is now a four-step general-purpose wizard: Requirements -> Database -> Application & Super Admin -> Review & Install. Existing-database backup/reset and interrupted-install recovery are shown only when database inspection requires them; source/runtime diagnostics are secondary rather than dominating the normal path. The installer remains driver-based and is not target environment-specific.
 
 Development work is now separated from final release audit. Run `scripts\development-readiness.bat --full` during development to check PHP, Composer, Node/npm, Laravel bootstrap/routes when dependencies exist, TypeScript `--noEmit`, and the raw Vite build. This command never promotes dependency locks or grants release certification. Final PKG/C1 supply-chain audit remains a later closure phase.
 

@@ -12,7 +12,7 @@ if errorlevel 1 (
 
 echo.
 echo [Nexora Source Activation] CLI source set is current and a fresh web-ack nonce was issued.
-echo 1. Restart/reload the Laragon Apache/Nginx/PHP service.
+echo 1. Restart/reload the target environment Apache/Nginx/PHP service.
 echo 2. Run: scripts\n1-source-web-ack.bat http://nexora
 echo 3. Confirm /install shows: 1.0.0-rc.94 / v5.29 / n1-v5.29 and critical source 37/37 and runtime classes 34/34.
 exit /b 0

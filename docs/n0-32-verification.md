@@ -36,4 +36,4 @@ Composer is not installed in this execution environment and the clean source art
 - full Laravel/Pest/PHPUnit suite
 - browser Membership/Helpdesk lifecycle tests
 
-Run `scripts\\quality-check.bat` on the target Laragon/Windows environment after dependencies are installed for the dependency-backed integration gate.
+Run `scripts\\quality-check.bat` on the target target environment/Windows environment after dependencies are installed for the dependency-backed integration gate.
