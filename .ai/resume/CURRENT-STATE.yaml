@@ -29,6 +29,7 @@ current_blockers:
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
   tight_polling_forbidden: true
+  rerun_on_chat_timeout_forbidden: true
   second_refresh_requires_material_transition_and_journal_entry: true
 progress:
   current_module:
@@ -44,3 +45,8 @@ state_drift:
   notes:
     - "Prior #1 future-carrier and pending #104 descriptions are historical."
     - "Disposable candidate verified; final source CI remains separate."
+
+future_target_input:
+  placeholder: "<operator-provided-target-path>"
+  availability: NOT_PROVISIONED
+  semantics: "Future operator input only; disposable loopback QA is not a provisioned live target."
