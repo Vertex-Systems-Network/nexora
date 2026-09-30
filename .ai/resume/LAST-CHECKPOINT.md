@@ -1,3 +1,7 @@
+# Stable runtime / auth throttle checkpoint — 2026-09-30
+
+Main `186138b0f7b7ca0da1ce3b2bb37b051edc75c855`: #104 merged and exact-main certification 36735105784 SUCCESS. Prior service mismatch reproduced by proxy-port drift only; stable disposable activation/recovery PASS. Fixed real public→auth throttle interference while preserving shared five/minute/IP auth limit. Regression red before patch; 10 tests / 40 assertions PASS afterwards. Fresh corrected candidate `5cfa5a6a54907e85d0cee8e90f04c38e486dd0a3`: source certification, real install, activation/web acknowledgement/CLI proof, governed recovery, public smoke, login 302/admin 200 and final readiness/current receipt PASS. Final published-source CI pending at preparation. Product target/release remains BLOCKED; no production/TLS/other-engine/key-rotation acceptance. Open #102 remains draft; #1 closed. Evidence: `docs/stable-runtime-verification-2026-09-30.md` and `.ai/evidence/stable-runtime-verification-2026-09-30.json`. Earlier checkpoints below remain historical.
+
 # Source Batch Checkpoint — 2026-09-30
 
 - Observed protected main after #100: `131addac09e888961989448e6415124dd3321215`.

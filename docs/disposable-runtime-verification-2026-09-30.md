@@ -30,3 +30,7 @@ In the separate unmodified-main fixture with an outside-source database, CLI sou
 ## Remaining boundaries
 
 Remote exact-head CI pending at preparation. Loopback HTTP is not TLS/production/browser/accessibility certification. Full installer UI interaction, all database families, real hosting, exposed-key invalidation and post-activation service convergence remain separate gates. Issue #74 stays open. Generated databases, environment files, passwords, cookies and activation tokens are excluded from this commit.
+
+## Subsequent diagnosis and corrected-source verification
+
+The prior service mismatch was traced to ephemeral workspace proxy-port drift, not source activation. Stable-environment re-execution found and fixed an independent shared-throttle authentication defect. Fresh activation/recovery/readiness and real login/admin now pass on the corrected candidate. See [stable-runtime-verification-2026-09-30.md](stable-runtime-verification-2026-09-30.md) for measured evidence and remaining scope. Earlier FAIL observations remain historical.

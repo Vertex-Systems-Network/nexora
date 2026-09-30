@@ -2,9 +2,9 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-30):** Source reconciliation is locally verified on `codex/product-source-reconciliation`, based on protected main `9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5` and draft #1. 38 conflicts resolved; 477 backend tests and 6 frontend tests pass; TypeScript/Vite build and source certification pass. Initial canonical MySQL CI #1132 passed; supplemental QA #173 failed on three textual contracts, corrected locally. Follow-up remote CI and independent review are pending. Isolated local backend suites pass; combined local artisan execution has HTTP throttling interference. No current hosting target is provisioned; target acceptance remains **BLOCKED**. See [source reconciliation evidence](docs/source-reconciliation-2026-09-30.md).
+> **Canonical current status (2026-09-30):** protected main `186138b0f7b7ca0da1ce3b2bb37b051edc75c855` includes merged PR #103 source reconciliation and PR #104 SQLite provenance correction. Exact main release certification 36735105784 SUCCESS. No current live hosting target is provisioned; product acceptance remains **BLOCKED**.
 
-> **Disposable runtime batch:** fresh SQLite install, public HTTP smoke, login POST and authenticated admin PASS with the SQLite attestation correction. Regression/source checks PASS; remote CI pending. Post-activation service mismatch remains unresolved. [Measured report](docs/disposable-runtime-verification-2026-09-30.md).
+> **Stable disposable runtime batch:** prior service mismatch reproduced by workspace proxy port only. Authentication public-counter interference fixed with the shared five/minute/IP auth budget preserved. Fresh installation, activation, exact CLI↔web proof, governed recovery, public HTTP smoke, login POST 302, admin GET 200 and final readiness/current receipt PASS. Local 10 tests / 40 assertions and source certification PASS; final PR CI pending. [Measured report](docs/stable-runtime-verification-2026-09-30.md).
 
 ## AI development startup gate
 
@@ -23,13 +23,13 @@ This rule applies on every AI development start, including work resumed from an 
 ## AI-Native Progress Ledger
 
 - **Observed:** 2026-09-30
-- **Last verified source baseline:** `d8e83e87305bc8c11d8b073b42f13cb69414c550` — protected-main #1125 / `36689146406` **SUCCESS**
+- **Last verified source baseline:** `186138b0f7b7ca0da1ce3b2bb37b051edc75c855` — protected-main release certification `36735105784` **SUCCESS**
 - **Product acceptance stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Current source batch:** draft #1/main source reconciliation; 38 conflicts resolved; local checks PASS; remote CI and independent review pending
-- **Current deployment:** not provisioned; user scope is GitHub source development
-- **Open remediation Issues:** #72 provider credential rotation; #74 target readiness/identity; #87 repository security review enforcement
-- **Future PR:** #1 remains draft; no blanket promotion from source CI
-- **Next safe action:** verify exact-head MySQL CI and obtain independent review of the source reconciliation; target provisioning/certification remains separate.
+- **Current source batch:** stable runtime verification + auth throttle repair on `codex/stable-runtime-verification`; local checks and fresh disposable runtime PASS; final remote CI pending
+- **Current deployment:** disposable SQLite/loopback HTTP tested; no live target provisioned
+- **Open remediation Issues:** #72 historical bootstrap-key non-use/rotation; #74 live runtime acceptance; #87 review enforcement reconciliation
+- **Open planning PR:** #102 remains draft; #1 closed; #103/#104 merged
+- **Next safe action:** exact-head CI/review and integration of this bounded repair; provisioned TLS target, other engines and key acceptance remain separate.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

@@ -40,6 +40,6 @@
         "app/Providers/NexoraServiceProvider.php": "08c4aa28eafa0f694941e7f256e93bb61848d66d9847d52087ac0386f073ba22",
         "resources/views/install/index.blade.php": "eff0f74f935ff775a410328bc6da056785c18f9929a9230a6bfe87cccc0ddf8c",
         "resources/views/install/runtime-handoff.blade.php": "9e1fdd0e7fd9aaaed1511a8a0af059939e6b0c5237f889b611bf01501801f256",
-        "routes/web.php": "090070d1b43eb05fe48b6c1b9560de63efc783bb818c4ecb92bf819acf9f32a4"
+        "routes/web.php": "119eb2c1cf9b931057b18c321011383012fbf438dc1fd816e6d2a208ad073fbf"
     }
 }

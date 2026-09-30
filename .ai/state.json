@@ -2,10 +2,10 @@
   "schema_version": "1.0",
   "project": "Nexora",
   "control_plane_revision": 7,
-  "control_plane_branch": "codex/product-source-reconciliation",
+  "control_plane_branch": "codex/stable-runtime-verification",
   "base_branch": "main",
   "base_sha": "9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5",
-  "last_verified_source_sha": "d8e83e87305bc8c11d8b073b42f13cb69414c550",
+  "last_verified_source_sha": "186138b0f7b7ca0da1ce3b2bb37b051edc75c855",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
   "source_generation": "n1-v5.29",
@@ -198,7 +198,7 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-09-30T12:20:08.284786+00:00",
+  "updated_at": "2026-09-30T16:03:42.331416+00:00",
   "historical_current_target": {
     "environment": "operator-provided target environment",
     "path": "<operator-provided-target-path>",
@@ -256,11 +256,22 @@
   "disposable_runtime_verification": {
     "base_sha": "84feada170f0529078984821f4a6706a830a1b1d",
     "unit": "SYS-RUNTIME-IDENTITY",
-    "sqlite_attestation_fix": "locally verified; remote CI pending",
+    "sqlite_attestation_fix": "merged PR #104; exact main release certification 36735105784 SUCCESS",
     "fresh_install": "pass",
     "http_login_admin": "pass: POST 302, authenticated GET 200",
-    "post_activation_service_identity": "unresolved observed mismatch",
+    "post_activation_service_identity": "prior mismatch reproduced by proxy port only; stable-environment activation/recovery PASS",
     "acceptance": "disposable local HTTP only; target/release remain BLOCKED",
-    "report": "docs/disposable-runtime-verification-2026-09-30.md"
+    "report": "docs/stable-runtime-verification-2026-09-30.md",
+    "authentication_throttle_fix": "public counters isolated; combined auth limit remains five/minute/IP",
+    "runtime_code_candidate_sha": "5cfa5a6a54907e85d0cee8e90f04c38e486dd0a3",
+    "final_readiness": {
+      "status": "pass",
+      "ready": true,
+      "runtime_ready": true,
+      "receipt_current": true,
+      "errors": []
+    },
+    "evidence": ".ai/evidence/stable-runtime-verification-2026-09-30.json",
+    "source_ci": "local SOURCE PASS; final PR exact-head CI pending"
   }
 }

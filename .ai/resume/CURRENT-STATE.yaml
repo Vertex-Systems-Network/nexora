@@ -1,35 +1,31 @@
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
-compact_state_path: .ai/resume
 observed_main:
   branch: main
-  sha: 131addac09e888961989448e6415124dd3321215
+  sha: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855
   observed_at: "2026-09-30"
-  semantics: "observed main after #100; last verified push baseline d8e83e87305bc8c11d8b073b42f13cb69414c550 / #1125 success; subsequent CI is not assumed"
+  semantics: "#104 merged; release certification 36735105784 SUCCESS"
 active_issue:
   number: 74
-  title: "RUNTIME-CLOSURE: target readiness and identity coordination"
 active_pr: null
-active_branch: codex/source-batch-checkpoint-20260930
+active_branch: codex/stable-runtime-verification
 current_stage:
   id: RUNTIME-CLOSURE-001
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: SOURCE-BATCH-PORTABILITY-009
-  title: "Reconcile environment-neutral source batch and current-target availability"
-  status: VERIFYING
+  id: DISPOSABLE-RUNTIME-CLOSURE-010
+  status: LOCAL_VERIFIED_REMOTE_PENDING
 last_completed_milestone:
-  main_commit: 131addac09e888961989448e6415124dd3321215
-  summary: "#99 and #100 merged after fresh exact-head certification; source checkpoint pending"
-exact_next_safe_action: "Verify post-#100 main and source checkpoint CI; continue authorized source work. No current target is provisioned. Target/provider evidence remains separate."
+  main_commit: 186138b0f7b7ca0da1ce3b2bb37b051edc75c855
+  summary: "#104 SQLite provenance fix; exact main CI SUCCESS"
+exact_next_safe_action: "Review bounded auth throttle repair and final exact-head CI; integrate only green. Live TLS/other engines/key acceptance remain separate."
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:
-  - "Fresh target-environment final readiness/current receipt evidence remains required."
-  - "Fresh exact target-local CLI↔web identity and authoritative same-origin /login evidence remain required."
-  - "Credential exposed by quarantined PR #71 still requires authorized real target/provider rotation and non-secret evidence."
-  - "CORE-QA-001 must not start before RUNTIME-CLOSURE-001 is TARGET_VERIFIED."
+  - "No live TLS target/five-engine acceptance established."
+  - "Historical bootstrap key non-use/rotation unresolved in #72."
+  - "CORE-QA remains locked until global runtime acceptance."
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
   tight_polling_forbidden: true
@@ -37,28 +33,20 @@ timeout_control:
   second_refresh_requires_material_transition_and_journal_entry: true
 progress:
   current_module:
-    label: "RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY"
     percent: null
     display_bar: "[??????????] N/A"
-    basis: "source/governance integrated and protected-main verified; remaining acceptance requires target-environment/provider evidence"
   overall:
-    label: "Nexora"
     percent: null
     display_bar: "[??????????] N/A"
-    basis: "canonical numeric metric unavailable"
 readme_progress_sync:
   required_every_material_milestone: true
-  ledger_path: "README.md#ai-native-progress-ledger"
-  missing_sync_blocks_completion_claim: true
 state_drift:
-  detected: true
+  detected: false
   notes:
-    - "Source portability/dependency batch integrated; source checkpoint in preparation."
-    - "PR #1 is FUTURE_CARRIER_FROZEN and is not active runtime-closure work."
-    - "Issue #72 remains open solely for real target/provider credential rotation."
-    - "Issue #74 source lanes are complete; target W03/W04/W07 remain evidence-gated."
+    - "Prior #1 future-carrier and pending #104 descriptions are historical."
+    - "Disposable candidate verified; final source CI remains separate."
 
 future_target_input:
   placeholder: "<operator-provided-target-path>"
   availability: NOT_PROVISIONED
-  semantics: "Future operator input only; not an existing installation or current execution instruction."
+  semantics: "Future operator input only; disposable loopback QA is not a provisioned live target."

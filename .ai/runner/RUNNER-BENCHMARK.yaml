@@ -220,3 +220,19 @@ tasks:
     deterministic_dedup_key: "nexora:d8e83e87305bc8c11d8b073b42f13cb69414c550:36689146406"
     status: PASS
     immutable_evidence: "GitHub workflow run 36689146406 completed conclusion=success"
+
+  - id: RB-NEX-DISPOSABLE-RUNTIME-010
+    source_work: "stable runtime / authentication throttle repair"
+    source_issue_or_pr: "Issue #74"
+    command_or_workflow: "source certification; installer; activation; runtime recovery; pkg1 usable smoke; final readiness"
+    source_ref: "local candidate"
+    source_sha: "5cfa5a6a54907e85d0cee8e90f04c38e486dd0a3"
+    environment_matrix_input_fixture: "PHP 8.3.6, SQLite, loopback HTTP, stable local no-proxy environment"
+    authorization_state: "user-authorized disposable QA"
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: "nexora:stable-runtime:5cfa5a6a54907e85d0cee8e90f04c38e486dd0a3"
+    status: PASS
+    immutable_evidence: ".ai/evidence/stable-runtime-verification-2026-09-30.json"
+    note: "Disposable only; global live acceptance not granted."
