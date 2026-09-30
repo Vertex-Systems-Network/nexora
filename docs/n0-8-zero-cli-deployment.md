@@ -14,7 +14,7 @@ When a source package is deployed, the browser preparation can:
 
 1. verify MySQL credentials to authorize deployment actions for the current browser session;
 2. discover PHP CLI, Composer, Node.js and npm from the web process PATH;
-3. discover Laragon installations from the project path and common Laragon locations on Windows;
+3. discover target environment installations from the project path and common target environment locations on Windows;
 4. install a private Composer PHAR after verifying the official installer signature;
 5. install a private Node.js v24 LTS runtime from an official checksum-published archive on supported platforms;
 6. run the fixed Composer dependency install;
