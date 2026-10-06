@@ -8,10 +8,10 @@ Status legend: **DONE** = implemented. **CERTIFYING** = implemented RC work is u
 
 | Priority | Remaining task | Status |
 |---|---|---|
-| 1 | Use a supported Node toolchain for the locked frontend graph; the repository requires Node `>=22 <25`, while the current hosting environment reports Node 20 | BLOCKED — target toolchain |
+| 1 | Produce frontend assets with a supported Node toolchain; repository requires Node `>=22 <25`, while hosting currently reports Node 20 | BLOCKED — frontend build only |
 | 2 | Run `npm ci` and `npm run build`; verify `public/build/manifest.json` and production asset budgets | PENDING — target build |
-| 3 | Deploy the exact built package with `vendor/` and `public/build/`; run Laravel cache, migration, storage and runtime checks | PENDING — hosting |
-| 4 | Complete live `/login` → `/admin`, installer/runtime handoff and exact CLI↔web identity verification | PENDING — live target |
+| 3 | Deploy package and verify Laravel runtime, Composer, database/migration, cache and storage on hosting | DONE — verified in hosting session; frontend build asset remains separate |
+| 4 | Complete live `/login` → `/admin`, installer/runtime handoff and exact CLI↔web identity verification | PARTIAL — URL is accessible; full acceptance evidence still required |
 | 5 | Complete C3 database matrix evidence for supported database families | PENDING — target evidence |
 | 6 | Complete C4 zero-install, upgrade, backup/restore and recovery rehearsal | PENDING — target evidence |
 | 7 | Complete C5 browser, accessibility/RTL, HTTP and performance evidence | PENDING — target evidence |
