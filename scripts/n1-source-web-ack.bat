@@ -25,7 +25,7 @@ if "!ACK_TOKEN!"=="" (
 )
 
 echo [Nexora Source Web Ack] Securely acknowledging %BASE_URL%/install/source-status ...
-curl.exe --fail --silent --show-error --no-cache ^
+curl.exe --fail --silent --show-error -H "Cache-Control: no-cache" -H "Pragma: no-cache" ^
   -H "Accept: application/json" ^
   -H "X-Nexora-Activation-Token: !ACK_TOKEN!" ^
   "%BASE_URL%/install/source-status"
