@@ -4,7 +4,7 @@
   "control_plane_revision": 7,
   "control_plane_branch": "codex/nine-point-closure-batch",
   "base_branch": "main",
-  "base_sha": "9d1c89eed4fc67d4e1a3798992d36d5a056e3ca5",
+  "base_sha": "55c249c06621fe7dc14868b3a5740b657bcb6b7a",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
@@ -32,11 +32,11 @@
     }
   ],
   "current_target": {
-    "environment": "not provisioned",
+    "environment": "operator-provided local Windows Laragon installation",
     "path": null,
-    "installed_release": null,
+    "installed_release": "1.0.0-rc.94",
     "expected_source_release_after_clean_upgrade_or_install": "1.0.0-rc.94",
-    "basis": "User clarified on 2026-09-30 that this product currently exists only on GitHub; no current installation path or URL."
+    "basis": "Operator supplied local target evidence on 2026-10-08; machine-local path is not stored. This does not establish hosted/production acceptance."
   },
   "runtime_closure_evidence": {
     "evidence_date": "2026-08-25",
@@ -46,24 +46,33 @@
     "deep_compatibility": "PASS; mismatches=[]; compatible=true; mode=installed-data-plane; deployment_drift=pass",
     "readiness_before_reconcile": "receipt-refresh-required; runtime_ready=true; receipt_current=false",
     "receipt_reconcile": "PASS; new post-install receipt bound to repaired installation lock",
-    "final_readiness": "PENDING fresh assert-ready after reconcile",
-    "web_identity": "PENDING fresh exact target-local CLI-to-web one-time challenge acknowledgement against the configured app.url origin",
-    "login": "PENDING /login target evidence on the same exact proven web origin",
+    "final_readiness": "PASS (operator-provided local Laragon evidence, 2026-10-08); ready=true; runtime_ready=true; receipt_current=true; errors=[]",
+    "web_identity": "PASS (operator-provided local Laragon evidence, 2026-10-08); current/valid CLI↔web acknowledgement for matching nonce/fingerprints; 37/37 critical source files; 34/34 runtime classes.",
+    "login": "PASS reported on same exact proven local origin (2026-10-08); HTTP 200; TLS verified; redirects not followed. Operator-provided, not independently inspected here.",
     "reviewed_dependency_attestation": "historical PR #30 reviewed-lock evidence remains retained, but the reconciled carrier adopts the current protected-main package-lock representation; fresh exact-head release certification is required before the new source head is accepted. This does not assert the installed rc.93 target consumed or resealed current dependency state.",
-    "orchestrator_source_work": "Runtime/source implementation and AI governance/evidence consolidation are integrated and protected-main verified through fde0667b150de551184ec5c5261a34f18538ceed. PR #83 final head 75d5436b0394f246bdca626571666abe77cd4012 passed #985 / 35673582569, merged under WVR-NEX-PR83-MAIN-REVIEW-001, and resulting-main #986 / 35767459733 completed SUCCESS. The runtime recovery orchestrator already covers final readiness/current receipt, exact target-to-web identity and authoritative /login; remaining closure evidence is target/provider only."
+    "orchestrator_source_work": "Runtime/source implementation and AI governance/evidence consolidation are integrated and protected-main verified through fde0667b150de551184ec5c5261a34f18538ceed. PR #83 final head 75d5436b0394f246bdca626571666abe77cd4012 passed #985 / 35673582569, merged under WVR-NEX-PR83-MAIN-REVIEW-001, and resulting-main #986 / 35767459733 completed SUCCESS. The runtime recovery orchestrator already covers final readiness/current receipt, exact target-to-web identity and authoritative /login; remaining closure evidence is target/provider only.",
+    "latest_local_target_checkpoint": {
+      "evidence_date": "2026-10-08",
+      "evidence_source": "operator-supplied command output recorded on GitHub Issue #74",
+      "target_scope": "local Windows Laragon; installed release 1.0.0-rc.94",
+      "cli_web_identity": "PASS reported; current/valid acknowledgement, 37/37 critical source files, 34/34 runtime classes; web SAPI cgi-fcgi",
+      "final_readiness": "PASS reported; ready=true, runtime_ready=true, receipt_current=true, errors=[]",
+      "login": "HTTP 200 reported with TLS verification enabled and redirects not followed on the proven origin",
+      "evidence_class": "operator-provided; not independently inspected in this workspace",
+      "limitations": "No hosted/production, other-database, release, or historical-key closure claim.",
+      "issue": "https://github.com/Vertex-Systems-Network/nexora/issues/74"
+    }
   },
   "blocker": {
     "category": "runtime-target-provider",
-    "summary": "Repository/source/governance remediation is integrated. RUNTIME-CLOSURE-001 remains BLOCKED on target environment readiness/current receipt, exact CLI-to-web identity, authoritative /login evidence, and rotation of the credential exposed by quarantined PR #71.",
+    "summary": "RUNTIME-CLOSURE-001 remains BLOCKED on Issue #72: establish historical exposed bootstrap-key use scope and safely retire any affected active/previous-key acceptance with encrypted-data/session recovery, or supply accepted evidence that no affected active use remains. Local Laragon readiness, CLI↔web identity and /login evidence were operator-reported PASS on 2026-10-08; hosted/production and release acceptance remain unverified.",
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "Verify post-#100 main push CI and this source checkpoint; continue user-authorized source development without assuming a target installation exists.",
-    "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
-    "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
-    "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",
-    "Rotate the credential exposed by quarantined PR #71 through an authorized target/provider path without recording the replacement secret.",
-    "Only after target gates pass, mark RUNTIME-CLOSURE-001 TARGET_VERIFIED and advance to CORE-QA-001."
+    "On the actual local target, perform a read-only, secret-safe comparison of the effective APP_KEY and APP_PREVIOUS_KEYS against the historical exposed bootstrap key; publish only match/no-match results.",
+    "Inventory any other installation or runtime that may have reused the historical key. If an affected active/previous key is found, plan encrypted-data/session recovery before retirement or rotation and retain non-secret evidence.",
+    "Reconcile Issue #72 and canonical state only after accepted affected-use/non-use or safe retirement evidence exists; keep local target evidence separate from hosted/production/release acceptance.",
+    "After all RUNTIME-CLOSURE-001 gates are accepted, mark TARGET_VERIFIED and advance to CORE-QA-001."
   ],
   "next_stage": {
     "id": "CORE-QA-001",
@@ -198,7 +207,7 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-09-30T17:24:49.596730+00:00",
+  "updated_at": "2026-10-08T14:00:00+00:00",
   "historical_current_target": {
     "environment": "operator-provided target environment",
     "path": "<operator-provided-target-path>",
