@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import Health from "./Health";
+import Health from "@admin/pages/Admin/System/Health";
 
 vi.mock("@inertiajs/react", () => ({ Head: () => null }));
 vi.mock("@admin/layout/AdminLayout", () => ({ AdminLayout: ({ children }: { children: ReactNode }) => <div>{children}</div> }));
