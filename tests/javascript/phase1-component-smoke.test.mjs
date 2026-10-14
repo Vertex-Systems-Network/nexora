@@ -4,7 +4,11 @@ import { createRequire } from 'node:module';
 import { test } from 'node:test';
 
 const require = createRequire(import.meta.url);
-const ts = require('typescript');
+// TypeScript 7 may expose its CommonJS API under default; support both
+// package layouts without weakening the syntax diagnostics.
+const tsPackage = require('typescript');
+const ts = tsPackage.transpileModule ? tsPackage : tsPackage.default;
+assert.ok(ts && typeof ts.transpileModule === 'function' && ts.ScriptTarget, 'TypeScript transpiler must be available');
 
 const jsx = (type, props = {}) => ({ type, props });
 const component = (name) => ({ children, ...props }) => jsx(name, { ...props, children });
