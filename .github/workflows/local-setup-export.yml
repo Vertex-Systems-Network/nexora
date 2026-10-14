@@ -1,0 +1,23 @@
+name: Temporary local setup source export
+on:
+  push:
+    branches:
+      - codex/portable-host-setup-20261015
+  workflow_dispatch:
+jobs:
+  source-export:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export exact tracked source without secrets
+        run: |
+          git archive --format=tar HEAD | gzip -9 > /tmp/nexora-source.tar.gz
+          cp /tmp/nexora-source.tar.gz ./nexora-source.tar.gz
+          sha256sum ./nexora-source.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nexora-source-portable-export
+          path: nexora-source.tar.gz
+          retention-days: 2
