@@ -24,16 +24,13 @@ if (-not (Test-Path 'composer.lock')) { throw 'composer.lock missing. Refresh an
 if (-not (Test-Path 'package-lock.json')) { throw 'package-lock.json missing. Refresh and review dependency locks before bootstrap.' }
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $envContent = Get-Content '.env' -Raw
-if ($envContent -notmatch '(?m)^APP_KEY=.{8,}
-npm ci --no-audit --no-fund; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-npm run build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-php artisan optimize:clear; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-Write-Host 'Source bootstrap complete. Open the configured APP_URL followed by /install.'
-) {
+# Preserve the current application encryption key on repeat bootstraps.
+# Rotating an installed key requires the separate authorized recovery workflow.
+if ($envContent -notmatch '(?m)^APP_KEY=.{8,}\r?$') {
     php artisan key:generate
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 npm ci --no-audit --no-fund; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 npm run build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 php artisan optimize:clear; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-Write-Host 'Source bootstrap complete. Open: http://nexora.test/install'
+Write-Host 'Source bootstrap complete. Open the configured APP_URL followed by /install.'
