@@ -108,3 +108,33 @@ jobs:
           path: storage/app/nexora/qa/development-readiness.json
           if-no-files-found: warn
           retention-days: 14
+
+  windows-bootstrap-qa:
+    name: Windows PowerShell bootstrap QA
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact pull-request source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          clean: true
+      - name: Native PowerShell parser and portability contract
+        shell: pwsh
+        run: |
+          $path = Join-Path $PWD 'scripts/bootstrap-installer.ps1'
+          $tokens = $null
+          $parseErrors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$tokens, [ref]$parseErrors)
+          if ($parseErrors.Count -ne 0) {
+            $parseErrors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+          $scriptText = Get-Content $path -Raw
+          if ($scriptText -notmatch '(?m)^if \(\$envContent -notmatch .*\) \{$') { throw 'APP_KEY detection block is malformed' }
+          if (([regex]::Matches($scriptText, 'npm ci --no-audit --no-fund')).Count -ne 1) { throw 'npm ci must execute once' }
+          if (([regex]::Matches($scriptText, 'npm run build')).Count -ne 1) { throw 'npm build must execute once' }
+          if ($scriptText.Contains('key:generate --force')) { throw 'Bootstrap must never forcibly rotate existing keys' }
+          if ($scriptText.Contains('nexora.test')) { throw 'Bootstrap must not require a local-server hostname' }
+          Write-Host 'PASS: Windows-native PowerShell parse, idempotent setup and hostname portability'
