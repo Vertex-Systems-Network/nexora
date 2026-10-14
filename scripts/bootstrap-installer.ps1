@@ -23,7 +23,16 @@ php scripts/source-guard.php --source-only; if ($LASTEXITCODE -ne 0) { exit $LAS
 if (-not (Test-Path 'composer.lock')) { throw 'composer.lock missing. Refresh and review dependency locks before bootstrap.' }
 if (-not (Test-Path 'package-lock.json')) { throw 'package-lock.json missing. Refresh and review dependency locks before bootstrap.' }
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-php artisan key:generate --force; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$envContent = Get-Content '.env' -Raw
+if ($envContent -notmatch '(?m)^APP_KEY=.{8,}
+npm ci --no-audit --no-fund; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+npm run build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+php artisan optimize:clear; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+Write-Host 'Source bootstrap complete. Open the configured APP_URL followed by /install.'
+) {
+    php artisan key:generate
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
 npm ci --no-audit --no-fund; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 npm run build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 php artisan optimize:clear; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
