@@ -32,8 +32,11 @@ if not exist composer.lock (echo [ERROR] composer.lock missing. Refresh and revi
 if not exist package-lock.json (echo [ERROR] package-lock.json missing. Refresh and review dependency locks before bootstrap. & exit /b 1)
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress
 if errorlevel 1 exit /b 1
-php artisan key:generate --force
-if errorlevel 1 exit /b 1
+findstr /B /R "APP_KEY=........" .env >nul 2>&1
+if errorlevel 1 (
+  php artisan key:generate
+  if errorlevel 1 exit /b 1
+)
 call npm ci --no-audit --no-fund
 if errorlevel 1 exit /b 1
 call npm run build
@@ -44,7 +47,7 @@ if errorlevel 1 exit /b 1
 echo.
 echo ======================================================
 echo Source bootstrap complete.
-echo Open: http://nexora.test/install
+echo Open the configured APP_URL followed by /install.
 echo The browser wizard will configure MySQL and Nexora.
 echo ======================================================
 exit /b 0
