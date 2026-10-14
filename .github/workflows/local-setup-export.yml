@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Export exact tracked source without secrets
         run: |
-          git archive --format=tar HEAD | gzip -9 > ./nexora-source.tar.gz
+          git ls-files -z | tar --null -T - -czf ./nexora-source.tar.gz
           sha256sum ./nexora-source.tar.gz
       - uses: actions/upload-artifact@v4
         with:
