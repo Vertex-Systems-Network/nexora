@@ -143,7 +143,13 @@ $exportEnv('APP_LOCALE', 'en');
 // APP_ENV/testing + NEXORA_INSTALLER_BYPASS pair without weakening real installs.
 $testEnvironment = strtolower(trim((string) (getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? '')))) === 'testing';
 $testBypass = filter_var(getenv('NEXORA_INSTALLER_BYPASS') ?: ($_ENV['NEXORA_INSTALLER_BYPASS'] ?? false), FILTER_VALIDATE_BOOL);
-if (! is_file($installedLock) && ! ($testEnvironment && $testBypass)) {
+if ($testEnvironment && $testBypass) {
+    // A disposable PHPUnit boot must never inherit a shared throttling/cache
+    // or session backend from .env.example, even before Laravel loads phpunit.xml.
+    $exportEnv('SESSION_DRIVER', 'array', true);
+    $exportEnv('CACHE_STORE', 'array', true);
+    $exportEnv('QUEUE_CONNECTION', 'sync', true);
+} elseif (! is_file($installedLock)) {
     $exportEnv('SESSION_DRIVER', 'file', true);
     $exportEnv('CACHE_STORE', 'file', true);
     $exportEnv('QUEUE_CONNECTION', 'sync', true);
