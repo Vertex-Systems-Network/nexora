@@ -56,7 +56,11 @@ $parseEnvFile = static function (string $path): array {
 
 $exportEnv = static function (string $key, string $value, bool $overwrite = false): void {
     $existing = getenv($key);
-    if (! $overwrite && $existing !== false && $existing !== '') {
+    // PHPUnit and some SAPIs inject environment settings via superglobals
+    // without calling putenv(). Treat these as explicit operator/test input,
+    // not as an absent setting to replace with .env.example defaults.
+    $injected = $_ENV[$key] ?? null;
+    if (! $overwrite && (($existing !== false && $existing !== '') || (is_string($injected) && $injected !== ''))) {
         return;
     }
     putenv($key.'='.$value);
@@ -134,7 +138,12 @@ $exportEnv('APP_DEBUG', is_file($installedLock) ? 'false' : 'true');
 $exportEnv('APP_URL', 'http://localhost');
 $exportEnv('APP_LOCALE', 'en');
 
-if (! is_file($installedLock)) {
+// Uninstalled public web requests need file-backed bootstrap state; isolated
+// PHPUnit workers explicitly opt into disposable test drivers. Preserve their
+// APP_ENV/testing + NEXORA_INSTALLER_BYPASS pair without weakening real installs.
+$testEnvironment = strtolower(trim((string) (getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? '')))) === 'testing';
+$testBypass = filter_var(getenv('NEXORA_INSTALLER_BYPASS') ?: ($_ENV['NEXORA_INSTALLER_BYPASS'] ?? false), FILTER_VALIDATE_BOOL);
+if (! is_file($installedLock) && ! ($testEnvironment && $testBypass)) {
     $exportEnv('SESSION_DRIVER', 'file', true);
     $exportEnv('CACHE_STORE', 'file', true);
     $exportEnv('QUEUE_CONNECTION', 'sync', true);
