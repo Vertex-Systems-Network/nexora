@@ -50,4 +50,5 @@ describe("System Health page", () => {
         expect(screen.getByText("Attention required")).toBeInTheDocument();
         expect(screen.getByText("Policy needs attention")).toBeInTheDocument();
     });
+
 });
