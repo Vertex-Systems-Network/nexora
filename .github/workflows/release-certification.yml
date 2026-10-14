@@ -125,6 +125,7 @@ jobs:
           chmod 600 .env.testing
           {
             echo "APP_ENV=testing"
+            echo "NEXORA_INSTALLER_BYPASS=true"
             echo "APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
             echo "DB_CONNECTION=mysql"
             echo "DB_HOST=127.0.0.1"
