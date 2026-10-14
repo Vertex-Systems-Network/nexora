@@ -1,0 +1,148 @@
+name: Nexora temporary protected public preview
+on:
+  push:
+    branches: [codex/portable-host-setup-20261015]
+    paths: [.github/workflows/nexora-temporary-preview.yml]
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: fileinfo,mbstring,openssl,pdo,pdo_sqlite,sqlite3,zip,curl
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies and production frontend
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm ci --no-audit --no-fund
+          npm run build
+          python3 -m venv /tmp/nexora-review-venv
+          /tmp/nexora-review-venv/bin/pip -q install requests
+      - name: Prepare preview credentials public encryption key
+        run: |
+          cat >/tmp/nexora-review-public.pem <<'PEM'
+          -----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1wRsPSO0AxBVromJ0vP
+          fz1tuSuLueL7hjmVgClQyLu3pe8olmHpkZtrSUAO4qL4v42gL8P4VQNNrv/qVNEg
+          F5i2nN5RfwtS/9qPHk/mKA1RUeiBTCmqcKVtmzYiO2oGEZpaQ8G+H9IL/E1qiG0v
+          1bOTqO9zbL/RU2FYN5kHG4K6335JAF5gUzDZFybxU4zR31t6O8G2rVs2kUL3ZX6d
+          PSqUxQ2GWXNRvEIBlHTRrjGjkghgc91HgDHRek3p7HVU6nWBKUyHAHeAvVgV/UvM
+          cJcakpDywt8eAC5HIko145XhtueStgz1ep2me4YWsbcVbnABXkwvMTdj3NQKbxcC
+          4wIDAQAB
+          -----END PUBLIC KEY-----
+          PEM
+      - name: Start preview and check external protection
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          touch database/nexora-public-preview.sqlite
+          export PREVIEW_DB_PATH="$PWD/database/nexora-public-preview.sqlite"
+          printf '\nAPP_ENV=production\nAPP_DEBUG=false\nAPP_URL=http://127.0.0.1:8000\nDB_CONNECTION=sqlite\nDB_DATABASE=%s\nNEXORA_ALLOW_INSECURE_HTTP=true\nSESSION_SECURE_COOKIE=false\n' "$PREVIEW_DB_PATH" >> .env
+          php artisan key:generate --force >/dev/null
+          export PREVIEW_BASIC_PASSWORD="$(openssl rand -hex 18)"
+          export PREVIEW_ADMIN_PASSWORD="N1!$(openssl rand -hex 18)"
+          cat >/tmp/nexora-review-proxy.py <<'PY'
+          from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+          from http.client import HTTPConnection
+          import os, base64, hmac
+          auth="Basic "+base64.b64encode(("review:"+os.environ["PREVIEW_BASIC_PASSWORD"]).encode()).decode()
+          drop={"connection","transfer-encoding","keep-alive","proxy-connection","upgrade","te","trailer","content-length","authorization","host"}
+          class Proxy(BaseHTTPRequestHandler):
+              protocol_version="HTTP/1.1"
+              def do_GET(self): self.relay()
+              def do_HEAD(self): self.relay()
+              def do_POST(self): self.relay()
+              def do_PUT(self): self.relay()
+              def do_PATCH(self): self.relay()
+              def do_DELETE(self): self.relay()
+              def log_message(self,*args): pass
+              def relay(self):
+                  if not hmac.compare_digest(self.headers.get("Authorization",""),auth):
+                      self.send_response(401); self.send_header("WWW-Authenticate",'Basic realm="Nexora Review"'); self.send_header("Cache-Control","no-store"); self.send_header("Content-Length","0"); self.end_headers(); return
+                  size=int(self.headers.get("Content-Length","0") or "0")
+                  if size>67108864: self.send_error(413); return
+                  content=self.rfile.read(size) if size else None
+                  headers={k:v for k,v in self.headers.items() if k.lower() not in drop}
+                  headers["Host"]=self.headers.get("Host","127.0.0.1:8000")
+                  headers["X-Forwarded-Proto"]="https"
+                  headers["X-Forwarded-Host"]=headers["Host"]
+                  try:
+                      upstream=HTTPConnection("127.0.0.1",8000,timeout=120)
+                      upstream.request(self.command,self.path,body=content,headers=headers)
+                      response=upstream.getresponse(); data=response.read()
+                      self.send_response(response.status)
+                      for k,v in response.getheaders():
+                          if k.lower() not in drop: self.send_header(k,v)
+                      self.send_header("Content-Length",str(len(data))); self.end_headers()
+                      if self.command!="HEAD": self.wfile.write(data)
+                      upstream.close()
+                  except Exception as ex:
+                      self.send_error(502)
+          ThreadingHTTPServer(("127.0.0.1",8080),Proxy).serve_forever()
+          PY
+          python3 -u /tmp/nexora-review-proxy.py >/tmp/nexora-review-proxy.log 2>&1 &
+          php -S 127.0.0.1:8000 -t public public/index.php >/tmp/nexora-review-php.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsS -o /dev/null http://127.0.0.1:8000/install; then break; fi; sleep 1; done
+          php artisan nexora:source:activate --assert-current >/tmp/nexora-review-source.log
+          token="$(php artisan nexora:source:status --web-token | tr -d '\r\n')"
+          curl -fsS -H "X-Nexora-Activation-Token: $token" -H "Accept: application/json" http://127.0.0.1:8000/install/source-status >/dev/null
+          php artisan nexora:source:status --require-web-ack >/dev/null
+          curl -fsSL --retry 2 -o /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+          chmod +x /tmp/cloudflared
+          /tmp/cloudflared tunnel --no-autoupdate --url http://127.0.0.1:8080 >/tmp/nexora-review-tunnel.log 2>&1 &
+          PREVIEW_PUBLIC_URL=""
+          for i in $(seq 1 60); do
+            PREVIEW_PUBLIC_URL="$(grep -oE 'https://[a-z0-9-]+[.]trycloudflare[.]com' /tmp/nexora-review-tunnel.log | head -1 || true)"
+            [ -n "$PREVIEW_PUBLIC_URL" ] && break
+            sleep 2
+          done
+          if [ -z "$PREVIEW_PUBLIC_URL" ]; then echo "TUNNEL_FAILED"; tail -30 /tmp/nexora-review-tunnel.log; exit 7; fi
+          export PREVIEW_PUBLIC_URL
+          echo "PREVIEW_PUBLIC_URL=$PREVIEW_PUBLIC_URL" >> "$GITHUB_ENV"
+          printf '\nAPP_URL=%s\n' "$PREVIEW_PUBLIC_URL" >> .env
+          cat >/tmp/nexora-review-install.py <<'PY'
+          import os,re,requests
+          base="http://127.0.0.1:8000"
+          s=requests.Session()
+          r=s.get(base+"/install",timeout=30)
+          print("PREVIEW_INSTALL_GET",r.status_code,flush=True)
+          m=re.search(r'<meta name="csrf-token" content="([^"]+)"',r.text)
+          if r.status_code!=200 or not m: raise RuntimeError("Cannot load install form")
+          password=os.environ["PREVIEW_ADMIN_PASSWORD"]
+          fields={"_token":m.group(1),"db_driver":"sqlite","db_database":os.environ["PREVIEW_DB_PATH"],"db_create":"0","db_reset_existing":"0","app_name":"Nexora Public Preview","app_url":os.environ["PREVIEW_PUBLIC_URL"],"language":"en","admin_name":"Preview Admin","admin_email":"preview-admin@example.test","admin_password":password,"admin_password_confirmation":password,"password_strength_consent":"1","terms":"1"}
+          post=s.post(base+"/install",data=fields,headers={"Referer":base+"/install","X-CSRF-TOKEN":m.group(1)},allow_redirects=False,timeout=145)
+          print("PREVIEW_INSTALL_POST",post.status_code,post.headers.get("Location",""),flush=True)
+          if post.status_code not in (200,201,302,303): raise RuntimeError("Install rejected")
+          PY
+          /tmp/nexora-review-venv/bin/python /tmp/nexora-review-install.py
+          php artisan nexora:runtime:post-install-reconcile --confirm=RECONCILE >/tmp/nexora-review-reconcile.log 2>&1 || (tail -45 /tmp/nexora-review-reconcile.log; exit 8)
+          php artisan nexora:runtime:post-install-status --assert-ready >/tmp/nexora-review-ready.log 2>&1 || (tail -45 /tmp/nexora-review-ready.log; exit 9)
+          curl --fail --max-time 20 -sS -o /dev/null http://127.0.0.1:8000/login
+          code="$(curl --max-time 25 -sS -o /dev/null -w '%{http_code}' "$PREVIEW_PUBLIC_URL/login")"
+          echo "PREVIEW_EXTERNAL_STATUS=$code"
+          [ "$code" = "401" ] || (echo "Missing basic auth protection"; exit 10)
+          printf 'URL=%s\nBASIC_USER=review\nBASIC_PASSWORD=%s\nADMIN_EMAIL=preview-admin@example.test\nADMIN_PASSWORD=%s\n' "$PREVIEW_PUBLIC_URL" "$PREVIEW_BASIC_PASSWORD" "$PREVIEW_ADMIN_PASSWORD" > /tmp/nexora-review-credentials.txt
+          openssl pkeyutl -encrypt -pubin -inkey /tmp/nexora-review-public.pem -in /tmp/nexora-review-credentials.txt -out nexora-review-credentials.enc -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256
+          rm -f /tmp/nexora-review-credentials.txt
+          echo "PREVIEW_READY=$PREVIEW_PUBLIC_URL"
+          
+      - name: Upload only encrypted temporary credentials
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-temporary-review-access-encrypted
+          path: nexora-review-credentials.enc
+          retention-days: 1
+      - name: Keep preview online for review
+        run: |
+          echo "Preview running on $PREVIEW_PUBLIC_URL"
+          sleep 3000
