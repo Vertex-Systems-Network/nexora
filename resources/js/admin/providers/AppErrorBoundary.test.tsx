@@ -6,7 +6,7 @@ vi.mock("@admin/components/LoadingStates", () => ({
     ErrorState: ({ description }: { description: string }) => <p>{description}</p>,
 }));
 
-function Broken() {
+function Broken(): never {
     throw new Error("View crashed");
 }
 
