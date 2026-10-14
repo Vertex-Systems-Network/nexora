@@ -14,7 +14,9 @@ php scripts/source-guard.php --source-only
 [[ -f composer.lock ]] || { echo "[ERROR] composer.lock missing. Refresh and review dependency locks before bootstrap."; exit 1; }
 [[ -f package-lock.json ]] || { echo "[ERROR] package-lock.json missing. Refresh and review dependency locks before bootstrap."; exit 1; }
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress
-php artisan key:generate --force
+if ! grep -Eq '^APP_KEY=.{8,}' .env; then
+  php artisan key:generate
+fi
 npm ci --no-audit --no-fund
 npm run build
 php artisan optimize:clear
