@@ -76,10 +76,25 @@ try {
     let sequence = 0;
     const pending = new Map();
     const exceptions = [];
+    const loginRequests = new Map();
+    const loginResponses = [];
     ws.addEventListener("message", (event) => {
         const message = JSON.parse(event.data);
         if (message.method === "Runtime.exceptionThrown") {
             exceptions.push(message.params?.exceptionDetails?.text || "unknown JavaScript exception");
+        }
+        if (message.method === "Network.requestWillBeSent") {
+            const request = message.params?.request;
+            // Record status only; never capture POST body, cookies or credentials.
+            if (request?.method === "POST" && new URL(request.url).pathname === "/login") {
+                loginRequests.set(message.params.requestId, true);
+            }
+        }
+        if (message.method === "Network.responseReceived" && loginRequests.has(message.params?.requestId)) {
+            loginResponses.push({ status: message.params.response.status, type: message.params.type });
+        }
+        if (message.method === "Network.loadingFailed" && loginRequests.has(message.params?.requestId)) {
+            loginResponses.push({ error: message.params.errorText });
         }
         if (!message.id) return;
         const entry = pending.get(message.id);
@@ -110,6 +125,7 @@ try {
 
     await cdp("Page.enable");
     await cdp("Runtime.enable");
+    await cdp("Network.enable");
     async function waitFor(expression, description, attempts = 100) {
         for (let i = 0; i < attempts; i++) {
             if (await evalJs(expression)) return;
@@ -117,7 +133,8 @@ try {
             await sleep(120);
         }
         const diagnostic = await evalJs("({url:location.pathname, title:document.title, ready:document.readyState, root:!!document.getElementById('app'), formCount:document.forms.length, inputs:Array.from(document.querySelectorAll('input')).map(i=>({name:i.name,type:i.type})), body:(document.body?.innerText||'').slice(0,350), scripts:Array.from(document.scripts).map(s=>s.src).filter(Boolean).slice(0,8)})");
-        throw new Error("Timed out: " + description + "; browser=" + JSON.stringify(diagnostic) + "; errors=" + JSON.stringify(exceptions).slice(0,1200));
+        const validation = await evalJs("({invalidInputs:Array.from(document.querySelectorAll('input[aria-invalid=true]')).map(i=>i.name), alerts:Array.from(document.querySelectorAll('[role=alert]')).map(e=>e.innerText.slice(0,120)), submitDisabled:document.querySelector('button[type=submit]')?.disabled ?? null})");
+        throw new Error("Timed out: " + description + "; browser=" + JSON.stringify(diagnostic) + "; validation=" + JSON.stringify(validation) + "; loginResponses=" + JSON.stringify(loginResponses) + "; errors=" + JSON.stringify(exceptions).slice(0,1200));
     }
     const navigation = await cdp("Page.navigate", { url });
     assert.ok(!navigation.errorText, "Could not navigate to test login page: " + navigation.errorText);
@@ -130,6 +147,8 @@ try {
     await cdp("Input.insertText", { text: password });
     const inputsPresent = await evalJs("document.querySelector('input[name=email]').value.length>0 && document.querySelector('input[name=password]').value.length>0");
     assert.equal(inputsPresent, true, "Login form failed to receive native keyboard input.");
+    const inputMatches = await evalJs("document.querySelector('input[name=email]').value.length>0 && document.querySelector('input[name=password]').value.length>0");
+    assert.equal(inputMatches, true, "Login input fields are empty before submitting.");
     await evalJs("document.querySelector('button[type=submit]').click()");
     await waitFor("location.pathname.startsWith('/admin') && !!document.querySelector('nav[aria-label=\"Admin navigation\"]')",
         "authenticated admin dashboard", 150);
