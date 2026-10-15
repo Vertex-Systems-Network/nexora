@@ -143,10 +143,22 @@ $exportEnv('APP_LOCALE', 'en');
 // APP_ENV/testing + NEXORA_INSTALLER_BYPASS pair without weakening real installs.
 $testEnvironment = strtolower(trim((string) (getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? '')))) === 'testing';
 $testBypass = filter_var(getenv('NEXORA_INSTALLER_BYPASS') ?: ($_ENV['NEXORA_INSTALLER_BYPASS'] ?? false), FILTER_VALIDATE_BOOL);
+// The real-browser QA uses multiple independent HTTP requests. Allow file
+// sessions only for an explicitly opted-in, disposable loopback + test-DB
+// fixture; ordinary PHPUnit still uses isolated, nonpersistent array sessions.
+$browserTestOrigin = (string) (getenv('APP_URL') ?: ($_ENV['APP_URL'] ?? ''));
+$browserTestDatabase = (string) (getenv('DB_DATABASE') ?: ($_ENV['DB_DATABASE'] ?? ''));
+$browserTestHost = (string) (getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? ''));
+$browserSessionOptIn = $testEnvironment && $testBypass
+    && (getenv('NEXORA_CI_BROWSER_E2E') ?: ($_ENV['NEXORA_CI_BROWSER_E2E'] ?? '')) === '1'
+    && (getenv('DB_CONNECTION') ?: ($_ENV['DB_CONNECTION'] ?? '')) === 'mysql'
+    && $browserTestDatabase === 'nexora_testing'
+    && in_array($browserTestHost, ['127.0.0.1', 'localhost'], true)
+    && preg_match('~^http://127\\.0\\.0\\.1:[0-9]{2,5}/?$~', $browserTestOrigin) === 1;
 if ($testEnvironment && $testBypass) {
-    // A disposable PHPUnit boot must never inherit a shared throttling/cache
-    // or session backend from .env.example, even before Laravel loads phpunit.xml.
-    $exportEnv('SESSION_DRIVER', 'array', true);
+    // Ordinary PHPUnit workers must never share persistent session/cache
+    // state. Only the explicitly guarded browser fixture needs file sessions.
+    $exportEnv('SESSION_DRIVER', $browserSessionOptIn ? 'file' : 'array', true);
     $exportEnv('CACHE_STORE', 'array', true);
     $exportEnv('QUEUE_CONNECTION', 'sync', true);
 } elseif (! is_file($installedLock)) {
