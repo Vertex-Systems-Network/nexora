@@ -10,6 +10,7 @@ export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-$TOOLS_DIR/npm-cache}"
 export HOME="${HOME:-$TOOLS_DIR/home}"
 for command in php composer npm; do command -v "$command" >/dev/null || { echo "[ERROR] $command not found in PATH."; exit 1; }; done
 [[ -f .env ]] || cp .env.example .env
+php scripts/bootstrap-origin-doctor.php
 php scripts/source-guard.php --source-only
 [[ -f composer.lock ]] || { echo "[ERROR] composer.lock missing. Refresh and review dependency locks before bootstrap."; exit 1; }
 [[ -f package-lock.json ]] || { echo "[ERROR] package-lock.json missing. Refresh and review dependency locks before bootstrap."; exit 1; }

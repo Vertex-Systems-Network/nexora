@@ -19,6 +19,7 @@ if ([string]::IsNullOrWhiteSpace($env:APPDATA) -and -not [string]::IsNullOrWhite
 Write-Host 'Nexora Source Bootstrap - PowerShell'
 foreach ($command in @('php','composer','npm')) { if (-not (Get-Command $command -ErrorAction SilentlyContinue)) { throw "$command not found in PATH." } }
 if (-not (Test-Path '.env')) { Copy-Item '.env.example' '.env' }
+php scripts/bootstrap-origin-doctor.php; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 php scripts/source-guard.php --source-only; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (-not (Test-Path 'composer.lock')) { throw 'composer.lock missing. Refresh and review dependency locks before bootstrap.' }
 if (-not (Test-Path 'package-lock.json')) { throw 'package-lock.json missing. Refresh and review dependency locks before bootstrap.' }

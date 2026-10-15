@@ -25,6 +25,8 @@ where composer >nul 2>&1 || (echo [ERROR] Composer not found in PATH. & exit /b 
 where npm >nul 2>&1 || (echo [ERROR] npm not found in PATH. & exit /b 1)
 
 if not exist .env copy .env.example .env >nul
+php scripts\bootstrap-origin-doctor.php
+if errorlevel 1 exit /b 1
 
 php scripts\source-guard.php --source-only
 if errorlevel 1 exit /b 1
