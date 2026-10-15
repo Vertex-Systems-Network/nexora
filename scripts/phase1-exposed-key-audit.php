@@ -413,6 +413,48 @@ function nexoraHistoricalAuditTarget(string $referenceBytes, string $target, arr
     ];
 }
 
+/**
+ * Confidential historical reference material must never live in the checked-out
+ * source tree or in the installation being audited. A private 0600 file placed
+ * inside either tree can be accidentally collected by a source export, backup,
+ * deployment, or Git commit. Resolve canonical paths (including Windows drive
+ * case) so relative paths and directory symlinks cannot bypass this boundary.
+ */
+function nexoraHistoricalReferenceOutsideCheckouts(string $reference, string $target): bool
+{
+    $referencePath = realpath($reference);
+    $sourceRoot = realpath(dirname(__DIR__));
+    $targetRoot = realpath($target);
+    if ($referencePath === false || $sourceRoot === false || $targetRoot === false) {
+        return false;
+    }
+
+    // A symlinked ancestor can make a key supplied via a checkout-local path
+    // resolve outside that checkout. Reject the alias rather than accepting
+    // a misleading "external" reference location.
+    $component = $reference;
+    while ($component !== dirname($component)) {
+        if (is_link($component)) {
+            return false;
+        }
+        $component = dirname($component);
+    }
+
+    $normalize = static function (string $path): string {
+        $path = rtrim(str_replace('\\', '/', $path), '/');
+        return PHP_OS_FAMILY === 'Windows' ? strtolower($path) : $path;
+    };
+    $referencePath = $normalize($referencePath);
+    foreach ([$sourceRoot, $targetRoot] as $root) {
+        $root = $normalize($root);
+        if ($referencePath === $root || str_starts_with($referencePath, $root.'/')) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 if (isset($_SERVER['SCRIPT_FILENAME']) && realpath((string) $_SERVER['SCRIPT_FILENAME']) === __FILE__) {
     $args = ['reference-file' => null, 'target' => null];
     foreach (array_slice($argv, 1) as $argument) {
@@ -430,6 +472,10 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && realpath((string) $_SERVER['SCRIPT_FIL
     if (is_link($reference) || ! is_file($reference) || ! is_readable($reference)
         || (PHP_OS_FAMILY !== 'Windows' && (fileperms($reference) & 0077) !== 0)) {
         fwrite(STDERR, "Reference key file must exist, be readable, non-symlink and owner-only (mode 0600).\n");
+        exit(2);
+    }
+    if (! nexoraHistoricalReferenceOutsideCheckouts($reference, $args['target'])) {
+        fwrite(STDERR, "Reference key file must be outside both the source repository and the audited target checkout.\n");
         exit(2);
     }
     $referenceContents = nexoraHistoricalBoundedRead($reference, NEXORA_HISTORICAL_MAX_KEY_BYTES);

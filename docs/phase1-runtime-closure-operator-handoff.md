@@ -20,7 +20,7 @@ The historical exposed key belongs to a **local installation bootstrap/applicati
 
 ## Confidential historical-key inventory helper (#72)
 
-The repo includes a **read-only** audit, `scripts/phase1-exposed-key-audit.php`, for comparing a privately supplied historical PR #71 key to the target's readable root/fallback environment and protected bootstrap key. The reference must be a **non-symlink, owner-only private file outside the repository**, containing the original key, and must never be committed, pasted into terminal flags or uploaded to GitHub.
+The repo includes a **read-only** audit, `scripts/phase1-exposed-key-audit.php`, for comparing a privately supplied historical PR #71 key to the target's readable root/fallback environment and protected bootstrap key. The reference must be a **non-symlink, owner-only private file outside both the source repository and the audited target checkout**, containing the original key, and must never be committed, pasted into terminal flags or uploaded to GitHub. The scanner rejects references inside either checkout, including through symlinked parent directories, before reading key bytes.
 
 On the authorized target machine:
 

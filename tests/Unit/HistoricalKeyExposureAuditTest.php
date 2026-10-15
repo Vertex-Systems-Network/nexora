@@ -12,6 +12,49 @@ require_once __DIR__.'/../../scripts/phase1-exposed-key-audit.php';
 final class HistoricalKeyExposureAuditTest extends TestCase
 {
     #[Test]
+    public function rejects_historical_reference_files_inside_source_or_audited_target(): void
+    {
+        $sourceRoot = dirname(__DIR__, 2);
+        $targetRoot = sys_get_temp_dir().'/nexora-reference-boundary-'.bin2hex(random_bytes(6));
+        $externalRoot = sys_get_temp_dir().'/nexora-private-reference-'.bin2hex(random_bytes(6));
+        $sourceReference = $sourceRoot.'/.nexora-synthetic-reference-'.bin2hex(random_bytes(6));
+        $sourceAlias = $sourceRoot.'/.nexora-synthetic-alias-'.bin2hex(random_bytes(6));
+        mkdir($targetRoot, 0700, true);
+        mkdir($externalRoot, 0700, true);
+        $targetReference = $targetRoot.'/synthetic-reference.key';
+        $externalReference = $externalRoot.'/synthetic-reference.key';
+        $synthetic = 'base64:'.base64_encode(str_repeat('Z', 32));
+
+        try {
+            foreach ([$sourceReference, $targetReference, $externalReference] as $file) {
+                file_put_contents($file, $synthetic);
+                chmod($file, 0600);
+            }
+            self::assertFalse(\nexoraHistoricalReferenceOutsideCheckouts($sourceReference, $targetRoot));
+            self::assertFalse(\nexoraHistoricalReferenceOutsideCheckouts($targetReference, $targetRoot));
+            self::assertTrue(\nexoraHistoricalReferenceOutsideCheckouts($externalReference, $targetRoot));
+            if (function_exists('symlink') && @symlink($externalRoot, $sourceAlias)) {
+                self::assertFalse(\nexoraHistoricalReferenceOutsideCheckouts(
+                    $sourceAlias.'/synthetic-reference.key', $targetRoot
+                ));
+            }
+            self::assertFalse(\nexoraHistoricalReferenceOutsideCheckouts($externalRoot.'/missing', $targetRoot));
+            // Canonical containment must also detect references reached through
+            // a source-root traversal or an alias (where permitted by the OS).
+            self::assertFalse(\nexoraHistoricalReferenceOutsideCheckouts(
+                $sourceRoot.'/tests/../'.basename($sourceReference), $targetRoot
+            ));
+        } finally {
+            @unlink($sourceAlias);
+            @unlink($sourceReference);
+            @unlink($targetReference);
+            @unlink($externalReference);
+            @rmdir($targetRoot);
+            @rmdir($externalRoot);
+        }
+    }
+
+    #[Test]
     public function observes_exposed_key_in_active_previous_or_bootstrap_storage_without_printing_it(): void
     {
         $root = sys_get_temp_dir().'/nexora-history-'.bin2hex(random_bytes(7));
