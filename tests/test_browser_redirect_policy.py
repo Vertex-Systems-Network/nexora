@@ -25,11 +25,24 @@ class FakePage:
         return FakeResponse()
     def screenshot(self, **kwargs):
         self.screenshots += 1
+        return b'PNG_MOCK_MASKED'
+    def evaluate(self, *args, **kwargs):
+        return {'password_visible': True, 'identity_visible': True,
+                'submit_visible': True, 'horizontal_overflow': False}
+    def locator(self, selector):
+        return 'masked-inputs'
 
 
 class FakeContext:
     def __init__(self, page):
         self.page = page
+    def route(self, pattern, handler):
+        self.route_pattern = pattern
+        self.route_handler = handler
+    def add_init_script(self, script):
+        self.init_script = script
+    def route_web_socket(self, pattern, handler):
+        self.websocket_route = (pattern, handler)
     def new_page(self):
         return self.page
     def close(self):
@@ -137,13 +150,15 @@ class AcceptanceRunnerBoundaries(unittest.TestCase):
                 f = repo / rel
                 f.parent.mkdir(parents=True, exist_ok=True)
                 f.write_text('<?php // fixture only\n')
+            for name in probe.REQUIRED_SOURCE_ROOTS:
+                (repo / name).mkdir(parents=True, exist_ok=True)
             (repo / '.env').symlink_to(repo / 'nonexistent-runtime-key.env')
             fake = MagicMock(returncode=0)
             with patch.dict(os.environ, {'NEXORA_DISPOSABLE_TEST_CHECKOUT': '1'}), \
                  patch.object(probe.subprocess, 'run', return_value=fake) as executed:
                 outcome = probe.probe_repo(repo, allow_native_unit=True)
             self.assertEqual(outcome['native_phpunit'], 'BLOCKED_EXISTING_RUNTIME_ENVIRONMENT', outcome)
-            self.assertEqual(executed.call_count, 2, 'only Source Guard and read-only manifest check allowed')
+            self.assertEqual(executed.call_count, 3, 'PHP extension inventory plus Source Guard and manifest check only')
 
 class NativeRuntimeStateGuards(unittest.TestCase):
     def test_active_environment_marker_or_cached_config_blocks_disposable_phpunit(self):
@@ -158,6 +173,8 @@ class NativeRuntimeStateGuards(unittest.TestCase):
                 p = root / rel
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text('fixture only\n')
+            for name in probe.REQUIRED_SOURCE_ROOTS:
+                (root / name).mkdir(parents=True, exist_ok=True)
             for marker in ['storage/app/nexora/environment/active', 'bootstrap/cache/config.php']:
                 p = root / marker
                 p.parent.mkdir(parents=True, exist_ok=True)
@@ -166,5 +183,5 @@ class NativeRuntimeStateGuards(unittest.TestCase):
                      patch.object(probe.subprocess, 'run', return_value=MagicMock(returncode=0)) as calls:
                     result = probe.probe_repo(root, allow_native_unit=True)
                 self.assertEqual(result['native_phpunit'], 'BLOCKED_EXISTING_RUNTIME_ENVIRONMENT')
-                self.assertEqual(calls.call_count, 2)
+                self.assertEqual(calls.call_count, 3)
                 p.unlink()
