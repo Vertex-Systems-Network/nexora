@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\\Architecture;
+namespace Tests\Architecture;
 
-use PHPUnit\\Framework\\Attributes\\Test;
-use Tests\\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 final class BrowserSessionIsolationArchitectureTest extends TestCase
 {
