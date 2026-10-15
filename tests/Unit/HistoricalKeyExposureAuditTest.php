@@ -390,4 +390,307 @@ final class HistoricalKeyExposureAuditTest extends TestCase
             \Illuminate\Support\Facades\File::deleteDirectory($root);
         }
     }
+    #[Test]
+    public function independent_cli_environment_apis_are_all_scanned_when_their_keys_disagree(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-env-variants-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $safe = 'base64:'.base64_encode(str_repeat('S', 32));
+        $exposed = 'base64:'.base64_encode(str_repeat('X', 32));
+        file_put_contents($root.'/.env', 'APP_KEY='.$safe."\n");
+        $previousGetenv = getenv('APP_KEY');
+        $previousEnv = $_ENV['APP_KEY'] ?? null;
+        $previousServer = $_SERVER['APP_KEY'] ?? null;
+        $previousEnvHistory = $_ENV['APP_PREVIOUS_KEYS'] ?? null;
+        $previousGetenvHistory = getenv('APP_PREVIOUS_KEYS');
+        try {
+            putenv('APP_KEY='.$safe);
+            putenv('APP_PREVIOUS_KEYS');
+            $_ENV['APP_KEY'] = $exposed;
+            $_SERVER['APP_KEY'] = $safe;
+            $_ENV['APP_PREVIOUS_KEYS'] = $safe;
+            $settings = \nexoraHistoricalReadProcessSettings();
+            self::assertTrue(is_array($settings['APP_KEY']));
+            self::assertSame(2, count($settings['APP_KEY']));
+            $result = \nexoraHistoricalAuditTarget(str_repeat('X', 32), $root, $settings);
+            self::assertSame('EXPOSED_KEY_OBSERVED', $result['status']);
+            self::assertStringNotContainsString($exposed, json_encode($result, JSON_THROW_ON_ERROR));
+            self::assertFalse($result['retired']);
+            $_ENV['APP_KEY'] = $safe;
+            $_ENV['APP_PREVIOUS_KEYS'] = $exposed;
+            $result = \nexoraHistoricalAuditTarget(str_repeat('X', 32), $root, \nexoraHistoricalReadProcessSettings());
+            self::assertSame('EXPOSED_KEY_OBSERVED', $result['status']);
+        } finally {
+            $previousGetenv === false ? putenv('APP_KEY') : putenv('APP_KEY='.$previousGetenv);
+            $previousGetenvHistory === false ? putenv('APP_PREVIOUS_KEYS') : putenv('APP_PREVIOUS_KEYS='.$previousGetenvHistory);
+            if ($previousEnv === null) { unset($_ENV['APP_KEY']); } else { $_ENV['APP_KEY'] = $previousEnv; }
+            if ($previousServer === null) { unset($_SERVER['APP_KEY']); } else { $_SERVER['APP_KEY'] = $previousServer; }
+            if ($previousEnvHistory === null) { unset($_ENV['APP_PREVIOUS_KEYS']); } else { $_ENV['APP_PREVIOUS_KEYS'] = $previousEnvHistory; }
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+    #[Test]
+    public function malformed_or_oversized_parallel_cli_sources_fail_closed(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-env-invalid-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $safe = 'base64:'.base64_encode(str_repeat('S', 32));
+        file_put_contents($root.'/.env', 'APP_KEY='.$safe."\n");
+        try {
+            foreach ([[$safe, 'not-a-key'], [$safe, str_repeat('Z', NEXORA_HISTORICAL_MAX_ENV_BYTES + 1)], [$safe, null]] as $inputs) {
+                $result = \nexoraHistoricalAuditTarget(str_repeat('X', 32), $root, ['APP_KEY' => $inputs]);
+                self::assertSame('INCONCLUSIVE', $result['status']);
+                self::assertGreaterThan(0, $result['unreadable']);
+                self::assertFalse($result['target_verified']);
+                self::assertFalse($result['historical_non_use_proved']);
+            }
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+
+
+    #[Test]
+    public function detects_quoted_escaped_raw_key_using_installer_environment_decoding(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-escaped-current-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $leaked = str_repeat('L', 10).'"'.str_repeat('L', 10).'\\'.str_repeat('L', 10);
+        self::assertSame(32, strlen($leaked));
+        $encoded = str_replace(['\\', '"'], ['\\\\', '\\"'], $leaked);
+        try {
+            file_put_contents($root.'/.env', 'APP_KEY="'.$encoded.'"' . "\n");
+            $result = \nexoraHistoricalAuditTarget($leaked, $root);
+            self::assertSame('EXPOSED_KEY_OBSERVED', $result['status']);
+            self::assertStringNotContainsString($leaked, json_encode($result, JSON_THROW_ON_ERROR));
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+    #[Test]
+    public function detects_quoted_escaped_newline_raw_key(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-escaped-newline-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $leaked = str_repeat('N', 15)."\n".str_repeat('N', 16);
+        self::assertSame(32, strlen($leaked));
+        try {
+            file_put_contents($root.'/.env', 'APP_KEY="'.str_repeat('N', 15).'\\n'.str_repeat('N', 16).'"' . "\n");
+            $result = \nexoraHistoricalAuditTarget($leaked, $root);
+            self::assertSame('EXPOSED_KEY_OBSERVED', $result['status']);
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+    #[Test]
+    public function detects_escaped_previous_keys_without_confusing_comma_separation(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-escaped-previous-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $leaked = str_repeat('P', 15).'\\'.str_repeat('P', 16);
+        $safe = 'base64:'.base64_encode(str_repeat('S', 32));
+        self::assertSame(32, strlen($leaked));
+        try {
+            file_put_contents($root.'/.env', 'APP_KEY='.$safe."\n".'APP_PREVIOUS_KEYS="'.$safe.','.str_repeat('P', 15).'\\\\'.str_repeat('P', 16).'"'."\n");
+            $result = \nexoraHistoricalAuditTarget($leaked, $root);
+            self::assertSame('EXPOSED_KEY_OBSERVED', $result['status']);
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+    #[Test]
+    public function duplicate_app_key_assignments_with_empty_last_value_cannot_produce_scoped_negative(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-history-duplicate-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $safe = 'base64:'.base64_encode(str_repeat('S', 32));
+        $leaked = 'base64:'.base64_encode(str_repeat('L', 32));
+        try {
+            // Nexora's bootstrap parser uses the LAST APP_KEY assignment.
+            // A previous safe value must not certify this environment.
+            file_put_contents($root.'/.env', 'APP_KEY='.$safe."\nAPP_KEY=\n");
+            $result = \nexoraHistoricalAuditTarget(str_repeat('L', 32), $root);
+            self::assertSame('INCONCLUSIVE', $result['status']);
+            self::assertTrue($result['selected_environment_incomplete']);
+            self::assertFalse($result['historical_non_use_proved']);
+
+            // Preserve detection of the exposed key in ANY duplicate slot.
+            file_put_contents($root.'/.env', 'APP_KEY='.$leaked."\nAPP_KEY=\n");
+            self::assertSame('EXPOSED_KEY_OBSERVED', \nexoraHistoricalAuditTarget(str_repeat('L', 32), $root)['status']);
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+    #[Test]
+    public function duplicate_previous_key_assignments_are_ambiguous_even_when_non_matching(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-history-duplicate-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $safe = 'base64:'.base64_encode(str_repeat('S', 32));
+        $leaked = 'base64:'.base64_encode(str_repeat('L', 32));
+        try {
+            file_put_contents($root.'/.env', 'APP_KEY='.$safe."\nAPP_PREVIOUS_KEYS={$safe}\nAPP_PREVIOUS_KEYS={$safe}\n");
+            $result = \nexoraHistoricalAuditTarget(str_repeat('L', 32), $root);
+            self::assertSame('INCONCLUSIVE', $result['status']);
+            self::assertGreaterThan(0, $result['duplicate_assignments']);
+            file_put_contents($root.'/.env', 'APP_KEY='.$safe."\nAPP_PREVIOUS_KEYS={$leaked}\nAPP_PREVIOUS_KEYS={$safe}\n");
+            self::assertSame('EXPOSED_KEY_OBSERVED', \nexoraHistoricalAuditTarget(str_repeat('L', 32), $root)['status']);
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+
+    #[Test]
+    public function explicitly_empty_cli_app_key_is_inconclusive_even_when_disk_key_looks_safe(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-empty-cli-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $safe = 'base64:'.base64_encode(str_repeat('S', 32));
+        $exposed = 'base64:'.base64_encode(str_repeat('X', 32));
+        try {
+            file_put_contents($root.'/.env', 'APP_KEY='.$safe."\n");
+            $result = \nexoraHistoricalAuditTarget(str_repeat('X', 32), $root, ['APP_KEY' => '']);
+            self::assertSame('INCONCLUSIVE', $result['status']);
+            self::assertGreaterThan(0, $result['unreadable']);
+            self::assertSame(1, $result['process_variables_present']);
+            self::assertFalse($result['retired']);
+            // Any positive observed key still outranks an ambiguous blank slot.
+            $positive = \nexoraHistoricalAuditTarget(str_repeat('X', 32), $root, ['APP_KEY' => ['', $exposed]]);
+            self::assertSame('EXPOSED_KEY_OBSERVED', $positive['status']);
+            self::assertStringNotContainsString($exposed, json_encode($positive, JSON_THROW_ON_ERROR));
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+    #[Test]
+    public function process_superglobal_empty_app_key_is_preserved_as_ambiguous_source(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-empty-env-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $safe = 'base64:'.base64_encode(str_repeat('S', 32));
+        $priorGetenv = getenv('APP_KEY');
+        $hadEnv = array_key_exists('APP_KEY', $_ENV);
+        $priorEnv = $_ENV['APP_KEY'] ?? null;
+        $hadServer = array_key_exists('APP_KEY', $_SERVER);
+        $priorServer = $_SERVER['APP_KEY'] ?? null;
+        try {
+            file_put_contents($root.'/.env', 'APP_KEY='.$safe."\n");
+            putenv('APP_KEY='.$safe);
+            $_ENV['APP_KEY'] = '';
+            $_SERVER['APP_KEY'] = $safe;
+            $settings = \nexoraHistoricalReadProcessSettings();
+            self::assertTrue(is_array($settings['APP_KEY']));
+            self::assertSame(2, count($settings['APP_KEY']));
+            $result = \nexoraHistoricalAuditTarget(str_repeat('X', 32), $root, $settings);
+            self::assertSame('INCONCLUSIVE', $result['status']);
+            self::assertGreaterThan(0, $result['unreadable']);
+            self::assertSame(1, $result['process_variables_present']);
+            // An unset source is not the same as a deliberately empty source.
+            unset($_ENV['APP_KEY']);
+            $notEmpty = \nexoraHistoricalAuditTarget(str_repeat('X', 32), $root, \nexoraHistoricalReadProcessSettings());
+            self::assertSame('NO_MATCH_IN_SCANNED_FILES', $notEmpty['status']);
+        } finally {
+            $priorGetenv === false ? putenv('APP_KEY') : putenv('APP_KEY='.$priorGetenv);
+            if ($hadEnv) { $_ENV['APP_KEY'] = $priorEnv; } else { unset($_ENV['APP_KEY']); }
+            if ($hadServer) { $_SERVER['APP_KEY'] = $priorServer; } else { unset($_SERVER['APP_KEY']); }
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+
+    #[Test]
+    public function unquoted_raw_key_with_space_hash_must_be_scanned_as_actual_bootstrap_value(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-unquoted-hash-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        // The installer bootstrap trims an unquoted value; it does not remove
+        // inline comments. This complete value is a usable raw 32-byte key.
+        $raw = str_repeat('X', 28).' #YZ';
+        self::assertSame(32, strlen($raw));
+        try {
+            file_put_contents($root.'/.env', "APP_KEY={$raw}\n");
+            $result = \nexoraHistoricalAuditTarget($raw, $root);
+            self::assertSame('EXPOSED_KEY_OBSERVED', $result['status']);
+            self::assertFalse($result['retired']);
+            self::assertStringNotContainsString($raw, json_encode($result, JSON_THROW_ON_ERROR));
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+    #[Test]
+    public function ambiguous_unquoted_inline_comment_must_not_be_a_scoped_clean_bill_of_health(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-unquoted-comment-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        $safe = 'base64:'.base64_encode(str_repeat('S', 32));
+        try {
+            file_put_contents($root.'/.env', "APP_KEY={$safe} # not necessarily discarded by pre-Laravel bootstrap\n");
+            $result = \nexoraHistoricalAuditTarget(str_repeat('X', 32), $root);
+            self::assertSame('INCONCLUSIVE', $result['status']);
+            self::assertFalse($result['historical_non_use_proved']);
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+
+    #[Test]
+    public function public_audit_api_rejects_invalid_reference_key_lengths_before_reporting_no_match(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-invalid-ref-'.bin2hex(random_bytes(7));
+        mkdir($root.'/bootstrap', 0700, true);
+        file_put_contents($root.'/artisan', '<?php');
+        file_put_contents($root.'/bootstrap/app.php', '<?php');
+        file_put_contents($root.'/.env', 'APP_KEY=base64:'.base64_encode(str_repeat('S', 32))."\n");
+        try {
+            foreach ([str_repeat('L', 31), str_repeat('L', 33), 'base64:'.base64_encode(str_repeat('L', 32)), ''] as $invalid) {
+                $rejected = false;
+                try {
+                    \nexoraHistoricalAuditTarget($invalid, $root);
+                } catch (\InvalidArgumentException $e) {
+                    $rejected = true;
+                    if ($invalid !== '') {
+                        self::assertStringNotContainsString($invalid, $e->getMessage());
+                    }
+                }
+                self::assertTrue($rejected);
+            }
+            // A valid 32-byte reference must still perform the normal audit.
+            self::assertSame('NO_MATCH_IN_SCANNED_FILES', \nexoraHistoricalAuditTarget(str_repeat('L', 32), $root)['status']);
+            self::assertSame('EXPOSED_KEY_OBSERVED', \nexoraHistoricalAuditTarget(str_repeat('S', 32), $root)['status']);
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
 }
