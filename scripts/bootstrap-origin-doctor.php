@@ -19,7 +19,7 @@ if ($environmentPath === null) {
     exit(1);
 }
 $overrides = [];
-foreach (['APP_ENV', 'APP_URL', 'SESSION_SECURE_COOKIE', 'NEXORA_ALLOW_INSECURE_HTTP'] as $name) {
+foreach (['APP_ENV', 'APP_URL', 'SESSION_SECURE_COOKIE', 'SESSION_DOMAIN', 'SESSION_SAME_SITE', 'SESSION_PARTITIONED_COOKIE', 'NEXORA_ALLOW_INSECURE_HTTP'] as $name) {
     $value = getenv($name);
     if (is_string($value) && $value !== '') {
         $overrides[$name] = $value;

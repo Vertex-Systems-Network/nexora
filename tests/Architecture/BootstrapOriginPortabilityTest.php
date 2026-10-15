@@ -137,6 +137,73 @@ final class BootstrapOriginPortabilityTest extends TestCase
     }
 
     #[Test]
+    public function cookie_domain_must_match_the_actual_browser_origin(): void
+    {
+        $base = "APP_ENV=production\nAPP_URL=https://admin.example.org\nSESSION_SECURE_COOKIE=true\nSESSION_SAME_SITE=lax\n";
+        $cases = [
+            'host-only cookie default' => ['', true],
+            'exact cookie domain' => ["SESSION_DOMAIN=admin.example.org\n", true],
+            'parent cookie domain' => ["SESSION_DOMAIN=.example.org\n", true],
+            'unrelated cookie domain' => ["SESSION_DOMAIN=other.example.org\n", false],
+            'domain in different registrable site' => ["SESSION_DOMAIN=example.net\n", false],
+            'single-label public suffix' => ["SESSION_DOMAIN=org\n", false],
+            'malformed empty label' => ["SESSION_DOMAIN=example..org\n", false],
+            'domain is a URL' => ["SESSION_DOMAIN=https://example.org\n", false],
+        ];
+        foreach ($cases as $name => [$suffix, $expected]) {
+            self::assertSame($expected, \nexoraBootstrapOriginErrors($base.$suffix) === [], $name);
+        }
+        self::assertNotSame([], \nexoraBootstrapOriginErrors(
+            "APP_ENV=local\nAPP_URL=http://127.0.0.1:8000\nSESSION_SECURE_COOKIE=false\nSESSION_DOMAIN=example.org\n",
+        ));
+        self::assertNotSame([], \nexoraBootstrapOriginErrors(
+            "APP_ENV=local\nAPP_URL=http://localhost:8000\nSESSION_SECURE_COOKIE=false\nSESSION_DOMAIN=localhost\n",
+        ));
+    }
+
+    #[Test]
+    public function samesite_and_partitioned_cookie_settings_must_be_usable_by_the_browser(): void
+    {
+        $https = "APP_ENV=production\nAPP_URL=https://admin.example.org\nSESSION_SECURE_COOKIE=true\n";
+        $http = "APP_ENV=local\nAPP_URL=http://127.0.0.1:8000\nSESSION_SECURE_COOKIE=false\n";
+        $cases = [
+            'default SameSite policy' => [$https, true],
+            'SameSite strict over HTTPS' => [$https."SESSION_SAME_SITE=strict\n", true],
+            'SameSite none over HTTPS' => [$https."SESSION_SAME_SITE=none\n", true],
+            'unexpected SameSite setting' => [$https."SESSION_SAME_SITE=invalid\n", false],
+            'SameSite none over insecure HTTP' => [$http."SESSION_SAME_SITE=none\n", false],
+            'partitioned cookie over HTTPS' => [$https."SESSION_PARTITIONED_COOKIE=true\n", true],
+            'partitioned cookie over insecure HTTP' => [$http."SESSION_PARTITIONED_COOKIE=true\n", false],
+            'invalid partitioned cookie setting' => [$https."SESSION_PARTITIONED_COOKIE=maybe\n", false],
+        ];
+        foreach ($cases as $name => [$config, $expected]) {
+            self::assertSame($expected, \nexoraBootstrapOriginErrors($config) === [], $name);
+        }
+    }
+
+    #[Test]
+    public function process_supplied_cookie_domain_and_policy_are_validated_as_effective_values(): void
+    {
+        $base = "APP_ENV=production\nAPP_URL=https://admin.example.org\nSESSION_SECURE_COOKIE=true\nSESSION_DOMAIN=example.org\nSESSION_SAME_SITE=lax\nSESSION_PARTITIONED_COOKIE=false\n";
+        self::assertNotSame([], \nexoraBootstrapOriginErrors($base, ['SESSION_DOMAIN' => 'wrong.example.net']));
+        self::assertNotSame([], \nexoraBootstrapOriginErrors($base, ['SESSION_SAME_SITE' => 'not-valid']));
+        self::assertNotSame([], \nexoraBootstrapOriginErrors($base, ['SESSION_PARTITIONED_COOKIE' => 'nonsense']));
+        self::assertSame([], \nexoraBootstrapOriginErrors($base, ['SESSION_DOMAIN' => '.example.org']));
+    }
+
+    #[Test]
+    public function non_loopback_insecure_http_requires_an_explicit_known_development_mode(): void
+    {
+        $base = "APP_URL=http://preview.example.org\nSESSION_SECURE_COOKIE=false\nNEXORA_ALLOW_INSECURE_HTTP=true\n";
+        foreach (['prod', 'Production', 'release', 'unknown', ''] as $mode) {
+            self::assertNotSame([], \nexoraBootstrapOriginErrors("APP_ENV={$mode}\n".$base), "mode ".$mode);
+        }
+        foreach (['local', 'development', 'testing', 'staging', 'preview'] as $mode) {
+            self::assertSame([], \nexoraBootstrapOriginErrors("APP_ENV={$mode}\n".$base), "mode ".$mode);
+        }
+    }
+
+    #[Test]
     public function every_portable_bootstrap_runs_the_origin_check_before_dependency_install(): void
     {
         $commands = [

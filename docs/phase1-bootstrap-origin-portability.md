@@ -21,3 +21,9 @@ If the installer has an active protected environment marker under `storage/app/n
 ## Bind addresses are not browser origins
 
 `0.0.0.0` and `[::]` are wildcard server bind addresses and must never be configured as `APP_URL`, even when the web process listens on all interfaces. Use the actual browser-reachable HTTPS hostname instead. Non-loopback HTTP with `NEXORA_ALLOW_INSECURE_HTTP=true` is only considered when `APP_ENV` is explicitly classified as nonproduction; a blank environment cannot silently authorize it. Production HTTP remains rejected.
+
+## Browser session cookie compatibility
+
+The origin doctor now also validates effective `SESSION_DOMAIN`, `SESSION_SAME_SITE` and `SESSION_PARTITIONED_COOKIE` values (including explicit hosting process overrides). A nonempty session domain must be an exact or parent DNS domain of `APP_URL`; omit `SESSION_DOMAIN` when using `localhost`, IPv4 or IPv6 loopback. An unrelated cookie domain causes successful login redirects to lose their authenticated session.
+
+`SESSION_SAME_SITE` supports `lax`, `strict` or `none` (default `lax`); `none` requires Secure cookies. Partitioned session cookies likewise require `SESSION_SECURE_COOKIE=true`. Invalid cookie-policy values fail closed instead of silently generating unusable browser cookies. Non-loopback HTTP opt-in is limited to explicitly recognized nonproduction modes (`local`, `development`, `dev`, `testing`, `test`, `staging`, `preview`, `demo`, `ci`); an unknown or `prod` environment cannot enable insecure hosting through the opt-in. This is a configuration preflight, not live browser or target acceptance.

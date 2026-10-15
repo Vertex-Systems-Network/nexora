@@ -71,7 +71,7 @@ function nexoraBootstrapOriginErrors(string $environment, array $overrides = [])
     // Nexora's pre-Laravel bootstrap gives explicit process environment values
     // precedence over .env. Verify those *effective* values instead of
     // rejecting a valid container-hosted installation's unused sample file.
-    foreach (['APP_ENV', 'APP_URL', 'SESSION_SECURE_COOKIE', 'NEXORA_ALLOW_INSECURE_HTTP'] as $name) {
+    foreach (['APP_ENV', 'APP_URL', 'SESSION_SECURE_COOKIE', 'SESSION_DOMAIN', 'SESSION_SAME_SITE', 'SESSION_PARTITIONED_COOKIE', 'NEXORA_ALLOW_INSECURE_HTTP'] as $name) {
         if (isset($overrides[$name]) && $overrides[$name] !== '') {
             $settings[$name] = $overrides[$name];
         }
@@ -114,6 +114,20 @@ function nexoraBootstrapOriginErrors(string $environment, array $overrides = [])
         $errors[] = 'APP_URL must be a reachable browser origin, not a wildcard server bind address.';
     }
 
+    // The session cookie must belong to the actual browser origin. A
+    // different SESSION_DOMAIN makes an otherwise successful login appear
+    // unauthenticated on the next request.
+    $sessionDomain = strtolower($settings['SESSION_DOMAIN'] ?? '');
+    if ($sessionDomain !== '') {
+        $domain = str_starts_with($sessionDomain, '.') ? substr($sessionDomain, 1) : $sessionDomain;
+        $validDomain = preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/D', $domain) === 1
+            && strlen($domain) <= 253;
+        if (! $validDomain || filter_var($host, FILTER_VALIDATE_IP) !== false || $validIpv6 || $host === 'localhost'
+            || ($host !== $domain && ! str_ends_with($host, '.'.$domain))) {
+            $errors[] = 'SESSION_DOMAIN must be a valid parent domain of the configured browser origin; omit it for IP/localhost.';
+        }
+    }
+
     $environmentMode = strtolower($settings['APP_ENV'] ?? '');
     if ($environmentMode === 'production' && strtolower($settings['NEXORA_ALLOW_INSECURE_HTTP'] ?? '') === 'true') {
         $errors[] = 'Production bootstrap must not opt into insecure HTTP.';
@@ -132,13 +146,28 @@ function nexoraBootstrapOriginErrors(string $environment, array $overrides = [])
         }
         $loopback = in_array($host, ['localhost', '127.0.0.1', '[::1]'], true);
         if (! $loopback) {
-            if ($environmentMode === '') {
-                $errors[] = 'Non-loopback HTTP requires an explicitly classified nonproduction APP_ENV.';
+            if (! in_array($environmentMode, ['local', 'development', 'dev', 'testing', 'test', 'staging', 'preview', 'demo', 'ci'], true)) {
+                $errors[] = 'Non-loopback HTTP requires an explicitly approved nonproduction APP_ENV.';
             }
             if (strtolower($settings['NEXORA_ALLOW_INSECURE_HTTP'] ?? '') !== 'true') {
                 $errors[] = 'Non-loopback HTTP requires an explicit NEXORA_ALLOW_INSECURE_HTTP=true in a nonproduction environment.';
             }
         }
+    }
+
+    // Browsers reject SameSite=None or partitioned session cookies without
+    // the Secure attribute. Validate the effective cookie policy early.
+    $sameSite = strtolower($settings['SESSION_SAME_SITE'] ?? 'lax');
+    if (! in_array($sameSite, ['lax', 'strict', 'none'], true)) {
+        $errors[] = 'SESSION_SAME_SITE must be lax, strict or none.';
+    } elseif ($sameSite === 'none' && $cookie !== 'true') {
+        $errors[] = 'SESSION_SAME_SITE=none requires SESSION_SECURE_COOKIE=true.';
+    }
+    $partitioned = strtolower($settings['SESSION_PARTITIONED_COOKIE'] ?? 'false');
+    if (! in_array($partitioned, ['true', 'false'], true)) {
+        $errors[] = 'SESSION_PARTITIONED_COOKIE must be true or false.';
+    } elseif ($partitioned === 'true' && $cookie !== 'true') {
+        $errors[] = 'Partitioned session cookies require SESSION_SECURE_COOKIE=true.';
     }
 
     return $errors;
