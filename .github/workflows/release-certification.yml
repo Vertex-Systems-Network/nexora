@@ -114,6 +114,13 @@ jobs:
       - name: Install frontend dependencies from reviewed lock
         run: npm ci --ignore-scripts --no-audit --no-fund
 
+      - name: Audit locked PHP and frontend dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          composer audit --locked --no-interaction
+          npm audit --audit-level=low
+
       - name: Build frontend assets required by feature tests
         run: npm run build:raw
 
