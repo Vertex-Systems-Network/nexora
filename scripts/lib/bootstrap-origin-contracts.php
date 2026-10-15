@@ -3,6 +3,51 @@
 declare(strict_types=1);
 
 /**
+ * Resolve the same explicitly activated .env source as Nexora's installer
+ * bootstrap. An installed fallback deployment must never be preflighted
+ * against a stale/example root .env instead of its effective environment.
+ *
+ * @throws RuntimeException On invalid or missing explicit active sources.
+ */
+function nexoraBootstrapEffectiveEnvironmentFile(string $root): ?string
+{
+    $rootEnv = $root.'/.env';
+    $protectedDir = $root.'/storage/app/nexora/environment';
+    $fallbackEnv = $protectedDir.'/.env';
+    $markerPath = $protectedDir.'/active';
+
+    $active = '';
+    if (file_exists($markerPath) || is_link($markerPath)) {
+        if (! is_file($markerPath) || ! is_readable($markerPath)) {
+            throw new RuntimeException('The protected environment active marker is unreadable.');
+        }
+        $active = strtolower(trim((string) file_get_contents($markerPath)));
+        if (! in_array($active, ['root', 'fallback'], true)) {
+            throw new RuntimeException('The protected environment active marker is invalid.');
+        }
+    }
+
+    if ($active === 'fallback') {
+        if (! is_file($fallbackEnv) || ! is_readable($fallbackEnv)) {
+            throw new RuntimeException('The active protected fallback environment is missing or unreadable.');
+        }
+        return $fallbackEnv;
+    }
+    if ($active === 'root') {
+        if (! is_file($rootEnv) || ! is_readable($rootEnv)) {
+            throw new RuntimeException('The active root environment is missing or unreadable.');
+        }
+        return $rootEnv;
+    }
+    foreach ([$rootEnv, $fallbackEnv] as $path) {
+        if (is_file($path) && is_readable($path)) {
+            return $path;
+        }
+    }
+    return null;
+}
+
+/**
  * Pre-Composer, pre-Laravel source-bootstrap URL/cookie safety checks.
  * Read-only: environment editing and existing key rotation remain operator-owned.
  *
@@ -40,8 +85,23 @@ function nexoraBootstrapOriginErrors(string $environment, array $overrides = [])
     }
     $scheme = strtolower($origin['scheme']);
     $host = strtolower($origin['host']);
+    $isBracketedIp = str_starts_with($host, '[') && str_ends_with($host, ']');
+    $ipv6 = $isBracketedIp ? substr($host, 1, -1) : '';
+    $validIpv6 = $isBracketedIp && filter_var($ipv6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
+    $validDns = preg_match('/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i', $host) === 1
+        && strlen($host) <= 253
+        && ! str_contains($host, '..')
+        && array_reduce(explode('.', $host), static function (bool $ok, string $label): bool {
+            return $ok && strlen($label) <= 63
+                && preg_match('/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i', $label) === 1;
+        }, true);
+    $validPort = ! isset($origin['port']) || ($origin['port'] >= 1 && $origin['port'] <= 65535);
+    if (preg_match('/:[\s]*$/', $url) === 1) {
+        $validPort = false;
+    }
     if (! in_array($scheme, ['http', 'https'], true)
-        || preg_match('/^[a-z0-9][a-z0-9.-]*$/i', $host) !== 1
+        || (! $validDns && ! $validIpv6)
+        || ! $validPort
         || isset($origin['user']) || isset($origin['pass'])
         || isset($origin['query']) || isset($origin['fragment'])
         || (isset($origin['path']) && ! in_array($origin['path'], ['', '/'], true))) {
@@ -67,7 +127,7 @@ function nexoraBootstrapOriginErrors(string $environment, array $overrides = [])
         if ($cookie !== 'false') {
             $errors[] = 'HTTP APP_URL requires SESSION_SECURE_COOKIE=false so browser login can persist.';
         }
-        $loopback = in_array($host, ['localhost', '127.0.0.1'], true);
+        $loopback = in_array($host, ['localhost', '127.0.0.1', '[::1]'], true);
         if (! $loopback && strtolower($settings['NEXORA_ALLOW_INSECURE_HTTP'] ?? '') !== 'true') {
             $errors[] = 'Non-loopback HTTP requires an explicit NEXORA_ALLOW_INSECURE_HTTP=true in a nonproduction environment.';
         }

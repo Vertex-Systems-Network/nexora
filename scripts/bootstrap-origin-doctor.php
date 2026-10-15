@@ -7,9 +7,15 @@ declare(strict_types=1);
  */
 require_once __DIR__.'/lib/bootstrap-origin-contracts.php';
 
-$environmentPath = dirname(__DIR__).'/.env';
-if (! is_file($environmentPath) || ! is_readable($environmentPath)) {
-    fwrite(STDERR, "[Nexora Bootstrap] ERROR: Expected a readable .env file.\n");
+try {
+    $environmentPath = nexoraBootstrapEffectiveEnvironmentFile(dirname(__DIR__));
+} catch (RuntimeException $exception) {
+    // Only fixed, non-secret source-selection messages are ever printed.
+    fwrite(STDERR, '[Nexora Bootstrap] ERROR: '.$exception->getMessage()."\n");
+    exit(1);
+}
+if ($environmentPath === null) {
+    fwrite(STDERR, "[Nexora Bootstrap] ERROR: No readable configured environment source.\n");
     exit(1);
 }
 $overrides = [];
@@ -24,7 +30,7 @@ if ($errors !== []) {
     foreach ($errors as $error) {
         fwrite(STDERR, "[Nexora Bootstrap] ERROR: {$error}\n");
     }
-    fwrite(STDERR, "[Nexora Bootstrap] Set APP_URL and SESSION_SECURE_COOKIE in .env. For local loopback HTTP use http://127.0.0.1:<port> with SESSION_SECURE_COOKIE=false. For real hosts configure HTTPS and SESSION_SECURE_COOKIE=true. No keys were modified.\n");
+    fwrite(STDERR, "[Nexora Bootstrap] Set APP_URL and SESSION_SECURE_COOKIE in the active environment file or hosting process environment. For local loopback HTTP use http://127.0.0.1:<port> with SESSION_SECURE_COOKIE=false. For real hosts configure HTTPS and SESSION_SECURE_COOKIE=true. No keys were modified.\n");
     exit(1);
 }
 fwrite(STDOUT, "[Nexora Bootstrap] PASS: configured origin and session cookie policy.\n");

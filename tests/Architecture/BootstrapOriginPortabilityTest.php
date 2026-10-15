@@ -57,6 +57,63 @@ final class BootstrapOriginPortabilityTest extends TestCase
     }
 
     #[Test]
+    public function protected_fallback_active_marker_selects_actual_environment_and_fails_closed(): void
+    {
+        $root = sys_get_temp_dir().'/nexora-preflight-'.bin2hex(random_bytes(8));
+        $protected = $root.'/storage/app/nexora/environment';
+        self::assertTrue(mkdir($protected, 0700, true));
+        try {
+            file_put_contents($root.'/.env', "APP_URL=https://nexora.test\nSESSION_SECURE_COOKIE=true\n");
+            file_put_contents($protected.'/.env', "APP_ENV=production\nAPP_URL=https://host.example.org\nSESSION_SECURE_COOKIE=true\n");
+            self::assertSame($root.'/.env', \nexoraBootstrapEffectiveEnvironmentFile($root));
+            file_put_contents($protected.'/active', 'fallback');
+            self::assertSame($protected.'/.env', \nexoraBootstrapEffectiveEnvironmentFile($root));
+            $effective = (string) file_get_contents(\nexoraBootstrapEffectiveEnvironmentFile($root));
+            self::assertSame([], \nexoraBootstrapOriginErrors($effective));
+
+            file_put_contents($protected.'/active', 'root');
+            self::assertSame($root.'/.env', \nexoraBootstrapEffectiveEnvironmentFile($root));
+            file_put_contents($protected.'/active', 'other');
+            try {
+                \nexoraBootstrapEffectiveEnvironmentFile($root);
+                self::fail('Invalid environment activation must fail closed');
+            } catch (\RuntimeException $e) {
+                self::assertSame('The protected environment active marker is invalid.', $e->getMessage());
+            }
+            file_put_contents($protected.'/active', 'fallback');
+            unlink($protected.'/.env');
+            try {
+                \nexoraBootstrapEffectiveEnvironmentFile($root);
+                self::fail('Missing active fallback must not use a stale root environment');
+            } catch (\RuntimeException $e) {
+                self::assertSame('The active protected fallback environment is missing or unreadable.', $e->getMessage());
+            }
+        } finally {
+            \Illuminate\Support\Facades\File::deleteDirectory($root);
+        }
+    }
+
+    #[Test]
+    public function ipv6_loopback_and_valid_hostname_rules_are_checked(): void
+    {
+        $base = "APP_ENV=local\nAPP_URL=http://127.0.0.1:8000\nSESSION_SECURE_COOKIE=false\n";
+        $cases = [
+            'IPv6 loopback with port' => ['http://[::1]:8000', true],
+            'IPv6 loopback without port' => ['http://[::1]', true],
+            'invalid zero port' => ['http://127.0.0.1:0', false],
+            'missing port number' => ['http://127.0.0.1:', false],
+            'invalid hostname with empty label' => ['http://bad..example.org', false],
+            'invalid hostname leading hyphen' => ['http://-bad.example.org', false],
+            'valid HTTPS IPv6 deployment' => ['https://[2001:db8::42]:8443', false],
+        ];
+        foreach ($cases as $description => [$url, $accepted]) {
+            $candidate = str_replace('http://127.0.0.1:8000', $url, $base);
+            self::assertSame($accepted, \nexoraBootstrapOriginErrors($candidate) === [], $description);
+        }
+        self::assertSame([], \nexoraBootstrapOriginErrors("APP_ENV=production\nAPP_URL=https://[2001:db8::42]:8443\nSESSION_SECURE_COOKIE=true\n"));
+    }
+
+    #[Test]
     public function every_portable_bootstrap_runs_the_origin_check_before_dependency_install(): void
     {
         $commands = [
