@@ -132,6 +132,47 @@ jobs:
           fi
           node tests/browser/installer-chromium-smoke.mjs http://127.0.0.1:8973/install
 
+      - name: Authenticated Chromium Admin Health navigation on disposable CI database
+        env:
+          APP_ENV: testing
+          APP_URL: http://127.0.0.1:8974
+          NEXORA_INSTALLER_BYPASS: 'true'
+          NEXORA_CI_BROWSER_E2E: '1'
+          NEXORA_CI_BROWSER_EMAIL: browser.qa@nexora.invalid
+          SESSION_DRIVER: file
+          CACHE_STORE: array
+        run: |
+          set -euo pipefail
+          export NEXORA_CI_BROWSER_PASSWORD
+          NEXORA_CI_BROWSER_PASSWORD="$(openssl rand -hex 24)"
+          CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          export CHROME_PATH
+          test "$DB_DATABASE" = "nexora_testing"
+          test "$APP_ENV" = "testing"
+          # Only the job-owned ephemeral MySQL service is eligible for destructive fixture setup.
+          php artisan migrate:fresh --force >/tmp/nexora-admin-e2e-migrate.log 2>&1 || {
+            tail -30 /tmp/nexora-admin-e2e-migrate.log
+            exit 1
+          }
+          php tests/browser/seed-disposable-admin.php
+          php -S 127.0.0.1:8974 -t public public/index.php > /tmp/nexora-admin-browser.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail --max-time 4 http://127.0.0.1:8974/login > /dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "Disposable Nexora Admin login did not become ready."
+            tail -40 /tmp/nexora-admin-browser.log
+            exit 1
+          fi
+          node tests/browser/admin-health-chromium-smoke.mjs http://127.0.0.1:8974/login
+
       - name: Upload development QA evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
