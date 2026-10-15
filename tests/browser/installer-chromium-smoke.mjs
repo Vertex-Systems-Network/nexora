@@ -149,5 +149,11 @@ try {
 } finally {
     ws?.close();
     child.kill("SIGKILL");
-    rmSync(temp, { recursive: true, force: true });
+    // Chromium may still write to its disposable profile after SIGKILL.
+    // Preserve the browser assertion result instead of masking it with ENOTEMPTY.
+    try {
+        rmSync(temp, { recursive: true, force: true, maxRetries: 12, retryDelay: 125 });
+    } catch (cleanupError) {
+        console.warn("Disposable Chromium profile cleanup incomplete:", cleanupError.code || "unknown");
+    }
 }
