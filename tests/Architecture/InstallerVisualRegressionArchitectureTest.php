@@ -34,6 +34,7 @@ final class InstallerVisualRegressionArchitectureTest extends TestCase
         $view = (string) file_get_contents(resource_path('views/install/index.blade.php'));
 
         self::assertStringContainsString('@media(max-width:360px)', $view);
+        self::assertStringContainsString('.step-nav{grid-template-columns:repeat(2,minmax(0,1fr))}', $view);
         self::assertStringContainsString('.top{height:auto;min-height:68px;flex-wrap:wrap;gap:8px;padding:12px 16px}', $view);
         self::assertStringContainsString('.header-actions{width:100%;justify-content:space-between}', $view);
     }

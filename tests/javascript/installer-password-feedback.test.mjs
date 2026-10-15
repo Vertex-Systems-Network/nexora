@@ -69,3 +69,53 @@ test('predictable Super Admin patterns remain consent gated', () => {
     fields['password-consent-checkbox'].checked = true;
     assert.equal(vm.runInContext('passwordReady()', context), true);
 });
+
+test('paste, deletion and confirmation mismatch update the current password state', () => {
+    const { fields, context } = setup();
+    const password = fields.admin_password;
+    const confirmation = fields.admin_password_confirmation;
+
+    // Pasting into an input emits input; never rely on a keyup-only meter.
+    password.value = 'V7!qR2#pL9@mX4$z';
+    password.listeners.input();
+    assert.equal(fields['password-level'].textContent, 'Strong');
+    assert.equal(fields['password-strength-track'].attrs['aria-valuenow'], '100');
+
+    confirmation.value = 'different-confirmation';
+    confirmation.listeners.input();
+    assert.equal(fields['password-match'].textContent, 'Passwords do not match.');
+    assert.equal(vm.runInContext('passwordReady()', context), false);
+
+    confirmation.value = password.value;
+    confirmation.listeners.change();
+    assert.equal(fields['password-match'].textContent, 'Passwords match.');
+    assert.equal(vm.runInContext('passwordReady()', context), true);
+
+    // Simulate selecting and deleting the full password after an autofill/paste.
+    password.value = '';
+    password.listeners.input();
+    assert.equal(fields['password-level'].textContent, 'Blocked');
+    assert.equal(fields['password-strength-track'].attrs['aria-valuenow'], '0');
+    assert.equal(vm.runInContext('passwordReady()', context), false);
+});
+
+test('strong replacement clears prior predictable-password consent', () => {
+    const { fields, context } = setup();
+    const password = fields.admin_password;
+    const confirmation = fields.admin_password_confirmation;
+    const consent = fields['password-consent-checkbox'];
+    password.value = 'NexoraAdmin1234!Qz';
+    confirmation.value = password.value;
+    password.listeners.input();
+    confirmation.listeners.input();
+    consent.checked = true;
+    assert.equal(vm.runInContext('passwordReady()', context), true);
+
+    password.value = 'V7!qR2#pL9@mX4$z';
+    confirmation.value = password.value;
+    password.listeners.input();
+    confirmation.listeners.input();
+    assert.equal(fields['password-level'].textContent, 'Strong');
+    assert.equal(consent.checked, false, 'Consent should clear when no longer needed.');
+    assert.equal(vm.runInContext('passwordReady()', context), true);
+});

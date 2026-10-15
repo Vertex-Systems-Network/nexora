@@ -117,8 +117,10 @@ try {
     for (const width of [320, 390, 768, 1440]) {
         await cdp("Emulation.setDeviceMetricsOverride", { width, height: 850, deviceScaleFactor: 1, mobile: false });
         const dimensions = await evalJs("({ width: innerWidth, scroll: document.documentElement.scrollWidth })");
-        assert.ok(dimensions.scroll <= dimensions.width + 1,
-            "Installer horizontal overflow at width " + width + ": " + JSON.stringify(dimensions));
+        if (dimensions.scroll > dimensions.width + 1) {
+            const offenders = await evalJs("Array.from(document.querySelectorAll('body *')).filter(e => { const r=e.getBoundingClientRect(); return r.width > 0 && r.right > innerWidth + 1; }).slice(0,12).map(e => ({ tag:e.tagName, className:String(e.className), right:Math.round(e.getBoundingClientRect().right) }))");
+            assert.fail("Installer horizontal overflow at width " + width + ": " + JSON.stringify({ ...dimensions, offenders }));
+        }
     }
 
     const script = [
