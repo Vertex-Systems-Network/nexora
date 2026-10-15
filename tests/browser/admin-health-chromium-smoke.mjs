@@ -116,7 +116,8 @@ try {
             if (child.exitCode !== null) break;
             await sleep(120);
         }
-        throw new Error("Timed out: " + description + ". Current URL: " + await evalJs("location.pathname"));
+        const diagnostic = await evalJs("({url:location.pathname, title:document.title, ready:document.readyState, root:!!document.getElementById('app'), formCount:document.forms.length, inputs:Array.from(document.querySelectorAll('input')).map(i=>({name:i.name,type:i.type})), body:(document.body?.innerText||'').slice(0,350), scripts:Array.from(document.scripts).map(s=>s.src).filter(Boolean).slice(0,8)})");
+        throw new Error("Timed out: " + description + "; browser=" + JSON.stringify(diagnostic) + "; errors=" + JSON.stringify(exceptions).slice(0,1200));
     }
     const navigation = await cdp("Page.navigate", { url });
     assert.ok(!navigation.errorText, "Could not navigate to test login page: " + navigation.errorText);
