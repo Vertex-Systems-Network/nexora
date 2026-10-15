@@ -4,9 +4,10 @@
  */
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createServer } from "node:net";
 
 const url = process.argv[2];
 if (!/^http:\/\/127\.0\.0\.1:\d+\/install\/?$/.test(url || "")) {
@@ -15,25 +16,49 @@ if (!/^http:\/\/127\.0\.0\.1:\d+\/install\/?$/.test(url || "")) {
 const chrome = process.env.CHROME_PATH || "google-chrome";
 const temp = mkdtempSync(join(tmpdir(), "nexora-browser-"));
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+// Chrome versions and runner images differ in whether they write
+// DevToolsActivePort for port=0. Reserve an explicit disposable loopback port.
+const port = await new Promise((resolve, reject) => {
+    const server = createServer();
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+        const address = server.address();
+        server.close((error) => error ? reject(error) : resolve(address.port));
+    });
+});
 const child = spawn(chrome, [
     "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage",
-    "--no-first-run", "--remote-debugging-port=0",
+    "--no-first-run", "--no-default-browser-check", "--disable-background-networking",
+    "--disable-extensions", "--remote-debugging-port=" + port,
     "--user-data-dir=" + temp, "about:blank",
-], { stdio: "ignore" });
+], { stdio: ["ignore", "ignore", "pipe"] });
+const diagnostics = [];
+let startError = null;
+child.on("error", (error) => { startError = error; });
+child.stderr?.on("data", (chunk) => {
+    diagnostics.push(chunk.toString("utf8"));
+    if (diagnostics.length > 100) diagnostics.shift();
+});
 let ws;
 try {
-    let port;
-    for (let i = 0; i < 80; i++) {
-        const info = join(temp, "DevToolsActivePort");
-        if (existsSync(info)) {
-            port = Number(readFileSync(info, "utf8").split("\n")[0]);
-            break;
-        }
-        if (child.exitCode !== null) throw new Error("Chromium exited before CDP became available.");
+    let pages;
+    for (let i = 0; i < 200; i++) {
+        if (startError || child.exitCode !== null) break;
+        try {
+            const response = await fetch("http://127.0.0.1:" + port + "/json/list", {
+                signal: AbortSignal.timeout(700),
+            });
+            if (response.ok) {
+                pages = await response.json();
+                break;
+            }
+        } catch { /* Chrome still starting. */ }
         await sleep(100);
     }
-    assert.ok(port, "Chromium debugger unavailable.");
-    const pages = await fetch("http://127.0.0.1:" + port + "/json/list").then((r) => r.json());
+    assert.ok(pages?.length,
+        "Chromium debugging endpoint unavailable. Chrome: " + chrome
+        + "; exit=" + child.exitCode + "; spawn=" + (startError?.message || "none")
+        + "; stderr=" + diagnostics.join("").slice(-2800));
     const page = pages.find((target) => target.type === "page");
     assert.ok(page?.webSocketDebuggerUrl, "No Chromium page target.");
     ws = new WebSocket(page.webSocketDebuggerUrl);
