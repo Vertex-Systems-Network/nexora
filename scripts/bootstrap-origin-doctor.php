@@ -12,7 +12,14 @@ if (! is_file($environmentPath) || ! is_readable($environmentPath)) {
     fwrite(STDERR, "[Nexora Bootstrap] ERROR: Expected a readable .env file.\n");
     exit(1);
 }
-$errors = nexoraBootstrapOriginErrors((string) file_get_contents($environmentPath));
+$overrides = [];
+foreach (['APP_ENV', 'APP_URL', 'SESSION_SECURE_COOKIE', 'NEXORA_ALLOW_INSECURE_HTTP'] as $name) {
+    $value = getenv($name);
+    if (is_string($value) && $value !== '') {
+        $overrides[$name] = $value;
+    }
+}
+$errors = nexoraBootstrapOriginErrors((string) file_get_contents($environmentPath), $overrides);
 if ($errors !== []) {
     foreach ($errors as $error) {
         fwrite(STDERR, "[Nexora Bootstrap] ERROR: {$error}\n");

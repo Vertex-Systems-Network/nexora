@@ -6,9 +6,10 @@ declare(strict_types=1);
  * Pre-Composer, pre-Laravel source-bootstrap URL/cookie safety checks.
  * Read-only: environment editing and existing key rotation remain operator-owned.
  *
+ * @param array<string,string> $overrides Explicit hosting/process environment values.
  * @return list<string> Non-secret validation messages.
  */
-function nexoraBootstrapOriginErrors(string $environment): array
+function nexoraBootstrapOriginErrors(string $environment, array $overrides = []): array
 {
     $settings = [];
     foreach (preg_split('/\r\n|\n|\r/', $environment) ?: [] as $line) {
@@ -20,6 +21,15 @@ function nexoraBootstrapOriginErrors(string $environment): array
             $value = substr($value, 1, -1);
         }
         $settings[$matches[1]] = $value;
+    }
+
+    // Nexora's pre-Laravel bootstrap gives explicit process environment values
+    // precedence over .env. Verify those *effective* values instead of
+    // rejecting a valid container-hosted installation's unused sample file.
+    foreach (['APP_ENV', 'APP_URL', 'SESSION_SECURE_COOKIE', 'NEXORA_ALLOW_INSECURE_HTTP'] as $name) {
+        if (isset($overrides[$name]) && $overrides[$name] !== '') {
+            $settings[$name] = $overrides[$name];
+        }
     }
 
     $url = $settings['APP_URL'] ?? '';
@@ -42,6 +52,9 @@ function nexoraBootstrapOriginErrors(string $environment): array
     }
 
     $environmentMode = strtolower($settings['APP_ENV'] ?? '');
+    if ($environmentMode === 'production' && strtolower($settings['NEXORA_ALLOW_INSECURE_HTTP'] ?? '') === 'true') {
+        $errors[] = 'Production bootstrap must not opt into insecure HTTP.';
+    }
     $cookie = strtolower($settings['SESSION_SECURE_COOKIE'] ?? '');
     if (! in_array($cookie, ['true', 'false'], true)) {
         $errors[] = 'SESSION_SECURE_COOKIE must be explicitly true or false.';

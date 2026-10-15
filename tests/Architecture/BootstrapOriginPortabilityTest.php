@@ -38,6 +38,25 @@ final class BootstrapOriginPortabilityTest extends TestCase
     }
 
     #[Test]
+    public function explicit_container_environment_overrides_are_checked_without_exposing_secret_values(): void
+    {
+        $sample = "APP_ENV=local\nAPP_URL=https://nexora.test\nSESSION_SECURE_COOKIE=true\nNEXORA_ALLOW_INSECURE_HTTP=false\n";
+        self::assertSame([], \nexoraBootstrapOriginErrors($sample, [
+            'APP_URL' => 'http://127.0.0.1:8974',
+            'SESSION_SECURE_COOKIE' => 'false',
+        ]));
+        self::assertNotSame([], \nexoraBootstrapOriginErrors($sample, [
+            'APP_URL' => 'https://production.example.org',
+            'SESSION_SECURE_COOKIE' => 'false',
+        ]));
+        self::assertNotSame([], \nexoraBootstrapOriginErrors($sample, [
+            'APP_URL' => 'https://production.example.org',
+            'APP_ENV' => 'production',
+            'NEXORA_ALLOW_INSECURE_HTTP' => 'true',
+        ]));
+    }
+
+    #[Test]
     public function every_portable_bootstrap_runs_the_origin_check_before_dependency_install(): void
     {
         $commands = [
