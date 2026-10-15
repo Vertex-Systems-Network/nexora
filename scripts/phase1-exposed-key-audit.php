@@ -9,49 +9,145 @@ declare(strict_types=1);
  */
 function nexoraHistoricalKeyBytes(string $input): ?string
 {
-    $key = trim($input, " \t\r\n\"'");
-    if (! str_starts_with($key, 'base64:')) {
-        return null;
+    // Laravel always interprets a `base64:` prefix as encoded key material;
+    // even a 32-byte string carrying that prefix must not be called a raw key.
+    $decodePrefixed = static function (string $value): ?string {
+        $decoded = base64_decode(substr($value, 7), true);
+        return $decoded !== false && strlen($decoded) === 32 ? $decoded : null;
+    };
+    if (str_starts_with($input, 'base64:')) {
+        return $decodePrefixed($input);
     }
-    $decoded = base64_decode(substr($key, 7), true);
-    return $decoded !== false && strlen($decoded) === 32 ? $decoded : null;
+    // Do not trim an exact raw 32-byte key: its first/last byte may be
+    // whitespace, a quote or a newline (valid as bytes, even if weak).
+    if (strlen($input) === 32) {
+        return $input;
+    }
+    $key = rtrim($input, "\r\n");
+    if (str_starts_with($key, 'base64:')) {
+        return $decodePrefixed($key);
+    }
+    if (strlen($key) === 32) {
+        return $key;
+    }
+    if (strlen($key) > 1 && ($key[0] === '"' || $key[0] === "'")
+        && substr($key, -1) === $key[0]) {
+        $key = substr($key, 1, -1);
+        if (str_starts_with($key, 'base64:')) {
+            return $decodePrefixed($key);
+        }
+        if (strlen($key) === 32) {
+            return $key;
+        }
+    }
+    // Only normalize outside whitespace for an encoded representation.
+    $key = trim($key, " \t");
+    return str_starts_with($key, 'base64:') ? $decodePrefixed($key) : null;
 }
 
-/** @return array{values:list<string>,readable:bool} */
+// Bound operator-side file reads: a corrupted or hostile candidate must yield
+// INCONCLUSIVE instead of exhausting CLI memory while scanning credentials.
+const NEXORA_HISTORICAL_MAX_ENV_BYTES = 1048576;
+const NEXORA_HISTORICAL_MAX_KEY_BYTES = 1024;
+const NEXORA_HISTORICAL_MAX_MARKER_BYTES = 128;
+
+function nexoraHistoricalBoundedRead(string $path, int $limit): ?string
+{
+    // Do not trust cached filesize() or read an unbounded file after a size
+    // check: the file can change between stat and read. Bound the *read*.
+    $content = @file_get_contents($path, false, null, 0, $limit + 1);
+    return is_string($content) && strlen($content) <= $limit ? $content : null;
+}
+
+/**
+ * Every path segment under this checkout must be a real directory or file,
+ * not a symlink into a different credential store. Never treat a linked
+ * parent path as a trustworthy scoped-negative key inventory.
+ */
+function nexoraHistoricalPathHasSymlink(string $root, string $relative): bool
+{
+    $current = $root;
+    foreach (explode('/', $relative) as $segment) {
+        $current .= '/'.$segment;
+        if (is_link($current)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/** @return array{values:list<string>,readable:bool,app_key_present:bool} */
 function nexoraHistoricalReadEnv(string $path): array
 {
     if (! file_exists($path) && ! is_link($path)) {
-        return ['values' => [], 'readable' => true];
+        return ['values' => [], 'readable' => true, 'app_key_present' => false];
     }
     if (is_link($path) || ! is_file($path) || ! is_readable($path)) {
-        return ['values' => [], 'readable' => false];
+        return ['values' => [], 'readable' => false, 'app_key_present' => false];
     }
-    $lines = @file($path, FILE_IGNORE_NEW_LINES);
-    if (! is_array($lines)) {
-        return ['values' => [], 'readable' => false];
+    $content = nexoraHistoricalBoundedRead($path, NEXORA_HISTORICAL_MAX_ENV_BYTES);
+    if ($content === null) {
+        return ['values' => [], 'readable' => false, 'app_key_present' => false];
     }
+    $lines = preg_split('/\r\n|\n|\r/', $content) ?: [];
     $values = [];
+    $appKeyPresent = false;
     foreach ($lines as $line) {
-        if (preg_match('/^\s*(APP_KEY|APP_PREVIOUS_KEYS)\s*=\s*(.*?)\s*$/D', $line, $parts) !== 1) {
+        if (preg_match('/^\s*(?:export\s+)?(APP_KEY|APP_PREVIOUS_KEYS)\s*=\s*(.*?)\s*$/D', $line, $parts) !== 1) {
             continue;
         }
         $setting = trim($parts[2]);
-        if (strlen($setting) > 1 && ($setting[0] === '"' || $setting[0] === "'") && substr($setting, -1) === $setting[0]) {
-            $setting = substr($setting, 1, -1);
+        // Environment files may have an optional `export` prefix and an
+        // inline comment after a whitespace separator. A quoted value may
+        // likewise be followed by a comment. Never print the source line.
+        if (strlen($setting) > 1 && ($setting[0] === '"' || $setting[0] === "'")) {
+            $closing = strpos($setting, $setting[0], 1);
+            if ($closing !== false) {
+                $remainder = trim(substr($setting, $closing + 1));
+                if ($remainder === '' || str_starts_with($remainder, '#')) {
+                    $setting = substr($setting, 1, $closing - 1);
+                }
+            }
+        } else {
+            $setting = (string) preg_replace('/\s+#.*$/D', '', $setting);
         }
-        foreach (explode(',', $setting) as $candidate) {
-            if (($candidate = trim($candidate)) !== '') {
+        // APP_KEY may itself be a raw 32-byte string containing commas. Only
+        // Laravel's APP_PREVIOUS_KEYS is a CSV list.
+        if ($parts[1] === 'APP_KEY' && $setting !== '') {
+            $appKeyPresent = true;
+        }
+        foreach ($parts[1] === 'APP_PREVIOUS_KEYS' ? explode(',', $setting) : [$setting] as $candidate) {
+            if ($candidate !== '') {
+                // Preserve raw key bytes, including leading/trailing spaces.
                 $values[] = $candidate;
             }
         }
     }
-    return ['values' => $values, 'readable' => true];
+    return ['values' => $values, 'readable' => true, 'app_key_present' => $appKeyPresent];
 }
 
 /**
- * @return array{status:string,scanned:int,key_slots_scanned:int,unreadable:int,cached_config_present:bool,installed_lock_present:bool,historical_non_use_proved:false,target_verified:false,retired:false}
+ * Read only the two credential settings exported to this PHP CLI process.
+ * Absence here is not evidence about a web worker, process manager or old deploy.
+ * @return array<string,string>
  */
-function nexoraHistoricalAuditTarget(string $referenceBytes, string $target): array
+function nexoraHistoricalReadProcessSettings(): array
+{
+    $values = [];
+    foreach (['APP_KEY', 'APP_PREVIOUS_KEYS'] as $name) {
+        $value = getenv($name);
+        if (is_string($value) && $value !== '') {
+            $values[$name] = $value;
+        }
+    }
+    return $values;
+}
+
+/**
+ * @param array<string,string> $processSettings Explicit caller/CLI environment snapshot; never printed.
+ * @return array{status:string,scanned:int,key_slots_scanned:int,unreadable:int,process_variables_present:int,process_key_slots_scanned:int,cached_config_present:bool,selected_environment_incomplete:bool,installed_lock_present:bool,historical_non_use_proved:false,target_verified:false,retired:false}
+ */
+function nexoraHistoricalAuditTarget(string $referenceBytes, string $target, array $processSettings = []): array
 {
     $root = realpath($target);
     if ($root === false || ! is_dir($root) || ! is_file($root.'/artisan') || ! is_file($root.'/bootstrap/app.php')) {
@@ -66,8 +162,15 @@ function nexoraHistoricalAuditTarget(string $referenceBytes, string $target): ar
     $keysParsed = 0;
     $unreadable = 0;
     $foundMatch = false;
+    $bootstrapKeyObserved = false;
+    $fileReadings = [];
     foreach ($relative as $file) {
         $path = $root.'/'.$file;
+        if (nexoraHistoricalPathHasSymlink($root, $file)) {
+            $scanned++;
+            $unreadable++;
+            continue;
+        }
         if (! file_exists($path) && ! is_link($path)) {
             continue;
         }
@@ -77,11 +180,13 @@ function nexoraHistoricalAuditTarget(string $referenceBytes, string $target): ar
                 $unreadable++;
                 continue;
             }
-            $candidate = nexoraHistoricalKeyBytes((string) @file_get_contents($path));
+            $candidateSource = nexoraHistoricalBoundedRead($path, NEXORA_HISTORICAL_MAX_KEY_BYTES);
+            $candidate = $candidateSource === null ? null : nexoraHistoricalKeyBytes($candidateSource);
             if ($candidate === null) {
                 $unreadable++;
             } else {
                 $keysParsed++;
+                $bootstrapKeyObserved = true;
             }
             if ($candidate !== null && hash_equals($referenceBytes, $candidate)) {
                 $foundMatch = true;
@@ -89,6 +194,7 @@ function nexoraHistoricalAuditTarget(string $referenceBytes, string $target): ar
             continue;
         }
         $result = nexoraHistoricalReadEnv($path);
+        $fileReadings[$file] = $result;
         if (! $result['readable']) {
             $unreadable++;
             continue;
@@ -105,23 +211,97 @@ function nexoraHistoricalAuditTarget(string $referenceBytes, string $target): ar
             }
         }
     }
+
+    // Environment-only hosting may supply keys from a service manager, not .env.
+    // The invoking CLI environment is compared as an extra observation, never
+    // conflated with the active web worker or historical key retirement proof.
+    $processVariables = 0;
+    $processKeysParsed = 0;
+    $processCurrentKeyObserved = false;
+    foreach (['APP_KEY', 'APP_PREVIOUS_KEYS'] as $name) {
+        if (! array_key_exists($name, $processSettings)) {
+            continue;
+        }
+        $setting = $processSettings[$name];
+        if (! is_string($setting) || $setting === '') {
+            continue;
+        }
+        $processVariables++;
+        // A process value that is already 32 raw bytes is authoritative as-is.
+        // Only unwrap a quoted representation if it is not an exact raw key.
+        if (strlen($setting) !== 32 && strlen($setting) > 1
+            && ($setting[0] === '"' || $setting[0] === "'")
+            && substr($setting, -1) === $setting[0]) {
+            $setting = substr($setting, 1, -1);
+        }
+        // Only APP_PREVIOUS_KEYS is a CSV setting in Laravel.
+        $candidates = $name === 'APP_PREVIOUS_KEYS' ? explode(',', $setting) : [$setting];
+        foreach ($candidates as $candidateText) {
+            if ($candidateText === '') {
+                continue;
+            }
+            $candidate = nexoraHistoricalKeyBytes($candidateText);
+            if ($candidate === null) {
+                $unreadable++;
+                continue;
+            }
+            $keysParsed++;
+            $processKeysParsed++;
+            if ($name === 'APP_KEY') {
+                $processCurrentKeyObserved = true;
+            }
+            if (hash_equals($referenceBytes, $candidate)) {
+                $foundMatch = true;
+            }
+        }
+    }
+
+    $selectedEnvironmentIncomplete = false;
     $marker = $root.'/storage/app/nexora/environment/active';
     if (file_exists($marker) || is_link($marker)) {
-        $selection = is_link($marker) || ! is_file($marker) || ! is_readable($marker)
-            ? null : strtolower(trim((string) @file_get_contents($marker)));
+        $markerContents = nexoraHistoricalPathHasSymlink($root, 'storage/app/nexora/environment/active')
+            || ! is_file($marker) || ! is_readable($marker)
+            ? null : nexoraHistoricalBoundedRead($marker, NEXORA_HISTORICAL_MAX_MARKER_BYTES);
+        $selection = $markerContents === null ? null : strtolower(trim($markerContents));
         if (! in_array($selection, ['root', 'fallback'], true)) {
             $unreadable++;
-        } elseif (! is_file($root.'/'.($selection === 'root' ? '.env' : 'storage/app/nexora/environment/.env'))) {
-            $unreadable++;
+        } else {
+            $selectedFile = $selection === 'root' ? '.env' : 'storage/app/nexora/environment/.env';
+            if (! isset($fileReadings[$selectedFile])
+                || ! $fileReadings[$selectedFile]['readable']
+                || ! $fileReadings[$selectedFile]['app_key_present']) {
+                // A safe key found in another (inactive) file cannot prove
+                // a complete inventory of the explicitly selected runtime.
+                // The invoking CLI process alone cannot attest the web key.
+                $selectedEnvironmentIncomplete = true;
+            }
+        }
+    } else {
+        // Without an explicit marker, Nexora's installation bootstrap chooses
+        // the readable root .env first, falling back to protected .env. A
+        // previous-key-only file does not establish the current application key.
+        // A known protected bootstrap key or this CLI's process APP_KEY is
+        // an additional *scanned* source, not proof of the running web key.
+        $autoFile = isset($fileReadings['.env'])
+            ? '.env'
+            : (isset($fileReadings['storage/app/nexora/environment/.env'])
+                ? 'storage/app/nexora/environment/.env' : null);
+        $autoKeyObserved = $autoFile !== null && $fileReadings[$autoFile]['readable']
+            && $fileReadings[$autoFile]['app_key_present'];
+        if (! $autoKeyObserved && ! $bootstrapKeyObserved && ! $processCurrentKeyObserved) {
+            $selectedEnvironmentIncomplete = true;
         }
     }
     $cached = file_exists($root.'/bootstrap/cache/config.php') || is_link($root.'/bootstrap/cache/config.php');
     return [
-        'status' => $foundMatch ? 'EXPOSED_KEY_OBSERVED' : ($unreadable > 0 || $keysParsed === 0 || $cached ? 'INCONCLUSIVE' : 'NO_MATCH_IN_SCANNED_FILES'),
+        'status' => $foundMatch ? 'EXPOSED_KEY_OBSERVED' : ($unreadable > 0 || $keysParsed === 0 || $cached || $selectedEnvironmentIncomplete ? 'INCONCLUSIVE' : 'NO_MATCH_IN_SCANNED_FILES'),
         'scanned' => $scanned,
         'key_slots_scanned' => $keysParsed,
         'unreadable' => $unreadable,
+        'process_variables_present' => $processVariables,
+        'process_key_slots_scanned' => $processKeysParsed,
         'cached_config_present' => $cached,
+        'selected_environment_incomplete' => $selectedEnvironmentIncomplete,
         'installed_lock_present' => is_file($root.'/storage/app/nexora/installed.lock'),
         'historical_non_use_proved' => false,
         'target_verified' => false,
@@ -148,17 +328,18 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && realpath((string) $_SERVER['SCRIPT_FIL
         fwrite(STDERR, "Reference key file must exist, be readable, non-symlink and owner-only (mode 0600).\n");
         exit(2);
     }
-    $bytes = nexoraHistoricalKeyBytes((string) file_get_contents($reference));
+    $referenceContents = nexoraHistoricalBoundedRead($reference, NEXORA_HISTORICAL_MAX_KEY_BYTES);
+    $bytes = $referenceContents === null ? null : nexoraHistoricalKeyBytes($referenceContents);
     if ($bytes === null) {
-        fwrite(STDERR, "Reference key format is not a Laravel 32-byte base64 key.\n");
+        fwrite(STDERR, "Reference key is not a valid 32-byte Laravel encryption key.\n");
         exit(2);
     }
     try {
-        $result = nexoraHistoricalAuditTarget($bytes, $args['target']);
+        $result = nexoraHistoricalAuditTarget($bytes, $args['target'], nexoraHistoricalReadProcessSettings());
     } catch (Throwable) {
         fwrite(STDERR, "Target audit could not complete. No secret material has been printed.\n");
         exit(2);
     }
-    fwrite(STDOUT, json_encode(['schema' => 1, 'scope' => 'local_file_inventory_only', 'issue' => 72] + $result, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR).PHP_EOL);
+    fwrite(STDOUT, json_encode(['schema' => 1, 'scope' => 'local_file_and_invoking_process_inventory_only', 'issue' => 72] + $result, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR).PHP_EOL);
     exit($result['status'] === 'EXPOSED_KEY_OBSERVED' ? 3 : ($result['status'] === 'INCONCLUSIVE' ? 2 : 0));
 }
