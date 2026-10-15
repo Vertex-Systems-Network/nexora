@@ -76,79 +76,154 @@ function nexoraHistoricalPathHasSymlink(string $root, string $relative): bool
     return false;
 }
 
-/** @return array{values:list<string>,readable:bool,app_key_present:bool} */
+/** @return array{values:list<string>,readable:bool,app_key_present:bool,duplicate_assignments:int} */
 function nexoraHistoricalReadEnv(string $path): array
 {
     if (! file_exists($path) && ! is_link($path)) {
-        return ['values' => [], 'readable' => true, 'app_key_present' => false];
+        return ['values' => [], 'readable' => true, 'app_key_present' => false, 'duplicate_assignments' => 0];
     }
     if (is_link($path) || ! is_file($path) || ! is_readable($path)) {
-        return ['values' => [], 'readable' => false, 'app_key_present' => false];
+        return ['values' => [], 'readable' => false, 'app_key_present' => false, 'duplicate_assignments' => 0];
     }
     $content = nexoraHistoricalBoundedRead($path, NEXORA_HISTORICAL_MAX_ENV_BYTES);
     if ($content === null) {
-        return ['values' => [], 'readable' => false, 'app_key_present' => false];
+        return ['values' => [], 'readable' => false, 'app_key_present' => false, 'duplicate_assignments' => 0];
     }
     $lines = preg_split('/\r\n|\n|\r/', $content) ?: [];
     $values = [];
     $appKeyPresent = false;
+    $seenAssignments = [];
+    $duplicateAssignments = 0;
     foreach ($lines as $line) {
         if (preg_match('/^\s*(?:export\s+)?(APP_KEY|APP_PREVIOUS_KEYS)\s*=\s*(.*?)\s*$/D', $line, $parts) !== 1) {
             continue;
         }
+        // Nexora's pre-Laravel parser is last-assignment-wins. A repeated
+        // APP_KEY/APP_PREVIOUS_KEYS makes scoped absence evidence ambiguous,
+        // especially when the final APP_KEY is empty. Scan EVERY candidate
+        // for an observed exposed key, but fail closed for a no-match.
+        if (isset($seenAssignments[$parts[1]])) {
+            $duplicateAssignments++;
+        }
+        $seenAssignments[$parts[1]] = true;
         $setting = trim($parts[2]);
-        // Environment files may have an optional `export` prefix and an
-        // inline comment after a whitespace separator. A quoted value may
-        // likewise be followed by a comment. Never print the source line.
+        // Nexora's pre-Laravel bootstrap does NOT strip inline comments
+        // from unquoted values. Laravel dotenv consumers might interpret them
+        // differently. Inspect both candidate interpretations, so a raw
+        // 32-byte APP_KEY containing " #" is never silently truncated.
+        // Ambiguous unmatched interpretations must remain INCONCLUSIVE.
+        // Never print any source line or key candidate.
+        $interpretations = [$setting];
         if (strlen($setting) > 1 && ($setting[0] === '"' || $setting[0] === "'")) {
-            $closing = strpos($setting, $setting[0], 1);
-            if ($closing !== false) {
-                $remainder = trim(substr($setting, $closing + 1));
+            $quote = $setting[0];
+            $closing = null;
+            // A quoted Laravel/Nexora dotenv value can contain an escaped
+            // double quote or an unescaped quote byte *inside* the key. The
+            // closing quote is the one followed only by whitespace/comment.
+            for ($i = 1, $length = strlen($setting); $i < $length; $i++) {
+                if ($quote === '"' && $setting[$i] === '\\' && $i + 1 < $length) {
+                    $i++; // escaped byte cannot terminate the quoted value
+                    continue;
+                }
+                if ($setting[$i] !== $quote) {
+                    continue;
+                }
+                $remainder = trim(substr($setting, $i + 1));
                 if ($remainder === '' || str_starts_with($remainder, '#')) {
-                    $setting = substr($setting, 1, $closing - 1);
+                    $closing = $i;
+                    break;
                 }
             }
+            if ($closing !== null) {
+                $setting = substr($setting, 1, $closing - 1);
+                // Match the pre-Laravel bootstrap's quoted dotenv decoding.
+                // Decode before splitting APP_PREVIOUS_KEYS or comparing keys;
+                // otherwise escaped raw 32-byte keys can be missed.
+                $setting = str_replace(['\\n', '\\"', '\\\\'], ["\n", '"', '\\'], $setting);
+                $interpretations = [$setting];
+            }
         } else {
-            $setting = (string) preg_replace('/\s+#.*$/D', '', $setting);
+            $stripped = (string) preg_replace('/\s+#.*$/D', '', $setting);
+            if ($stripped !== $setting) {
+                // The bootstrap reads the raw value; other dotenv parsers may
+                // drop the comment. Do not pretend either interpretation is
+                // authoritative across CLI and web workers. Scanning both
+                // makes a raw match visible; an invalid alternate candidate
+                // forces an unresolved inventory to be inconclusive.
+                $interpretations[] = $stripped;
+            }
         }
         // APP_KEY may itself be a raw 32-byte string containing commas. Only
         // Laravel's APP_PREVIOUS_KEYS is a CSV list.
-        if ($parts[1] === 'APP_KEY' && $setting !== '') {
-            $appKeyPresent = true;
+        if ($parts[1] === 'APP_KEY') {
+            $appKeyPresent = count(array_filter($interpretations, static fn (string $v): bool => $v !== '')) > 0;
         }
-        foreach ($parts[1] === 'APP_PREVIOUS_KEYS' ? explode(',', $setting) : [$setting] as $candidate) {
-            if ($candidate !== '') {
-                // Preserve raw key bytes, including leading/trailing spaces.
-                $values[] = $candidate;
+        foreach ($interpretations as $possibleValue) {
+            foreach ($parts[1] === 'APP_PREVIOUS_KEYS' ? explode(',', $possibleValue) : [$possibleValue] as $candidate) {
+                if ($candidate !== '') {
+                    // Preserve raw key bytes, including leading/trailing spaces.
+                    $values[] = $candidate;
+                }
             }
         }
     }
-    return ['values' => $values, 'readable' => true, 'app_key_present' => $appKeyPresent];
+    return ['values' => $values, 'readable' => true, 'app_key_present' => $appKeyPresent, 'duplicate_assignments' => $duplicateAssignments];
 }
 
 /**
- * Read only the two credential settings exported to this PHP CLI process.
- * Absence here is not evidence about a web worker, process manager or old deploy.
- * @return array<string,string>
+ * Read only APP_KEY and APP_PREVIOUS_KEYS from this invoking PHP CLI process.
+ * The three PHP environment APIs can disagree under CLI/SAPI bootstrap;
+ * inventory ALL distinct values instead of silently preferring getenv().
+ * Nothing here proves which values an unrelated web worker accepts.
+ * @return array<string,string|list<mixed>>
  */
 function nexoraHistoricalReadProcessSettings(): array
 {
     $values = [];
     foreach (['APP_KEY', 'APP_PREVIOUS_KEYS'] as $name) {
-        $value = getenv($name);
-        if (is_string($value) && $value !== '') {
-            $values[$name] = $value;
+        $candidates = [];
+        // Distinguish absent values from explicit empty/null values. In
+        // particular, an empty APP_KEY in one PHP environment API must not
+        // disappear when another API exposes a plausible non-matching key.
+        $sources = [];
+        $fromProcess = getenv($name);
+        if ($fromProcess !== false) {
+            $sources[] = $fromProcess;
+        }
+        if (array_key_exists($name, $_ENV)) {
+            $sources[] = $_ENV[$name];
+        }
+        if (array_key_exists($name, $_SERVER)) {
+            $sources[] = $_SERVER[$name];
+        }
+        foreach ($sources as $value) {
+            // Null, arrays and objects cannot represent usable key material;
+            // retain a sentinel so the audit fails closed without emitting it.
+            $candidate = is_string($value) ? $value : null;
+            if (! in_array($candidate, $candidates, true)) {
+                $candidates[] = $candidate;
+            }
+        }
+        if ($candidates !== []) {
+            $values[$name] = count($candidates) === 1 && is_string($candidates[0])
+                ? $candidates[0] : $candidates;
         }
     }
     return $values;
 }
 
 /**
- * @param array<string,string> $processSettings Explicit caller/CLI environment snapshot; never printed.
- * @return array{status:string,scanned:int,key_slots_scanned:int,unreadable:int,process_variables_present:int,process_key_slots_scanned:int,cached_config_present:bool,selected_environment_incomplete:bool,installed_lock_present:bool,historical_non_use_proved:false,target_verified:false,retired:false}
+ * @param array<string,string|list<mixed>> $processSettings Explicit caller/CLI environment snapshot; never printed.
+ * @return array{status:string,scanned:int,key_slots_scanned:int,unreadable:int,duplicate_assignments:int,process_variables_present:int,process_key_slots_scanned:int,cached_config_present:bool,selected_environment_incomplete:bool,installed_lock_present:bool,historical_non_use_proved:false,target_verified:false,retired:false}
  */
 function nexoraHistoricalAuditTarget(string $referenceBytes, string $target, array $processSettings = []): array
 {
+    // The reusable API must enforce the same decoded-key contract as the CLI.
+    // Otherwise an accidental base64 text or short reference can manufacture
+    // a misleading NO_MATCH_IN_SCANNED_FILES result for a genuinely exposed key.
+    if (strlen($referenceBytes) !== 32) {
+        throw new InvalidArgumentException('Historical-key reference must contain exactly 32 decoded bytes.');
+    }
     $root = realpath($target);
     if ($root === false || ! is_dir($root) || ! is_file($root.'/artisan') || ! is_file($root.'/bootstrap/app.php')) {
         throw new RuntimeException('Target must be a readable Nexora project directory with artisan and bootstrap/app.php.');
@@ -161,6 +236,7 @@ function nexoraHistoricalAuditTarget(string $referenceBytes, string $target, arr
     $scanned = 0;
     $keysParsed = 0;
     $unreadable = 0;
+    $duplicateAssignments = 0;
     $foundMatch = false;
     $bootstrapKeyObserved = false;
     $fileReadings = [];
@@ -195,6 +271,10 @@ function nexoraHistoricalAuditTarget(string $referenceBytes, string $target, arr
         }
         $result = nexoraHistoricalReadEnv($path);
         $fileReadings[$file] = $result;
+        // Duplicates are ambiguous even if both values are parseable. Track
+        // them separately from unreadable files, but scan every value so any
+        // observed historical-key match still has highest priority.
+        $duplicateAssignments += $result['duplicate_assignments'];
         if (! $result['readable']) {
             $unreadable++;
             continue;
@@ -222,37 +302,60 @@ function nexoraHistoricalAuditTarget(string $referenceBytes, string $target, arr
         if (! array_key_exists($name, $processSettings)) {
             continue;
         }
-        $setting = $processSettings[$name];
-        if (! is_string($setting) || $setting === '') {
-            continue;
-        }
-        $processVariables++;
-        // A process value that is already 32 raw bytes is authoritative as-is.
-        // Only unwrap a quoted representation if it is not an exact raw key.
-        if (strlen($setting) !== 32 && strlen($setting) > 1
-            && ($setting[0] === '"' || $setting[0] === "'")
-            && substr($setting, -1) === $setting[0]) {
-            $setting = substr($setting, 1, -1);
-        }
-        // Only APP_PREVIOUS_KEYS is a CSV setting in Laravel.
-        $candidates = $name === 'APP_PREVIOUS_KEYS' ? explode(',', $setting) : [$setting];
-        foreach ($candidates as $candidateText) {
-            if ($candidateText === '') {
+        $settings = is_array($processSettings[$name])
+            ? $processSettings[$name] : [$processSettings[$name]];
+        $variablePresent = false;
+        foreach ($settings as $setting) {
+            if (! is_string($setting)) {
+                $unreadable++;
+                $variablePresent = true;
                 continue;
             }
-            $candidate = nexoraHistoricalKeyBytes($candidateText);
-            if ($candidate === null) {
+            if ($setting === '') {
+                // A deliberately empty current APP_KEY is not proof that
+                // some other file/API contains the effective runtime key.
+                // An empty APP_PREVIOUS_KEYS list is harmless and optional.
+                if ($name === 'APP_KEY') {
+                    $unreadable++;
+                    $variablePresent = true;
+                }
+                continue;
+            }
+            $variablePresent = true;
+            if (strlen($setting) > NEXORA_HISTORICAL_MAX_ENV_BYTES) {
                 $unreadable++;
                 continue;
             }
-            $keysParsed++;
-            $processKeysParsed++;
-            if ($name === 'APP_KEY') {
-                $processCurrentKeyObserved = true;
+            // An exact 32-byte raw environment value is authoritative as-is;
+            // only unwrap quotes when the complete value is not a raw key.
+            if (strlen($setting) !== 32 && strlen($setting) > 1
+                && ($setting[0] === '"' || $setting[0] === "'")
+                && substr($setting, -1) === $setting[0]) {
+                $setting = substr($setting, 1, -1);
             }
-            if (hash_equals($referenceBytes, $candidate)) {
-                $foundMatch = true;
+            // APP_KEY is a single key even when the 32 bytes include commas.
+            $candidates = $name === 'APP_PREVIOUS_KEYS' ? explode(',', $setting) : [$setting];
+            foreach ($candidates as $candidateText) {
+                if ($candidateText === '') {
+                    continue;
+                }
+                $candidate = nexoraHistoricalKeyBytes($candidateText);
+                if ($candidate === null) {
+                    $unreadable++;
+                    continue;
+                }
+                $keysParsed++;
+                $processKeysParsed++;
+                if ($name === 'APP_KEY') {
+                    $processCurrentKeyObserved = true;
+                }
+                if (hash_equals($referenceBytes, $candidate)) {
+                    $foundMatch = true;
+                }
             }
+        }
+        if ($variablePresent) {
+            $processVariables++;
         }
     }
 
@@ -294,10 +397,11 @@ function nexoraHistoricalAuditTarget(string $referenceBytes, string $target, arr
     }
     $cached = file_exists($root.'/bootstrap/cache/config.php') || is_link($root.'/bootstrap/cache/config.php');
     return [
-        'status' => $foundMatch ? 'EXPOSED_KEY_OBSERVED' : ($unreadable > 0 || $keysParsed === 0 || $cached || $selectedEnvironmentIncomplete ? 'INCONCLUSIVE' : 'NO_MATCH_IN_SCANNED_FILES'),
+        'status' => $foundMatch ? 'EXPOSED_KEY_OBSERVED' : ($unreadable > 0 || $duplicateAssignments > 0 || $keysParsed === 0 || $cached || $selectedEnvironmentIncomplete ? 'INCONCLUSIVE' : 'NO_MATCH_IN_SCANNED_FILES'),
         'scanned' => $scanned,
         'key_slots_scanned' => $keysParsed,
         'unreadable' => $unreadable,
+        'duplicate_assignments' => $duplicateAssignments,
         'process_variables_present' => $processVariables,
         'process_key_slots_scanned' => $processKeysParsed,
         'cached_config_present' => $cached,
