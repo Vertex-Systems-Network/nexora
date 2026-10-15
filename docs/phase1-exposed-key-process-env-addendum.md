@@ -1,5 +1,7 @@
 # Phase 1 / Issue #72 — CLI process-environment audit addendum
 
+The v9–v14 hardening described below has been submitted to the open PR #122 branch, without any claim of merge, native PHPUnit/source attestation, independent security approval, key retirement, or target readiness. Versioned sections retain their original local regression results.
+
 In addition to scanning the target checkout's root `.env`, protected fallback `.env` and `bootstrap.key`, the read-only `scripts/phase1-exposed-key-audit.php` command now also compares `APP_KEY` and `APP_PREVIOUS_KEYS` inherited by **the invoking PHP CLI process**. This catches environment-only hosting configurations that would otherwise be invisible to a file inventory.
 
 - Launch the audit from an authorized shell with the **same environment injection** expected for the target. A different CLI shell may not see the web service manager's secrets.
@@ -57,3 +59,127 @@ bounded. The tool continues to print no secret bytes or fingerprints.
 ## v6 security hardening — linked parent directories
 
 Credential candidates beneath a symlinked intermediate directory (for example, `storage/app/nexora/environment`) are **not traversed** by the read-only scanner. A linked candidate or active marker returns `INCONCLUSIVE`, rather than treating foreign-storage keys as a trustworthy local-file negative. This narrows what `NO_MATCH_IN_SCANNED_FILES` can assert. Read-only behavior, no secret emission, and `historical_non_use_proved=false` remain unchanged. A deployment legitimately using a symlinked protected storage mount requires independent operator inventory; this scanner will not attest that mount.
+
+## v9 local follow-up — divergent PHP environment APIs
+
+An invoking PHP CLI process can expose different values in `getenv()`, `$_ENV`,
+and `$_SERVER`; preferring a single source can miss an exposed historical key.
+The scanner now inventories all **distinct** nonempty `APP_KEY` and
+`APP_PREVIOUS_KEYS` settings across these three local APIs. Any observed match
+wins (`EXPOSED_KEY_OBSERVED`). A malformed or oversized source causes
+`INCONCLUSIVE` if no match is observed, rather than allowing an apparently
+safe value from another source to hide uncertainty. Invalid non-string
+injections also fail closed. Only the two named variables are read.
+
+These comparisons describe the **invoking CLI process**, not the independently
+running PHP-FPM/web worker, a cloud secret manager, or a historical deployment.
+They do not retire the exposed key, establish historical non-use, or satisfy
+Issue #72 / Issue #74 target acceptance. Do not put secrets into source,
+GitHub issues, logs, or reports.
+
+Local regression scope: 17/17 compatibility-harness test methods, 32/32
+isolated CLI checks and 144/144 randomized synthetic matrix cases. This local
+v9 change was developed locally and subsequently contributed to PR #122 (not merged); native Nexora PHPUnit, full Source Guard,
+independent reviewer approval and final browser/target acceptance remain open.
+
+
+## Local v10 follow-up: quoted raw-key escape detection (originally local; PR #122 branch update)
+
+The read-only audit scanner now recognizes Nexora installer bootstrap's quoted
+`.env` value escape decoding (`\n`, `\"`, `\\`) before key comparisons and
+before splitting `APP_PREVIOUS_KEYS` CSV. This closes a detection gap where
+valid raw 32-byte APP_KEY or previous-key values containing a quote, backslash,
+or escaped newline could report INCONCLUSIVE rather than EXPOSED_KEY_OBSERVED.
+The scanner chooses the final valid closing quote, ignoring internal escaped
+quotes, and still treats malformed/unreadable sources conservatively. Tests use
+synthetic key bytes only. Neither a matching nor nonmatching local inventory
+establishes historical non-use, deployment retirement, or hosted web identity.
+
+Run the local v10 compatibility suite and quoted-escape matrix to reproduce;
+full repository PHPUnit/Source Guard and independent acceptance remain separate.
+
+## Local v11 follow-up: duplicate dotenv assignments (originally local; PR #122 branch update)
+
+Nexora's pre-Laravel `.env` parser is **last-assignment-wins**. An active
+file with `APP_KEY=<safe>` followed by `APP_KEY=` therefore has no effective
+key from that file. Before v11 the audit scanner still counted the earlier
+safe assignment as present and could incorrectly return
+`NO_MATCH_IN_SCANNED_FILES`. Repeated `APP_PREVIOUS_KEYS` assignments had a
+similar source-ambiguity gap.
+
+The audit now inspects **every** duplicate slot for positive evidence, so any
+historical-key match takes precedence (`EXPOSED_KEY_OBSERVED`, exit 3). But a
+non-matching duplicate assignment yields `INCONCLUSIVE` (exit 2) rather than
+trusting ambiguous configuration. The non-secret `duplicate_assignments`
+counter reports repeated assignments separately from `unreadable`; the
+`app_key_present` check reflects the **last** APP_KEY assignment. A single
+valid safe APP_KEY still allows the explicitly scoped negative inventory.
+
+Additional local evidence: two new PHPUnit-style regression methods and an
+18-scenario, isolated real-PHP-CLI matrix across automatic root, explicit root,
+and explicit fallback selection. Only synthetic keys were used. This code is
+not a historical-key retirement, native PHPUnit/source certificate or hosted
+HTTPS target acceptance. Do not post actual keys or fingerprints in reports.
+
+
+## Local v12 follow-up: explicitly empty current APP_KEY (originally local; PR #122 branch update)
+
+An explicit empty `APP_KEY` from the invoking PHP CLI process must be
+considered **ambiguous** rather than silently dropped while a different
+source (`.env`, `$_ENV`, or `$_SERVER`) contains another valid-looking key.
+`nexoraHistoricalReadProcessSettings()` now distinguishes absent values from
+empty or malformed entries across `getenv()`, `$_ENV`, and `$_SERVER`. In the
+absence of an observed exposed key, an explicitly blank current APP_KEY
+forces `INCONCLUSIVE` (exit 2); a historical-key match still has priority
+and returns `EXPOSED_KEY_OBSERVED` (exit 3). An empty optional
+`APP_PREVIOUS_KEYS` list remains acceptable. No key bytes are printed.
+
+PHP `proc_open()` can silently omit an empty value in the environment array;
+the isolated CLI regression therefore uses `/usr/bin/env APP_KEY=` when
+available to distinguish *present but empty* from *not present*. This is
+synthetic local coverage only. It does not establish runtime key rotation,
+historical non-use, hosted target identity, or independent review approval.
+
+
+## Local v13 follow-up: unquoted inline `#` key candidates (originally local; PR #122 branch update)
+
+Nexora's pre-Laravel bootstrap trims an unquoted `.env` value but does **not**
+strip an inline `#` comment. The historical-key scanner previously removed a
+space followed by `#` before comparing keys. A valid 32-byte raw `APP_KEY`
+containing ` #` could therefore be truncated and the exposed key missed.
+
+The scanner now checks both the unmodified unquoted value and a comment-stripped
+interpretation; a positive exposed-key match remains `EXPOSED_KEY_OBSERVED`
+(exit 3). If parsing interpretations conflict and the complete key cannot be
+resolved, an apparently safe key must not yield a clean scoped inventory:
+`INCONCLUSIVE` (exit 2). Neither interpretation's value nor any secret
+fingerprint appears in stdout/stderr. Quoted key decoding, previous-key CSV
+splitting, process API comparisons, file bounds and symlink restrictions are
+unchanged. The independent web worker may have different effective settings.
+
+Evidence: v12 24 methods plus 2 new red→green test methods, four isolated
+actual CLI exit/redaction checks, and 128 extra synthetic variants with
+embedded ` #`. This remains an operator-local **read-only aid**; it is not
+historical key retirement, independent security approval, native PHPUnit,
+Source Guard, or verified hosted HTTPS runtime readiness.
+
+## Local v14 follow-up: decoded reference-key contract (originally local; PR #122 branch update)
+
+The reusable `nexoraHistoricalAuditTarget()` API previously allowed reference
+strings of any length. A 31-byte reference or a still-encoded `base64:` text
+string could then yield `NO_MATCH_IN_SCANNED_FILES` even when it could not
+possibly match the actual decoded 32-byte reference. The command-line wrapper
+already validated the reference; now the callable audit API validates it too.
+
+Callers **must pass exactly 32 decoded key bytes**. Invalid reference lengths
+raise `InvalidArgumentException` before target files or process variables are
+scanned. The error is generic and does not include the rejected key material.
+The CLI continues to accept a base64 representation in its owner-only private
+reference file, decode it, and supply 32 bytes to the reusable audit function.
+
+Local red→green compatibility regression and isolated real CLI checks cover
+invalid reference lengths, encoded text supplied to the API, matching and
+nonmatching decoded references, exit statuses and output redaction. All checks
+use synthetic keys; this remains read-only source-side QA and is **not**
+independent security approval, historical key retirement, complete Nexora
+Source Guard/native PHPUnit certification, or a verified target receipt.
