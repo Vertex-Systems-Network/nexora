@@ -110,6 +110,9 @@ function nexoraBootstrapOriginErrors(string $environment, array $overrides = [])
     if (in_array($host, ['nexora.test', 'example.com', 'example.test'], true)) {
         $errors[] = 'APP_URL is a template hostname. Configure the actual local or HTTPS target origin before running bootstrap.';
     }
+    if (in_array($host, ['0.0.0.0', '[::]'], true)) {
+        $errors[] = 'APP_URL must be a reachable browser origin, not a wildcard server bind address.';
+    }
 
     $environmentMode = strtolower($settings['APP_ENV'] ?? '');
     if ($environmentMode === 'production' && strtolower($settings['NEXORA_ALLOW_INSECURE_HTTP'] ?? '') === 'true') {
@@ -128,8 +131,13 @@ function nexoraBootstrapOriginErrors(string $environment, array $overrides = [])
             $errors[] = 'HTTP APP_URL requires SESSION_SECURE_COOKIE=false so browser login can persist.';
         }
         $loopback = in_array($host, ['localhost', '127.0.0.1', '[::1]'], true);
-        if (! $loopback && strtolower($settings['NEXORA_ALLOW_INSECURE_HTTP'] ?? '') !== 'true') {
-            $errors[] = 'Non-loopback HTTP requires an explicit NEXORA_ALLOW_INSECURE_HTTP=true in a nonproduction environment.';
+        if (! $loopback) {
+            if ($environmentMode === '') {
+                $errors[] = 'Non-loopback HTTP requires an explicitly classified nonproduction APP_ENV.';
+            }
+            if (strtolower($settings['NEXORA_ALLOW_INSECURE_HTTP'] ?? '') !== 'true') {
+                $errors[] = 'Non-loopback HTTP requires an explicit NEXORA_ALLOW_INSECURE_HTTP=true in a nonproduction environment.';
+            }
         }
     }
 

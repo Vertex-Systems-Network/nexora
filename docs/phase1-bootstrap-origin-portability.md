@@ -17,3 +17,7 @@ This preflight is not evidence of ownership of a live target, a current source-t
 ## Protected fallback environment and IPv6 hosts
 
 If the installer has an active protected environment marker under `storage/app/nexora/environment/active`, the preflight inspects the selected `root` or `fallback` `.env` instead of blindly validating the root file. An invalid active marker or a missing selected environment is rejected without falling back to a stale source; only fixed diagnostic messages are emitted. Explicit process environment overrides retain precedence. Local IPv6 loopback origins such as `http://[::1]:8000` are supported when `SESSION_SECURE_COOKIE=false`, while zero/empty ports and malformed DNS labels are rejected. This is configuration consistency evidence, not hosted-target identity attestation.
+
+## Bind addresses are not browser origins
+
+`0.0.0.0` and `[::]` are wildcard server bind addresses and must never be configured as `APP_URL`, even when the web process listens on all interfaces. Use the actual browser-reachable HTTPS hostname instead. Non-loopback HTTP with `NEXORA_ALLOW_INSECURE_HTTP=true` is only considered when `APP_ENV` is explicitly classified as nonproduction; a blank environment cannot silently authorize it. Production HTTP remains rejected.

@@ -114,6 +114,29 @@ final class BootstrapOriginPortabilityTest extends TestCase
     }
 
     #[Test]
+    public function bootstrap_rejects_unspecified_listen_addresses_and_unclassified_insecure_http(): void
+    {
+        $sample = "APP_ENV=local\nAPP_URL=https://site.example.org\nSESSION_SECURE_COOKIE=true\nNEXORA_ALLOW_INSECURE_HTTP=false\n";
+        $cases = [
+            'wildcard IPv4 is a bind address, not an origin' => ['https://0.0.0.0', 'local', 'true', false],
+            'IPv6 wildcard is a bind address, not an origin' => ['https://[::]', 'local', 'true', false],
+            'HTTPS browser loopback remains supported' => ['https://127.0.0.1', 'local', 'true', true],
+            'nonloopback HTTP without environment classification' => ['http://preview.example.org', '', 'false', false],
+            'nonloopback HTTP with explicit local classification' => ['http://preview.example.org', 'local', 'false', true],
+            'nonloopback HTTP with explicit staging classification' => ['http://preview.example.org', 'staging', 'false', true],
+            'nonloopback HTTP in production always rejected' => ['http://preview.example.org', 'production', 'false', false],
+        ];
+        foreach ($cases as $label => [$url, $appEnv, $secureCookie, $expected]) {
+            $config = str_replace(
+                ['APP_ENV=local', 'APP_URL=https://site.example.org', 'SESSION_SECURE_COOKIE=true', 'NEXORA_ALLOW_INSECURE_HTTP=false'],
+                ['APP_ENV='.$appEnv, 'APP_URL='.$url, 'SESSION_SECURE_COOKIE='.$secureCookie, 'NEXORA_ALLOW_INSECURE_HTTP=true'],
+                $sample,
+            );
+            self::assertSame($expected, \nexoraBootstrapOriginErrors($config) === [], $label);
+        }
+    }
+
+    #[Test]
     public function every_portable_bootstrap_runs_the_origin_check_before_dependency_install(): void
     {
         $commands = [
