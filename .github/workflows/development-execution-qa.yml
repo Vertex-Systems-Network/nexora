@@ -155,7 +155,9 @@ jobs:
             exit 1
           }
           php tests/browser/seed-disposable-admin.php
-          php -S 127.0.0.1:8974 -t public public/index.php > /tmp/nexora-admin-browser.log 2>&1 &
+          # No explicit router script: PHP must serve public/build assets as static files
+          # and fall back to index.php only for Inertia routes.
+          php -S 127.0.0.1:8974 -t public > /tmp/nexora-admin-browser.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           ready=0
@@ -171,6 +173,14 @@ jobs:
             tail -40 /tmp/nexora-admin-browser.log
             exit 1
           fi
+          # Guard against a router accidentally sending Vite JS to Laravel (HTML/404).
+          js_asset="$(node -e 'const m=require("./public/build/manifest.json"); const e=m["resources/js/app.tsx"]; if(!e?.file)process.exit(1); process.stdout.write("/build/"+e.file)')"
+          curl --silent --show-error --fail --max-time 8 "http://127.0.0.1:8974${js_asset}" -o /tmp/nexora-admin-browser-entry.js
+          if ! grep -qE 'createInertiaApp|\.jsx' /tmp/nexora-admin-browser-entry.js; then
+            echo "Browser entrypoint was not served as a real JavaScript asset."
+            exit 1
+          fi
+          rm -f /tmp/nexora-admin-browser-entry.js
           node tests/browser/admin-health-chromium-smoke.mjs http://127.0.0.1:8974/login
 
       - name: Upload development QA evidence
