@@ -18,6 +18,23 @@ Before making any target change, the operator must establish:
 
 The historical exposed key belongs to a **local installation bootstrap/application-key lifecycle**, not an established external SaaS token. A public PR artifact deletion, random fresh QA key, or automated `key:generate --force` does **not** invalidate copies that might have become effective APP_KEY values.
 
+## Confidential historical-key inventory helper (#72)
+
+The repo includes a **read-only** audit, \`scripts/phase1-exposed-key-audit.php\`, for comparing a privately supplied historical PR #71 key to the target's readable root/fallback environment and protected bootstrap key. The reference must be a **non-symlink, owner-only private file outside the repository**, containing the original key, and must never be committed, pasted into terminal flags or uploaded to GitHub.
+
+On the authorized target machine:
+
+\`\`\`sh
+chmod 600 /secure/operator-only/exposed-bootstrap.key
+php scripts/phase1-exposed-key-audit.php \
+  --reference-file=/secure/operator-only/exposed-bootstrap.key \
+  --target="<operator-provided-target-path>"
+\`\`\`
+
+Interpret the status conservatively: \`EXPOSED_KEY_OBSERVED\` (exit 3) identifies a match in at least one scanned file, \`INCONCLUSIVE\` (exit 2) means an unreadable/missing key source or cached configuration blocks a reliable file assessment, and \`NO_MATCH_IN_SCANNED_FILES\` (exit 0) means **only** that scanned readable files did not contain the reference key. All statuses still report \`historical_non_use_proved=false\`, \`target_verified=false\`, and \`retired=false\`. No secret, replacement key or fingerprint is printed.
+
+This tool cannot observe the exact active key of external running processes, backups/snapshots or installations not supplied as targets. Review application runtime configuration, \`APP_PREVIOUS_KEYS\`, historical deployments, offline backups and owner inventory before accepting key retirement/non-use. Do not automatically revoke a key needed for decrypting stored data.
+
 ## 2. Issue #72 — affected-key retirement
 
 - [ ] Inventory current active keys **and accepted previous keys** for every actually affected installation, using confidential comparison by the target's authorized operator. Report only the scope and a conclusion (affected / not affected / unknown); never attach key material or raw environment files to GitHub.
