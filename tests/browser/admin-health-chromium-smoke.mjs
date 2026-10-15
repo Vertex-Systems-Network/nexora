@@ -159,5 +159,11 @@ try {
 } finally {
     ws?.close();
     child.kill("SIGKILL");
-    rmSync(temp, { recursive: true, force: true });
+    // Chromium can still be writing profile files while SIGKILL is delivered.
+    // Never hide a browser assertion error behind a temporary-directory race.
+    try {
+        rmSync(temp, { recursive: true, force: true, maxRetries: 12, retryDelay: 125 });
+    } catch (cleanupError) {
+        console.warn("Disposable Chromium profile cleanup incomplete:", cleanupError.code || "unknown");
+    }
 }
