@@ -140,6 +140,9 @@ jobs:
           NEXORA_CI_BROWSER_E2E: '1'
           NEXORA_CI_BROWSER_EMAIL: browser.qa@nexora.invalid
           SESSION_DRIVER: file
+          # This isolated browser fixture uses HTTP loopback, not HTTPS hosting.
+          # Production sessions remain Secure on real HTTPS targets.
+          SESSION_SECURE_COOKIE: 'false'
           CACHE_STORE: array
         run: |
           set -euo pipefail
