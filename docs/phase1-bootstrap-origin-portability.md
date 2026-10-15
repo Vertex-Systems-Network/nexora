@@ -10,4 +10,6 @@ Execute the URL-only check with: php scripts/bootstrap-origin-doctor.php
 
 Then run the platform's bootstrap-installer.sh, bootstrap-installer.bat or bootstrap-installer.ps1. For a local PHP development server using Vite assets, run php -S 127.0.0.1:8000 -t public without an explicit router script so static compiled JS/CSS files are served correctly.
 
+When Docker, a service manager, or a hosting panel injects APP_URL, APP_ENV, SESSION_SECURE_COOKIE or NEXORA_ALLOW_INSECURE_HTTP through the process environment, the preflight checks those effective values in preference to the file. It does not rewrite .env. The same effective settings must be supplied to the PHP web runtime; otherwise the command-line preflight is not a valid assertion about the running server. A production HTTPS origin must never opt into NEXORA_ALLOW_INSECURE_HTTP=true.
+
 This preflight is not evidence of ownership of a live target, a current source-to-web challenge, target readiness, TLS acceptance, or retirement of the historically exposed application key. Use the governed Phase 1 target operator handoff for those separately required gates. Do not commit .env or rotate APP_KEY during source bootstrap.
