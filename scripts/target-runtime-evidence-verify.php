@@ -26,9 +26,33 @@ try{
         $bundleSha=hash_file('sha256',$inputPath)?:null;
         $zip=new ZipArchive();
         if($zip->open($inputPath)!==true){ fwrite(STDERR,"[Nexora Target Runtime Evidence] Unable to open ZIP.\n"); exit(1); }
+        // Reject hostile/corrupt operator ZIPs before any extraction. Runtime
+        // evidence is made of bounded JSON and step logs, not arbitrary data
+        // archives. A 1 GB expanded ZIP must not exhaust a target's disk.
+        $maxEntries=1024;
+        $maxEntryBytes=16*1024*1024;
+        $maxTotalBytes=256*1024*1024;
+        if($zip->numFiles>$maxEntries){
+            $zip->close();throw new RuntimeException('Evidence ZIP has too many entries.');
+        }
+        $totalBytes=0;
+        $normalizedNames=[];
         for($i=0;$i<$zip->numFiles;$i++){
+            $stats=$zip->statIndex($i);
+            if(!is_array($stats)||!is_int($stats['size']??null)||$stats['size']<0
+                ||$stats['size']>$maxEntryBytes||$totalBytes>$maxTotalBytes-$stats['size']){
+                $zip->close();throw new RuntimeException('Evidence ZIP expanded-size limit exceeded or entry metadata invalid.');
+            }
+            $totalBytes+=$stats['size'];
             $name=(string)$zip->getNameIndex($i);
             $normalized=str_replace('\\','/',$name);
+            // Aliases and repeated entry names must not silently overwrite
+            // earlier ZIP content during extraction.
+            $entryKey=PHP_OS_FAMILY==='Windows'?strtolower($normalized):$normalized;
+            if(isset($normalizedNames[$entryKey])){
+                $zip->close();throw new RuntimeException('Evidence ZIP contains duplicate normalized paths.');
+            }
+            $normalizedNames[$entryKey]=true;
             if($normalized===''||str_starts_with($normalized,'/')||preg_match('/^[A-Za-z]:\//',$normalized)===1||str_contains('/'.$normalized.'/','/../')||str_contains('/'.$normalized.'/','/./')){
                 $zip->close(); fwrite(STDERR,"[Nexora Target Runtime Evidence] Unsafe ZIP path [{$name}].\n"); exit(1);
             }
