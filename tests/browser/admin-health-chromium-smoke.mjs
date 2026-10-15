@@ -85,13 +85,17 @@ try {
         }
         if (message.method === "Network.requestWillBeSent") {
             const request = message.params?.request;
-            // Record status only; never capture POST body, cookies or credentials.
+            const id = message.params?.requestId;
+            if (loginRequests.has(id) && message.params?.redirectResponse) {
+                loginResponses.push({ redirect: message.params.redirectResponse.status, to: new URL(request.url).pathname });
+            }
+            // Record status/route only; never capture POST body, cookies or credentials.
             if (request?.method === "POST" && new URL(request.url).pathname === "/login") {
-                loginRequests.set(message.params.requestId, true);
+                loginRequests.set(id, true);
             }
         }
         if (message.method === "Network.responseReceived" && loginRequests.has(message.params?.requestId)) {
-            loginResponses.push({ status: message.params.response.status, type: message.params.type });
+            loginResponses.push({ status: message.params.response.status, path: new URL(message.params.response.url).pathname, type: message.params.type });
         }
         if (message.method === "Network.loadingFailed" && loginRequests.has(message.params?.requestId)) {
             loginResponses.push({ error: message.params.errorText });
@@ -140,14 +144,20 @@ try {
     assert.ok(!navigation.errorText, "Could not navigate to test login page: " + navigation.errorText);
     await waitFor("document.readyState==='complete' && !!document.querySelector('input[name=email]') && !!document.querySelector('input[name=password]')",
         "React login form");
-    // CDP typing fires native input events (unlike directly setting React-controlled input.value).
+    // Dispatch real keyboard events so React 19 updates useForm state, not only DOM.value.
+    async function typeViaKeyboard(value) {
+        for (const character of value) {
+            await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: character, text: character, unmodifiedText: character });
+            await cdp("Input.dispatchKeyEvent", { type: "keyUp", key: character });
+        }
+    }
     await evalJs("document.querySelector('input[name=email]').focus()");
-    await cdp("Input.insertText", { text: email });
+    await typeViaKeyboard(email);
     await evalJs("document.querySelector('input[name=password]').focus()");
-    await cdp("Input.insertText", { text: password });
+    await typeViaKeyboard(password);
     const inputsPresent = await evalJs("document.querySelector('input[name=email]').value.length>0 && document.querySelector('input[name=password]').value.length>0");
     assert.equal(inputsPresent, true, "Login form failed to receive native keyboard input.");
-    const inputMatches = await evalJs("document.querySelector('input[name=email]').value.length>0 && document.querySelector('input[name=password]').value.length>0");
+    const inputMatches = await evalJs("document.querySelector('input[name=email]').value.length===" + email.length + " && document.querySelector('input[name=password]').value.length===" + password.length);
     assert.equal(inputMatches, true, "Login input fields are empty before submitting.");
     await evalJs("document.querySelector('button[type=submit]').click()");
     await waitFor("location.pathname.startsWith('/admin') && !!document.querySelector('nav[aria-label=\"Admin navigation\"]')",
