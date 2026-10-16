@@ -51,6 +51,7 @@ final class TargetRuntimeBuildResumeTest extends TestCase
     private function environment(): array
     {
         return ['platform_version' => '1.0', 'source_tree_sha256' => str_repeat('a', 64),
+            'composer_version' => '2.9.1', 'node_version' => '22.16.0', 'npm_version' => '10.9.2',
             'node_modules' => true, 'node_modules_lock_sha256' => str_repeat('e', 64),
             'vendor_autoload' => true, 'vendor_installed_sha256' => str_repeat('f', 64)];
     }

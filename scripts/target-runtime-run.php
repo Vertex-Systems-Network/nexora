@@ -6,6 +6,9 @@ $root=dirname(__DIR__);
 require_once $root.'/bootstrap/nexora-process-environment.php';
 require_once $root.'/scripts/lib/source-attestation.php';
 require_once $root.'/scripts/lib/target-resume-contracts.php';
+require_once $root.'/scripts/lib/target-composer.php';
+require_once $root.'/scripts/lib/target-runtime-toolchain-versions.php';
+require_once $root.'/scripts/lib/target-process-capture.php';
 
 $platform=require $root.'/config/nexora.php';
 $version=(string)($platform['version']??'unknown');
@@ -95,15 +98,12 @@ $run=static function(string $id,string $label,array $parts,string $group,bool $r
     $cmd=implode(' ',array_map(static fn($v)=>escapeshellarg((string)$v),$parts));
     fwrite(STDOUT,"\n[Nexora Target Runtime] {$label}\n> {$cmd}\n");
     $started=microtime(true);
-    $proc=@proc_open($cmd,[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes,$root,$env,['bypass_shell'=>false]);
-    if(!is_resource($proc)){
-        $stdout='';$stderr='Unable to start process.';$exit=127;
-    }else{
-        fclose($pipes[0]);
-        $stdout=(string)stream_get_contents($pipes[1]);fclose($pipes[1]);
-        $stderr=(string)stream_get_contents($pipes[2]);fclose($pipes[2]);
-        $exit=proc_close($proc);
-    }
+    // argv execution + concurrent bounded streams avoids Unix pipe deadlocks
+    // and Windows cmd.exe quoting/injection ambiguity.
+    $result=nexoraTargetCaptureCommand(array_values(array_map('strval',$parts)),$root,$env);
+    $stdout=$result['stdout'];
+    $stderr=$result['stderr'];
+    $exit=$result['exit_code'];
     $stdout=$redact($stdout);$stderr=$redact($stderr);
     $record([
         'id'=>$id,'group'=>$group,'label'=>$label,'required'=>$required,
@@ -127,6 +127,9 @@ $fail=static function(string $id,string $label,string $message,string $group='pr
     fwrite(STDERR,"[Nexora Target Runtime] {$label}: {$message}\n");
 };
 
+$toolVersions=nexoraTargetResumeToolchainVersions(
+    static fn(array $command):array => nexoraRunTargetCommand($command,$root,$env)
+);
 $sourceAttestation=nexoraComputeSourceAttestation($root);
 $loadedExtensions = get_loaded_extensions();
 sort($loadedExtensions, SORT_STRING);
@@ -138,6 +141,9 @@ $environment=[
     'os_family'=>PHP_OS_FAMILY,
     'php_binary'=>PHP_BINARY,
     'php_extensions_sha256'=>hash('sha256',implode('\n',$loadedExtensions)),
+    'composer_version'=>$toolVersions['composer_version'],
+    'node_version'=>$toolVersions['node_version'],
+    'npm_version'=>$toolVersions['npm_version'],
     'composer_available'=>$commandExists('composer'),
     'node_available'=>$commandExists('node'),
     'npm_available'=>$commandExists('npm'),

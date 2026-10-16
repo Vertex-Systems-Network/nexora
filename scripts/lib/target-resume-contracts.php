@@ -59,6 +59,7 @@ function nexoraTargetResumeEnvironmentDrift(array $previous, array $current): ?s
     $fingerprints = [
         'platform_version', 'source_tree_sha256',
         'php_version', 'os_family', 'php_binary', 'php_extensions_sha256',
+        'composer_version', 'node_version', 'npm_version',
         'composer_available', 'node_available', 'npm_available',
         'composer_lock_sha256', 'package_lock_sha256',
         'vendor_installed_sha256', 'node_modules_lock_sha256',
@@ -91,6 +92,17 @@ function nexoraTargetResumeSafeStepAllowlist(
     array $environment, array $allowlist, array $priorArtifacts = [], array $currentArtifacts = []
 ): array
 {
+    $validVersion = static fn(mixed $version): bool => is_string($version)
+        && preg_match('/^\d+\.\d+(?:\.\d+)?$/D', $version) === 1;
+    if (!$validVersion($environment['composer_version'] ?? null)) {
+        unset($allowlist['composer-install']);
+    }
+    if (!$validVersion($environment['node_version'] ?? null)
+        || !$validVersion($environment['npm_version'] ?? null)) {
+        unset($allowlist['npm-ci'], $allowlist['frontend-typecheck'],
+            $allowlist['frontend-tests'], $allowlist['frontend-build'],
+            $allowlist['frontend-build-budget']);
+    }
     if (($environment['vendor_autoload'] ?? false) !== true
         || !is_string($environment['vendor_installed_sha256'] ?? null)
         || ($environment['vendor_installed_sha256'] ?? '') === '') {

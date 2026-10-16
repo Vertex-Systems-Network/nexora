@@ -17,6 +17,7 @@ final class TargetRuntimeEnvironmentResumeTest extends TestCase
         return [
             'platform_version' => '1.0',
             'source_tree_sha256' => str_repeat('a', 64),
+            'composer_version' => '2.9.1', 'node_version' => '22.16.0', 'npm_version' => '10.9.2',
             'php_version' => '8.4.24',
             'os_family' => 'Linux',
             'php_binary' => '/usr/bin/php',

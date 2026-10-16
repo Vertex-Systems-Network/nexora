@@ -76,6 +76,62 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
         return $process;
     }
 
+
+    /**
+     * The PASS verifier accepts only complete, ordered producer receipts with
+     * environment modes and SHA-256-bound per-step logs. Legacy one-step
+     * synthetic summaries remain valid only as blocked-path test fixtures.
+     *
+     * @return array<string,mixed>
+     */
+    private function prepareCompletePassReceipt(bool $full = false): array
+    {
+        $environment = json_decode((string) file_get_contents($this->bundleDir.'/environment.json'), true, 512, JSON_THROW_ON_ERROR);
+        $environment['full_certification_requested'] = $full;
+        $environment['install_dependencies_requested'] = false;
+        $ids = [
+            'source-preflight', 'target-bootstrap', 'target-runtime-contract', 'inertia-contract',
+            'dependency-lock-review', 'dependency-contract-strict', 'dependency-runtime',
+            'frontend-typecheck', 'frontend-tests', 'frontend-build', 'frontend-build-budget',
+            'package-discover', 'optimize-clear', 'artisan-about', 'route-list', 'schedule-list',
+            'database-doctor', 'environment-doctor', 'filesystem-doctor', 'transfer-doctor',
+            'runtime-doctor', 'concurrency-doctor',
+        ];
+        if ($full) {
+            $ids[] = 'isolated-full-certification';
+        }
+        $ids[] = 'closure-status';
+        $steps = [];
+        foreach ($ids as $id) {
+            $stdout = "synthetic {$id} stdout\n";
+            $stderr = '';
+            file_put_contents($this->bundleDir.'/steps/'.$id.'.stdout.log', $stdout);
+            file_put_contents($this->bundleDir.'/steps/'.$id.'.stderr.log', $stderr);
+            $steps[] = [
+                'id' => $id,
+                'required' => $id !== 'closure-status',
+                'status' => 'pass',
+                'exit_code' => 0,
+                'stdout_log' => 'steps/'.$id.'.stdout.log',
+                'stderr_log' => 'steps/'.$id.'.stderr.log',
+                'stdout_sha256' => hash('sha256', $stdout),
+                'stderr_sha256' => hash('sha256', $stderr),
+            ];
+        }
+        $summary = [
+            'schema' => 2,
+            'platform_version' => $environment['platform_version'],
+            'run_id' => '20261016-150000-a1b2c3',
+            'status' => $full ? 'target-certification-pass' : 'target-readiness-pass',
+            'first_blocker' => null,
+            'environment' => $environment,
+            'steps' => $steps,
+        ];
+        file_put_contents($this->bundleDir.'/environment.json', json_encode($environment, JSON_THROW_ON_ERROR));
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+        return $summary;
+    }
+
     #[Test]
     public function symlinked_environment_json_outside_evidence_directory_is_rejected(): void
     {
@@ -220,7 +276,7 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
     #[Test]
     public function claimed_readiness_cannot_hide_a_failed_required_step(): void
     {
-        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary = $this->prepareCompletePassReceipt(false);
         $summary['status'] = 'target-readiness-pass';
         $summary['first_blocker'] = null;
         $summary['steps'][0]['required'] = true;
@@ -230,13 +286,13 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
 
         $result = $this->verify($this->bundleDir, true);
         self::assertSame(1, $result->getExitCode());
-        self::assertStringContainsString('required runtime step', $result->getErrorOutput());
+        self::assertStringContainsString('failed mandatory step', $result->getErrorOutput());
     }
 
     #[Test]
     public function claimed_readiness_cannot_hide_nonzero_required_exit_code(): void
     {
-        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary = $this->prepareCompletePassReceipt(false);
         $summary['status'] = 'target-readiness-pass';
         $summary['first_blocker'] = null;
         $summary['steps'][0]['required'] = true;
@@ -246,15 +302,16 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
 
         $result = $this->verify($this->bundleDir, true);
         self::assertSame(1, $result->getExitCode());
-        self::assertStringContainsString('inconsistent runtime step', $result->getErrorOutput());
+        self::assertStringContainsString('inconsistent result', $result->getErrorOutput());
     }
 
     #[Test]
     public function claimed_full_certification_requires_full_certification_step(): void
     {
-        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary = $this->prepareCompletePassReceipt(true);
         $summary['status'] = 'target-certification-pass';
         $summary['first_blocker'] = null;
+        $summary['steps'][count($summary['steps']) - 2]['id'] = 'invalid-certification-gate';
         $summary['steps'][0]['required'] = true;
         $summary['steps'][0]['status'] = 'pass';
         $summary['steps'][0]['exit_code'] = 0;
@@ -268,18 +325,15 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
     #[Test]
     public function consistent_readiness_allows_an_optional_failed_closure_step(): void
     {
-        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary = $this->prepareCompletePassReceipt(false);
         $summary['status'] = 'target-readiness-pass';
         $summary['first_blocker'] = null;
         $summary['steps'][0]['required'] = true;
         $summary['steps'][0]['status'] = 'pass';
         $summary['steps'][0]['exit_code'] = 0;
-        $summary['steps'][] = [
-            'id' => 'closure-status', 'required' => false,
-            'status' => 'fail', 'exit_code' => 1,
-            'stdout_log' => 'steps/test.stdout.log',
-            'stderr_log' => 'steps/test.stderr.log',
-        ];
+        $index = count($summary['steps']) - 1;
+        $summary['steps'][$index]['status'] = 'fail';
+        $summary['steps'][$index]['exit_code'] = 1;
         file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
 
         $result = $this->verify($this->bundleDir, true);
@@ -290,18 +344,13 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
     #[Test]
     public function consistent_full_certification_step_remains_accepted_as_structural_evidence(): void
     {
-        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary = $this->prepareCompletePassReceipt(true);
         $summary['status'] = 'target-certification-pass';
         $summary['first_blocker'] = null;
         $summary['steps'][0]['required'] = true;
         $summary['steps'][0]['status'] = 'pass';
         $summary['steps'][0]['exit_code'] = 0;
-        $summary['steps'][] = [
-            'id' => 'isolated-full-certification', 'required' => true,
-            'status' => 'pass', 'exit_code' => 0,
-            'stdout_log' => 'steps/test.stdout.log',
-            'stderr_log' => 'steps/test.stderr.log',
-        ];
+        // The complete producer receipt already has the required certification step.
         file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
 
         $result = $this->verify($this->bundleDir, true);
@@ -312,7 +361,7 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
     #[Test]
     public function arbitrary_failed_optional_step_cannot_be_used_to_mask_failure(): void
     {
-        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary = $this->prepareCompletePassReceipt(false);
         $summary['status'] = 'target-readiness-pass';
         $summary['first_blocker'] = null;
         $summary['steps'][0]['required'] = false;
@@ -322,7 +371,7 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
 
         $result = $this->verify($this->bundleDir, true);
         self::assertSame(1, $result->getExitCode());
-        self::assertStringContainsString('unrecognized failed optional runtime step', $result->getErrorOutput());
+        self::assertStringContainsString('incorrect required flag', $result->getErrorOutput());
     }
 
     #[Test]
