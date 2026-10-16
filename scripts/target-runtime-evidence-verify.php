@@ -18,8 +18,36 @@ if(!preg_match('/^(?:[A-Za-z]:[\\\\\/]|\/)/',$inputPath)) $inputPath=$root.DIREC
 if(!file_exists($inputPath)){ fwrite(STDERR,"[Nexora Target Runtime Evidence] Input not found.\n"); exit(2); }
 
 $tempDir=null;$sourceDir=null;$bundleSha=null;
+
+/**
+ * Operator directories are untrusted too. Do not follow symlinks to evidence
+ * outside the submitted root (including a symlinked intermediate directory).
+ * The ZIP parser enforces this boundary before extraction.
+ */
+function nexoraTargetEvidenceSafeFile(string $sourceDir,string $relative): bool
+{
+    $root=realpath($sourceDir);
+    if($root===false||!is_dir($root)||$relative===''||str_starts_with($relative,'/')
+        ||preg_match('/^[A-Za-z]:[\\\\\\/]/',$relative)===1){
+        return false;
+    }
+    $parts=explode('/',str_replace('\\\\','/',$relative));
+    $path=$root;
+    foreach($parts as $part){
+        if($part===''||$part==='.'||$part==='..') return false;
+        $path.=DIRECTORY_SEPARATOR.$part;
+        if(is_link($path)) return false;
+    }
+    $resolved=realpath($path);
+    if($resolved===false||!is_file($resolved)||!is_readable($resolved)) return false;
+    $normalize=static fn(string $value):string => PHP_OS_FAMILY==='Windows'
+        ? strtolower(str_replace('\\\\','/',$value)) : str_replace('\\\\','/',$value);
+    return str_starts_with($normalize($resolved),rtrim($normalize($root),'/').'/');
+}
+
 try{
     if(is_dir($inputPath)){
+        if(is_link($inputPath)) throw new RuntimeException('Evidence directory symlink rejected.');
         $sourceDir=rtrim($inputPath,'\\/');
     }else{
         if(!class_exists(ZipArchive::class)){ fwrite(STDERR,"[Nexora Target Runtime Evidence] ext-zip is required to inspect a bundle.\n"); exit(1); }
@@ -68,7 +96,11 @@ try{
         $zip->close();$sourceDir=$tempDir;
     }
 
-    foreach(['summary.json','environment.json'] as $required) if(!is_file($sourceDir.DIRECTORY_SEPARATOR.$required)) throw new RuntimeException("Evidence missing {$required}.");
+    foreach(['summary.json','environment.json'] as $required){
+        $candidate=$sourceDir.DIRECTORY_SEPARATOR.$required;
+        if(!file_exists($candidate)&&!is_link($candidate)) throw new RuntimeException("Evidence missing {$required}.");
+        if(!nexoraTargetEvidenceSafeFile($sourceDir,$required)) throw new RuntimeException("Evidence unsafe {$required}.");
+    }
     $summary=json_decode((string)file_get_contents($sourceDir.DIRECTORY_SEPARATOR.'summary.json'),true,512,JSON_THROW_ON_ERROR);
     $environment=json_decode((string)file_get_contents($sourceDir.DIRECTORY_SEPARATOR.'environment.json'),true,512,JSON_THROW_ON_ERROR);
     if(!is_array($summary)||!is_array($environment)) throw new RuntimeException('Evidence JSON payload is invalid.');
@@ -92,7 +124,7 @@ try{
         $seen[$id]=true;
         foreach(['stdout_log','stderr_log'] as $field){
             $relative=(string)($step[$field]??'');
-            if($relative===''||str_contains($relative,'..')||!is_file($sourceDir.DIRECTORY_SEPARATOR.str_replace('/',DIRECTORY_SEPARATOR,$relative))) throw new RuntimeException("Evidence step [{$id}] missing {$field}.");
+            if(!nexoraTargetEvidenceSafeFile($sourceDir,$relative)) throw new RuntimeException("Evidence step [{$id}] missing or unsafe {$field}.");
         }
     }
     $status=(string)($summary['status']??'');

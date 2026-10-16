@@ -1,0 +1,154 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Unit;
+
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Process\Process;
+
+require_once __DIR__.'/../../scripts/lib/source-attestation.php';
+
+final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
+{
+    private string $fixtureRoot;
+    private string $bundleDir;
+    private string $externalDir;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->fixtureRoot = sys_get_temp_dir().'/nexora-dir-proof-'.bin2hex(random_bytes(6));
+        $this->bundleDir = $this->fixtureRoot.'/bundle';
+        $this->externalDir = $this->fixtureRoot.'/external';
+        mkdir($this->bundleDir.'/steps', 0700, true);
+        mkdir($this->externalDir, 0700, true);
+        $root = dirname(__DIR__, 2);
+        $version = (require $root.'/config/nexora.php')['version'];
+        $attestation = \nexoraComputeSourceAttestation($root);
+
+        file_put_contents($this->bundleDir.'/summary.json', json_encode([
+            'platform_version' => $version, 'status' => 'blocked',
+            'steps' => [['id' => 'test', 'stdout_log' => 'steps/test.stdout.log', 'stderr_log' => 'steps/test.stderr.log']],
+        ], JSON_THROW_ON_ERROR));
+        file_put_contents($this->bundleDir.'/environment.json', json_encode([
+            'platform_version' => $version,
+            'source_tree_sha256' => $attestation['tree_sha256'],
+        ], JSON_THROW_ON_ERROR));
+        file_put_contents($this->bundleDir.'/steps/test.stdout.log', 'synthetic stdout only');
+        file_put_contents($this->bundleDir.'/steps/test.stderr.log', 'synthetic stderr only');
+    }
+
+    protected function tearDown(): void
+    {
+        if (isset($this->fixtureRoot) && is_dir($this->fixtureRoot)) {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($this->fixtureRoot, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($iterator as $entry) {
+                if ($entry->isDir() && ! $entry->isLink()) {
+                    @rmdir($entry->getPathname());
+                } else {
+                    @unlink($entry->getPathname());
+                }
+            }
+            @rmdir($this->fixtureRoot);
+        }
+        parent::tearDown();
+    }
+
+    private function verify(string $path, bool $requirePass = false): Process
+    {
+        $args = [PHP_BINARY, dirname(__DIR__, 2).'/scripts/target-runtime-evidence-verify.php', '--input='.$path];
+        if ($requirePass) {
+            $args[] = '--require-pass';
+        }
+        $process = new Process($args);
+        $process->setTimeout(30);
+        $process->run();
+        return $process;
+    }
+
+    #[Test]
+    public function symlinked_environment_json_outside_evidence_directory_is_rejected(): void
+    {
+        $this->requireSymlinks();
+        file_put_contents($this->externalDir.'/environment.json', file_get_contents($this->bundleDir.'/environment.json'));
+        unlink($this->bundleDir.'/environment.json');
+        self::assertTrue(symlink($this->externalDir.'/environment.json', $this->bundleDir.'/environment.json'));
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('unsafe environment.json', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function symlinked_step_log_outside_evidence_directory_is_rejected(): void
+    {
+        $this->requireSymlinks();
+        file_put_contents($this->externalDir.'/outside.log', 'synthetic external log');
+        unlink($this->bundleDir.'/steps/test.stdout.log');
+        self::assertTrue(symlink($this->externalDir.'/outside.log', $this->bundleDir.'/steps/test.stdout.log'));
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('unsafe stdout_log', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function symlinked_intermediate_steps_directory_is_rejected(): void
+    {
+        $this->requireSymlinks();
+        file_put_contents($this->externalDir.'/test.stdout.log', 'synthetic external log');
+        file_put_contents($this->externalDir.'/test.stderr.log', 'synthetic external error log');
+        unlink($this->bundleDir.'/steps/test.stdout.log');
+        unlink($this->bundleDir.'/steps/test.stderr.log');
+        rmdir($this->bundleDir.'/steps');
+        self::assertTrue(symlink($this->externalDir, $this->bundleDir.'/steps'));
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('unsafe stdout_log', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function symlinked_root_directory_is_rejected(): void
+    {
+        $this->requireSymlinks();
+        $alias = $this->fixtureRoot.'/alias';
+        self::assertTrue(symlink($this->bundleDir, $alias));
+        $result = $this->verify($alias);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('directory symlink rejected', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function path_traversal_in_step_log_is_rejected(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['steps'][0]['stdout_log'] = '../external/outside.log';
+        file_put_contents($this->externalDir.'/outside.log', 'synthetic external log');
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('unsafe stdout_log', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function legitimate_directory_evidence_keeps_structural_validation_behavior(): void
+    {
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(0, $result->getExitCode(), $result->getErrorOutput());
+        self::assertStringContainsString('PASS — blocked;', $result->getOutput());
+
+        $rejectedAsTarget = $this->verify($this->bundleDir, true);
+        self::assertSame(1, $rejectedAsTarget->getExitCode());
+        self::assertStringContainsString('not PASS', $rejectedAsTarget->getErrorOutput());
+    }
+
+    private function requireSymlinks(): void
+    {
+        if (! function_exists('symlink')) {
+            self::markTestSkipped('Symlink support is unavailable.');
+        }
+    }
+}
