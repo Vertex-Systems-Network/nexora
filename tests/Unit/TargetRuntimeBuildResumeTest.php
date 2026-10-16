@@ -355,6 +355,42 @@ final class TargetRuntimeBuildResumeTest extends TestCase
     }
 
     #[Test]
+    public function invalid_app_entry_css_masquerade_disables_build_reuse(): void
+    {
+        $manifest = json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        $manifest['resources/js/app.tsx']['file'] = 'assets/app-bbbbbbbb.css';
+        $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function invalid_css_entry_javascript_masquerade_disables_build_reuse(): void
+    {
+        $manifest = json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        $manifest['resources/css/app.css']['file'] = 'assets/app-aaaaaaaa.js';
+        $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function manifest_self_reference_disables_build_reuse(): void
+    {
+        $manifest = json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        $manifest['resources/js/extra.tsx'] = ['file' => 'manifest.json'];
+        $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function static_asset_manifest_self_reference_disables_build_reuse(): void
+    {
+        $manifest = json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        $manifest['resources/js/app.tsx']['assets'] = ['manifest.json'];
+        $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
     public function stale_source_bound_budget_report_must_not_be_reused(): void
     {
         $bad = ['platform_version' => '1.0', 'source_tree_sha256' => str_repeat('b', 64)];

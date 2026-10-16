@@ -162,6 +162,9 @@ function nexoraTargetResumeBuildDigest(string $root): ?string
             || !isset($manifest['resources/js/app.tsx'], $manifest['resources/css/app.css'])) {
             return null;
         }
+        if (!nexoraPerformanceBuildRequiredEntrypointsValid($manifest)) {
+            return null;
+        }
         // Validate referenced outputs as well as the overall tree digest.
         $referencedAssets = [];
         foreach ($manifest as $entry) {
@@ -188,7 +191,7 @@ function nexoraTargetResumeBuildDigest(string $root): ?string
                     || preg_match('~(^|/)\\.{1,2}(/|$)~', $relative) === 1) {
                     return null;
                 }
-                if (!nexoraPerformanceBuildSafeOutputName($relative)) {
+                if (!nexoraPerformanceBuildSafeManifestAsset($directory, $relative)) {
                     return null;
                 }
                 $target = $directory.'/'.$relative;

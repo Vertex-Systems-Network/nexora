@@ -22,6 +22,13 @@ function nexoraPerformanceBuildManifestErrors(string $root, array $manifest): ar
         return ['Vite manifest entries are missing or malformed.'];
     }
 
+    // Required Vite entrypoints must resolve to their actual executable and
+    // stylesheet asset types. A syntactically valid manifest referencing an
+    // unrelated file (including the manifest itself) is not a usable build.
+    if (!nexoraPerformanceBuildRequiredEntrypointsValid($manifest)) {
+        return ['Required Vite JavaScript/CSS entrypoints have invalid file types.'];
+    }
+
     foreach ($manifest as $key => $entry) {
         if (!is_string($key) || !is_array($entry)
             || !is_string($entry['file'] ?? null)) {
@@ -121,9 +128,31 @@ function nexoraPerformanceBuildSafeOutputName(string $relative, bool $isDirector
     ], true);
 }
 
+/**
+ * Distinct source entry types are essential: the app entry must load JS,
+ * and its top-level stylesheet entry must load CSS. Other imported Vite
+ * chunks retain the normal asset allowlist and may have any reviewed type.
+ *
+ * @param array<mixed> $manifest
+ */
+function nexoraPerformanceBuildRequiredEntrypointsValid(array $manifest): bool
+{
+    foreach ([
+        'resources/js/app.tsx' => ['js', 'mjs'],
+        'resources/css/app.css' => ['css'],
+    ] as $key => $extensions) {
+        $entry = $manifest[$key] ?? null;
+        if (!is_array($entry) || !is_string($entry['file'] ?? null)
+            || !in_array(strtolower((string)pathinfo($entry['file'], PATHINFO_EXTENSION)), $extensions, true)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function nexoraPerformanceBuildSafeManifestAsset(string $build, string $asset): bool
 {
-    if (!nexoraPerformanceBuildSafeOutputName($asset)
+    if ($asset === 'manifest.json' || !nexoraPerformanceBuildSafeOutputName($asset)
         || strlen($asset) > 512 || str_contains($asset, '\\')
         || str_contains($asset, "\0") || str_starts_with($asset, '/')
         || preg_match('/[\x00-\x1f\x7f]/', $asset) === 1) {

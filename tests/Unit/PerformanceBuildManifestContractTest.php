@@ -226,6 +226,47 @@ final class PerformanceBuildManifestContractTest extends TestCase
     }
 
     #[Test]
+    public function required_app_entry_must_reference_javascript(): void
+    {
+        $manifest = $this->manifest();
+        $manifest['resources/js/app.tsx']['file'] = 'assets/app-bbbbbbbb.css';
+        self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $manifest));
+    }
+
+    #[Test]
+    public function required_css_entry_must_reference_stylesheet(): void
+    {
+        $manifest = $this->manifest();
+        $manifest['resources/css/app.css']['file'] = 'assets/app-aaaaaaaa.js';
+        self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $manifest));
+    }
+
+    #[Test]
+    public function manifest_json_cannot_masquerade_as_an_application_asset(): void
+    {
+        $manifest = $this->manifest();
+        $manifest['resources/js/extra.tsx'] = ['file' => 'manifest.json'];
+        self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $manifest));
+    }
+
+    #[Test]
+    public function manifest_json_cannot_be_declared_as_a_static_asset(): void
+    {
+        $manifest = $this->manifest();
+        $manifest['resources/js/app.tsx']['assets'] = ['manifest.json'];
+        self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $manifest));
+    }
+
+    #[Test]
+    public function regular_css_and_javascript_entry_extensions_are_supported(): void
+    {
+        self::assertSame(true, \nexoraPerformanceBuildRequiredEntrypointsValid($this->manifest()));
+        $manifest = $this->manifest();
+        $manifest['resources/js/app.tsx']['file'] = 'assets/app-aaaaaaaa.mjs';
+        self::assertSame(true, \nexoraPerformanceBuildRequiredEntrypointsValid($manifest));
+    }
+
+    #[Test]
     public function malformed_manifest_entries_are_rejected(): void
     {
         $manifest=$this->manifest();
