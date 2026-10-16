@@ -27,6 +27,27 @@ function nexoraTargetRedactOutput(string $text): string
         '~\b(Bearer|Basic)\s+[^\s,;]+~i', '$1 [REDACTED]', $text
     );
 
+    // Laravel's APP_PREVIOUS_KEYS contains an entire comma-separated list of
+    // previously valid encryption keys. A generic key=value matcher normally
+    // stops at a comma and would leave later keys visible in step logs.
+    // Also cover JSON arrays exported by config diagnostics. This runs before
+    // the general assignment matcher and keeps quoted JSON structure valid.
+    $text = (string) preg_replace_callback(
+        '~(?P<key>["\']?APP_PREVIOUS_KEYS["\']?)(?P<sep>\s*[:=]\s*)(?P<value>\[[^\]\r\n]*\]|"[^"\r\n]*"|\'[^\'\r\n]*\'|[^\s;\r\n}]+)~i',
+        static function (array $match): string {
+            $value = $match['value'];
+            // Preserve our plain-text mask across repeated scrub passes.
+            if ($value === '[REDACTED]') return $match['key'].$match['sep'].$value;
+            if (str_starts_with($value, '[')) {
+                // Array-shaped config output must remain parseable JSON.
+                return $match['key'].$match['sep'].'["[REDACTED]"]';
+            }
+            $quote = ($value[0] === '"' || $value[0] === "'") ? $value[0] : '';
+            return $match['key'].$match['sep'].$quote.'[REDACTED]'.$quote;
+        },
+        $text
+    );
+
     // Environment/JSON/YAML-style assignments, including APP_KEY=base64:...
     // and provider-specific credentials such as AWS_SECRET_ACCESS_KEY.
     $text = (string) preg_replace_callback(
@@ -81,14 +102,14 @@ function nexoraTargetRedactCommandParts(array $parts): array
             continue;
         }
         if (preg_match(
-            '~^(--?(?:app[_-]?key|api[_-]?key|token|password|passwd|secret|credential|authorization|auth|client[_-]?secret))=.+$~i',
+            '~^(--?(?:app[_-]?(?:key|previous[_-]?keys)|api[_-]?key|private[_-]?key|token|password|passwd|secret|credential|authorization|auth|client[_-]?secret))=.+$~i',
             $value, $credential
         ) === 1) {
             $sanitized[] = $credential[1].'=[REDACTED]';
             continue;
         }
         $redactNext = preg_match(
-            '~^--?(?:app[_-]?key|api[_-]?key|token|password|passwd|secret|credential|authorization|auth|client[_-]?secret)$~i',
+            '~^--?(?:app[_-]?(?:key|previous[_-]?keys)|api[_-]?key|private[_-]?key|token|password|passwd|secret|credential|authorization|auth|client[_-]?secret)$~i',
             $value
         ) === 1;
         $sanitized[] = nexoraTargetRedactOutput($value);
