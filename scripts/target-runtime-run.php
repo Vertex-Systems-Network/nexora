@@ -9,6 +9,7 @@ require_once $root.'/scripts/lib/target-resume-contracts.php';
 require_once $root.'/scripts/lib/target-composer.php';
 require_once $root.'/scripts/lib/target-runtime-toolchain-versions.php';
 require_once $root.'/scripts/lib/target-process-capture.php';
+require_once $root.'/scripts/lib/target-runtime-redaction.php';
 require_once $root.'/scripts/lib/target-runtime-resume-input.php';
 
 $platform=require $root.'/config/nexora.php';
@@ -53,14 +54,7 @@ foreach([$base,$runDir,$logDir] as $dir){
 }
 
 $env=NexoraBootstrapProcessEnvironment::build($root,$_ENV);
-$redact=static function(string $text):string{
-    foreach([
-        '/((?:password|passwd|secret|token|authorization|cookie|api[_-]?key)\s*[:=]\s*)([^\s\r\n]+)/i',
-        '/(Bearer\s+)[A-Za-z0-9._~+\/-]+/i',
-        '/([?&](?:token|secret|key|password)=)[^&\s]+/i',
-    ] as $pattern) $text=(string)preg_replace($pattern,'$1[REDACTED]',$text);
-    return $text;
-};
+$redact=static fn(string $text):string => nexoraTargetRedactOutput($text);
 
 $commandExists=static function(string $command) use($root,$env):bool{
     $cmd=PHP_OS_FAMILY==='Windows' ? 'where '.escapeshellarg($command) : 'command -v '.escapeshellarg($command);
@@ -94,12 +88,13 @@ $run=static function(string $id,string $label,array $parts,string $group,bool $r
     if($blocked && !$keepGoing) return false;
     if($resumeFrom!==null && isset($resumePassed[$id],$resumeSkippable[$id])){
         $message="Resumed from {$resumeFrom}; exact source/lock/dependency fingerprints match prior PASS.";
-        $record(['id'=>$id,'group'=>$group,'label'=>$label,'required'=>$required,'status'=>'pass','exit_code'=>0,'duration_seconds'=>0.0,'command'=>array_values(array_map('strval',$parts)),'resumed'=>true,'stdout'=>$message."\n",'stderr'=>'','stdout_tail'=>$message,'stderr_tail'=>'']);
+        $record(['id'=>$id,'group'=>$group,'label'=>$label,'required'=>$required,'status'=>'pass','exit_code'=>0,'duration_seconds'=>0.0,'command'=>nexoraTargetRedactCommandParts($parts),'resumed'=>true,'stdout'=>$message."\n",'stderr'=>'','stdout_tail'=>$message,'stderr_tail'=>'']);
         fwrite(STDOUT,"\n[Nexora Target Runtime] {$label}\n[RESUME] {$message}\n");
         return true;
     }
     $cmd=implode(' ',array_map(static fn($v)=>escapeshellarg((string)$v),$parts));
-    fwrite(STDOUT,"\n[Nexora Target Runtime] {$label}\n> {$cmd}\n");
+    $safeCmd=implode(' ',array_map(static fn($v)=>escapeshellarg((string)$v),nexoraTargetRedactCommandParts($parts)));
+    fwrite(STDOUT,"\n[Nexora Target Runtime] {$label}\n> {$safeCmd}\n");
     $started=microtime(true);
     // argv execution + concurrent bounded streams avoids Unix pipe deadlocks
     // and Windows cmd.exe quoting/injection ambiguity.
@@ -111,7 +106,7 @@ $run=static function(string $id,string $label,array $parts,string $group,bool $r
     $record([
         'id'=>$id,'group'=>$group,'label'=>$label,'required'=>$required,
         'status'=>$exit===0?'pass':'fail','exit_code'=>$exit,
-        'duration_seconds'=>round(microtime(true)-$started,3),'command'=>array_values(array_map('strval',$parts)),
+        'duration_seconds'=>round(microtime(true)-$started,3),'command'=>nexoraTargetRedactCommandParts($parts),
         'stdout'=>$stdout,'stderr'=>$stderr,
         'stdout_tail'=>substr($stdout,max(0,strlen($stdout)-4000)),
         'stderr_tail'=>substr($stderr,max(0,strlen($stderr)-4000)),
