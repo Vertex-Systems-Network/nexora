@@ -74,9 +74,44 @@ function nexoraTargetCaptureCommand(
                 }
             }
         }
+        // A child can close BOTH output streams and continue running. The
+        // pipes reaching EOF does not prove process completion. Keep the same
+        // deadline enforced until the child exits, rather than allowing
+        // proc_close() to block past the configured timeout.
+        if ($error === null) {
+            do {
+                $finalStatus = proc_get_status($proc);
+                if (!($finalStatus['running'] ?? false)) {
+                    break;
+                }
+                if (microtime(true) > $deadline) {
+                    $error = 'Target subprocess timed out.';
+                    break;
+                }
+                usleep(20000);
+            } while (true);
+        }
     } finally {
         if ($error !== null) {
+            // A timed-out child may ignore SIGTERM. Do not let proc_close()
+            // wait indefinitely after the deadline: attempt graceful stop,
+            // then force-kill the exact child PID on POSIX. Windows process
+            // termination is already forceful in PHP's proc_terminate().
             @proc_terminate($proc);
+            $graceDeadline = microtime(true) + 0.3;
+            do {
+                $termination = proc_get_status($proc);
+                if (!($termination['running'] ?? false)) {
+                    break;
+                }
+                if (microtime(true) >= $graceDeadline) {
+                    if (PHP_OS_FAMILY !== 'Windows') {
+                        @proc_terminate($proc, 9);
+                    }
+                    break;
+                }
+                usleep(20000);
+            } while (true);
         }
         foreach ($open as $pipe) {
             @fclose($pipe);

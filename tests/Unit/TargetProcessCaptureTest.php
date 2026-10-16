@@ -54,6 +54,42 @@ CODE;
     }
 
     #[Test]
+    public function closed_output_pipes_must_not_bypass_timeout(): void
+    {
+        $started = microtime(true);
+        $result = $this->capture([PHP_BINARY, '-r',
+            'fclose(STDOUT); fclose(STDERR); sleep(4);'], 1024, 1);
+        self::assertNotSame(0, $result['exit_code']);
+        self::assertStringContainsString('timed out', $result['stderr']);
+        self::assertLessThan(3.0, microtime(true) - $started,
+            'Child closing output streams must not circumvent the deadline.');
+    }
+
+    #[Test]
+    public function timeout_force_stops_a_child_that_ignores_sigterm(): void
+    {
+        if (PHP_OS_FAMILY === 'Windows' || !extension_loaded('pcntl')) {
+            self::markTestSkipped('POSIX signal regression requires pcntl.');
+        }
+        $started = microtime(true);
+        $code = 'pcntl_async_signals(true); pcntl_signal(SIGTERM, SIG_IGN); '
+            .'fclose(STDOUT); fclose(STDERR); sleep(5);';
+        $result = $this->capture([PHP_BINARY, '-r', $code], 1024, 1);
+        self::assertNotSame(0, $result['exit_code']);
+        self::assertStringContainsString('timed out', $result['stderr']);
+        self::assertLessThan(3.0, microtime(true) - $started,
+            'SIGTERM-resistant subprocess must not block finalization.');
+    }
+
+    #[Test]
+    public function child_exit_code_is_retained_after_both_pipes_close(): void
+    {
+        $result = $this->capture([PHP_BINARY, '-r',
+            'fclose(STDOUT); fclose(STDERR); exit(37);'], 1024, 2);
+        self::assertSame(37, $result['exit_code']);
+    }
+
+    #[Test]
     public function stalled_process_is_terminated(): void
     {
         $result = $this->capture([PHP_BINARY, '-r', 'sleep(3);'], 1024, 1);
