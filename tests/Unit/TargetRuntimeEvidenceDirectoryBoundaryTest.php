@@ -36,6 +36,11 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
             'platform_version' => $version,
             'source_tree_sha256' => $attestation['tree_sha256'],
         ], JSON_THROW_ON_ERROR));
+        // The real target-runtime producer writes the exact same environment
+        // fingerprint to environment.json and to summary.json.environment.
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['environment'] = json_decode(file_get_contents($this->bundleDir.'/environment.json'), true, 512, JSON_THROW_ON_ERROR);
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
         file_put_contents($this->bundleDir.'/steps/test.stdout.log', 'synthetic stdout only');
         file_put_contents($this->bundleDir.'/steps/test.stderr.log', 'synthetic stderr only');
     }
@@ -318,6 +323,30 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
         $result = $this->verify($this->bundleDir, true);
         self::assertSame(1, $result->getExitCode());
         self::assertStringContainsString('unrecognized failed optional runtime step', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function conflicting_embedded_environment_is_rejected(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['environment']['source_tree_sha256'] = str_repeat('f', 64);
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('environment mismatch', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function missing_embedded_environment_is_rejected(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        unset($summary['environment']);
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('environment mismatch', $result->getErrorOutput());
     }
 
     private function requireSymlinks(): void

@@ -123,6 +123,17 @@ try{
     $summary=json_decode((string)file_get_contents($sourceDir.DIRECTORY_SEPARATOR.'summary.json'),true,512,JSON_THROW_ON_ERROR);
     $environment=json_decode((string)file_get_contents($sourceDir.DIRECTORY_SEPARATOR.'environment.json'),true,512,JSON_THROW_ON_ERROR);
     if(!is_array($summary)||!is_array($environment)) throw new RuntimeException('Evidence JSON payload is invalid.');
+    // The target-runtime producer writes the same environment to both files.
+    // Reject mixed-run evidence instead of trusting only standalone JSON.
+    $summaryEnvironment=$summary['environment']??null;
+    if(!is_array($summaryEnvironment)||count($summaryEnvironment)!==count($environment)){
+        throw new RuntimeException('Evidence summary/environment mismatch.');
+    }
+    foreach($environment as $key=>$value){
+        if(!array_key_exists($key,$summaryEnvironment)||$summaryEnvironment[$key]!==$value){
+            throw new RuntimeException('Evidence summary/environment mismatch.');
+        }
+    }
     if(($summary['platform_version']??null)!==$version||($environment['platform_version']??null)!==$version) throw new RuntimeException('Evidence platform version does not match current source.');
     $currentSource=nexoraComputeSourceAttestation($root);
     if(($environment['source_tree_sha256']??null)!==$currentSource['tree_sha256']) throw new RuntimeException('Evidence source-tree digest does not match current source.');
