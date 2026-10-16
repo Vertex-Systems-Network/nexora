@@ -49,6 +49,63 @@ function nexoraTargetReusableStepIds(array $summary, array $allowlist, string $r
 }
 
 /**
+ * A blocked run may contain genuinely successful steps, but they are only
+ * resumable if every earlier mandatory producer step ran successfully in the
+ * correct order. A detached PASS step in a partial or reordered receipt is
+ * not enough to skip dependency installation, typechecking or a Vite build.
+ *
+ * Receipt/log integrity and environment drift are checked separately by the
+ * runner. This function establishes *execution lineage*, not authenticity.
+ *
+ * @param array<string,mixed> $summary
+ * @param array<string,bool> $allowlist
+ * @return array<string,bool>
+ */
+function nexoraTargetResumeLineageAllowlist(array $summary, array $allowlist): array
+{
+    $environment = $summary['environment'] ?? null;
+    if (($summary['schema'] ?? null) !== 2 || !is_array($environment)
+        || !is_bool($environment['install_dependencies_requested'] ?? null)
+        || !is_array($summary['steps'] ?? null) || !array_is_list($summary['steps'])) {
+        return [];
+    }
+    // This sequence must match the mandatory phases in target-runtime-run.php.
+    // Prerequisite failure receipts have additional IDs and deliberately break
+    // the PASS prefix; nothing after that failure is eligible for fast reuse.
+    $mandatory = [
+        'source-preflight', 'target-bootstrap', 'target-runtime-contract',
+        'inertia-contract', 'dependency-lock-review',
+        'dependency-contract-strict', 'dependency-runtime',
+    ];
+    if ($environment['install_dependencies_requested']) {
+        array_push($mandatory, 'composer-install', 'npm-ci');
+    }
+    array_push($mandatory, 'frontend-typecheck', 'frontend-tests',
+        'frontend-build', 'frontend-build-budget');
+
+    $proved = [];
+    $next = 0;
+    foreach ($summary['steps'] as $step) {
+        $expected = $mandatory[$next] ?? null;
+        if ($expected === null) break;
+        if (!is_array($step) || ($step['id'] ?? null) !== $expected
+            || ($step['required'] ?? null) !== true
+            || ($step['status'] ?? null) !== 'pass'
+            || ($step['exit_code'] ?? null) !== 0) {
+            break;
+        }
+        $proved[$expected] = true;
+        ++$next;
+    }
+    foreach ($allowlist as $id => $enabled) {
+        if ($enabled !== true || !isset($proved[$id])) {
+            unset($allowlist[$id]);
+        }
+    }
+    return $allowlist;
+}
+
+/**
  * Compare the execution environment before reusing any previous PASS step.
  * Missing keys must never behave like matching null-valued fingerprints.
  *

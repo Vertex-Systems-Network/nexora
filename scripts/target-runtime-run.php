@@ -182,6 +182,9 @@ if(is_array($resumeSummary)){
     $priorArtifacts=is_array($resumeSummary['output_artifacts']??null)?$resumeSummary['output_artifacts']:[];
     $currentArtifacts=nexoraTargetResumeOutputArtifacts($root,$environment);
     $safeSkippable=nexoraTargetResumeSafeStepAllowlist($environment,$resumeSkippable,$priorArtifacts,$currentArtifacts);
+    // Successful isolated step receipts are not sufficient on their own:
+    // prove the complete mandatory predecessor sequence before fast reuse.
+    $safeSkippable=nexoraTargetResumeLineageAllowlist($resumeSummary,$safeSkippable);
     $resumePassed=nexoraTargetReusableStepIds($resumeSummary,$safeSkippable,$resumeRunId);
 }
 file_put_contents($runDir.'/environment.json',json_encode($environment,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR));
