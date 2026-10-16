@@ -145,6 +145,73 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
         self::assertStringContainsString('not PASS', $rejectedAsTarget->getErrorOutput());
     }
 
+    #[Test]
+    public function oversized_directory_summary_is_rejected_before_json_decode(): void
+    {
+        $file = fopen($this->bundleDir.'/summary.json', 'c+b');
+        self::assertNotFalse($file);
+        self::assertTrue(ftruncate($file, 16 * 1024 * 1024 + 1));
+        fclose($file);
+
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('unsafe summary.json', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function oversized_directory_step_log_is_rejected(): void
+    {
+        $file = fopen($this->bundleDir.'/steps/test.stdout.log', 'c+b');
+        self::assertNotFalse($file);
+        self::assertTrue(ftruncate($file, 16 * 1024 * 1024 + 1));
+        fclose($file);
+
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('unsafe stdout_log', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function aggregate_directory_log_budget_is_enforced(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['steps'] = [];
+        for ($index = 0; $index < 17; $index++) {
+            $name = "test-{$index}.stdout.log";
+            $handle = fopen($this->bundleDir.'/steps/'.$name, 'c+b');
+            self::assertNotFalse($handle);
+            self::assertTrue(ftruncate($handle, 16 * 1024 * 1024));
+            fclose($handle);
+            $summary['steps'][] = [
+                'id' => 'step-'.$index,
+                'stdout_log' => 'steps/'.$name,
+                'stderr_log' => 'steps/test.stderr.log',
+            ];
+        }
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('directory total-size limit exceeded', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function excessive_directory_step_count_is_rejected(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['steps'] = [];
+        for ($index = 0; $index < 512; $index++) {
+            $summary['steps'][] = [
+                'id' => 'step-'.$index,
+                'stdout_log' => 'steps/test.stdout.log',
+                'stderr_log' => 'steps/test.stderr.log',
+            ];
+        }
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+        $result = $this->verify($this->bundleDir);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('too many runtime steps', $result->getErrorOutput());
+    }
+
     private function requireSymlinks(): void
     {
         if (! function_exists('symlink')) {

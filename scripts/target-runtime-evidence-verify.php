@@ -40,6 +40,9 @@ function nexoraTargetEvidenceSafeFile(string $sourceDir,string $relative): bool
     }
     $resolved=realpath($path);
     if($resolved===false||!is_file($resolved)||!is_readable($resolved)) return false;
+    // Directory-mode evidence needs the same expanded per-entry bound as ZIP.
+    $bytes=@filesize($resolved);
+    if(!is_int($bytes)||$bytes<0||$bytes>16*1024*1024) return false;
     $normalize=static fn(string $value):string => PHP_OS_FAMILY==='Windows'
         ? strtolower(str_replace('\\\\','/',$value)) : str_replace('\\\\','/',$value);
     return str_starts_with($normalize($resolved),rtrim($normalize($root),'/').'/');
@@ -96,10 +99,26 @@ try{
         $zip->close();$sourceDir=$tempDir;
     }
 
+    // Count bounded referenced data, not every unrelated file on the target.
+    // ZIP inputs were already checked against these limits before extraction.
+    $directoryInput=is_dir($inputPath) && $tempDir===null;
+    $directoryReferencedBytes=0;
+    $countDirectoryBytes=static function(string $relative) use($sourceDir,&$directoryReferencedBytes,$directoryInput):void {
+        if(!$directoryInput) return;
+        $path=$sourceDir.DIRECTORY_SEPARATOR.str_replace('/',DIRECTORY_SEPARATOR,$relative);
+        $size=@filesize($path);
+        if(!is_int($size)||$size<0||$size>16*1024*1024
+            ||$directoryReferencedBytes>256*1024*1024-$size){
+            throw new RuntimeException('Evidence directory total-size limit exceeded.');
+        }
+        $directoryReferencedBytes+=$size;
+    };
+
     foreach(['summary.json','environment.json'] as $required){
         $candidate=$sourceDir.DIRECTORY_SEPARATOR.$required;
         if(!file_exists($candidate)&&!is_link($candidate)) throw new RuntimeException("Evidence missing {$required}.");
         if(!nexoraTargetEvidenceSafeFile($sourceDir,$required)) throw new RuntimeException("Evidence unsafe {$required}.");
+        $countDirectoryBytes($required);
     }
     $summary=json_decode((string)file_get_contents($sourceDir.DIRECTORY_SEPARATOR.'summary.json'),true,512,JSON_THROW_ON_ERROR);
     $environment=json_decode((string)file_get_contents($sourceDir.DIRECTORY_SEPARATOR.'environment.json'),true,512,JSON_THROW_ON_ERROR);
@@ -116,6 +135,7 @@ try{
     }
     $steps=(array)($summary['steps']??[]);
     if($steps===[]) throw new RuntimeException('Evidence contains no runtime steps.');
+    if(count($steps)>511) throw new RuntimeException('Evidence contains too many runtime steps.');
     $seen=[];
     foreach($steps as $step){
         $id=(string)($step['id']??'');
@@ -125,6 +145,7 @@ try{
         foreach(['stdout_log','stderr_log'] as $field){
             $relative=(string)($step[$field]??'');
             if(!nexoraTargetEvidenceSafeFile($sourceDir,$relative)) throw new RuntimeException("Evidence step [{$id}] missing or unsafe {$field}.");
+            $countDirectoryBytes($relative);
         }
     }
     $status=(string)($summary['status']??'');
