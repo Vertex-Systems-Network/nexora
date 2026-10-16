@@ -166,7 +166,21 @@ function nexoraTargetResumeBuildDigest(string $root): ?string
             if (!is_array($entry) || !is_string($entry['file'] ?? null)) {
                 return null;
             }
-            foreach (array_merge([$entry['file']], (array) ($entry['css'] ?? [])) as $relative) {
+            // Vite emits list-valued css/assets and imports/dynamicImports.
+            // Reject scalar or associative substitutions rather than letting a
+            // malformed manifest silently omit lazy chunks or static media.
+            $assets = [$entry['file']];
+            foreach (['css', 'assets'] as $field) {
+                if (!array_key_exists($field, $entry)) continue;
+                if (!is_array($entry[$field]) || !array_is_list($entry[$field])) {
+                    return null;
+                }
+                foreach ($entry[$field] as $asset) {
+                    if (!is_string($asset)) return null;
+                    $assets[] = $asset;
+                }
+            }
+            foreach ($assets as $relative) {
                 if (!is_string($relative) || $relative === '' || str_contains($relative, "\0")
                     || str_contains($relative, '\\') || str_starts_with($relative, '/')
                     || preg_match('~(^|/)\\.{1,2}(/|$)~', $relative) === 1) {
@@ -178,9 +192,15 @@ function nexoraTargetResumeBuildDigest(string $root): ?string
                 }
                 $referencedAssets[$relative] = true;
             }
-            foreach ((array) ($entry['imports'] ?? []) as $import) {
-                if (!is_string($import) || !array_key_exists($import, $manifest)) {
+            foreach (['imports', 'dynamicImports'] as $field) {
+                if (!array_key_exists($field, $entry)) continue;
+                if (!is_array($entry[$field]) || !array_is_list($entry[$field])) {
                     return null;
+                }
+                foreach ($entry[$field] as $import) {
+                    if (!is_string($import) || !array_key_exists($import, $manifest)) {
+                        return null;
+                    }
                 }
             }
         }

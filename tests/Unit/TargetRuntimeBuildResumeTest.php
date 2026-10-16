@@ -270,6 +270,60 @@ final class TargetRuntimeBuildResumeTest extends TestCase
     }
 
     #[Test]
+    public function valid_dynamic_imports_and_static_assets_remain_resumable(): void
+    {
+        $manifest = json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        $manifest['resources/js/app.tsx']['dynamicImports'] = ['resources/js/lazy.tsx'];
+        $manifest['resources/js/app.tsx']['assets'] = ['assets/logo-cccccccc.svg'];
+        $manifest['resources/js/lazy.tsx'] = ['file' => 'assets/lazy-dddddddd.js'];
+        $this->put('public/build/assets/lazy-dddddddd.js', 'export default 1;');
+        $this->put('public/build/assets/logo-cccccccc.svg', '<svg xmlns="http://www.w3.org/2000/svg"/>');
+        $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+        self::assertMatchesRegularExpression('/^[a-f0-9]{64}$/', \nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function missing_dynamic_import_manifest_key_fails_closed(): void
+    {
+        $manifest = json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        $manifest['resources/js/app.tsx']['dynamicImports'] = ['resources/js/removed.tsx'];
+        $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function missing_lazy_chunk_referenced_by_manifest_fails_closed(): void
+    {
+        $manifest = json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        $manifest['resources/js/app.tsx']['dynamicImports'] = ['resources/js/lazy.tsx'];
+        $manifest['resources/js/lazy.tsx'] = ['file' => 'assets/lazy-dddddddd.js'];
+        $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function missing_static_asset_referenced_by_manifest_fails_closed(): void
+    {
+        $manifest = json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        $manifest['resources/js/app.tsx']['assets'] = ['assets/logo-cccccccc.svg'];
+        $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function malformed_import_and_asset_lists_are_not_resumable(): void
+    {
+        foreach (['imports', 'dynamicImports', 'css', 'assets'] as $field) {
+            $manifest = json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+            unset($manifest['resources/js/app.tsx']['imports'], $manifest['resources/js/app.tsx']['dynamicImports'],
+                  $manifest['resources/js/app.tsx']['css'], $manifest['resources/js/app.tsx']['assets']);
+            $manifest['resources/js/app.tsx'][$field] = 'assets/app-aaaaaaaa.js';
+            $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+            self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+        }
+    }
+
+    #[Test]
     public function stale_source_bound_budget_report_must_not_be_reused(): void
     {
         $bad = ['platform_version' => '1.0', 'source_tree_sha256' => str_repeat('b', 64)];
