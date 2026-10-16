@@ -158,6 +158,74 @@ final class PerformanceBuildManifestContractTest extends TestCase
     }
 
     #[Test]
+    public function secret_dotenv_in_unreferenced_build_file_is_rejected(): void
+    {
+        file_put_contents($this->root.'/public/build/.env', 'FAKE_TEST_VALUE=not-a-secret');
+        self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $this->manifest()));
+    }
+
+    #[Test]
+    public function dotfile_nested_inside_assets_is_rejected(): void
+    {
+        file_put_contents($this->root.'/public/build/assets/.hidden', 'fixture');
+        self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $this->manifest()));
+    }
+
+    #[Test]
+    public function hidden_directory_is_rejected_even_when_empty(): void
+    {
+        mkdir($this->root.'/public/build/.git', 0700, true);
+        self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $this->manifest()));
+    }
+
+    #[Test]
+    public function unreferenced_server_script_is_rejected(): void
+    {
+        file_put_contents($this->root.'/public/build/assets/debug.php', '<?php echo 1;');
+        self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $this->manifest()));
+    }
+
+    #[Test]
+    public function credential_file_and_database_dump_are_not_public_build_assets(): void
+    {
+        foreach (['private.pem', 'records.sqlite', 'backup.sql', 'config.json'] as $file) {
+            $path=$this->root.'/public/build/assets/'.$file;
+            file_put_contents($path, 'synthetic test fixture');
+            self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $this->manifest()));
+            unlink($path);
+        }
+    }
+
+    #[Test]
+    public function manifest_cannot_reference_credentials_or_json_configs(): void
+    {
+        foreach (['assets/config.json', 'assets/debug.php', 'assets/secrets.pem'] as $asset) {
+            $path=$this->root.'/public/build/'.$asset;
+            file_put_contents($path, 'fixture');
+            $manifest=$this->manifest();
+            $manifest['resources/js/app.tsx']['assets']=[$asset];
+            self::assertNotSame([], \nexoraPerformanceBuildManifestErrors($this->root, $manifest));
+            unlink($path);
+        }
+    }
+
+    #[Test]
+    public function manifest_json_is_only_allowed_as_root_manifest_file(): void
+    {
+        self::assertSame(true, \nexoraPerformanceBuildSafeOutputName('manifest.json'));
+        self::assertSame(false, \nexoraPerformanceBuildSafeOutputName('assets/manifest.json'));
+        self::assertSame(false, \nexoraPerformanceBuildSafeOutputName('assets/.private/app.js'));
+    }
+
+    #[Test]
+    public function supported_media_fonts_and_wasm_remain_allowed(): void
+    {
+        foreach (['assets/logo.svg', 'assets/font.woff2', 'assets/player.wasm', 'assets/icon.webp'] as $asset) {
+            self::assertSame(true, \nexoraPerformanceBuildSafeOutputName($asset));
+        }
+    }
+
+    #[Test]
     public function malformed_manifest_entries_are_rejected(): void
     {
         $manifest=$this->manifest();

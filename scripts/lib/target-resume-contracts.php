@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__.'/performance-build-manifest-contracts.php';
+
 /**
  * Only completed, required, zero-exit steps from the exact prior run may
  * skip expensive dependency/build work. A malformed, conflicting or duplicated
@@ -186,6 +188,9 @@ function nexoraTargetResumeBuildDigest(string $root): ?string
                     || preg_match('~(^|/)\\.{1,2}(/|$)~', $relative) === 1) {
                     return null;
                 }
+                if (!nexoraPerformanceBuildSafeOutputName($relative)) {
+                    return null;
+                }
                 $target = $directory.'/'.$relative;
                 if (!is_file($target) || is_link($target)) {
                     return null;
@@ -215,10 +220,16 @@ function nexoraTargetResumeBuildDigest(string $root): ?string
             if ($file->isLink()) {
                 return null;
             }
-            if (!$file->isFile()) {
+            $relative = str_replace('\\', '/', substr($file->getPathname(), strlen($directory) + 1));
+            if (!nexoraPerformanceBuildSafeOutputName($relative, $file->isDir())) {
+                return null;
+            }
+            if ($file->isDir()) {
                 continue;
             }
-            $relative = str_replace('\\', '/', substr($file->getPathname(), strlen($directory) + 1));
+            if (!$file->isFile()) {
+                return null;
+            }
             $bytes = $file->getSize();
             if (!is_int($bytes) || $bytes < 0 || $totalBytes > (512 * 1024 * 1024) - $bytes
                 || count($files) >= 10000 || !is_readable($file->getPathname())) {

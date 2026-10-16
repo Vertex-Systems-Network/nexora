@@ -68,6 +68,10 @@ function nexoraPerformanceBuildManifestErrors(string $root, array $manifest): ar
         );
         foreach ($iterator as $node) {
             if ($node->isLink()) return ['Symlink in generated Vite build tree.'];
+            $relative = str_replace('\\', '/', substr($node->getPathname(), strlen($build) + 1));
+            if (!nexoraPerformanceBuildSafeOutputName($relative, $node->isDir())) {
+                return ['Unexpected or sensitive file in generated Vite build.'];
+            }
             if ($node->isDir()) continue;
             if (!$node->isFile() || !$node->isReadable()) {
                 return ['Unsafe generated Vite build file.'];
@@ -85,9 +89,42 @@ function nexoraPerformanceBuildManifestErrors(string $root, array $manifest): ar
     return [];
 }
 
+/**
+ * Keep the web-exposed build tree limited to generated asset classes.
+ * Credentials, hidden files, PHP, database dumps, source maps, JSON configs
+ * and other arbitrary deploy artifacts never belong in public/build.
+ *
+ * This is an output-extension policy, NOT content-based malware detection.
+ */
+function nexoraPerformanceBuildSafeOutputName(string $relative, bool $isDirectory = false): bool
+{
+    if ($relative === 'manifest.json') return true;
+    if ($relative === '' || strlen($relative) > 1024 || str_contains($relative, "\0")
+        || str_contains($relative, '\\') || str_starts_with($relative, '/')
+        || preg_match('/[\x00-\x1f\x7f]/', $relative) === 1) {
+        return false;
+    }
+    foreach (explode('/', $relative) as $component) {
+        if ($component === '' || $component === '.' || $component === '..'
+            || str_starts_with($component, '.')) {
+            return false;
+        }
+    }
+    $extension = strtolower((string) pathinfo($relative, PATHINFO_EXTENSION));
+    return $isDirectory || in_array($extension, [
+        'js', 'mjs', 'css',
+        'png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'svg', 'ico', 'cur',
+        'woff', 'woff2', 'ttf', 'otf', 'eot',
+        'wasm', 'webmanifest',
+        'mp3', 'mp4', 'webm', 'ogg', 'wav', 'aac', 'flac',
+        'pdf',
+    ], true);
+}
+
 function nexoraPerformanceBuildSafeManifestAsset(string $build, string $asset): bool
 {
-    if ($asset === '' || strlen($asset) > 512 || str_contains($asset, '\\')
+    if (!nexoraPerformanceBuildSafeOutputName($asset)
+        || strlen($asset) > 512 || str_contains($asset, '\\')
         || str_contains($asset, "\0") || str_starts_with($asset, '/')
         || preg_match('/[\x00-\x1f\x7f]/', $asset) === 1) {
         return false;

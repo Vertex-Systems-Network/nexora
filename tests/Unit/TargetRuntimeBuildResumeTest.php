@@ -324,6 +324,37 @@ final class TargetRuntimeBuildResumeTest extends TestCase
     }
 
     #[Test]
+    public function secret_dotenv_file_disables_reuse_even_when_manifest_is_intact(): void
+    {
+        $this->put('public/build/.env', 'FAKE_TEST_VALUE=not-a-secret');
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function unreferenced_php_file_disables_build_reuse(): void
+    {
+        $this->put('public/build/assets/debug.php', '<?php echo 1;');
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function manifest_reference_to_json_configuration_disables_reuse(): void
+    {
+        $manifest=json_decode((string)file_get_contents($this->root.'/public/build/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        $manifest['resources/js/app.tsx']['assets']=['assets/config.json'];
+        $this->put('public/build/assets/config.json', '{"token":"synthetic"}');
+        $this->put('public/build/manifest.json', json_encode($manifest, JSON_THROW_ON_ERROR));
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function regular_generated_font_remains_resumable(): void
+    {
+        $this->put('public/build/assets/site.woff2', 'synthetic-font');
+        self::assertMatchesRegularExpression('/^[a-f0-9]{64}$/', \nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
     public function stale_source_bound_budget_report_must_not_be_reused(): void
     {
         $bad = ['platform_version' => '1.0', 'source_tree_sha256' => str_repeat('b', 64)];
