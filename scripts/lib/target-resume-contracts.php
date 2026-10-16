@@ -2,6 +2,50 @@
 
 declare(strict_types=1);
 
+/**
+ * Only completed, required, zero-exit steps from the exact prior run may
+ * skip expensive dependency/build work. A malformed, conflicting or duplicated
+ * receipt fails closed to no resumable steps; the runner must execute normally.
+ *
+ * This checks internal consistency, not authenticity of an external actor.
+ *
+ * @param array<string,mixed> $summary
+ * @param array<string,bool> $allowlist
+ * @return array<string,true>
+ */
+function nexoraTargetReusableStepIds(array $summary, array $allowlist, string $runId): array
+{
+    if (($summary['run_id'] ?? null) !== $runId
+        || !in_array($summary['status'] ?? null, ['blocked', 'target-readiness-pass', 'target-certification-pass'], true)
+        || !is_array($summary['steps'] ?? null)
+        || !array_is_list($summary['steps'])) {
+        return [];
+    }
+
+    $seen = [];
+    $reusable = [];
+    foreach ($summary['steps'] as $step) {
+        if (!is_array($step)
+            || !is_string($step['id'] ?? null)
+            || preg_match('/^[a-z0-9-]+$/D', $step['id']) !== 1
+            || isset($seen[$step['id']])
+            || !is_bool($step['required'] ?? null)
+            || !in_array($step['status'] ?? null, ['pass', 'fail'], true)
+            || !is_int($step['exit_code'] ?? null)
+            || (($step['status'] === 'pass') !== ($step['exit_code'] === 0))) {
+            return [];
+        }
+        $id = $step['id'];
+        $seen[$id] = true;
+        if (($allowlist[$id] ?? false) && $step['required']
+            && $step['status'] === 'pass' && $step['exit_code'] === 0) {
+            $reusable[$id] = true;
+        }
+    }
+
+    return $reusable;
+}
+
 /** @return array{errors:list<string>,metrics:array<string,int>} */
 function nexoraAnalyzeTargetResumeContracts(string $root): array
 {

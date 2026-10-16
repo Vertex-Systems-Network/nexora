@@ -5,6 +5,7 @@ declare(strict_types=1);
 $root=dirname(__DIR__);
 require_once $root.'/bootstrap/nexora-process-environment.php';
 require_once $root.'/scripts/lib/source-attestation.php';
+require_once $root.'/scripts/lib/target-resume-contracts.php';
 
 $platform=require $root.'/config/nexora.php';
 $version=(string)($platform['version']??'unknown');
@@ -153,7 +154,9 @@ if(is_array($resumeSummary)){
             fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: fingerprint drift in {$fingerprint}. Start a new run.\n"); exit(2);
         }
     }
-    foreach((array)($resumeSummary['steps']??[]) as $priorStep) if(($priorStep['status']??null)==='pass') $resumePassed[(string)($priorStep['id']??'')]=true;
+    // A stale summary pass label alone is insufficient to skip a step.
+    // Contradictory, duplicate or wrong-run metadata forces a clean rerun.
+    $resumePassed=nexoraTargetReusableStepIds($resumeSummary,$resumeSkippable,$resumeRunId);
 }
 file_put_contents($runDir.'/environment.json',json_encode($environment,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR));
 
