@@ -24,10 +24,22 @@ final class TargetRuntimeBuildResumeTest extends TestCase
             'resources/js/app.tsx' => ['file' => 'assets/app-aaaaaaaa.js', 'isEntry' => true],
             'resources/css/app.css' => ['file' => 'assets/app-bbbbbbbb.css', 'isEntry' => true],
         ], JSON_THROW_ON_ERROR));
-        $this->put('storage/app/nexora/certification/build-assets.json', json_encode([
-            'status' => 'pass', 'platform_version' => '1.0',
+        $this->put('storage/app/nexora/certification/build-assets.json', json_encode($this->validReport(), JSON_THROW_ON_ERROR));
+    }
+
+    /** @return array<string,mixed> */
+    private function validReport(): array
+    {
+        return [
+            'schema' => 2, 'status' => 'pass', 'platform_version' => '1.0',
             'source_tree_sha256' => str_repeat('a', 64),
-        ], JSON_THROW_ON_ERROR));
+            'budgets' => ['build_total_bytes' => 1048576],
+            'totals' => ['build' => 400], 'counts' => ['js' => 1, 'css' => 1],
+            'files' => [['path' => 'public/build/manifest.json', 'bytes' => 100,
+                'sha256' => str_repeat('b', 64)]],
+            'initial_javascript_assets' => ['assets/app-aaaaaaaa.js'],
+            'errors' => [], 'warnings' => [],
+        ];
     }
 
     protected function tearDown(): void
@@ -90,10 +102,9 @@ final class TargetRuntimeBuildResumeTest extends TestCase
     public function changed_budget_report_requires_budget_verification_only(): void
     {
         $prior = \nexoraTargetResumeOutputArtifacts($this->root, $this->environment());
-        $this->put('storage/app/nexora/certification/build-assets.json', json_encode([
-            'status' => 'pass', 'platform_version' => '1.0',
-            'source_tree_sha256' => str_repeat('a', 64), 'changed' => true,
-        ], JSON_THROW_ON_ERROR));
+        $report = $this->validReport();
+        $report['warnings'] = ['reviewed warning'];
+        $this->put('storage/app/nexora/certification/build-assets.json', json_encode($report, JSON_THROW_ON_ERROR));
         $current = \nexoraTargetResumeOutputArtifacts($this->root, $this->environment());
         $expected = $this->steps();
         unset($expected['frontend-build-budget']);
@@ -210,6 +221,52 @@ final class TargetRuntimeBuildResumeTest extends TestCase
             self::markTestSkipped('Symlink creation not permitted.');
         }
         self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function report_claiming_pass_with_errors_is_not_resumable(): void
+    {
+        $report = $this->validReport();
+        $report['errors'] = ['JS asset budget exceeded'];
+        $this->put('storage/app/nexora/certification/build-assets.json', json_encode($report, JSON_THROW_ON_ERROR));
+        $result = \nexoraTargetResumeOutputArtifacts($this->root, $this->environment());
+        self::assertNull($result['build_budget_report_sha256']);
+        self::assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $result['build_output_sha256']);
+    }
+
+    #[Test]
+    public function wrong_or_missing_report_schema_is_not_resumable(): void
+    {
+        foreach ([1, null] as $schema) {
+            $report = $this->validReport();
+            if ($schema === null) {
+                unset($report['schema']);
+            } else {
+                $report['schema'] = $schema;
+            }
+            $this->put('storage/app/nexora/certification/build-assets.json', json_encode($report, JSON_THROW_ON_ERROR));
+            self::assertNull(\nexoraTargetResumeOutputArtifacts($this->root, $this->environment())['build_budget_report_sha256']);
+        }
+    }
+
+    #[Test]
+    public function incomplete_report_payload_is_not_resumable(): void
+    {
+        foreach (['budgets', 'totals', 'counts', 'files', 'initial_javascript_assets', 'errors'] as $key) {
+            $report = $this->validReport();
+            unset($report[$key]);
+            $this->put('storage/app/nexora/certification/build-assets.json', json_encode($report, JSON_THROW_ON_ERROR));
+            self::assertNull(\nexoraTargetResumeOutputArtifacts($this->root, $this->environment())['build_budget_report_sha256']);
+        }
+    }
+
+    #[Test]
+    public function oversized_valid_report_is_not_resumable(): void
+    {
+        $report = json_encode($this->validReport(), JSON_THROW_ON_ERROR);
+        $file = $this->root.'/storage/app/nexora/certification/build-assets.json';
+        file_put_contents($file, $report.str_repeat(' ', 8 * 1024 * 1024 + 1));
+        self::assertNull(\nexoraTargetResumeOutputArtifacts($this->root, $this->environment())['build_budget_report_sha256']);
     }
 
     #[Test]

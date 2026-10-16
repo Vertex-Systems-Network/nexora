@@ -254,14 +254,33 @@ function nexoraTargetResumeOutputArtifacts(string $root, array $environment): ar
             break;
         }
     }
-    if ($buildHash !== null && $reportParentsSafe && is_file($reportFile) && !is_link($reportFile)
-        && filesize($reportFile) <= 8 * 1024 * 1024) {
+    if ($buildHash !== null && $reportParentsSafe && is_file($reportFile) && !is_link($reportFile)) {
         try {
-            $report = json_decode((string) file_get_contents($reportFile), true, 512, JSON_THROW_ON_ERROR);
-            if (is_array($report) && ($report['status'] ?? null) === 'pass'
-                && ($report['source_tree_sha256'] ?? null) === ($environment['source_tree_sha256'] ?? null)
-                && ($report['platform_version'] ?? null) === ($environment['platform_version'] ?? null)) {
-                $reportHash = hash_file('sha256', $reportFile) ?: null;
+            // A size check by itself cannot bound a concurrent file read.
+            // Read no more than the supported report size plus one sentinel
+            // byte and hash exactly the bytes that were structurally checked.
+            clearstatcache(true, $reportFile);
+            $size = @filesize($reportFile);
+            if (is_int($size) && $size > 0 && $size <= 8 * 1024 * 1024) {
+                $data = @file_get_contents($reportFile, false, null, 0, 8 * 1024 * 1024 + 1);
+                if (is_string($data) && strlen($data) === $size) {
+                    $report = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
+                    // A PASS label on a malformed/contradictory report is NOT
+                    // sufficient to reuse the build budget verification gate.
+                    if (is_array($report) && ($report['schema'] ?? null) === 2
+                        && ($report['status'] ?? null) === 'pass'
+                        && ($report['errors'] ?? null) === []
+                        && is_array($report['budgets'] ?? null)
+                        && is_array($report['totals'] ?? null)
+                        && is_array($report['counts'] ?? null)
+                        && is_array($report['files'] ?? null)
+                        && array_is_list($report['files']) && $report['files'] !== []
+                        && is_array($report['initial_javascript_assets'] ?? null)
+                        && ($report['source_tree_sha256'] ?? null) === ($environment['source_tree_sha256'] ?? null)
+                        && ($report['platform_version'] ?? null) === ($environment['platform_version'] ?? null)) {
+                        $reportHash = hash('sha256', $data);
+                    }
+                }
             }
         } catch (Throwable) {
             // Invalid or stale report must be regenerated on resume.
