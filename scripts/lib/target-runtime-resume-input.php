@@ -72,3 +72,48 @@ function nexoraTargetRuntimeReadResumeJson(string $base, string $relative, int $
         return null;
     }
 }
+
+/**
+ * Check prior-run receipts before their PASS step IDs may be reused.
+ * This is local integrity checking, not independent operator attestation.
+ * A blocked run can legitimately end after a partial set of steps, but each
+ * recorded step still must be self-consistent and bound to its actual logs.
+ *
+ * @param array<string,mixed> $summary
+ * @return list<string>
+ */
+function nexoraTargetRuntimeResumeReceiptErrors(array $summary, string $runDir, string $runId): array
+{
+    require_once __DIR__.'/target-runtime-log-receipt-contracts.php';
+    require_once __DIR__.'/target-runtime-receipt-contracts.php';
+
+    if (($summary['schema'] ?? null) !== 2 || ($summary['run_id'] ?? null) !== $runId
+        || preg_match('/^[0-9]{8}-[0-9]{6}-[a-f0-9]{6}$/D', $runId) !== 1) {
+        return ['Prior target-runtime receipt has invalid schema or run ID.'];
+    }
+    $status = $summary['status'] ?? null;
+    if (!in_array($status, ['blocked', 'target-readiness-pass', 'target-certification-pass'], true)) {
+        return ['Prior target-runtime receipt has invalid status.'];
+    }
+    $steps = $summary['steps'] ?? null;
+    if (!is_array($steps) || !array_is_list($steps) || $steps === [] || count($steps) > 511) {
+        return ['Prior target-runtime receipt contains invalid step list.'];
+    }
+    foreach ($steps as $step) {
+        if (!is_array($step) || !is_bool($step['required'] ?? null)
+            || !in_array($step['status'] ?? null, ['pass', 'fail'], true)
+            || !is_int($step['exit_code'] ?? null)
+            || (($step['status'] === 'pass') !== ($step['exit_code'] === 0))) {
+            return ['Prior target-runtime receipt has inconsistent step result.'];
+        }
+    }
+    // A claimed complete PASS cannot be a fabricated one-step or incomplete
+    // receipt. The existing producer-order contract checks all mandatory gates.
+    if ($status !== 'blocked') {
+        $errors = nexoraTargetRuntimePassReceiptErrors($summary);
+        if ($errors !== []) return $errors;
+    }
+    // Even a blocked partial run must not enable reuse after its log content
+    // is altered, deleted, replaced with a symlink or rebound to other steps.
+    return nexoraTargetRuntimeLogReceiptErrors($steps, $runDir);
+}

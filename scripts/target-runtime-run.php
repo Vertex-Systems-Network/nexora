@@ -161,6 +161,17 @@ $environment=[
     'resume_from'=>$resumeFrom,
 ];
 if(is_array($resumeSummary)){
+    // A summary PASS label is not sufficient for reuse: the complete PASS
+    // gate sequence (or valid partial blocked sequence) and each captured
+    // step log must match its exact SHA-256 receipt. Altered evidence aborts
+    // rather than silently reusing expensive installation/frontend steps.
+    $receiptErrors=nexoraTargetRuntimeResumeReceiptErrors(
+        $resumeSummary, $base.'/'.$resumeRunId, $resumeRunId
+    );
+    if($receiptErrors!==[]){
+        fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: prior step evidence failed integrity checks. Start a new run.\n");
+        exit(2);
+    }
     $priorEnv=is_array($resumeSummary['environment']??null)?$resumeSummary['environment']:[];
     $drift=nexoraTargetResumeEnvironmentDrift($priorEnv,$environment);
     if($drift!==null){
