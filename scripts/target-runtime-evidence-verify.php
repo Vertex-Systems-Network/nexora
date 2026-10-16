@@ -154,6 +154,42 @@ try{
     if($requirePass&&!in_array($status,['target-readiness-pass','target-certification-pass'],true)) throw new RuntimeException("Target runtime evidence is not PASS; current status is {$status}.");
     if($status!=='blocked'&&($summary['first_blocker']??null)!==null) throw new RuntimeException('PASS evidence may not contain a first blocker.');
 
+    // A source-bound JSON summary is not sufficient evidence of successful
+    // execution if any required runtime step failed. Validate pass semantics
+    // before a receipt can be sealed or accepted via --require-pass.
+    if($status!=='blocked'){
+        $requiredCount=0;
+        $certificationStepPassed=false;
+        foreach($steps as $step){
+            if(!is_array($step)||!is_bool($step['required']??null)
+                ||!in_array($step['status']??null,['pass','fail'],true)
+                ||!is_int($step['exit_code']??null)){
+                throw new RuntimeException('PASS evidence contains invalid runtime step metadata.');
+            }
+            $id=(string)$step['id'];
+            $required=$step['required'];
+            $passed=$step['status']==='pass'&&$step['exit_code']===0;
+            if(($step['status']==='pass')!==($step['exit_code']===0)){
+                throw new RuntimeException("PASS evidence has inconsistent runtime step [{$id}] status and exit code.");
+            }
+            if($required){
+                $requiredCount++;
+                if(!$passed) throw new RuntimeException("PASS evidence contains failed required runtime step [{$id}].");
+            }elseif(!$passed&&$id!=='closure-status'){
+                // closure-status is informational in the producer, not a
+                // prerequisite for runtime readiness.
+                throw new RuntimeException("PASS evidence contains unrecognized failed optional runtime step [{$id}].");
+            }
+            if($id==='isolated-full-certification'&&$required&&$passed){
+                $certificationStepPassed=true;
+            }
+        }
+        if($requiredCount===0) throw new RuntimeException('PASS evidence has no required runtime steps.');
+        if($status==='target-certification-pass'&&!$certificationStepPassed){
+            throw new RuntimeException('PASS evidence missing successful isolated-full-certification step.');
+        }
+    }
+
     $result=[
         'schema'=>1,'status'=>'pass','platform_version'=>$version,'verified_at'=>gmdate(DATE_ATOM),
         'runtime_status'=>$status,'run_id'=>(string)($summary['run_id']??''),'source_tree_sha256'=>$currentSource['tree_sha256'],

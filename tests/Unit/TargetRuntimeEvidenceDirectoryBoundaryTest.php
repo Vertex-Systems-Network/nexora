@@ -212,6 +212,114 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
         self::assertStringContainsString('too many runtime steps', $result->getErrorOutput());
     }
 
+    #[Test]
+    public function claimed_readiness_cannot_hide_a_failed_required_step(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['status'] = 'target-readiness-pass';
+        $summary['first_blocker'] = null;
+        $summary['steps'][0]['required'] = true;
+        $summary['steps'][0]['status'] = 'fail';
+        $summary['steps'][0]['exit_code'] = 5;
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir, true);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('required runtime step', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function claimed_readiness_cannot_hide_nonzero_required_exit_code(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['status'] = 'target-readiness-pass';
+        $summary['first_blocker'] = null;
+        $summary['steps'][0]['required'] = true;
+        $summary['steps'][0]['status'] = 'pass';
+        $summary['steps'][0]['exit_code'] = 9;
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir, true);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('inconsistent runtime step', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function claimed_full_certification_requires_full_certification_step(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['status'] = 'target-certification-pass';
+        $summary['first_blocker'] = null;
+        $summary['steps'][0]['required'] = true;
+        $summary['steps'][0]['status'] = 'pass';
+        $summary['steps'][0]['exit_code'] = 0;
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir, true);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('isolated-full-certification', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function consistent_readiness_allows_an_optional_failed_closure_step(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['status'] = 'target-readiness-pass';
+        $summary['first_blocker'] = null;
+        $summary['steps'][0]['required'] = true;
+        $summary['steps'][0]['status'] = 'pass';
+        $summary['steps'][0]['exit_code'] = 0;
+        $summary['steps'][] = [
+            'id' => 'closure-status', 'required' => false,
+            'status' => 'fail', 'exit_code' => 1,
+            'stdout_log' => 'steps/test.stdout.log',
+            'stderr_log' => 'steps/test.stderr.log',
+        ];
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir, true);
+        self::assertSame(0, $result->getExitCode(), $result->getErrorOutput());
+        self::assertStringContainsString('target-readiness-pass', $result->getOutput());
+    }
+
+    #[Test]
+    public function consistent_full_certification_step_remains_accepted_as_structural_evidence(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['status'] = 'target-certification-pass';
+        $summary['first_blocker'] = null;
+        $summary['steps'][0]['required'] = true;
+        $summary['steps'][0]['status'] = 'pass';
+        $summary['steps'][0]['exit_code'] = 0;
+        $summary['steps'][] = [
+            'id' => 'isolated-full-certification', 'required' => true,
+            'status' => 'pass', 'exit_code' => 0,
+            'stdout_log' => 'steps/test.stdout.log',
+            'stderr_log' => 'steps/test.stderr.log',
+        ];
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir, true);
+        self::assertSame(0, $result->getExitCode(), $result->getErrorOutput());
+        self::assertStringContainsString('target-certification-pass', $result->getOutput());
+    }
+
+    #[Test]
+    public function arbitrary_failed_optional_step_cannot_be_used_to_mask_failure(): void
+    {
+        $summary = json_decode(file_get_contents($this->bundleDir.'/summary.json'), true, 512, JSON_THROW_ON_ERROR);
+        $summary['status'] = 'target-readiness-pass';
+        $summary['first_blocker'] = null;
+        $summary['steps'][0]['required'] = false;
+        $summary['steps'][0]['status'] = 'fail';
+        $summary['steps'][0]['exit_code'] = 2;
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir, true);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('unrecognized failed optional runtime step', $result->getErrorOutput());
+    }
+
     private function requireSymlinks(): void
     {
         if (! function_exists('symlink')) {
