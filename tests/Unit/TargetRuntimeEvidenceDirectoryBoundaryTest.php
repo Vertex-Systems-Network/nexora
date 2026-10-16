@@ -35,6 +35,10 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
         file_put_contents($this->bundleDir.'/environment.json', json_encode([
             'platform_version' => $version,
             'source_tree_sha256' => $attestation['tree_sha256'],
+            // PASS receipts now bind dependency locks independently from the
+            // general source-tree attestation (which excludes lockfiles).
+            'composer_lock_sha256' => hash_file('sha256', $root.'/composer.lock'),
+            'package_lock_sha256' => hash_file('sha256', $root.'/package-lock.json'),
         ], JSON_THROW_ON_ERROR));
         // The real target-runtime producer writes the exact same environment
         // fingerprint to environment.json and to summary.json.environment.
@@ -271,6 +275,46 @@ final class TargetRuntimeEvidenceDirectoryBoundaryTest extends TestCase
         $result = $this->verify($this->bundleDir);
         self::assertSame(1, $result->getExitCode());
         self::assertStringContainsString('too many runtime steps', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function claimed_readiness_without_composer_lock_hash_is_rejected(): void
+    {
+        $summary = $this->prepareCompletePassReceipt();
+        unset($summary['environment']['composer_lock_sha256']);
+        $environment = $summary['environment'];
+        file_put_contents($this->bundleDir.'/environment.json', json_encode($environment, JSON_THROW_ON_ERROR));
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir, true);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('missing or invalid composer.lock digest', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function claimed_readiness_without_package_lock_hash_is_rejected(): void
+    {
+        $summary = $this->prepareCompletePassReceipt();
+        unset($summary['environment']['package_lock_sha256']);
+        file_put_contents($this->bundleDir.'/environment.json', json_encode($summary['environment'], JSON_THROW_ON_ERROR));
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir, true);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('missing or invalid package-lock.json digest', $result->getErrorOutput());
+    }
+
+    #[Test]
+    public function claimed_readiness_with_mismatched_lock_digest_is_rejected(): void
+    {
+        $summary = $this->prepareCompletePassReceipt();
+        $summary['environment']['composer_lock_sha256'] = str_repeat('0', 64);
+        file_put_contents($this->bundleDir.'/environment.json', json_encode($summary['environment'], JSON_THROW_ON_ERROR));
+        file_put_contents($this->bundleDir.'/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
+
+        $result = $this->verify($this->bundleDir, true);
+        self::assertSame(1, $result->getExitCode());
+        self::assertStringContainsString('composer.lock digest does not match current source', $result->getErrorOutput());
     }
 
     #[Test]

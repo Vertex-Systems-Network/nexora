@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 $root=dirname(__DIR__);
 require_once $root.'/scripts/lib/source-attestation.php';
+require_once $root.'/scripts/lib/target-runtime-lock-evidence.php';
 require_once $root.'/scripts/lib/target-runtime-receipt-contracts.php';
 require_once $root.'/scripts/lib/target-runtime-log-receipt-contracts.php';
 $platform=require $root.'/config/nexora.php';
@@ -139,13 +140,15 @@ try{
     if(($summary['platform_version']??null)!==$version||($environment['platform_version']??null)!==$version) throw new RuntimeException('Evidence platform version does not match current source.');
     $currentSource=nexoraComputeSourceAttestation($root);
     if(($environment['source_tree_sha256']??null)!==$currentSource['tree_sha256']) throw new RuntimeException('Evidence source-tree digest does not match current source.');
-    foreach(['composer_lock_sha256'=>'composer.lock','package_lock_sha256'=>'package-lock.json'] as $key=>$relative){
-        $expected=$environment[$key]??null;
-        if($expected===null) continue;
-        if(!is_file($root.'/'.$relative)) throw new RuntimeException("Evidence is lock-bound but current {$relative} is missing.");
-        $actual=hash_file('sha256',$root.'/'.$relative)?:null;
-        if(!is_string($actual)||!hash_equals((string)$expected,$actual)) throw new RuntimeException("Evidence {$relative} digest does not match current source.");
-    }
+    // composer.lock and package-lock.json are outside the general source-tree
+    // attestation. A PASS receipt MUST explicitly bind both locks; a missing
+    // fingerprint must not silently opt out of integrity verification.
+    $lockErrors=nexoraTargetRuntimeLockEvidenceErrors(
+        $root,
+        $environment,
+        in_array($summary['status']??null,['target-readiness-pass','target-certification-pass'],true)
+    );
+    if($lockErrors!==[]) throw new RuntimeException(implode('; ',$lockErrors));
     $steps=(array)($summary['steps']??[]);
     if($steps===[]) throw new RuntimeException('Evidence contains no runtime steps.');
     if(count($steps)>511) throw new RuntimeException('Evidence contains too many runtime steps.');
