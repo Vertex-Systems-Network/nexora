@@ -9,6 +9,7 @@ require_once $root.'/scripts/lib/target-resume-contracts.php';
 require_once $root.'/scripts/lib/target-composer.php';
 require_once $root.'/scripts/lib/target-runtime-toolchain-versions.php';
 require_once $root.'/scripts/lib/target-process-capture.php';
+require_once $root.'/scripts/lib/target-runtime-resume-input.php';
 
 $platform=require $root.'/config/nexora.php';
 $version=(string)($platform['version']??'unknown');
@@ -29,17 +30,19 @@ $logDir=$runDir.'/steps';
 $resumeSummary=null;
 $resumeFrom=null;
 if($resumeLatest){
-    $latestPath=$base.'/latest.json';
-    if(!is_file($latestPath)){ fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: latest.json does not exist.\n"); exit(2); }
-    $latest=json_decode((string)file_get_contents($latestPath),true);
-    $resumeRunId=is_array($latest)?(string)($latest['run_id']??''):'';
+    $latest=nexoraTargetRuntimeReadResumeJson($base,'latest.json',65536);
+    if($latest===null){ fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: latest.json missing, invalid or unsafe.\n"); exit(2); }
+    $resumeRunId=is_string($latest['run_id']??null)?$latest['run_id']:'';
 }
 if($resumeRunId!==null){
     if(preg_match('/^[0-9]{8}-[0-9]{6}-[a-f0-9]{6}$/',$resumeRunId)!==1){ fwrite(STDERR,"[Nexora Target Runtime] Invalid resume run id.\n"); exit(2); }
-    $resumePath=$base.'/'.$resumeRunId.'/summary.json';
-    if(!is_file($resumePath)){ fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: summary not found for {$resumeRunId}.\n"); exit(2); }
-    $resumeSummary=json_decode((string)file_get_contents($resumePath),true);
-    if(!is_array($resumeSummary)){ fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: prior summary is invalid.\n"); exit(2); }
+    $resumeSummary=nexoraTargetRuntimeReadResumeJson($base,$resumeRunId.'/summary.json',16*1024*1024);
+    if($resumeSummary===null || ($resumeSummary['run_id']??null)!==$resumeRunId
+        || !is_array($resumeSummary['steps']??null) || !array_is_list($resumeSummary['steps'])
+        || $resumeSummary['steps']===[] || count($resumeSummary['steps'])>511){
+        fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: prior summary missing, invalid or unsafe.\n");
+        exit(2);
+    }
     $resumeFrom=$resumeRunId;
 }
 foreach([$base,$runDir,$logDir] as $dir){
