@@ -157,6 +157,62 @@ final class TargetRuntimeBuildResumeTest extends TestCase
     }
 
     #[Test]
+    public function oversized_even_valid_json_manifest_is_not_reused(): void
+    {
+        $manifest = $this->root.'/public/build/manifest.json';
+        // Valid JSON can contain arbitrary trailing whitespace. Previously it
+        // was fully read and decoded without any bound before hashing assets.
+        $file = fopen($manifest, 'ab');
+        self::assertSame(true, is_resource($file));
+        fwrite($file, str_repeat(' ', 8 * 1024 * 1024 + 1));
+        fclose($file);
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function dangling_vite_hot_symlink_cannot_authorize_resume(): void
+    {
+        if (!function_exists('symlink')) {
+            self::markTestSkipped('Symlinks unavailable.');
+        }
+        if (!@symlink($this->root.'/no-such-vite-hot', $this->root.'/public/hot')) {
+            self::markTestSkipped('Symlink creation not permitted.');
+        }
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
+    public function linked_report_parent_is_not_trusted_for_budget_reuse(): void
+    {
+        if (!function_exists('symlink')) {
+            self::markTestSkipped('Symlinks unavailable.');
+        }
+        $outside = $this->root.'/outside-report';
+        mkdir($outside, 0700, true);
+        rename($this->root.'/storage/app/nexora/certification/build-assets.json', $outside.'/build-assets.json');
+        rmdir($this->root.'/storage/app/nexora/certification');
+        if (!@symlink($outside, $this->root.'/storage/app/nexora/certification')) {
+            self::markTestSkipped('Symlink creation not permitted.');
+        }
+        $artifacts = \nexoraTargetResumeOutputArtifacts($this->root, $this->environment());
+        self::assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $artifacts['build_output_sha256']);
+        self::assertNull($artifacts['build_budget_report_sha256']);
+    }
+
+    #[Test]
+    public function symlinked_public_root_cannot_authorize_reused_build(): void
+    {
+        if (!function_exists('symlink')) {
+            self::markTestSkipped('Symlinks unavailable.');
+        }
+        rename($this->root.'/public', $this->root.'/real-public');
+        if (!@symlink($this->root.'/real-public', $this->root.'/public')) {
+            self::markTestSkipped('Symlink creation not permitted.');
+        }
+        self::assertNull(\nexoraTargetResumeBuildDigest($this->root));
+    }
+
+    #[Test]
     public function stale_source_bound_budget_report_must_not_be_reused(): void
     {
         $bad = ['platform_version' => '1.0', 'source_tree_sha256' => str_repeat('b', 64)];

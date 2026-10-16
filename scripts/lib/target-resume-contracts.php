@@ -137,15 +137,26 @@ function nexoraTargetResumeBuildDigest(string $root): ?string
 {
     $directory = $root.'/public/build';
     $manifestPath = $directory.'/manifest.json';
-    if (!is_dir($directory) || is_link($directory)
+    if (!is_dir($directory) || is_link($directory) || is_link($root.'/public')
         || !is_file($manifestPath) || is_link($manifestPath)
-        || is_file($root.'/public/hot')) {
+        || is_file($root.'/public/hot') || is_link($root.'/public/hot')) {
         return null;
     }
 
     try {
-        $manifest = json_decode((string) file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR);
-        if (!is_array($manifest) || array_is_list($manifest)
+        // A hostile or corrupted manifest must never trigger an unbounded
+        // allocation before the build tree's size budget can be enforced.
+        clearstatcache(true, $manifestPath);
+        $manifestBytes = @filesize($manifestPath);
+        if (!is_int($manifestBytes) || $manifestBytes < 1 || $manifestBytes > 8 * 1024 * 1024) {
+            return null;
+        }
+        $manifestSource = @file_get_contents($manifestPath, false, null, 0, 8 * 1024 * 1024 + 1);
+        if (!is_string($manifestSource) || strlen($manifestSource) !== $manifestBytes) {
+            return null;
+        }
+        $manifest = json_decode($manifestSource, true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($manifest) || array_is_list($manifest) || count($manifest) > 10000
             || !isset($manifest['resources/js/app.tsx'], $manifest['resources/css/app.css'])) {
             return null;
         }
@@ -233,7 +244,17 @@ function nexoraTargetResumeOutputArtifacts(string $root, array $environment): ar
     $buildHash = nexoraTargetResumeBuildDigest($root);
     $reportHash = null;
     $reportFile = $root.'/storage/app/nexora/certification/build-assets.json';
-    if ($buildHash !== null && is_file($reportFile) && !is_link($reportFile)
+    // Reject symlinked ancestors, not just the final JSON path: otherwise
+    // a lookalike PASS report outside this runtime can be reused silently.
+    $reportParentsSafe = true;
+    foreach (['storage', 'storage/app', 'storage/app/nexora',
+              'storage/app/nexora/certification'] as $relative) {
+        if (is_link($root.'/'.$relative)) {
+            $reportParentsSafe = false;
+            break;
+        }
+    }
+    if ($buildHash !== null && $reportParentsSafe && is_file($reportFile) && !is_link($reportFile)
         && filesize($reportFile) <= 8 * 1024 * 1024) {
         try {
             $report = json_decode((string) file_get_contents($reportFile), true, 512, JSON_THROW_ON_ERROR);
