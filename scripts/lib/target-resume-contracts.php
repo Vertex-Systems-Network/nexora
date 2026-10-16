@@ -65,6 +65,7 @@ function nexoraTargetResumeLineageAllowlist(array $summary, array $allowlist): a
 {
     $environment = $summary['environment'] ?? null;
     if (($summary['schema'] ?? null) !== 2 || !is_array($environment)
+        || !is_bool($environment['full_certification_requested'] ?? null)
         || !is_bool($environment['install_dependencies_requested'] ?? null)
         || !is_array($summary['steps'] ?? null) || !array_is_list($summary['steps'])) {
         return [];
@@ -123,7 +124,16 @@ function nexoraTargetResumeEnvironmentDrift(array $previous, array $current): ?s
         'composer_lock_sha256', 'package_lock_sha256',
         'vendor_installed_sha256', 'node_modules_lock_sha256',
         'vendor_autoload', 'node_modules', 'install_dependencies_requested',
+        'full_certification_requested',
     ];
+
+    // A readiness receipt must not be rebound to isolated full certification,
+    // even if source, tool versions and installed dependencies are unchanged.
+    foreach (['full_certification_requested', 'install_dependencies_requested'] as $mode) {
+        if (!is_bool($previous[$mode] ?? null) || !is_bool($current[$mode] ?? null)) {
+            return $mode;
+        }
+    }
 
     foreach ($fingerprints as $fingerprint) {
         if (!array_key_exists($fingerprint, $previous)

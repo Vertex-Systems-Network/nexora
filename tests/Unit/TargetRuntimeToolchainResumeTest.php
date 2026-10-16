@@ -77,6 +77,10 @@ final class TargetRuntimeToolchainResumeTest extends TestCase
             'composer_lock_sha256','package_lock_sha256','vendor_installed_sha256',
             'node_modules_lock_sha256','vendor_autoload','node_modules','install_dependencies_requested'];
         foreach($keys as $key){$before[$key]='same';$after[$key]='same';}
+        $before['install_dependencies_requested']=true;
+        $after['install_dependencies_requested']=true;
+        $before['full_certification_requested']=false;
+        $after['full_certification_requested']=false;
         self::assertSame('node_version',\nexoraTargetResumeEnvironmentDrift($before,$after));
     }
 }

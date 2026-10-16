@@ -32,6 +32,7 @@ final class TargetRuntimeEnvironmentResumeTest extends TestCase
             'vendor_autoload' => true,
             'node_modules' => true,
             'install_dependencies_requested' => true,
+            'full_certification_requested' => false,
         ];
     }
 
@@ -97,6 +98,43 @@ final class TargetRuntimeEnvironmentResumeTest extends TestCase
         $previous = $current;
         $previous['install_dependencies_requested'] = false;
         self::assertSame('install_dependencies_requested', \nexoraTargetResumeEnvironmentDrift($previous, $current));
+    }
+
+    #[Test]
+    public function readiness_to_full_certification_mode_drift_forces_new_run(): void
+    {
+        $current = $this->environment();
+        $current['full_certification_requested'] = true;
+        self::assertSame('full_certification_requested',
+            \nexoraTargetResumeEnvironmentDrift($this->environment(), $current));
+        self::assertSame('full_certification_requested',
+            \nexoraTargetResumeEnvironmentDrift($current, $this->environment()));
+    }
+
+    #[Test]
+    public function absent_full_certification_flag_disables_resume(): void
+    {
+        $current = $this->environment();
+        $previous = $current;
+        unset($previous['full_certification_requested']);
+        self::assertSame('full_certification_requested',
+            \nexoraTargetResumeEnvironmentDrift($previous, $current));
+        unset($current['full_certification_requested']);
+        self::assertSame('full_certification_requested',
+            \nexoraTargetResumeEnvironmentDrift($current, $current));
+    }
+
+    #[Test]
+    public function non_boolean_execution_modes_must_fail_closed(): void
+    {
+        foreach (['full_certification_requested', 'install_dependencies_requested'] as $key) {
+            foreach (['false', 0, null] as $bad) {
+                $invalid = $this->environment();
+                $invalid[$key] = $bad;
+                self::assertSame($key,
+                    \nexoraTargetResumeEnvironmentDrift($invalid, $invalid));
+            }
+        }
     }
 
     #[Test]

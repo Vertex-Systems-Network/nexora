@@ -31,7 +31,7 @@ final class TargetRuntimeResumeLineageTest extends TestCase
     private function receipt(array $steps, bool $install = true): array
     {
         return ['schema'=>2, 'status'=>'blocked',
-            'environment'=>['install_dependencies_requested'=>$install],
+            'environment'=>['install_dependencies_requested'=>$install, 'full_certification_requested'=>false],
             'steps'=>$steps];
     }
 
@@ -133,6 +133,22 @@ final class TargetRuntimeResumeLineageTest extends TestCase
         self::assertSame([], \nexoraTargetResumeLineageAllowlist($receipt, $this->allowlist()));
         $receipt=$this->receipt($this->prefix(true));
         $receipt['schema']=1;
+        self::assertSame([], \nexoraTargetResumeLineageAllowlist($receipt, $this->allowlist()));
+    }
+
+    #[Test]
+    public function missing_full_certification_mode_blocks_lineage_reuse(): void
+    {
+        $receipt = $this->receipt($this->prefix(true));
+        unset($receipt['environment']['full_certification_requested']);
+        self::assertSame([], \nexoraTargetResumeLineageAllowlist($receipt, $this->allowlist()));
+    }
+
+    #[Test]
+    public function non_boolean_full_mode_blocks_lineage_reuse(): void
+    {
+        $receipt = $this->receipt($this->prefix(true));
+        $receipt['environment']['full_certification_requested'] = 'false';
         self::assertSame([], \nexoraTargetResumeLineageAllowlist($receipt, $this->allowlist()));
     }
 
