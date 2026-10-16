@@ -336,7 +336,8 @@ def inspect_login_ui(page) -> dict[str, bool]:
         // only an input's own style/disabled property. An opacity-zero parent
         // or disabled fieldset must not count as a working login control.
         const usable = el => {
-            if (!el || el.matches(':disabled') || el.closest('[inert],[aria-disabled="true"]'))
+            if (!el || el.matches(':disabled')
+                || el.closest('[inert],[aria-disabled="true"],[aria-hidden="true"]'))
                 return false;
             if (el.getClientRects().length === 0) return false;
             for (let node = el; node && node.nodeType === 1; node = node.parentElement) {
@@ -345,6 +346,20 @@ def inspect_login_ui(page) -> dict[str, bool]:
                     || Number(css.opacity) === 0 || css.pointerEvents === 'none')
                     return false;
             }
+            // DOM visibility is not evidence that a person can use the control.
+            // A consent banner or modal overlay may intercept all pointer events
+            // while the login form remains painted behind it. Check the centre
+            // hit-target without clicking or sending any data.
+            const rect = el.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            if (rect.width <= 0 || rect.height <= 0 || x < 0 || y < 0
+                || x >= window.innerWidth || y >= window.innerHeight)
+                return false;
+            const hit = document.elementFromPoint(x, y);
+            if (!hit || !(hit === el || el.contains(hit)
+                || hit.closest('label')?.control === el))
+                return false;
             return true;
         };
         const password = [...document.querySelectorAll('form input[type="password"]')]
