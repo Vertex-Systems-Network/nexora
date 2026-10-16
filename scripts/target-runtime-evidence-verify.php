@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 $root=dirname(__DIR__);
 require_once $root.'/scripts/lib/source-attestation.php';
+require_once $root.'/scripts/lib/target-runtime-receipt-contracts.php';
+require_once $root.'/scripts/lib/target-runtime-log-receipt-contracts.php';
 $platform=require $root.'/config/nexora.php';
 $version=(string)($platform['version']??'unknown');
 $requirePass=in_array('--require-pass',$argv,true);
@@ -169,6 +171,12 @@ try{
     // execution if any required runtime step failed. Validate pass semantics
     // before a receipt can be sealed or accepted via --require-pass.
     if($status!=='blocked'){
+        $coverageErrors=nexoraTargetRuntimePassReceiptErrors($summary);
+        if($coverageErrors!==[]) throw new RuntimeException(implode('; ', $coverageErrors));
+        // File existence alone cannot establish step-log integrity.
+        // Require the producer's SHA-256 to match both bounded log streams.
+        $logErrors=nexoraTargetRuntimeLogReceiptErrors($steps,$sourceDir);
+        if($logErrors!==[]) throw new RuntimeException(implode('; ', $logErrors));
         $requiredCount=0;
         $certificationStepPassed=false;
         foreach($steps as $step){

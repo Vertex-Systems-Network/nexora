@@ -128,12 +128,16 @@ $fail=static function(string $id,string $label,string $message,string $group='pr
 };
 
 $sourceAttestation=nexoraComputeSourceAttestation($root);
+$loadedExtensions = get_loaded_extensions();
+sort($loadedExtensions, SORT_STRING);
 $environment=[
     'platform_version'=>$version,
     'source_tree_sha256'=>$sourceAttestation['tree_sha256'],
     'source_file_count'=>$sourceAttestation['file_count'],
     'php_version'=>PHP_VERSION,
     'os_family'=>PHP_OS_FAMILY,
+    'php_binary'=>PHP_BINARY,
+    'php_extensions_sha256'=>hash('sha256',implode('\n',$loadedExtensions)),
     'composer_available'=>$commandExists('composer'),
     'node_available'=>$commandExists('node'),
     'npm_available'=>$commandExists('npm'),
@@ -148,15 +152,17 @@ $environment=[
     'resume_from'=>$resumeFrom,
 ];
 if(is_array($resumeSummary)){
-    $priorEnv=(array)($resumeSummary['environment']??[]);
-    foreach(['platform_version','source_tree_sha256','composer_lock_sha256','package_lock_sha256','vendor_installed_sha256','node_modules_lock_sha256'] as $fingerprint){
-        if(($priorEnv[$fingerprint]??null)!==($environment[$fingerprint]??null)){
-            fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: fingerprint drift in {$fingerprint}. Start a new run.\n"); exit(2);
-        }
+    $priorEnv=is_array($resumeSummary['environment']??null)?$resumeSummary['environment']:[];
+    $drift=nexoraTargetResumeEnvironmentDrift($priorEnv,$environment);
+    if($drift!==null){
+        fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: missing or changed fingerprint {$drift}. Start a new run.\n"); exit(2);
     }
     // A stale summary pass label alone is insufficient to skip a step.
     // Contradictory, duplicate or wrong-run metadata forces a clean rerun.
-    $resumePassed=nexoraTargetReusableStepIds($resumeSummary,$resumeSkippable,$resumeRunId);
+    $priorArtifacts=is_array($resumeSummary['output_artifacts']??null)?$resumeSummary['output_artifacts']:[];
+    $currentArtifacts=nexoraTargetResumeOutputArtifacts($root,$environment);
+    $safeSkippable=nexoraTargetResumeSafeStepAllowlist($environment,$resumeSkippable,$priorArtifacts,$currentArtifacts);
+    $resumePassed=nexoraTargetReusableStepIds($resumeSummary,$safeSkippable,$resumeRunId);
 }
 file_put_contents($runDir.'/environment.json',json_encode($environment,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR));
 
@@ -229,7 +235,12 @@ $summary=[
     'duration_seconds'=>round(microtime(true)-$started,3),
     'first_blocker'=>$firstBlocker,
     'environment'=>$environment,
+    'output_artifacts'=>nexoraTargetResumeOutputArtifacts($root,$environment),
     'steps'=>array_map(static function(array $step):array{
+        // Tie serialized step receipts to the exact redacted logs written
+        // during execution (including resumed steps and empty stderr logs).
+        $step['stdout_sha256']=hash('sha256',(string)($step['stdout']??''));
+        $step['stderr_sha256']=hash('sha256',(string)($step['stderr']??''));
         unset($step['stdout'],$step['stderr']);
         $step['stdout_log']='steps/'.$step['id'].'.stdout.log';
         $step['stderr_log']='steps/'.$step['id'].'.stderr.log';
