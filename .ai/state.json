@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 8,
-  "control_plane_branch": "codex/pr71-clean-replacement",
+  "control_plane_revision": 9,
+  "control_plane_branch": "claude/blissful-pasteur-fn8sww",
   "base_branch": "main",
-  "base_sha": "55c249c06621fe7dc14868b3a5740b657bcb6b7a",
+  "base_sha": "5334be7acd92c9c943c0bc1ec78209f65872e140",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
@@ -13,18 +13,27 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 75,
   "current_stage": {
-    "id": "RUNTIME-CLOSURE-001",
-    "name": "Installation + Runtime Closure",
-    "status": "BLOCKED",
-    "legacy_aliases": [
-      "N1.0A",
-      "DEV-3"
-    ]
+    "id": "CORE-QA-001",
+    "name": "Super Admin + Core Application Functional QA",
+    "status": "ACTIVE",
+    "scope_note": "Source and disposable-fixture QA only; live target acceptance stays in RUNTIME-TARGET-ACCEPTANCE."
   },
   "active_development_units": [
-    "SYS-RUNTIME-IDENTITY"
+    "SYS-CORE-ADMIN-QA"
   ],
   "completed_control_stages": [
+    {
+      "id": "RUNTIME-CLOSURE-001",
+      "status": "SOURCE_CLOSED_WAIVED",
+      "legacy_aliases": [
+        "N1.0A",
+        "DEV-3"
+      ],
+      "waiver": "WVR-NEX-PR122-PHASE1-SOURCE-CLOSE-001",
+      "carrier": "#122",
+      "date": "2026-10-17",
+      "evidence": "Owner-waived source closure; TARGET_VERIFIED not claimed. #72 and #74 remain open under RUNTIME-TARGET-ACCEPTANCE."
+    },
     {
       "id": "AI-GOV-001",
       "status": "SOURCE_DONE",
@@ -53,22 +62,22 @@
     "orchestrator_source_work": "Runtime/source implementation and AI governance/evidence consolidation are integrated and protected-main verified through fde0667b150de551184ec5c5261a34f18538ceed. PR #83 final head 75d5436b0394f246bdca626571666abe77cd4012 passed #985 / 35673582569, merged under WVR-NEX-PR83-MAIN-REVIEW-001, and resulting-main #986 / 35767459733 completed SUCCESS. The runtime recovery orchestrator already covers final readiness/current receipt, exact target-to-web identity and authoritative /login; remaining closure evidence is target/provider only."
   },
   "blocker": {
-    "category": "runtime-target-provider",
-    "summary": "Repository/source/governance remediation is integrated. RUNTIME-CLOSURE-001 remains BLOCKED on target environment readiness/current receipt, exact CLI-to-web identity, authoritative /login evidence, and rotation of the credential exposed by quarantined PR #71.",
+    "category": "runtime-target-provider (follow-up only)",
+    "summary": "No source blocker for CORE-QA-001. Target acceptance remains open under RUNTIME-TARGET-ACCEPTANCE: target readiness/current receipt, exact CLI-to-web identity, authoritative /login evidence (#74), and rotation of the credential exposed by quarantined PR #71 (#72).",
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "Verify clean PR #71 replacement source preparation and exact-head CI; map remaining original requirements without claiming global target acceptance.",
+    "Execute CORE-QA-001 source/disposable QA building on the #106 regression suite (merged b7f3431); run browser verification (B04) once a disposable or provisioned target exists.",
     "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
     "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",
     "Rotate the credential exposed by quarantined PR #71 through an authorized target/provider path without recording the replacement secret.",
-    "Only after target gates pass, mark RUNTIME-CLOSURE-001 TARGET_VERIFIED and advance to CORE-QA-001."
+    "Only after target gates pass, mark RUNTIME-TARGET-ACCEPTANCE TARGET_VERIFIED."
   ],
   "next_stage": {
-    "id": "CORE-QA-001",
-    "name": "Super Admin + Core Application Functional QA",
-    "advance_when": "RUNTIME-CLOSURE-001 is TARGET_VERIFIED"
+    "id": "RUNTIME-TARGET-ACCEPTANCE",
+    "name": "Live target acceptance follow-up",
+    "advance_when": "#72 and #74 closed with operator/target evidence"
   },
   "post_core_qa_sequence": [
     "AI-GOV-AUTOMATION-100",
@@ -198,7 +207,7 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-10-01",
+  "updated_at": "2026-10-17",
   "historical_current_target": {
     "environment": "operator-provided target environment",
     "path": "<operator-provided-target-path>",
