@@ -2,6 +2,24 @@
 
 Status legend: **DONE** = implemented. **CERTIFYING** = implemented RC work is under dependency/browser/operator certification and is not yet a stable-release claim. **NEXT** = immediate block after the current certification gate passes. **PLANNED** = approved but not yet implemented. **EXTERNAL** = intentionally excluded from Nexora Core and planned as an installable App/Extension/Theme.
 
+## Remaining work — current verified target/release gates
+
+**Observed 2026-10-06 against protected `main` and the shared-hosting target.** Source engineering is complete for the current RC, but the following items remain genuinely open and must not be marked DONE from source-only evidence:
+
+| Priority | Remaining task | Status |
+|---|---|---|
+| 1 | Produce frontend assets with a supported Node toolchain; repository requires Node `>=22 <25`, while hosting currently reports Node 20 | BLOCKED — frontend build only |
+| 2 | Run `npm ci` and `npm run build`; verify `public/build/manifest.json` and production asset budgets | PENDING — target build |
+| 3 | Deploy package and verify Laravel runtime, Composer, database/migration, cache and storage on hosting | DONE — verified in hosting session; frontend build asset remains separate |
+| 4 | Complete live `/login` → `/admin`, installer/runtime handoff and exact CLI↔web identity verification | PARTIAL — URL is accessible; full acceptance evidence still required |
+| 5 | Complete C3 database matrix evidence for supported database families | PENDING — target evidence |
+| 6 | Complete C4 zero-install, upgrade, backup/restore and recovery rehearsal | PENDING — target evidence |
+| 7 | Complete C5 browser, accessibility/RTL, HTTP and performance evidence | PENDING — target evidence |
+| 8 | Complete C6 multi-node HA, final evidence intake, package sealing and independent ZIP verification | BLOCKED — depends on C1–C5 |
+| 9 | Rotate/validate the historical credential issue tracked in #72 through the authorized target/provider path | OPEN — external target action |
+
+These are the current closure gates. N0.0–N0.34 remain source-side DONE; N1.1 and later roadmap milestones remain planned/next and are not part of the current PKG-1 hosting closure.
+
 ## Internal Nexora Platform Roadmap
 
 | Milestone | Scope | Status |
