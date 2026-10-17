@@ -23,7 +23,7 @@ export function UntitledButton({
     ...props
 }: Props) {
     const variants: Record<ButtonVariant, string> = {
-        primary: "border-transparent bg-[var(--nx-brand-600)] text-white shadow-sm hover:brightness-95",
+        primary: "nx-brand-fill border-transparent text-white shadow-sm hover:brightness-95",
         secondary: "border-[var(--nx-border)] bg-[var(--nx-surface)] text-[var(--nx-text)] shadow-xs hover:bg-[var(--nx-surface-subtle)]",
         ghost: "border-transparent bg-transparent text-[var(--nx-text-secondary)] hover:bg-[var(--nx-surface-subtle)] hover:text-[var(--nx-text)]",
         danger: "border-transparent bg-[var(--nx-danger)] text-white shadow-sm hover:brightness-95",
