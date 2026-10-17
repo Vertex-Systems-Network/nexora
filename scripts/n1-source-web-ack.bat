@@ -3,7 +3,15 @@ setlocal EnableExtensions EnableDelayedExpansion
 cd /d "%~dp0.."
 
 set "BASE_URL=%~1"
-if "%BASE_URL%"=="" set "BASE_URL=http://nexora"
+if "%BASE_URL%"=="" (
+  echo [Nexora Source Web Ack] ERROR - provide this installation^'s configured http/https origin.
+  echo Usage: scripts\n1-source-web-ack.bat https://your-domain.example
+  exit /b 2
+)
+if /i not "%BASE_URL:~0,7%"=="http://" if /i not "%BASE_URL:~0,8%"=="https://" (
+  echo [Nexora Source Web Ack] ERROR - the origin must begin with http:// or https://.
+  exit /b 2
+)
 set "BASE_URL=%BASE_URL:/install/source-status=%"
 set "BASE_URL=%BASE_URL:/install=%"
 
@@ -25,7 +33,9 @@ if "!ACK_TOKEN!"=="" (
 )
 
 echo [Nexora Source Web Ack] Securely acknowledging %BASE_URL%/install/source-status ...
-curl.exe --fail --silent --show-error --no-cache ^
+curl.exe --fail --silent --show-error --connect-timeout 10 --max-time 30 ^
+  -H "Cache-Control: no-cache" ^
+  -H "Pragma: no-cache" ^
   -H "Accept: application/json" ^
   -H "X-Nexora-Activation-Token: !ACK_TOKEN!" ^
   "%BASE_URL%/install/source-status"
