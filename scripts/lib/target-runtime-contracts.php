@@ -10,6 +10,7 @@ function nexoraAnalyzeTargetRuntimeContracts(string $root): array
     $requiredFiles=[
         'scripts/target-runtime-run.php','scripts/target-runtime-run.bat','scripts/target-runtime-run.ps1','scripts/target-runtime-run.sh',
         'scripts/target-runtime-contract-verify.php','scripts/lib/target-runtime-contracts.php',
+        'scripts/lib/target-runtime-redaction.php',
     ];
     foreach($requiredFiles as $file) if(!is_file($root.'/'.$file)||filesize($root.'/'.$file)===0)$errors[]="missing target runtime artifact [{$file}]";
     foreach([
@@ -17,8 +18,27 @@ function nexoraAnalyzeTargetRuntimeContracts(string $root): array
         'dependency-contract-verify.php','dependency-runtime-verify.php','npm','typecheck','performance-build-verify.php',
         'package:discover','optimize:clear','route:list','schedule:list','nexora:database:doctor','nexora:environment:doctor',
         'nexora:filesystem:doctor','nexora:transfer:doctor','nexora:runtime:doctor','nexora:concurrency:doctor',
-        'certify-release.php','--no-package','final-closure-status.php','first_blocker','[REDACTED]',
+        'certify-release.php','--no-package','final-closure-status.php','first_blocker',
     ] as $marker) if(!str_contains($runner,$marker))$errors[]="target runtime runner missing marker [{$marker}]";
+    // The v20 runtime deliberately moved secret redaction out of the runner.
+    // Verify BOTH the live runner wiring and the actual redaction helper so
+    // moving security logic cannot silently remove the guard.
+    foreach([
+        "require_once \$root.'/scripts/lib/target-runtime-redaction.php';",
+        'nexoraTargetRedactOutput(',
+        'nexoraTargetRedactCommandParts(',
+    ] as $marker) {
+        if(!str_contains($runner,$marker)) $errors[]="target runtime runner missing redaction integration [{$marker}]";
+    }
+    $redactor=(string)@file_get_contents($root.'/scripts/lib/target-runtime-redaction.php');
+    foreach([
+        'function nexoraTargetRedactOutput(',
+        'function nexoraTargetRedactCommandParts(',
+        '[REDACTED]',
+        'PRIVATE KEY',
+    ] as $marker) {
+        if(!str_contains($redactor,$marker)) $errors[]="target runtime redaction helper missing safety contract [{$marker}]";
+    }
     if(str_contains($runner,'migrate:fresh')||str_contains($runner,'migrate:reset'))$errors[]='target runtime runner must delegate destructive migration work to certify-release.php instead of operating on the ambient database';
     if(!str_contains($runner,"if(\$full"))$errors[]='isolated destructive certification must remain explicit --full behavior';
     $bat=(string)@file_get_contents($root.'/scripts/target-runtime-run.bat');

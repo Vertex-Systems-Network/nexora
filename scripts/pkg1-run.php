@@ -8,7 +8,7 @@ require_once $root.'/scripts/lib/pkg1-closure.php';
 
 $options = [
     'operator' => '',
-    'base_url' => 'http://nexora',
+    'base_url' => trim((string) (getenv('APP_URL') ?: '')),
     'reviewer' => '',
     'max_steps' => 24,
 ];
@@ -21,7 +21,7 @@ foreach ($argv as $index => $argument) {
 }
 
 if ($options['operator'] === '' || strlen($options['operator']) > 120) {
-    fwrite(STDERR, "Usage: php scripts/pkg1-run.php --operator=\"REAL NAME\" [--base-url=http://nexora]\n");
+    fwrite(STDERR, "Usage: php scripts/pkg1-run.php --operator=\"REAL NAME\" [--base-url=https://your-domain.example]\n");
     exit(2);
 }
 if (! filter_var($options['base_url'], FILTER_VALIDATE_URL)

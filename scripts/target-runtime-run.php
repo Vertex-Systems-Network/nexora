@@ -5,6 +5,12 @@ declare(strict_types=1);
 $root=dirname(__DIR__);
 require_once $root.'/bootstrap/nexora-process-environment.php';
 require_once $root.'/scripts/lib/source-attestation.php';
+require_once $root.'/scripts/lib/target-resume-contracts.php';
+require_once $root.'/scripts/lib/target-composer.php';
+require_once $root.'/scripts/lib/target-runtime-toolchain-versions.php';
+require_once $root.'/scripts/lib/target-process-capture.php';
+require_once $root.'/scripts/lib/target-runtime-redaction.php';
+require_once $root.'/scripts/lib/target-runtime-resume-input.php';
 
 $platform=require $root.'/config/nexora.php';
 $version=(string)($platform['version']??'unknown');
@@ -25,17 +31,19 @@ $logDir=$runDir.'/steps';
 $resumeSummary=null;
 $resumeFrom=null;
 if($resumeLatest){
-    $latestPath=$base.'/latest.json';
-    if(!is_file($latestPath)){ fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: latest.json does not exist.\n"); exit(2); }
-    $latest=json_decode((string)file_get_contents($latestPath),true);
-    $resumeRunId=is_array($latest)?(string)($latest['run_id']??''):'';
+    $latest=nexoraTargetRuntimeReadResumeJson($base,'latest.json',65536);
+    if($latest===null){ fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: latest.json missing, invalid or unsafe.\n"); exit(2); }
+    $resumeRunId=is_string($latest['run_id']??null)?$latest['run_id']:'';
 }
 if($resumeRunId!==null){
     if(preg_match('/^[0-9]{8}-[0-9]{6}-[a-f0-9]{6}$/',$resumeRunId)!==1){ fwrite(STDERR,"[Nexora Target Runtime] Invalid resume run id.\n"); exit(2); }
-    $resumePath=$base.'/'.$resumeRunId.'/summary.json';
-    if(!is_file($resumePath)){ fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: summary not found for {$resumeRunId}.\n"); exit(2); }
-    $resumeSummary=json_decode((string)file_get_contents($resumePath),true);
-    if(!is_array($resumeSummary)){ fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: prior summary is invalid.\n"); exit(2); }
+    $resumeSummary=nexoraTargetRuntimeReadResumeJson($base,$resumeRunId.'/summary.json',16*1024*1024);
+    if($resumeSummary===null || ($resumeSummary['run_id']??null)!==$resumeRunId
+        || !is_array($resumeSummary['steps']??null) || !array_is_list($resumeSummary['steps'])
+        || $resumeSummary['steps']===[] || count($resumeSummary['steps'])>511){
+        fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: prior summary missing, invalid or unsafe.\n");
+        exit(2);
+    }
     $resumeFrom=$resumeRunId;
 }
 foreach([$base,$runDir,$logDir] as $dir){
@@ -46,14 +54,7 @@ foreach([$base,$runDir,$logDir] as $dir){
 }
 
 $env=NexoraBootstrapProcessEnvironment::build($root,$_ENV);
-$redact=static function(string $text):string{
-    foreach([
-        '/((?:password|passwd|secret|token|authorization|cookie|api[_-]?key)\s*[:=]\s*)([^\s\r\n]+)/i',
-        '/(Bearer\s+)[A-Za-z0-9._~+\/-]+/i',
-        '/([?&](?:token|secret|key|password)=)[^&\s]+/i',
-    ] as $pattern) $text=(string)preg_replace($pattern,'$1[REDACTED]',$text);
-    return $text;
-};
+$redact=static fn(string $text):string => nexoraTargetRedactOutput($text);
 
 $commandExists=static function(string $command) use($root,$env):bool{
     $cmd=PHP_OS_FAMILY==='Windows' ? 'where '.escapeshellarg($command) : 'command -v '.escapeshellarg($command);
@@ -87,27 +88,25 @@ $run=static function(string $id,string $label,array $parts,string $group,bool $r
     if($blocked && !$keepGoing) return false;
     if($resumeFrom!==null && isset($resumePassed[$id],$resumeSkippable[$id])){
         $message="Resumed from {$resumeFrom}; exact source/lock/dependency fingerprints match prior PASS.";
-        $record(['id'=>$id,'group'=>$group,'label'=>$label,'required'=>$required,'status'=>'pass','exit_code'=>0,'duration_seconds'=>0.0,'command'=>array_values(array_map('strval',$parts)),'resumed'=>true,'stdout'=>$message."\n",'stderr'=>'','stdout_tail'=>$message,'stderr_tail'=>'']);
+        $record(['id'=>$id,'group'=>$group,'label'=>$label,'required'=>$required,'status'=>'pass','exit_code'=>0,'duration_seconds'=>0.0,'command'=>nexoraTargetRedactCommandParts($parts),'resumed'=>true,'stdout'=>$message."\n",'stderr'=>'','stdout_tail'=>$message,'stderr_tail'=>'']);
         fwrite(STDOUT,"\n[Nexora Target Runtime] {$label}\n[RESUME] {$message}\n");
         return true;
     }
     $cmd=implode(' ',array_map(static fn($v)=>escapeshellarg((string)$v),$parts));
-    fwrite(STDOUT,"\n[Nexora Target Runtime] {$label}\n> {$cmd}\n");
+    $safeCmd=implode(' ',array_map(static fn($v)=>escapeshellarg((string)$v),nexoraTargetRedactCommandParts($parts)));
+    fwrite(STDOUT,"\n[Nexora Target Runtime] {$label}\n> {$safeCmd}\n");
     $started=microtime(true);
-    $proc=@proc_open($cmd,[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes,$root,$env,['bypass_shell'=>false]);
-    if(!is_resource($proc)){
-        $stdout='';$stderr='Unable to start process.';$exit=127;
-    }else{
-        fclose($pipes[0]);
-        $stdout=(string)stream_get_contents($pipes[1]);fclose($pipes[1]);
-        $stderr=(string)stream_get_contents($pipes[2]);fclose($pipes[2]);
-        $exit=proc_close($proc);
-    }
+    // argv execution + concurrent bounded streams avoids Unix pipe deadlocks
+    // and Windows cmd.exe quoting/injection ambiguity.
+    $result=nexoraTargetCaptureCommand(array_values(array_map('strval',$parts)),$root,$env);
+    $stdout=$result['stdout'];
+    $stderr=$result['stderr'];
+    $exit=$result['exit_code'];
     $stdout=$redact($stdout);$stderr=$redact($stderr);
     $record([
         'id'=>$id,'group'=>$group,'label'=>$label,'required'=>$required,
         'status'=>$exit===0?'pass':'fail','exit_code'=>$exit,
-        'duration_seconds'=>round(microtime(true)-$started,3),'command'=>array_values(array_map('strval',$parts)),
+        'duration_seconds'=>round(microtime(true)-$started,3),'command'=>nexoraTargetRedactCommandParts($parts),
         'stdout'=>$stdout,'stderr'=>$stderr,
         'stdout_tail'=>substr($stdout,max(0,strlen($stdout)-4000)),
         'stderr_tail'=>substr($stderr,max(0,strlen($stderr)-4000)),
@@ -126,13 +125,23 @@ $fail=static function(string $id,string $label,string $message,string $group='pr
     fwrite(STDERR,"[Nexora Target Runtime] {$label}: {$message}\n");
 };
 
+$toolVersions=nexoraTargetResumeToolchainVersions(
+    static fn(array $command):array => nexoraRunTargetCommand($command,$root,$env)
+);
 $sourceAttestation=nexoraComputeSourceAttestation($root);
+$loadedExtensions = get_loaded_extensions();
+sort($loadedExtensions, SORT_STRING);
 $environment=[
     'platform_version'=>$version,
     'source_tree_sha256'=>$sourceAttestation['tree_sha256'],
     'source_file_count'=>$sourceAttestation['file_count'],
     'php_version'=>PHP_VERSION,
     'os_family'=>PHP_OS_FAMILY,
+    'php_binary'=>PHP_BINARY,
+    'php_extensions_sha256'=>hash('sha256',implode('\n',$loadedExtensions)),
+    'composer_version'=>$toolVersions['composer_version'],
+    'node_version'=>$toolVersions['node_version'],
+    'npm_version'=>$toolVersions['npm_version'],
     'composer_available'=>$commandExists('composer'),
     'node_available'=>$commandExists('node'),
     'npm_available'=>$commandExists('npm'),
@@ -147,13 +156,31 @@ $environment=[
     'resume_from'=>$resumeFrom,
 ];
 if(is_array($resumeSummary)){
-    $priorEnv=(array)($resumeSummary['environment']??[]);
-    foreach(['platform_version','source_tree_sha256','composer_lock_sha256','package_lock_sha256','vendor_installed_sha256','node_modules_lock_sha256'] as $fingerprint){
-        if(($priorEnv[$fingerprint]??null)!==($environment[$fingerprint]??null)){
-            fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: fingerprint drift in {$fingerprint}. Start a new run.\n"); exit(2);
-        }
+    // A summary PASS label is not sufficient for reuse: the complete PASS
+    // gate sequence (or valid partial blocked sequence) and each captured
+    // step log must match its exact SHA-256 receipt. Altered evidence aborts
+    // rather than silently reusing expensive installation/frontend steps.
+    $receiptErrors=nexoraTargetRuntimeResumeReceiptErrors(
+        $resumeSummary, $base.'/'.$resumeRunId, $resumeRunId
+    );
+    if($receiptErrors!==[]){
+        fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: prior step evidence failed integrity checks. Start a new run.\n");
+        exit(2);
     }
-    foreach((array)($resumeSummary['steps']??[]) as $priorStep) if(($priorStep['status']??null)==='pass') $resumePassed[(string)($priorStep['id']??'')]=true;
+    $priorEnv=is_array($resumeSummary['environment']??null)?$resumeSummary['environment']:[];
+    $drift=nexoraTargetResumeEnvironmentDrift($priorEnv,$environment);
+    if($drift!==null){
+        fwrite(STDERR,"[Nexora Target Runtime] Cannot resume: missing or changed fingerprint {$drift}. Start a new run.\n"); exit(2);
+    }
+    // A stale summary pass label alone is insufficient to skip a step.
+    // Contradictory, duplicate or wrong-run metadata forces a clean rerun.
+    $priorArtifacts=is_array($resumeSummary['output_artifacts']??null)?$resumeSummary['output_artifacts']:[];
+    $currentArtifacts=nexoraTargetResumeOutputArtifacts($root,$environment);
+    $safeSkippable=nexoraTargetResumeSafeStepAllowlist($environment,$resumeSkippable,$priorArtifacts,$currentArtifacts);
+    // Successful isolated step receipts are not sufficient on their own:
+    // prove the complete mandatory predecessor sequence before fast reuse.
+    $safeSkippable=nexoraTargetResumeLineageAllowlist($resumeSummary,$safeSkippable);
+    $resumePassed=nexoraTargetReusableStepIds($resumeSummary,$safeSkippable,$resumeRunId);
 }
 file_put_contents($runDir.'/environment.json',json_encode($environment,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR));
 
@@ -226,7 +253,12 @@ $summary=[
     'duration_seconds'=>round(microtime(true)-$started,3),
     'first_blocker'=>$firstBlocker,
     'environment'=>$environment,
+    'output_artifacts'=>nexoraTargetResumeOutputArtifacts($root,$environment),
     'steps'=>array_map(static function(array $step):array{
+        // Tie serialized step receipts to the exact redacted logs written
+        // during execution (including resumed steps and empty stderr logs).
+        $step['stdout_sha256']=hash('sha256',(string)($step['stdout']??''));
+        $step['stderr_sha256']=hash('sha256',(string)($step['stderr']??''));
         unset($step['stdout'],$step['stderr']);
         $step['stdout_log']='steps/'.$step['id'].'.stdout.log';
         $step['stderr_log']='steps/'.$step['id'].'.stderr.log';

@@ -7,7 +7,7 @@
         "build": "php scripts/pkg1-build.php",
         "typecheck": "tsc --noEmit",
         "verify:inertia": "php scripts/inertia-frontend-contract-verify.php",
-        "test": "vitest run",
+        "test": "vitest run && node --test tests/javascript/*.test.mjs",
         "test:watch": "vitest",
         "quality": "npm run typecheck && npm run test && npm run build && npm run verify:build",
         "certify:source": "php scripts/certify-release.php --source-only",
