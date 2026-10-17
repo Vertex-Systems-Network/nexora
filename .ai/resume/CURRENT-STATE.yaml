@@ -2,30 +2,30 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 observed_main:
   branch: main
-  sha: 55c249c06621fe7dc14868b3a5740b657bcb6b7a
-  observed_at: '2026-10-01'
-  semantics: '#102 merged; clean #71 replacement source preparation only'
+  sha: 5334be7acd92c9c943c0bc1ec78209f65872e140
+  observed_at: '2026-10-17'
+  semantics: '#122 Phase 1 merged under owner waiver; Dependabot batch, #106 and #110 merged'
 active_issue:
   number: 74
 active_pr: null
-active_branch: codex/pr71-clean-replacement
+active_branch: claude/blissful-pasteur-fn8sww
 current_stage:
-  id: RUNTIME-CLOSURE-001
-  unit: SYS-RUNTIME-IDENTITY
-  status: BLOCKED
+  id: CORE-QA-001
+  unit: SYS-CORE-ADMIN-QA
+  status: ACTIVE
 current_milestone:
-  id: PR71-CLEAN-SOURCE-PREPARATION-012
-  status: VERIFYING
+  id: CORE-QA-SOURCE-001
+  status: PLANNED
 last_completed_milestone:
-  main_commit: 3439ac7e324e867046674044ba4ad1586bd963af
-  summary: '#105 auth/runtime fix; exact main CI SUCCESS'
-exact_next_safe_action: Verify clean source preparation CI; map remaining original cases; no Core QA target acceptance.
+  main_commit: 5334be7acd92c9c943c0bc1ec78209f65872e140
+  summary: 'RUNTIME-CLOSURE-001 SOURCE_CLOSED_WAIVED (WVR-NEX-PR122-PHASE1-SOURCE-CLOSE-001); #106 regressions merged'
+exact_next_safe_action: Begin CORE-QA-001 source/disposable QA; no target acceptance claimed.
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:
 - No live TLS target/five-engine acceptance established.
 - 'Historical bootstrap key non-use/rotation unresolved in #72.'
-- CORE-QA remains locked until global runtime acceptance.
+- Target acceptance follow-up RUNTIME-TARGET-ACCEPTANCE (#72, #74) open; TARGET_VERIFIED not claimed.
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
   tight_polling_forbidden: true

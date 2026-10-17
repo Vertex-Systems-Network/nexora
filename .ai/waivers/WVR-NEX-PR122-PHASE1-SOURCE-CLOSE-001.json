@@ -1,0 +1,21 @@
+{
+  "id": "WVR-NEX-PR122-PHASE1-SOURCE-CLOSE-001",
+  "scope": "Close RUNTIME-CLOSURE-001 at source level and advance active work to CORE-QA-001 source/disposable QA.",
+  "carrier": "https://github.com/Vertex-Systems-Network/nexora/pull/122",
+  "merged_head_sha": "f05171c",
+  "approver": "Repository owner (explicit consent given in-session on 2026-10-17)",
+  "authoring_agent": "Claude Code session",
+  "created_at": "2026-10-17",
+  "expires_at": "2027-01-17",
+  "waived_gates": [
+    "Hosted HTTPS target acceptance (Issue #74)",
+    "Historical exposed-key non-use/retirement evidence (Issue #72)",
+    "Independent human security sign-off for Phase 1 closure"
+  ],
+  "not_waived": [
+    "TARGET_VERIFIED is NOT claimed",
+    "Production/release readiness is NOT claimed",
+    "Issues #72 and #74 remain OPEN as RUNTIME-TARGET-ACCEPTANCE follow-up"
+  ],
+  "record": "https://github.com/Vertex-Systems-Network/nexora/pull/122#issuecomment-6237342166"
+}
