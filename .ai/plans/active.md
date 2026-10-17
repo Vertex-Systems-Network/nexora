@@ -1,4 +1,11 @@
-# PR #71 clean replacement source preparation — 2026-10-01
+# CORE-QA-001 source QA and AI-GOV-AUTOMATION-100 increments — 2026-10-17
+
+Stage CORE-QA-001 (ACTIVE, unit SYS-CORE-ADMIN-QA) after RUNTIME-CLOSURE-001 was source-closed under WVR-NEX-PR122-PHASE1-SOURCE-CLOSE-001 (#126). TARGET_VERIFIED is not claimed; #72 and #74 remain open under RUNTIME-TARGET-ACCEPTANCE.
+
+Source QA delivered: #127 profile/password/session revocation (8 tests); #128 user/role/media CRUD (10 tests) plus fix for the dropped `email_verified_at` flag in Admin user create/update; #129 site/SEO settings and login session hardening (8 tests). Remaining CORE-QA-001 item: browser verification (B04) on a disposable or provisioned target.
+
+AI-GOV-AUTOMATION-100 (unit SYS-AI-GOVERNANCE-AUTOMATION, PLANNED; work started as owner-directed early increments): #130 added `scripts/ai-control-plane-verify.php` and its architecture test; this increment adds active-plan and DoD presence checks. Workflows and policies are not modified. Rollback: revert the verifier commits. Pending: PR-to-unit traceability (requires a protected workflow change and explicit governance review).
+
 
 Owner explicitly requested starting a clean replacement after the quarantined-suite diagnostic. Base main: 55c249c06621fe7dc14868b3a5740b657bcb6b7a. Unit SYS-CORE-ADMIN-QA, source preparation only; CORE-QA-001 remains PLANNED and global target acceptance BLOCKED. No stage promotion or historical key invalidation is implied.
 

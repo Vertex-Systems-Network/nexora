@@ -112,6 +112,24 @@ function nexora_ai_control_plane_errors(string $root): array
         } else {
             $errors[] = 'CURRENT-STATE.yaml has no readable current_stage id/unit.';
         }
+
+        // The newest (first) section of the active plan must cover the current stage and its units.
+        $planPath = $ai.'/plans/active.md';
+        $plan = is_file($planPath) ? (string) file_get_contents($planPath) : '';
+        $latest = preg_split('/^(?=# )/m', ltrim($plan), 2, PREG_SPLIT_NO_EMPTY)[0] ?? '';
+        if ($latest === '') {
+            $errors[] = 'plans/active.md is missing or empty.';
+        } else {
+            foreach (array_merge([$current], (array) ($state['active_development_units'] ?? [])) as $reference) {
+                if (is_string($reference) && ! str_contains($latest, $reference)) {
+                    $errors[] = "Latest plans/active.md section does not reference {$reference}.";
+                }
+            }
+        }
+    }
+
+    if (trim((string) @file_get_contents($ai.'/quality/definition-of-done.md')) === '') {
+        $errors[] = 'quality/definition-of-done.md is missing or empty.';
     }
 
     return $errors;
