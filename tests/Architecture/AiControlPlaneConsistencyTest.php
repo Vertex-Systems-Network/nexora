@@ -28,6 +28,19 @@ final class AiControlPlaneConsistencyTest extends TestCase
         ]);
         $this->writeJson('.ai/waivers/WVR-TEST-001.json', ['id' => 'WVR-TEST-001']);
         $this->write('.ai/resume/CURRENT-STATE.yaml', "current_stage:\n  id: CORE-QA-001\n  unit: SYS-CORE-ADMIN-QA\n");
+        $this->write('.ai/plans/active.md', "# Current plan\n\nCORE-QA-001 via SYS-CORE-ADMIN-QA.\n\n# Older plan\n\nRUNTIME-CLOSURE-001.\n");
+        $this->write('.ai/quality/definition-of-done.md', "# Definition of Done\n");
+    }
+
+    public function test_stale_active_plan_and_missing_dod_are_rejected(): void
+    {
+        $this->write('.ai/plans/active.md', "# Latest plan\n\nRUNTIME-CLOSURE-001 only.\n\n# Older\n\nCORE-QA-001 SYS-CORE-ADMIN-QA\n");
+        unlink($this->fixture.'/.ai/quality/definition-of-done.md');
+
+        $errors = implode("\n", nexora_ai_control_plane_errors($this->fixture));
+        self::assertStringContainsString('Latest plans/active.md section does not reference CORE-QA-001', $errors);
+        self::assertStringContainsString('Latest plans/active.md section does not reference SYS-CORE-ADMIN-QA', $errors);
+        self::assertStringContainsString('definition-of-done.md is missing or empty', $errors);
     }
 
     protected function tearDown(): void
