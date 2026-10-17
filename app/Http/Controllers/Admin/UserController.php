@@ -83,15 +83,17 @@ final class UserController extends Controller
     {
         $data = $this->validated($request);
 
-        $user = User::query()->create([
+        $user = User::query()->make([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
             'status' => $data['status'],
             'timezone' => $data['timezone'],
             'locale' => $data['locale'],
-            'email_verified_at' => ($data['verified'] ?? false) ? now() : null,
         ]);
+        // email_verified_at is not mass assignable, so set it explicitly.
+        $user->email_verified_at = ($data['verified'] ?? false) ? now() : null;
+        $user->save();
 
         $user->roles()->sync($data['roles'] ?? []);
         $audit->record('user.created', $user, ['roles' => $data['roles'] ?? []]);
@@ -150,16 +152,18 @@ final class UserController extends Controller
             'status' => $data['status'],
             'timezone' => $data['timezone'],
             'locale' => $data['locale'],
-            'email_verified_at' => ($data['verified'] ?? false)
-                ? ($user->email_verified_at ?? now())
-                : null,
         ];
 
         if (! empty($data['password'])) {
             $payload['password'] = $data['password'];
         }
 
-        $user->update($payload);
+        $user->fill($payload);
+        // email_verified_at is not mass assignable, so set it explicitly.
+        $user->email_verified_at = ($data['verified'] ?? false)
+            ? ($user->email_verified_at ?? now())
+            : null;
+        $user->save();
         $user->roles()->sync($data['roles'] ?? []);
         $audit->record('user.updated', $user, [
             'roles' => $data['roles'] ?? [],
