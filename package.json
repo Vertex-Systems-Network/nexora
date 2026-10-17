@@ -64,7 +64,7 @@
         "dev:target-qa": "php scripts/development-readiness.php --full --tests --evidence"
     },
     "dependencies": {
-        "@inertiajs/react": "^3.6.1",
+        "@inertiajs/react": "^3.9.1",
         "@inertiajs/vite": "^3.6.1",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
