@@ -10,27 +10,44 @@ $config = require $root.'/config/nexora-performance.php';
 $platform = require $root.'/config/nexora.php';
 require_once $root.'/scripts/lib/source-attestation.php';
 require_once $root.'/scripts/lib/performance-build-leaks.php';
+require_once $root.'/scripts/lib/performance-build-manifest-contracts.php';
 $sourceAttestation=nexoraComputeSourceAttestation($root);
 $budgets = (array) ($config['budgets'] ?? []);
 $errors = [];
 $warnings = [];
 
-if (is_file($root.'/public/hot')) $errors[] = 'public/hot must not exist for a production build.';
-if (! is_file($manifestPath)) $errors[] = 'public/build/manifest.json is missing. Run npm run build first.';
+if (is_file($root.'/public/hot') || is_link($root.'/public/hot')) $errors[] = 'public/hot must not exist for a production build.';
+if (! is_file($manifestPath) || is_link($manifestPath) || is_link($build) || is_link($root.'/public')) $errors[] = 'public/build/manifest.json is missing or unsafe. Run npm run build first.';
 if ($errors !== []) {
     fwrite(STDERR, "[Nexora Build Assets] FAILED\n - ".implode("\n - ",$errors)."\n");
     exit(1);
 }
 
 try {
-    $manifest = json_decode((string) file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR);
+    // Reject oversized manifest inputs before decoding and read only a bounded
+    // prefix; a stat-only bound can be bypassed by a concurrent file change.
+    clearstatcache(true, $manifestPath);
+    $manifestBytes = @filesize($manifestPath);
+    if (!is_int($manifestBytes) || $manifestBytes < 1 || $manifestBytes > 8 * 1024 * 1024) {
+        throw new RuntimeException('Manifest size is outside supported bounds.');
+    }
+    $manifestSource = @file_get_contents($manifestPath, false, null, 0, 8 * 1024 * 1024 + 1);
+    if (!is_string($manifestSource) || strlen($manifestSource) !== $manifestBytes) {
+        throw new RuntimeException('Manifest changed while being read.');
+    }
+    $manifest = json_decode($manifestSource, true, 512, JSON_THROW_ON_ERROR);
 } catch (Throwable $e) {
-    fwrite(STDERR, "[Nexora Build Assets] Invalid manifest JSON: {$e->getMessage()}\n");
+    fwrite(STDERR, "[Nexora Build Assets] Invalid or unsafe manifest JSON: {$e->getMessage()}\n");
     exit(1);
 }
-if (! is_array($manifest)) $errors[] = 'Vite manifest must decode to an object.';
-foreach (['resources/js/app.tsx','resources/css/app.css'] as $entry) {
-    if (! array_key_exists($entry, $manifest)) $errors[] = 'Vite manifest missing entry: '.$entry;
+if (!is_array($manifest)) {
+    fwrite(STDERR, "[Nexora Build Assets] FAILED: Vite manifest must decode to an object.\n");
+    exit(1);
+}
+$manifestErrors = nexoraPerformanceBuildManifestErrors($root, $manifest);
+if ($manifestErrors !== []) {
+    fwrite(STDERR, "[Nexora Build Assets] FAILED\n - ".implode("\n - ", $manifestErrors)."\n");
+    exit(1);
 }
 
 $files = [];

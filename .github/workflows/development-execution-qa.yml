@@ -26,6 +26,9 @@ jobs:
       APP_ENV: testing
       APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
       NEXORA_INSTALLER_BYPASS: 'true'
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
       DB_CONNECTION: mysql
       DB_HOST: 127.0.0.1
       DB_PORT: '3306'
@@ -62,7 +65,7 @@ jobs:
           EOF
 
       - name: Set up PHP 8.3
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
           php-version: '8.3'
           extensions: fileinfo, mbstring, openssl, pdo, pdo_mysql, zip
@@ -70,7 +73,7 @@ jobs:
           tools: composer:v2
 
       - name: Set up Node.js 22
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: '22'
           package-manager-cache: false
@@ -100,11 +103,124 @@ jobs:
       - name: Execute full development QA and write evidence
         run: php scripts/development-readiness.php --full --tests --evidence
 
+      - name: Real Chromium installer browser smoke on disposable origin
+        env:
+          APP_ENV: local
+          APP_URL: http://127.0.0.1:8973
+          NEXORA_INSTALLER_BYPASS: 'false'
+        run: |
+          set -euo pipefail
+          CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          export CHROME_PATH
+          # No real target, persistent database, external host or exposed credentials.
+          test -f public/build/manifest.json
+          php -S 127.0.0.1:8973 -t public public/index.php > /tmp/nexora-installer-browser.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail --max-time 4 http://127.0.0.1:8973/install > /dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "Disposable Nexora installer did not become ready."
+            tail -30 /tmp/nexora-installer-browser.log
+            exit 1
+          fi
+          node tests/browser/installer-chromium-smoke.mjs http://127.0.0.1:8973/install
+
+      - name: Authenticated Chromium Admin Health navigation on disposable CI database
+        env:
+          APP_ENV: testing
+          APP_URL: http://127.0.0.1:8974
+          NEXORA_INSTALLER_BYPASS: 'true'
+          NEXORA_CI_BROWSER_E2E: '1'
+          NEXORA_CI_BROWSER_EMAIL: browser.qa@nexora.invalid
+          SESSION_DRIVER: file
+          # This isolated browser fixture uses HTTP loopback, not HTTPS hosting.
+          # Production sessions remain Secure on real HTTPS targets.
+          SESSION_SECURE_COOKIE: 'false'
+          CACHE_STORE: array
+        run: |
+          set -euo pipefail
+          export NEXORA_CI_BROWSER_PASSWORD
+          NEXORA_CI_BROWSER_PASSWORD="$(openssl rand -hex 24)"
+          CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          export CHROME_PATH
+          test "$DB_DATABASE" = "nexora_testing"
+          test "$APP_ENV" = "testing"
+          # Only the job-owned ephemeral MySQL service is eligible for destructive fixture setup.
+          php artisan migrate:fresh --force >/tmp/nexora-admin-e2e-migrate.log 2>&1 || {
+            tail -30 /tmp/nexora-admin-e2e-migrate.log
+            exit 1
+          }
+          php tests/browser/seed-disposable-admin.php
+          # No explicit router script: PHP must serve public/build assets as static files
+          # and fall back to index.php only for Inertia routes.
+          php -S 127.0.0.1:8974 -t public > /tmp/nexora-admin-browser.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail --max-time 4 http://127.0.0.1:8974/login > /dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "Disposable Nexora Admin login did not become ready."
+            tail -40 /tmp/nexora-admin-browser.log
+            exit 1
+          fi
+          # Guard against a router accidentally sending Vite JS to Laravel (HTML/404).
+          js_asset="$(node -e 'const m=require("./public/build/manifest.json"); const e=m["resources/js/app.tsx"]; if(!e?.file)process.exit(1); process.stdout.write("/build/"+e.file)')"
+          curl --silent --show-error --fail --max-time 8 "http://127.0.0.1:8974${js_asset}" -o /tmp/nexora-admin-browser-entry.js
+          if ! grep -qE 'createInertiaApp|\.jsx' /tmp/nexora-admin-browser-entry.js; then
+            echo "Browser entrypoint was not served as a real JavaScript asset."
+            exit 1
+          fi
+          rm -f /tmp/nexora-admin-browser-entry.js
+          node tests/browser/admin-health-chromium-smoke.mjs http://127.0.0.1:8974/login
+
       - name: Upload development QA evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: nexora-development-readiness-${{ github.event.pull_request.head.sha || github.sha }}
           path: storage/app/nexora/qa/development-readiness.json
           if-no-files-found: warn
           retention-days: 14
+
+  windows-bootstrap-qa:
+    name: Windows PowerShell bootstrap QA
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact pull-request source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          clean: true
+      - name: Native PowerShell parser and portability contract
+        shell: pwsh
+        run: |
+          $path = Join-Path $PWD 'scripts/bootstrap-installer.ps1'
+          $tokens = $null
+          $parseErrors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$tokens, [ref]$parseErrors)
+          if ($parseErrors.Count -ne 0) {
+            $parseErrors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+          $scriptText = Get-Content $path -Raw
+          if ($scriptText -notmatch '(?m)^if \(\$envContent -notmatch .*\) \{$') { throw 'APP_KEY detection block is malformed' }
+          if (([regex]::Matches($scriptText, 'npm ci --no-audit --no-fund')).Count -ne 1) { throw 'npm ci must execute once' }
+          if (([regex]::Matches($scriptText, 'npm run build')).Count -ne 1) { throw 'npm build must execute once' }
+          if ($scriptText.Contains('key:generate --force')) { throw 'Bootstrap must never forcibly rotate existing keys' }
+          if ($scriptText.Contains('nexora.test')) { throw 'Bootstrap must not require a local-server hostname' }
+          Write-Host 'PASS: Windows-native PowerShell parse, idempotent setup and hostname portability'

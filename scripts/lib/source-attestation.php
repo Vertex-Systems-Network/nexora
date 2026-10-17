@@ -20,7 +20,7 @@ function nexoraSourceAttestationRootFiles(): array
 {
     return [
         'artisan','composer.json','package.json','phpunit.xml','tsconfig.json','vite.config.ts',
-        '.env.example','.env.production.example','SECURITY.md','ARCHITECTURE.md','CONTRIBUTING.md',
+        '.env.example','.env.production.example','.env.testing','SECURITY.md','ARCHITECTURE.md','CONTRIBUTING.md',
     ];
 }
 
