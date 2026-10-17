@@ -8,4 +8,11 @@ describe("Nexora button boundary", () => {
         expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
         expect(screen.getByRole("button", { name: "Save" })).toHaveAttribute("aria-busy", "true");
     });
+
+    it("renders primary actions with the shared brand gradient fill", () => {
+        render(<UntitledButton>Create</UntitledButton>);
+        expect(screen.getByRole("button", { name: "Create" })).toHaveClass("nx-brand-fill");
+        render(<UntitledButton variant="secondary">Cancel</UntitledButton>);
+        expect(screen.getByRole("button", { name: "Cancel" })).not.toHaveClass("nx-brand-fill");
+    });
 });

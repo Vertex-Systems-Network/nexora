@@ -25,6 +25,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   box-shadow: 0 0 0 3px rgb(var(--nx-brand-rgb) / 0.18);
 }
 
+.nx-brand-fill {
+  background-color: var(--nx-brand-600);
+  background-image: var(--nx-brand-gradient);
+}
+
 .nx-scrollbar { scrollbar-width: thin; scrollbar-color: var(--nx-border-strong) transparent; }
 .nx-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
 .nx-scrollbar::-webkit-scrollbar-track { background: transparent; }

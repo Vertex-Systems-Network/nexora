@@ -6,6 +6,10 @@
   --nx-brand-rgb: 124 58 237;
   --nx-brand: var(--nx-brand-600);
   --nx-brand-soft: rgb(var(--nx-brand-rgb) / 0.10);
+  /* VSN redesign accent: the configurable brand colour blends into blue → teal. */
+  --nx-accent-mid: #6188c6;
+  --nx-accent-end: #5ac8d6;
+  --nx-brand-gradient: linear-gradient(90deg, var(--nx-brand-600) 0%, var(--nx-accent-mid) 55%, var(--nx-accent-end) 100%);
 
   --nx-bg: #f8fafc;
   --nx-surface: #ffffff;
@@ -50,11 +54,11 @@
 }
 
 :root.dark {
-  --nx-bg: #0b0d12;
-  --nx-surface: #11141b;
-  --nx-surface-subtle: #151922;
-  --nx-surface-muted: #1c2230;
-  --nx-surface-elevated: #191e29;
+  --nx-bg: #000000;
+  --nx-surface: #0f1118;
+  --nx-surface-subtle: #131620;
+  --nx-surface-muted: #1c2030;
+  --nx-surface-elevated: #171a24;
   --nx-border: #242a36;
   --nx-border-strong: #343c4b;
   --nx-text: #f8fafc;
