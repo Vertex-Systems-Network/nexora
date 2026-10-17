@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-base_url="${1:-http://nexora}"
+base_url="${1:-}"
+if [[ ! "$base_url" =~ ^https?:// ]]; then
+  printf "Usage: scripts/n1-source-web-ack.sh https://your-domain.example (or an explicitly configured local HTTP origin)\n" >&2
+  exit 2
+fi
 base_url="${base_url%/install/source-status}"
 base_url="${base_url%/install}"
 
@@ -18,7 +22,9 @@ if [[ ! "$token" =~ ^[a-f0-9]{64}$ ]]; then
 fi
 
 printf '[Nexora Source Web Ack] Securely acknowledging %s/install/source-status ...\n' "$base_url"
-curl --fail --silent --show-error \
+curl --fail --silent --show-error --proto '=http,https' --connect-timeout 10 --max-time 30 \
+  -H 'Cache-Control: no-cache' \
+  -H 'Pragma: no-cache' \
   -H 'Accept: application/json' \
   -H "X-Nexora-Activation-Token: $token" \
   "$base_url/install/source-status"

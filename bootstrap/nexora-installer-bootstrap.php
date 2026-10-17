@@ -56,7 +56,11 @@ $parseEnvFile = static function (string $path): array {
 
 $exportEnv = static function (string $key, string $value, bool $overwrite = false): void {
     $existing = getenv($key);
-    if (! $overwrite && $existing !== false && $existing !== '') {
+    // PHPUnit and some SAPIs inject environment settings via superglobals
+    // without calling putenv(). Treat these as explicit operator/test input,
+    // not as an absent setting to replace with .env.example defaults.
+    $injected = $_ENV[$key] ?? null;
+    if (! $overwrite && (($existing !== false && $existing !== '') || (is_string($injected) && $injected !== ''))) {
         return;
     }
     putenv($key.'='.$value);
@@ -134,7 +138,30 @@ $exportEnv('APP_DEBUG', is_file($installedLock) ? 'false' : 'true');
 $exportEnv('APP_URL', 'http://localhost');
 $exportEnv('APP_LOCALE', 'en');
 
-if (! is_file($installedLock)) {
+// Uninstalled public web requests need file-backed bootstrap state; isolated
+// PHPUnit workers explicitly opt into disposable test drivers. Preserve their
+// APP_ENV/testing + NEXORA_INSTALLER_BYPASS pair without weakening real installs.
+$testEnvironment = strtolower(trim((string) (getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? '')))) === 'testing';
+$testBypass = filter_var(getenv('NEXORA_INSTALLER_BYPASS') ?: ($_ENV['NEXORA_INSTALLER_BYPASS'] ?? false), FILTER_VALIDATE_BOOL);
+// The real-browser QA uses multiple independent HTTP requests. Allow file
+// sessions only for an explicitly opted-in, disposable loopback + test-DB
+// fixture; ordinary PHPUnit still uses isolated, nonpersistent array sessions.
+$browserTestOrigin = (string) (getenv('APP_URL') ?: ($_ENV['APP_URL'] ?? ''));
+$browserTestDatabase = (string) (getenv('DB_DATABASE') ?: ($_ENV['DB_DATABASE'] ?? ''));
+$browserTestHost = (string) (getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? ''));
+$browserSessionOptIn = $testEnvironment && $testBypass
+    && (getenv('NEXORA_CI_BROWSER_E2E') ?: ($_ENV['NEXORA_CI_BROWSER_E2E'] ?? '')) === '1'
+    && (getenv('DB_CONNECTION') ?: ($_ENV['DB_CONNECTION'] ?? '')) === 'mysql'
+    && $browserTestDatabase === 'nexora_testing'
+    && in_array($browserTestHost, ['127.0.0.1', 'localhost'], true)
+    && preg_match('~^http://127\\.0\\.0\\.1:[0-9]{2,5}/?$~', $browserTestOrigin) === 1;
+if ($testEnvironment && $testBypass) {
+    // Ordinary PHPUnit workers must never share persistent session/cache
+    // state. Only the explicitly guarded browser fixture needs file sessions.
+    $exportEnv('SESSION_DRIVER', $browserSessionOptIn ? 'file' : 'array', true);
+    $exportEnv('CACHE_STORE', 'array', true);
+    $exportEnv('QUEUE_CONNECTION', 'sync', true);
+} elseif (! is_file($installedLock)) {
     $exportEnv('SESSION_DRIVER', 'file', true);
     $exportEnv('CACHE_STORE', 'file', true);
     $exportEnv('QUEUE_CONNECTION', 'sync', true);
