@@ -2,30 +2,30 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 observed_main:
   branch: main
-  sha: 3439ac7e324e867046674044ba4ad1586bd963af
-  observed_at: "2026-09-30"
-  semantics: "#105 merged; release certification 36742999910 SUCCESS"
+  sha: 55c249c06621fe7dc14868b3a5740b657bcb6b7a
+  observed_at: "2026-10-08"
+  semantics: "PR #102 resulting main; operator-provided local Laragon runtime handoff/readiness/login evidence is recorded on Issues #72/#74."
 active_issue:
-  number: 74
-active_pr: 102
-active_branch: codex/nine-point-closure-batch
+  number: 72
+active_pr: null
+active_branch: null
 current_stage:
   id: RUNTIME-CLOSURE-001
   unit: SYS-RUNTIME-IDENTITY
   status: BLOCKED
 current_milestone:
-  id: NINE-POINT-EVIDENCE-RECONCILIATION-011
-  status: VERIFYING
+  id: HISTORICAL-KEY-USE-AUDIT-012
+  status: WAITING_EXTERNAL
 last_completed_milestone:
-  main_commit: 3439ac7e324e867046674044ba4ad1586bd963af
-  summary: "#105 auth/runtime fix; exact main CI SUCCESS"
-exact_next_safe_action: "Verify updated #102 plan/evidence CI, integrate green; actual target/key/release remain blocked."
+  main_commit: 55c249c06621fe7dc14868b3a5740b657bcb6b7a
+  summary: "Local Laragon W03/W04/readiness and same-origin login reported PASS by operator; source remains SOURCE_DONE."
+exact_next_safe_action: "Obtain a secret-safe read-only match/no-match audit for effective APP_KEY and APP_PREVIOUS_KEYS on the actual target, then inventory other affected installations."
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:
-  - "No live TLS target/five-engine acceptance established."
-  - "Historical bootstrap key non-use/rotation unresolved in #72."
-  - "CORE-QA remains locked until global runtime acceptance."
+  - "Issue #72: historical exposed bootstrap-key use scope and safe retirement/non-use evidence unresolved."
+  - "Hosted/production, multi-database, and final release acceptance not established by local Laragon evidence."
+  - "CORE-QA remains locked until RUNTIME-CLOSURE-001 is TARGET_VERIFIED."
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
   tight_polling_forbidden: true
@@ -41,12 +41,11 @@ progress:
 readme_progress_sync:
   required_every_material_milestone: true
 state_drift:
-  detected: false
+  detected: true
   notes:
-    - "Prior #1 future-carrier and pending #104 descriptions are historical."
-    - "Exact #105 source/main CI and disposable runtime verified; updated #102 plan CI remains separate."
-
+    - "Protected main and canonical status files still require exact-head reconciliation through this proposed control-plane PR."
+    - "All observed open PR workflows are green, but review submissions are absent; none is asserted merge-approved."
 future_target_input:
   placeholder: "<operator-provided-target-path>"
-  availability: NOT_PROVISIONED
-  semantics: "Future operator input only; disposable loopback QA is not a provisioned live target."
+  availability: LOCAL_TARGET_PROVIDED; HOSTED_TARGET_UNVERIFIED
+  semantics: "Local Laragon evidence is operator-provided; path is intentionally omitted. Do not infer hosted/production acceptance."

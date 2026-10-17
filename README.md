@@ -2,9 +2,9 @@
 
 **Current development candidate:** `1.0.0-rc.94` — installer protocol `v5.29`.
 
-> **Canonical current status (2026-09-30):** protected main `3439ac7e324e867046674044ba4ad1586bd963af` includes merged #103 source reconciliation, #104 SQLite provenance fix and #105 authentication throttle repair. Exact resulting-main release certification `36742999910` **SUCCESS**. Source CI: 480 backend tests / 4607 assertions + 6 frontend tests PASS. Source is verified; live Target/Release remain **BLOCKED**.
+> **Canonical current status (2026-10-08):** protected main `55c249c06621fe7dc14868b3a5740b657bcb6b7a`; source remains `SOURCE_DONE`. Operator-provided local Laragon `1.0.0-rc.94` evidence reports current readiness, CLI↔web handoff, and same-origin TLS-verified `/login` PASS. Target/Release remain **BLOCKED** on the historical bootstrap-key audit/retirement (#72); hosted/production acceptance is not established.
 
-> **Nine-point batch:** source reconciliation and disposable SQLite install/readiness/CLI↔web identity/login/recovery PASS. Approval-enforcement proposal #87 closed **NOT_PLANNED** under the owner decision. Historical key acceptance #72, live target #74 and final-release prerequisites remain incomplete. [Measured nine-point table](docs/nine-point-closure-batch.md) and [runtime proof](docs/stable-runtime-verification-2026-09-30.md). This PR reconciles the plan; it does not complete the product.
+> **Runtime closure:** local W03/W04/readiness/login evidence is now reported by the operator and recorded on [Issue #74](https://github.com/Vertex-Systems-Network/nexora/issues/74). Issue #72 still blocks stage promotion until historical key-use scope and safe retirement/non-use are accepted. CORE-QA stays locked.
 
 ## AI development startup gate
 
@@ -22,14 +22,14 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## AI-Native Progress Ledger
 
-- **Observed:** 2026-09-30
-- **Last verified source baseline:** `3439ac7e324e867046674044ba4ad1586bd963af` — protected-main release certification `36742999910` **SUCCESS**
+- **Observed:** 2026-10-08
+- **Last verified source baseline:** `55c249c06621fe7dc14868b3a5740b657bcb6b7a` — source-state main; no current target/release certification is inferred from this documentation reconciliation
 - **Product acceptance stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Current source batch:** nine-point plan/evidence reconciliation in #102; #103/#104/#105 integrated and exact source/main CI verified
-- **Current deployment:** disposable SQLite/loopback HTTP tested; no live target provisioned
-- **Open remediation Issues:** #72 historical bootstrap-key non-use/rotation; #74 live runtime acceptance; #87 closed NOT_PLANNED
-- **Open planning PR:** #102 is current plan reconciliation; #1 closed; #103/#104/#105 merged
-- **Next safe action:** verify and integrate the updated #102 plan/evidence; target/key/release acceptance remains separate.
+- **Current source batch:** source implementation remains `SOURCE_DONE`; no new runtime/source code is part of this state reconciliation
+- **Current deployment:** operator-provided local Windows Laragon `1.0.0-rc.94`; readiness, CLI↔web identity and same-origin `/login` reported PASS; hosted/production acceptance unverified
+- **Open remediation Issues:** #72 historical bootstrap-key use/retirement; #74 local runtime evidence recorded; #114 UI defects are deferred until the active stage allows them
+- **Open PR intake:** #106–#113 remain open; all have green exact-head workflows observed, but review submissions are absent. #106 browser acceptance is pending; #113 changes installed source identity; none is merged by this reconciliation.
+- **Next safe action:** perform the secret-safe read-only active/previous-key audit and affected-install inventory for #72; do not rotate APP_KEY without a data/session recovery plan.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 
@@ -41,7 +41,7 @@ This rule applies on every AI development start, including work resumed from an 
   npm run runtime:recover -- --target="<operator-provided-target-path>" --apply --confirm=RECOVER-RUNTIME
   ```
 - The orchestrator fails closed, writes a machine-readable target receipt, and reports `target_verification_complete=true` only when compatibility, final readiness/current receipt, exact web identity and `/login` all pass.
-- Source status is **SOURCE_DONE**; target status remains **BLOCKED** because no fresh target execution output has been accepted after the current source closure.
+- Source status remains **SOURCE_DONE**. Operator-provided local Laragon evidence now reports fresh target readiness, CLI↔web identity and same-origin TLS-verified `/login` PASS; target status remains **BLOCKED** on Issue #72 historical key-use/retirement and broader hosted/release acceptance.
 - Credential rotation after PR #71 is a separate real target/provider action and cannot be completed by repository edits.
 - `CORE-QA-001` MUST NOT start until `RUNTIME-CLOSURE-001` is `TARGET_VERIFIED`.
 
@@ -58,11 +58,10 @@ Hosted source/CI evidence does **not** establish target verification, credential
 
 ## Current next sequence
 
-1. On the operator-provided target environment, run the governed `runtime:recover` apply command and retain its non-secret machine-readable receipt.
-2. Accept target closure only if final readiness/current receipt, exact target↔web proof and authoritative same-origin `/login` are all PASS.
-3. Rotate the credential exposed by PR #71 through an authorized target/provider path and retain non-secret evidence.
-4. Reconcile W07 canonical state only after both target evidence and credential rotation are accepted.
-5. Mark `RUNTIME-CLOSURE-001` TARGET_VERIFIED only after all gates pass; only then start `CORE-QA-001`.
+1. Establish the historical key-use scope and compare the actual target's effective APP_KEY plus APP_PREVIOUS_KEYS without exposing values.
+2. If the exposed key is accepted by an active or previous-key slot, plan encrypted-data/session recovery before rotating or retiring it; retain only non-secret evidence.
+3. Keep CORE-QA locked until Issue #72 and all runtime closure gates are accepted.
+4. Then reconcile W07 and advance to `CORE-QA-001`; defer Issue #114 until its registered stage is active.
 
 ## Core stack
 

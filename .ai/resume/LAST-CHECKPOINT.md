@@ -1,3 +1,19 @@
+## Operator-provided local runtime closure evidence — 2026-10-08
+
+Protected main at reconciliation: `55c249c06621fe7dc14868b3a5740b657bcb6b7a`. User-supplied Laragon target output is recorded on [Issue #74](https://github.com/Vertex-Systems-Network/nexora/issues/74).
+
+- Target scope: local Windows Laragon installation, Nexora `1.0.0-rc.94`; machine-local path intentionally omitted.
+- W03 CLI↔web handoff: operator output reports CLI source current, critical files 37/37 and runtime classes 34/34; web acknowledgement current/valid for the same activation nonce and fingerprints, SAPI `cgi-fcgi`.
+- W04 readiness: final post-install assertion reports `status=pass`, `ready=true`, `runtime_ready=true`, `receipt_current=true`, `errors=[]`.
+- Same-origin login: operator reports `/login` HTTP 200 with TLS verification enabled and redirects not followed; Issue #74 records this as the proven origin.
+- Evidence class: operator-provided, not independently inspected from this workspace. This supports local W03/W04/login only; no hosted/production, multi-database, or release acceptance is claimed.
+- Issue #72 remains OPEN: historical bootstrap-key use/retirement, affected-install inventory, and encrypted-data/session recovery are not established. Do not rotate APP_KEY blindly or publish key values/fingerprints.
+- Next safe action: read-only audit of the active effective key and previous-key acceptance on the actual target, plus affected-install inventory; plan safe retirement/recovery only if an affected key is found. Keep CORE-QA locked.
+
+Earlier checkpoint statements that no current local installation or W03/W04/login evidence existed are superseded for this local Laragon target only; their historical scope is retained.
+
+---
+
 # Nine-point evidence reconciliation — 2026-09-30
 
 Protected main `3439ac7e324e867046674044ba4ad1586bd963af` after #105: exact-main certification `36742999910` SUCCESS; #105 release/development QA SUCCESS; 480 backend tests / 4607 assertions + 6 frontend tests PASS. Exact published #105 head disposable installation, readiness, CLI↔web proof, recovery, login/admin and drift-negative checks PASS. #87 closed NOT_PLANNED per owner approval-rule removal; no independent-review implementation claimed. Current #102 plan is reconciled against completed source work. #72 historical key and #74 actual target acceptance remain OPEN; global runtime/release stage BLOCKED and Core QA locked. Nine-point acceptance table: `docs/nine-point-closure-batch.md`. Earlier checkpoints are historical. Final #102 CI pending at preparation; later results belong on PR/Issue to avoid status-only head churn.
