@@ -16,7 +16,7 @@ foreach ($argv as $argument) {
     }
 }
 if ($baseUrl === '') {
-    $baseUrl = rtrim((string) (getenv('APP_URL') ?: 'http://nexora'), '/');
+    $baseUrl = rtrim((string) (getenv('APP_URL') ?: ''), '/');
 }
 
 $source = nexoraComputeSourceAttestation($root);

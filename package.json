@@ -7,7 +7,7 @@
         "build": "php scripts/pkg1-build.php",
         "typecheck": "tsc --noEmit",
         "verify:inertia": "php scripts/inertia-frontend-contract-verify.php",
-        "test": "vitest run",
+        "test": "vitest run && node --test tests/javascript/*.test.mjs",
         "test:watch": "vitest",
         "quality": "npm run typecheck && npm run test && npm run build && npm run verify:build",
         "certify:source": "php scripts/certify-release.php --source-only",
@@ -64,13 +64,13 @@
         "dev:target-qa": "php scripts/development-readiness.php --full --tests --evidence"
     },
     "dependencies": {
-        "@inertiajs/react": "^3.6.1",
-        "@inertiajs/vite": "^3.6.1",
+        "@inertiajs/react": "^3.9.1",
+        "@inertiajs/vite": "^3.9.1",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "react-aria-components": "^1.20.0",
         "tailwind-merge": "^3.6.0",
-        "lucide-react": "^1.47.0",
+        "lucide-react": "^1.55.0",
         "@internationalized/date": "^3.9.0"
     },
     "devDependencies": {
@@ -78,15 +78,15 @@
         "@testing-library/dom": "^10.4.1",
         "@testing-library/jest-dom": "^7.0.1",
         "@testing-library/react": "^16.3.2",
-        "@types/node": "^24.0.0",
+        "@types/node": "^25.9.9",
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
-        "@vitejs/plugin-react": "^6.0.5",
+        "@vitejs/plugin-react": "^6.1.2",
         "jsdom": "^26.1.0",
         "laravel-vite-plugin": "^3.1.0",
         "tailwindcss": "^4.3.0",
         "typescript": "^7.0.2",
-        "vite": "^8.3.1",
+        "vite": "^8.3.4",
         "vitest": "5.0.1"
     },
     "engines": {
