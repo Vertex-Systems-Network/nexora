@@ -74,8 +74,14 @@ New finding (MEDIUM): the account cap was checked before failures were counted, 
 
 Fixed: `verifyForLogin` now increments the account bucket **before** verifying and refuses if the count exceeds the cap; only a success clears it. Test: `test_attempt_is_counted_before_verification_runs`, which asserts the counter is already 1 when the user row is read. It fails against 1501531.
 
+## Independent review round 3 (head 8043345, APPROVE)
+
+The burst race is closed for the web, API and disable paths, with no regressions. This follow-up is documentation only.
+
 ## Residual risk
 
+- Cache store: the account cap relies on atomic cache increments (Redis, Memcached or database). With the `file` or `array` stores in a multi-worker setup, increments can be lost, so production should use an atomic store.
+- Counter reset: a genuine user's successful login clears the counter, which gives an attacker at most 10 extra guesses per real login.
 - Account lockout: anyone who knows a password can trigger the 10-failure, 15-minute MFA lock. This is accepted as the price of the brute-force cap.
 - With file or cookie session drivers, other sessions cannot be enumerated for revocation on enrolment; the remember token is still rotated.
 - TOTP can be phished in real time. Passkeys, planned for a later increment, are the phishing-resistant fix.
@@ -109,4 +115,4 @@ Fixed: `verifyForLogin` now increments the account bucket **before** verifying a
 - [x] Critical/high threats have mitigations.
 - [x] Required tests planned.
 - [x] Residual risk documented.
-- [ ] Independent security review on the exact head SHA. Required before merge.
+- [x] Independent security review: round 1 CHANGES_REQUIRED (3f1a20d), round 2 CHANGES_REQUIRED (1501531), round 3 APPROVE (8043345). Code is unchanged since then; only this doc was updated.
