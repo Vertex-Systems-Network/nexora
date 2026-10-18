@@ -1,3 +1,25 @@
+# Control-plane alignment — 2026-10-18 (docs only)
+
+This pass reconciles records with merged reality after #126–#138. It touches only `.ai`/markdown files; no code, schema, workflow or policy rule changes.
+
+Current stage: ADMIN-UX-CLOSURE-001 (ACTIVE, unit SYS-ADMIN-DESIGN-SYSTEM). Remaining work there is per-page Figma polish (forms, cards, empty/error states), verified with local screenshots before each push.
+
+Stage and unit statuses after alignment:
+
+| Stage | Status |
+|---|---|
+| RUNTIME-CLOSURE-001 | SOURCE_CLOSED_WAIVED. Target acceptance moves to RUNTIME-TARGET-ACCEPTANCE (#72/#74). |
+| CORE-QA-001 / SYS-CORE-ADMIN-QA | ACTIVE. Source QA done (#127–#129); browser B04 pending a target. |
+| AI-GOV-AUTOMATION-100 / SYS-AI-GOVERNANCE-AUTOMATION | ACTIVE. Verifier merged (#130–#131); PR→unit traceability pending a protected-workflow review. |
+| MOBILE-AUTH-API-100 / SYS-MOBILE-AUTH-API | SOURCE_DONE (#138). |
+| MOBILE-APPS-100 / APP-MOBILE-CLIENT | PLANNED, ON HOLD by the owner (plan only, no code). |
+
+The non-canonical `IN_PROGRESS` status was replaced with the lifecycle value `ACTIVE`.
+
+Known out-of-order item: SECURITY-BASELINE-200 (MFA/passkeys) has not started, although MOBILE-AUTH-API-100 already ships password-only exchange. This is recorded as residual risk and is the recommended next stage after ADMIN-UX-CLOSURE-001.
+
+Rollback: revert this docs commit.
+
 # MOBILE-AUTH-API-100 mobile sign-in token API — 2026-10-18
 
 Stage MOBILE-AUTH-API-100 (ACTIVE, unit SYS-MOBILE-AUTH-API, critical). The owner prioritised iOS/Android apps; the decision is to keep Laravel as the single backend and add native clients (APP-MOBILE-CLIENT, MOBILE-APPS-100, PLANNED). CORE-QA-001 source QA is delivered (#127–#129); browser item B04 remains pending under RUNTIME-TARGET-ACCEPTANCE. Threat model: `.ai/security/threat-models/MOBILE-AUTH-API-100.md`.

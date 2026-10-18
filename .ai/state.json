@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 10,
+  "control_plane_revision": 11,
   "control_plane_branch": "claude/blissful-pasteur-fn8sww",
   "base_branch": "main",
   "base_sha": "5334be7acd92c9c943c0bc1ec78209f65872e140",
@@ -13,15 +13,22 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 75,
   "current_stage": {
-    "id": "MOBILE-AUTH-API-100",
-    "name": "Mobile Sign-in Token API",
+    "id": "ADMIN-UX-CLOSURE-001",
+    "name": "Admin UX Closure",
     "status": "ACTIVE",
-    "scope_note": "Owner-prioritised 2026-10-18 for iOS/Android apps. CORE-QA-001 source QA delivered (#127-#129); its browser item B04 stays pending under RUNTIME-TARGET-ACCEPTANCE. Threat model: .ai/security/threat-models/MOBILE-AUTH-API-100.md."
+    "scope_note": "Aligned 2026-10-18. Tokens, brand, typography, density, components and installer merged (#132-#137); remaining: per-page Figma polish. Parallel partial stages: CORE-QA-001 (browser B04 pending target) and AI-GOV-AUTOMATION-100 (PR-to-unit traceability pending). MOBILE-APPS-100 on hold by owner."
   },
   "active_development_units": [
-    "SYS-MOBILE-AUTH-API"
+    "SYS-ADMIN-DESIGN-SYSTEM"
   ],
   "completed_control_stages": [
+    {
+      "id": "MOBILE-AUTH-API-100",
+      "status": "SOURCE_DONE",
+      "carrier": "#138",
+      "date": "2026-10-18",
+      "evidence": "784 tests PASS; independent review round 2 APPROVE on 7aa46d1. TARGET_VERIFIED not claimed."
+    },
     {
       "id": "RUNTIME-CLOSURE-001",
       "status": "SOURCE_CLOSED_WAIVED",
@@ -67,7 +74,10 @@
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "Execute CORE-QA-001 source/disposable QA building on the #106 regression suite (merged b7f3431); run browser verification (B04) once a disposable or provisioned target exists.",
+    "ADMIN-UX-CLOSURE-001: finish per-page Figma polish (forms, cards, empty/error states) with local screenshots before each push.",
+    "SECURITY-BASELINE-200: threat-model-first MFA/passkeys, CSP and AppSec CI (MFA gap also listed as residual risk in MOBILE-AUTH-API-100).",
+    "AI-GOV-AUTOMATION-100: PR-to-unit traceability (protected workflow change; needs explicit governance review).",
+    "CORE-QA-001 browser verification (B04) once a disposable or provisioned target exists.",
     "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
     "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",

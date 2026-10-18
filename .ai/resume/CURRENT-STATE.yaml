@@ -2,24 +2,24 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 observed_main:
   branch: main
-  sha: 5334be7acd92c9c943c0bc1ec78209f65872e140
-  observed_at: '2026-10-17'
-  semantics: '#122 Phase 1 merged under owner waiver; Dependabot batch, #106 and #110 merged'
+  sha: db207374995407a4dff3c081c8846a8e557f75d2
+  observed_at: '2026-10-18'
+  semantics: '#126-#138 merged (state, core QA, AI-gov verifier, admin UX, installer rebrand, mobile sign-in API); no open PRs'
 active_issue:
   number: 74
 active_pr: null
 active_branch: claude/blissful-pasteur-fn8sww
 current_stage:
-  id: MOBILE-AUTH-API-100
-  unit: SYS-MOBILE-AUTH-API
+  id: ADMIN-UX-CLOSURE-001
+  unit: SYS-ADMIN-DESIGN-SYSTEM
   status: ACTIVE
 current_milestone:
-  id: CORE-QA-SOURCE-001
+  id: ADMIN-UX-PAGE-POLISH
   status: PLANNED
 last_completed_milestone:
-  main_commit: 5334be7acd92c9c943c0bc1ec78209f65872e140
-  summary: 'RUNTIME-CLOSURE-001 SOURCE_CLOSED_WAIVED (WVR-NEX-PR122-PHASE1-SOURCE-CLOSE-001); #106 regressions merged'
-exact_next_safe_action: Begin CORE-QA-001 source/disposable QA; no target acceptance claimed.
+  main_commit: db207374995407a4dff3c081c8846a8e557f75d2
+  summary: 'MOBILE-AUTH-API-100 SOURCE_DONE (#138, independent review APPROVE); MOBILE-APPS-100 on hold by owner'
+exact_next_safe_action: ADMIN-UX-CLOSURE-001 per-page Figma polish, verified locally before each push; no target acceptance claimed.
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:

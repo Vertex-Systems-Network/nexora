@@ -32,12 +32,12 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 | # | Stage | Scope | Train | Status | Depends on |
 |---:|---|---|---|---|---|
 | 0 | `AI-GOV-001` | deterministic `.ai` control plane, registry, capability map, handoff and planning rules | Builder Beta | SOURCE_DONE on AI branch | — |
-| 1 | `RUNTIME-CLOSURE-001` | rc.93 live repair, compatibility/readiness proof, rc.94 clean-runtime closure | Builder Beta | ACTIVE / BLOCKED ON REAL TARGET | AI-GOV-001 |
-| 2 | `CORE-QA-001` | login/session, direct routes, Admin boot, users/roles/settings/media/core CRUD | Builder Beta | PLANNED | RUNTIME-CLOSURE-001 |
-| 3 | `AI-GOV-AUTOMATION-100` | machine-check `.ai` registries/stages/plans/DoD/state/handoff so CI rejects unplanned/inconsistent work | Builder Beta | NEW_REQUIRED | CORE-QA-001 |
+| 1 | `RUNTIME-CLOSURE-001` | rc.93 live repair, compatibility/readiness proof, rc.94 clean-runtime closure | Builder Beta | SOURCE_CLOSED_WAIVED (#122/#126; target acceptance → #72/#74) | AI-GOV-001 |
+| 2 | `CORE-QA-001` | login/session, direct routes, Admin boot, users/roles/settings/media/core CRUD | Builder Beta | ACTIVE — source QA done (#127–#129); browser B04 pending target | RUNTIME-CLOSURE-001 |
+| 3 | `AI-GOV-AUTOMATION-100` | machine-check `.ai` registries/stages/plans/DoD/state/handoff so CI rejects unplanned/inconsistent work | Builder Beta | ACTIVE — verifier merged (#130–#131); PR→unit traceability pending | CORE-QA-001 |
 | 4 | `RESEARCH-DISCOVERY-100` | ResearchBrief/VOC/problem-vs-solution validation, current market/standards evidence, baseline, alternatives and CTQ inputs for substantial new work | Builder Beta | NEW_REQUIRED | AI-GOV-AUTOMATION-100 |
 | 5 | `QUALITY-GOVERNANCE-100` | Quality OS, proportional DMADV/DMAIC, CTQs, SIPOC/FMEA/root-cause/control-plan traceability and outcome-over-output policy | Builder Beta | NEW_REQUIRED | RESEARCH-DISCOVERY-100, AI-GOV-AUTOMATION-100 |
-| 6 | `ADMIN-UX-CLOSURE-001` | shared Admin design system, responsive behavior, loading/error/destructive states, accessibility baseline | Builder Beta | PLANNED | CORE-QA-001 |
+| 6 | `ADMIN-UX-CLOSURE-001` | shared Admin design system, responsive behavior, loading/error/destructive states, accessibility baseline | Builder Beta | ACTIVE — tokens/brand/density/installer merged (#132–#137); per-page Figma polish pending | CORE-QA-001 |
 | 7 | `SECURITY-BASELINE-200` | MFA/passkeys plan, CSP/browser hardening, continuous AppSec CI, secrets/dependency scanning, authorization/tenancy matrices, early threat-model program | Builder Beta | NEW_REQUIRED / CRITICAL | AI-GOV-AUTOMATION-100, CORE-QA-001, QUALITY-GOVERNANCE-100 |
 | 8 | `ARCH-BOUNDARY-100` | reconcile architecture constitution with implementation; repository/persistence boundaries; broaden architecture tests | Builder Beta | NEW_REQUIRED | SECURITY-BASELINE-200 |
 
@@ -136,8 +136,8 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 | 72 | `A11Y-CERT-100` | accessibility/international certification including keyboard, screen-reader, contrast and RTL | Production | LEGACY_PLANNED | PERF-CWV-CERT-100, I18N-200 |
 | 73 | `RELEASE-CERT-100` | final exact-source dependency/browser/DB/security/payment-enabled/backup/restore/HA/package/reliability/Flow evidence certification | Production | DEFERRED_CERTIFICATION | A11Y-CERT-100, SENTINEL-200, DR-PLATFORM-100, DELIVERY-EXCELLENCE-100, FLOW-INTELLIGENCE-200 |
 | 74 | `N2-STABLE-100` | stable production platform release | Production | BLOCKED | RELEASE-CERT-100 |
-| 75 | `MOBILE-AUTH-API-100` | native-app sign-in token exchange, self profile and device-token revocation on the existing scoped API-token layer (no new auth stack); owner-prioritised 2026-10-18 for iOS/Android apps | Builder Beta | NEW_REQUIRED / CRITICAL | CORE-QA-001 |
-| 76 | `MOBILE-APPS-100` | iOS/Android client apps (React Native/Expo) consuming `/api/v1` with VSN design tokens | Pro | NEW_REQUIRED | MOBILE-AUTH-API-100, ADMIN-UX-CLOSURE-001 |
+| 75 | `MOBILE-AUTH-API-100` | native-app sign-in token exchange, self profile and device-token revocation on the existing scoped API-token layer (no new auth stack); owner-prioritised 2026-10-18 for iOS/Android apps | Builder Beta | SOURCE_DONE (#138, independent review APPROVE) | CORE-QA-001 |
+| 76 | `MOBILE-APPS-100` | iOS/Android client apps (React Native/Expo) consuming `/api/v1` with VSN design tokens | Pro | PLANNED — ON HOLD by owner 2026-10-18 | MOBILE-AUTH-API-100, ADMIN-UX-CLOSURE-001 |
 
 ## External first-party package track
 
