@@ -1,3 +1,10 @@
+# In-progress stage completion — 2026-10-18
+
+- CORE-QA-001 is SOURCE_DONE: B04 passed on a disposable local install (61/61 routes HTTP 200, 0 JS errors).
+- ADMIN-UX-CLOSURE-001 is SOURCE_DONE.
+- `.gitignore` now covers runtime-generated paths.
+- The current stage is AI-GOV-AUTOMATION-100. Its remaining PR→unit traceability work needs owner approval because it changes protected workflows.
+
 # Control-plane alignment — 2026-10-18
 
 The records now match merged reality (#126–#138); this was docs only.

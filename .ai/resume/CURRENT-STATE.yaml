@@ -10,16 +10,16 @@ active_issue:
 active_pr: null
 active_branch: claude/blissful-pasteur-fn8sww
 current_stage:
-  id: ADMIN-UX-CLOSURE-001
-  unit: SYS-ADMIN-DESIGN-SYSTEM
+  id: AI-GOV-AUTOMATION-100
+  unit: SYS-AI-GOVERNANCE-AUTOMATION
   status: ACTIVE
 current_milestone:
-  id: ADMIN-UX-PAGE-POLISH
+  id: AI-GOV-PR-TRACEABILITY
   status: PLANNED
 last_completed_milestone:
   main_commit: db207374995407a4dff3c081c8846a8e557f75d2
   summary: 'MOBILE-AUTH-API-100 SOURCE_DONE (#138, independent review APPROVE); MOBILE-APPS-100 on hold by owner'
-exact_next_safe_action: ADMIN-UX-CLOSURE-001 per-page Figma polish, verified locally before each push; no target acceptance claimed.
+exact_next_safe_action: Await owner approval for the protected-workflow PR-to-unit traceability change; otherwise start SECURITY-BASELINE-200 threat model. No target acceptance claimed.
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:

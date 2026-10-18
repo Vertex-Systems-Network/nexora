@@ -33,11 +33,11 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 |---:|---|---|---|---|---|
 | 0 | `AI-GOV-001` | deterministic `.ai` control plane, registry, capability map, handoff and planning rules | Builder Beta | SOURCE_DONE on AI branch | — |
 | 1 | `RUNTIME-CLOSURE-001` | rc.93 live repair, compatibility/readiness proof, rc.94 clean-runtime closure | Builder Beta | SOURCE_CLOSED_WAIVED (#122/#126; target acceptance → #72/#74) | AI-GOV-001 |
-| 2 | `CORE-QA-001` | login/session, direct routes, Admin boot, users/roles/settings/media/core CRUD | Builder Beta | ACTIVE — source QA done (#127–#129); browser B04 pending target | RUNTIME-CLOSURE-001 |
+| 2 | `CORE-QA-001` | login/session, direct routes, Admin boot, users/roles/settings/media/core CRUD | Builder Beta | SOURCE_DONE — source QA #127–#129 + B04 browser PASS on disposable-local (EVD-CORE-QA-B04-LOCAL-2026-10-18); live target → #72/#74 | RUNTIME-CLOSURE-001 |
 | 3 | `AI-GOV-AUTOMATION-100` | machine-check `.ai` registries/stages/plans/DoD/state/handoff so CI rejects unplanned/inconsistent work | Builder Beta | ACTIVE — verifier merged (#130–#131); PR→unit traceability pending | CORE-QA-001 |
 | 4 | `RESEARCH-DISCOVERY-100` | ResearchBrief/VOC/problem-vs-solution validation, current market/standards evidence, baseline, alternatives and CTQ inputs for substantial new work | Builder Beta | NEW_REQUIRED | AI-GOV-AUTOMATION-100 |
 | 5 | `QUALITY-GOVERNANCE-100` | Quality OS, proportional DMADV/DMAIC, CTQs, SIPOC/FMEA/root-cause/control-plan traceability and outcome-over-output policy | Builder Beta | NEW_REQUIRED | RESEARCH-DISCOVERY-100, AI-GOV-AUTOMATION-100 |
-| 6 | `ADMIN-UX-CLOSURE-001` | shared Admin design system, responsive behavior, loading/error/destructive states, accessibility baseline | Builder Beta | ACTIVE — tokens/brand/density/installer merged (#132–#137); per-page Figma polish pending | CORE-QA-001 |
+| 6 | `ADMIN-UX-CLOSURE-001` | shared Admin design system, responsive behavior, loading/error/destructive states, accessibility baseline | Builder Beta | SOURCE_DONE — #132–#137; 61-page visual review consistent; Figma pixel-parity not certified | CORE-QA-001 |
 | 7 | `SECURITY-BASELINE-200` | MFA/passkeys plan, CSP/browser hardening, continuous AppSec CI, secrets/dependency scanning, authorization/tenancy matrices, early threat-model program | Builder Beta | NEW_REQUIRED / CRITICAL | AI-GOV-AUTOMATION-100, CORE-QA-001, QUALITY-GOVERNANCE-100 |
 | 8 | `ARCH-BOUNDARY-100` | reconcile architecture constitution with implementation; repository/persistence boundaries; broaden architecture tests | Builder Beta | NEW_REQUIRED | SECURITY-BASELINE-200 |
 

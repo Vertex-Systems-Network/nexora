@@ -1,0 +1,29 @@
+{
+  "evidence_id": "EVD-CORE-QA-B04-LOCAL-2026-10-18",
+  "stage": "CORE-QA-001",
+  "unit": "SYS-CORE-ADMIN-QA",
+  "item": "B04 browser verification",
+  "evidence_class": "tested",
+  "target_class": "disposable-local",
+  "not_a_target_claim": "Disposable local SQLite install (php artisan serve on 127.0.0.1:8123, NEXORA_INSTALLER_BYPASS, seeded demo data). This is not TARGET_VERIFIED; live TLS target acceptance remains under RUNTIME-TARGET-ACCEPTANCE (#72/#74).",
+  "source": {
+    "application_code_sha": "db207374995407a4dff3c081c8846a8e557f75d2",
+    "note": "The run executed on branch head 328821c, which differs from db20737 only in .ai/markdown documentation (no app/resources/routes/database/config changes)."
+  },
+  "method": {
+    "browser": "Playwright Chromium (pre-installed, headless), viewport 1440x900",
+    "steps": [
+      "Open /login, fill admin@nexora.test / seeded password, submit via the real form (cookie + CSRF), wait for /admin.",
+      "Visit every GET admin route without route parameters (61 routes from `php artisan route:list --path=admin --method=GET`, excluding the export download).",
+      "Record HTTP status and uncaught page errors (pageerror) per route; capture a full-viewport screenshot per route for visual review."
+    ]
+  },
+  "result": {
+    "routes_checked": 61,
+    "http_200": 61,
+    "uncaught_js_errors": 0,
+    "visual_review": "Consistent VSN design scale across pages. /admin/saved-views and /admin/search are JSON endpoints used by components (redirect back without parameters), not pages. The theme preview 404 was traced to locally deleted runtime assets (public/nexora-themes) and re-verified as rendering after reseed; .gitignore now protects that runtime path.",
+    "verdict": "PASS (disposable-local)"
+  },
+  "recorded_at": "2026-10-18"
+}

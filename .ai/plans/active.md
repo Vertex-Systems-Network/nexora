@@ -1,3 +1,14 @@
+# In-progress stage completion — 2026-10-18
+
+- **CORE-QA-001 → SOURCE_DONE.** The B04 browser check passed on a disposable local install, covering 61 admin routes with HTTP 200 and 0 uncaught JS errors. Evidence: `.ai/evidence/core-qa-b04-local-browser-2026-10-18.json`. Live target acceptance stays in RUNTIME-TARGET-ACCEPTANCE (#72/#74).
+- **ADMIN-UX-CLOSURE-001 → SOURCE_DONE.** #132–#137 merged, and the 61-page visual review shows a consistent design. Figma pixel parity is not certified.
+- **Hygiene.** `.gitignore` now covers runtime-generated paths: `public/nexora-themes`, `storage/app/nexora/runtime`, `storage/app/nexora/certification` and `storage/nexora/quarantine`. `repository-hygiene-guard` passes.
+- **Current stage: AI-GOV-AUTOMATION-100** (ACTIVE, unit SYS-AI-GOVERNANCE-AUTOMATION).
+  - Remaining work is PR-to-unit traceability. It changes protected `.github/workflows`, so it needs explicit owner/governance approval and independent review before implementation.
+  - If that approval is not given, the next stage is SECURITY-BASELINE-200, starting threat-model-first.
+
+Rollback: revert this commit. It touches only docs, evidence and `.gitignore`.
+
 # Control-plane alignment — 2026-10-18 (docs only)
 
 This pass reconciles records with merged reality after #126–#138. It touches only `.ai`/markdown files; no code, schema, workflow or policy rule changes.

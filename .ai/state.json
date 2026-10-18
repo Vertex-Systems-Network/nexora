@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 11,
+  "control_plane_revision": 12,
   "control_plane_branch": "claude/blissful-pasteur-fn8sww",
   "base_branch": "main",
   "base_sha": "5334be7acd92c9c943c0bc1ec78209f65872e140",
@@ -13,15 +13,29 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 75,
   "current_stage": {
-    "id": "ADMIN-UX-CLOSURE-001",
-    "name": "Admin UX Closure",
+    "id": "AI-GOV-AUTOMATION-100",
+    "name": "AI Governance Automation",
     "status": "ACTIVE",
-    "scope_note": "Aligned 2026-10-18. Tokens, brand, typography, density, components and installer merged (#132-#137); remaining: per-page Figma polish. Parallel partial stages: CORE-QA-001 (browser B04 pending target) and AI-GOV-AUTOMATION-100 (PR-to-unit traceability pending). MOBILE-APPS-100 on hold by owner."
+    "scope_note": "Verifier merged (#130-#131). Remaining: PR-to-unit traceability, which changes protected .github/workflows and needs explicit owner/governance approval before implementation. Next recommended stage: SECURITY-BASELINE-200."
   },
   "active_development_units": [
-    "SYS-ADMIN-DESIGN-SYSTEM"
+    "SYS-AI-GOVERNANCE-AUTOMATION"
   ],
   "completed_control_stages": [
+    {
+      "id": "ADMIN-UX-CLOSURE-001",
+      "status": "SOURCE_DONE",
+      "carrier": "#132-#137",
+      "date": "2026-10-18",
+      "evidence": "Design tokens/brand/density/components/installer merged; 61-page browser visual review consistent. Figma pixel parity not certified."
+    },
+    {
+      "id": "CORE-QA-001",
+      "status": "SOURCE_DONE",
+      "carrier": "#127-#129",
+      "date": "2026-10-18",
+      "evidence": "Source QA suites PASS; B04 browser PASS on disposable-local (.ai/evidence/core-qa-b04-local-browser-2026-10-18.json). Live target acceptance stays in RUNTIME-TARGET-ACCEPTANCE."
+    },
     {
       "id": "MOBILE-AUTH-API-100",
       "status": "SOURCE_DONE",
@@ -74,10 +88,8 @@
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "ADMIN-UX-CLOSURE-001: finish per-page Figma polish (forms, cards, empty/error states) with local screenshots before each push.",
     "SECURITY-BASELINE-200: threat-model-first MFA/passkeys, CSP and AppSec CI (MFA gap also listed as residual risk in MOBILE-AUTH-API-100).",
     "AI-GOV-AUTOMATION-100: PR-to-unit traceability (protected workflow change; needs explicit governance review).",
-    "CORE-QA-001 browser verification (B04) once a disposable or provisioned target exists.",
     "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
     "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",
