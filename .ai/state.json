@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 9,
+  "control_plane_revision": 10,
   "control_plane_branch": "claude/blissful-pasteur-fn8sww",
   "base_branch": "main",
   "base_sha": "5334be7acd92c9c943c0bc1ec78209f65872e140",
@@ -13,13 +13,13 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 75,
   "current_stage": {
-    "id": "CORE-QA-001",
-    "name": "Super Admin + Core Application Functional QA",
+    "id": "MOBILE-AUTH-API-100",
+    "name": "Mobile Sign-in Token API",
     "status": "ACTIVE",
-    "scope_note": "Source and disposable-fixture QA only; live target acceptance stays in RUNTIME-TARGET-ACCEPTANCE."
+    "scope_note": "Owner-prioritised 2026-10-18 for iOS/Android apps. CORE-QA-001 source QA delivered (#127-#129); its browser item B04 stays pending under RUNTIME-TARGET-ACCEPTANCE. Threat model: .ai/security/threat-models/MOBILE-AUTH-API-100.md."
   },
   "active_development_units": [
-    "SYS-CORE-ADMIN-QA"
+    "SYS-MOBILE-AUTH-API"
   ],
   "completed_control_stages": [
     {
@@ -207,7 +207,7 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-10-17",
+  "updated_at": "2026-10-18",
   "historical_current_target": {
     "environment": "operator-provided target environment",
     "path": "<operator-provided-target-path>",
