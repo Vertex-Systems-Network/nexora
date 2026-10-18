@@ -38,8 +38,8 @@
         "app/Nexora/Installation/SystemRequirementChecker.php": "70e85a94f67233ff852ee2cd1303147429d0455d7f274bfad17860b6783808af",
         "app/Nexora/Security/Password/PasswordStrengthEvaluator.php": "c35a95f369e24c860345a63ee8f32a79a123b5232a04149e3d1c698e8e091222",
         "app/Providers/NexoraServiceProvider.php": "08c4aa28eafa0f694941e7f256e93bb61848d66d9847d52087ac0386f073ba22",
-        "resources/views/install/index.blade.php": "6b1e833de12516fbe8d222e453fa4f4d388fd5ee081782aeaec2a5d3efdcc5bd",
-        "resources/views/install/runtime-handoff.blade.php": "9e1fdd0e7fd9aaaed1511a8a0af059939e6b0c5237f889b611bf01501801f256",
+        "resources/views/install/index.blade.php": "11d4d3be8964073ca763b90ad29c05515031fd0860faf6b56d27b372ce7d282a",
+        "resources/views/install/runtime-handoff.blade.php": "c70b3c67c4bdaa7d8491537c87666749cc2a80da2595ff7171904eb520997098",
         "routes/web.php": "119eb2c1cf9b931057b18c321011383012fbf438dc1fd816e6d2a208ad073fbf"
     }
 }
