@@ -10,11 +10,11 @@ active_issue:
 active_pr: null
 active_branch: claude/blissful-pasteur-fn8sww
 current_stage:
-  id: AI-GOV-AUTOMATION-100
-  unit: SYS-AI-GOVERNANCE-AUTOMATION
+  id: SECURITY-BASELINE-200
+  unit: SYS-MFA-TOTP
   status: ACTIVE
 current_milestone:
-  id: AI-GOV-PR-TRACEABILITY
+  id: SECURITY-MFA-TOTP
   status: PLANNED
 last_completed_milestone:
   main_commit: db207374995407a4dff3c081c8846a8e557f75d2

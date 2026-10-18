@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Nexora\Security\Audit\AuditManager;
 use App\Nexora\Security\Session\SessionSecurityManager;
+use App\Nexora\Security\TwoFactor\TotpAuthenticator;
+use App\Nexora\Security\TwoFactor\TwoFactorManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,13 +50,32 @@ final class ProfileController extends Controller
             ],
             'sessions' => $sessions,
             'sessionDriver' => config('session.driver'),
+            'twoFactor' => $this->twoFactorProps($user),
+            'recoveryCodes' => $request->session()->get('two_factor_recovery_codes'),
             'locales' => array_map(static fn (array $meta, string $code): array => [
                 'code' => $code,
                 'label' => trim((string) ($meta['name'] ?? $meta['native'] ?? $code).((string) ($meta['country'] ?? '') !== '' ? ' — '.(string) $meta['country'] : '')),
                 'flag' => (string) ($meta['flag'] ?? '🌐'),
-            'flagUrl' => (string) ($meta['flag_asset'] ?? ''),
+                'flagUrl' => (string) ($meta['flag_asset'] ?? ''),
             ], (array) config('localization.supported', ['en' => ['native' => 'English']]), array_keys((array) config('localization.supported', ['en' => ['native' => 'English']]))),
         ]);
+    }
+
+    /** @return array{enabled:bool,pending:bool,setupKey:?string,otpauthUri:?string,recoveryRemaining:int} */
+    private function twoFactorProps(User $user): array
+    {
+        $manager = app(TwoFactorManager::class);
+        $enabled = $manager->enabled($user);
+        $pending = ! $enabled && is_string($user->two_factor_secret) && $user->two_factor_secret !== '';
+
+        // The setup key is only ever shown to its owner while enrolment is unconfirmed.
+        return [
+            'enabled' => $enabled,
+            'pending' => $pending,
+            'setupKey' => $pending ? $user->two_factor_secret : null,
+            'otpauthUri' => $pending ? app(TotpAuthenticator::class)->provisioningUri((string) $user->two_factor_secret, $user->email, (string) config('app.name', 'Nexora')) : null,
+            'recoveryRemaining' => $enabled ? $manager->remainingRecoveryCodes($user) : 0,
+        ];
     }
 
     public function update(Request $request, AuditManager $audit): RedirectResponse

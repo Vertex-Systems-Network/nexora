@@ -18,6 +18,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 
     /** @var array<int, string>|null */
     private ?array $resolvedPermissionSlugs = null;
+
     /** @var array<int, string>|null */
     private ?array $resolvedRoleSlugs = null;
 
@@ -34,6 +35,9 @@ final class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_last_used_step',
     ];
 
     protected function casts(): array
@@ -42,6 +46,10 @@ final class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
+            'two_factor_last_used_step' => 'integer',
         ];
     }
 

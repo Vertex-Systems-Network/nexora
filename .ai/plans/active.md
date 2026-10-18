@@ -1,3 +1,22 @@
+# SECURITY-BASELINE-200 increment 1 — TOTP MFA — 2026-10-18
+
+Stage SECURITY-BASELINE-200 is ACTIVE (unit SYS-MFA-TOTP, risk critical). The owner prioritised it ahead of the AI-GOV-AUTOMATION-100 traceability work (still awaiting approval) and ahead of QUALITY-GOVERNANCE-100. This closes the MFA gap recorded as a residual risk in MOBILE-AUTH-API-100.
+
+- **Threat model:** `.ai/security/threat-models/SECURITY-BASELINE-200-MFA-TOTP.md`.
+- **Method:** DMADV.
+- **Design:** native RFC 6238 TOTP with no new dependency.
+  - Secret and recovery codes in encrypted columns.
+  - Enrolment must be confirmed before it is enforced.
+  - Pending web challenge with a 5-minute lifetime and a 5-attempt cap.
+  - Replay protection through the last used time step.
+  - Mobile token exchange requires `code` for users who have MFA.
+- **Data:** adds four nullable columns to `users` (`two_factor_secret`, `two_factor_recovery_codes`, `two_factor_confirmed_at`, `two_factor_last_used_step`). No backfill; the default is off.
+- **Graph:** two new edges, login → MFA challenge and token exchange → MFA check. Evidence is declared and tested only.
+- **Performance:** one HMAC per verification.
+- **Rollback:** revert the PR, or null the columns for a single user.
+- **Critical manifest:** `routes/web.php` is hash-pinned, so the manifest will be resealed with the repository script.
+- **Before merge:** independent review on the exact head.
+
 # In-progress stage completion — 2026-10-18
 
 - **CORE-QA-001 → SOURCE_DONE.** The B04 browser check passed on a disposable local install, covering 61 admin routes with HTTP 200 and 0 uncaught JS errors. Evidence: `.ai/evidence/core-qa-b04-local-browser-2026-10-18.json`. Live target acceptance stays in RUNTIME-TARGET-ACCEPTANCE (#72/#74).

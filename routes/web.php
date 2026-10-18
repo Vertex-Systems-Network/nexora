@@ -58,6 +58,7 @@ use App\Http\Controllers\Public\MediaController as PublicMediaController;
 use App\Http\Controllers\Public\RssFeedController;
 use App\Http\Controllers\Public\NewsletterSubscriptionController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ProfileTwoFactorController;
 use App\Http\Controllers\Admin\Publishing\ArticleController;
 use App\Http\Controllers\Admin\Publishing\AuthorProfileController;
 use App\Http\Controllers\Admin\Publishing\SeriesController;
@@ -83,6 +84,7 @@ use App\Http\Controllers\Admin\System\ModuleRuntimeController;
 use App\Http\Controllers\Admin\System\RuntimeSyncController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -144,6 +146,9 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('throttle:5,1,auth:')->name('password.email');
     Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password', [NewPasswordController::class, 'store'])->middleware('throttle:5,1,auth:')->name('password.store');
+    // SECURITY-BASELINE-200 / SYS-MFA-TOTP: second login step; shares the auth: throttle bucket.
+    Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])->name('two-factor.challenge');
+    Route::post('/two-factor-challenge', [TwoFactorChallengeController::class, 'store'])->middleware('throttle:5,1,auth:')->name('two-factor.challenge.store');
 });
 
 Route::middleware('auth')->group(function (): void {
@@ -177,6 +182,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin',
     Route::put('/profile', [ProfileController::class, 'update'])->middleware('permission:profile.manage')->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'password'])->middleware('permission:profile.manage')->name('profile.password');
     Route::delete('/profile/sessions', [ProfileController::class, 'destroyOtherSessions'])->middleware('permission:sessions.manage')->name('profile.sessions.destroy');
+    Route::post('/profile/two-factor', [ProfileTwoFactorController::class, 'store'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.two-factor.store');
+    Route::post('/profile/two-factor/confirm', [ProfileTwoFactorController::class, 'confirm'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.two-factor.confirm');
+    Route::post('/profile/two-factor/recovery-codes', [ProfileTwoFactorController::class, 'recoveryCodes'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.two-factor.recovery');
+    Route::delete('/profile/two-factor', [ProfileTwoFactorController::class, 'destroy'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.two-factor.destroy');
 
     Route::get('/audit', AuditLogController::class)->middleware('permission:audit.view')->name('audit.index');
     Route::get('/notifications', [NotificationController::class, 'index'])->middleware('permission:notifications.view')->name('notifications.index');
