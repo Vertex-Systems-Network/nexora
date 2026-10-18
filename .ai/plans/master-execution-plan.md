@@ -312,6 +312,8 @@ request / discovered gap
 
 Moving the active cursor requires explicit user priority change.
 
+Current cursor (2026-10-18): `SECURITY-BASELINE-200` / unit `SEC-BASELINE`. The single ordered path is `.ai/roadmap/stages.md` → "Execution flow"; `.ai/state.json` `execution_sequence` mirrors its next steps.
+
 ## Development AI must not
 
 - disable controls to make tests/scores pass;

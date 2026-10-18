@@ -1,3 +1,11 @@
+# Handoff — single execution flow — 2026-10-18
+
+- #140 merged (a197149), and SYS-MFA-TOTP is SOURCE_DONE. Its independent review approved 8043345; the commits after that are a MySQL test-quoting fix and restored pinned auth source contracts.
+- The plan now follows one flow: `.ai/roadmap/stages.md` → "Execution flow". The rows are renumbered 0–76 in execution order and exactly one stage is `▶ CURRENT`.
+- Current: SECURITY-BASELINE-200 (unit SEC-BASELINE). Next increments: passkeys → CSP → AppSec CI → authz/tenancy matrices.
+- Then: AI-GOV-AUTOMATION-100 (owner approval) → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ARCH-BOUNDARY-100 → Track B closures.
+- On hold: MOBILE-APPS-100. Side track: RUNTIME-TARGET-ACCEPTANCE (#72/#74).
+
 # SECURITY-BASELINE-200 increment 1 — TOTP MFA — 2026-10-18
 
 SYS-MFA-TOTP adds native RFC 6238 MFA:

@@ -29,8 +29,9 @@ The current working branch reconciles protected main `9d1c89eed4fc67d4e1a3798992
 ## 1. Current checkpoint
 
 > 2026-10-18 update:
-> - Canonical state is `.ai/state.json` revision 11. The active stage is `ADMIN-UX-CLOSURE-001`.
-> - Merged: #126–#138. MOBILE-AUTH-API-100 is SOURCE_DONE. MOBILE-APPS-100 is on hold.
+> - Canonical state is `.ai/state.json` revision 14. The active stage is `SECURITY-BASELINE-200` (unit `SEC-BASELINE`).
+> - Merged: #126–#140. MOBILE-AUTH-API-100 and SYS-MFA-TOTP (TOTP MFA, #140) are SOURCE_DONE. MOBILE-APPS-100 is on hold.
+> - The plan follows one execution flow: `.ai/roadmap/stages.md` → "Execution flow".
 > - No target evidence is claimed and Target Power is unchanged.
 > - The detail below is the last full checkpoint and stays historical until re-certified.
 
@@ -209,14 +210,16 @@ Only carrier `449ea9b3d5c0d2ad176031a1849ed80c349e0023` / run `33563871904` is c
 
 ## 3. Current active roadmap cursor
 
-`.ai/state.json` and this dashboard agree:
+`.ai/state.json` and this dashboard agree (2026-10-18):
 
 ```text
-Stable stage: COLLAB-200
-Registered unit: SYS-COLLABORATION
-Legacy alias: N1.13 — Collaboration
-Status: PARTIAL (source exists; bounded real-target verification pending)
+Stable stage: SECURITY-BASELINE-200
+Registered unit: SEC-BASELINE (increment 1 SYS-MFA-TOTP SOURCE_DONE, #140)
+Next: AI-GOV-AUTOMATION-100 (owner approval) → RESEARCH-DISCOVERY-100 → QUALITY-GOVERNANCE-100 → ARCH-BOUNDARY-100
+Order: .ai/roadmap/stages.md "Execution flow"
 ```
+
+Historical (superseded) cursor: `COLLAB-200` / `SYS-COLLABORATION` / N1.13. The text below describes that earlier target-QA slice.
 
 Canonical dependencies: `SITE-BUILDER-200`, `RELEASE-WORKFLOW-200`, `PORTAL-200`. They remain distinct evidence/product claims and are not silently satisfied by the user-authorized legacy target-QA execution order.
 
@@ -366,6 +369,13 @@ RELEASE POWER   25.0%
 ---
 
 ## 10. Exact next action
+
+```text
+Current (2026-10-18): owner selects the next SECURITY-BASELINE-200 increment (passkeys / CSP / AppSec CI)
+or approves AI-GOV-AUTOMATION-100 traceability. Target Power unchanged.
+```
+
+Historical next-action list (N1.13 era):
 
 ```text
 A. Require GitHub-hosted governance PASS on the synchronized N1.12-closure/N1.13-cursor dev head.
