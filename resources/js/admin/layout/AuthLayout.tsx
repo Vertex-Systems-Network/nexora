@@ -25,8 +25,8 @@ export function AuthLayout({ children, title, description }: { children: ReactNo
                     <p className="mt-10 text-xs leading-5 text-[var(--nx-text-muted)]">Protected by Nexora foundation security controls. Activity may be audited.</p>
                 </div>
             </section>
-            <aside className="relative hidden overflow-hidden border-s border-[var(--nx-border)] bg-[#0c0d12] lg:block" aria-hidden="true">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(124,58,237,.35),transparent_34%),radial-gradient(circle_at_80%_75%,rgba(59,130,246,.18),transparent_30%)]" />
+            <aside className="relative hidden overflow-hidden border-s border-[var(--nx-border)] bg-[#000000] lg:block" aria-hidden="true">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(98,91,168,.38),transparent_34%),radial-gradient(circle_at_80%_75%,rgba(90,200,214,.16),transparent_30%)]" />
                 <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.06)_1px,transparent_1px)] [background-size:48px_48px]" />
                 <div className="relative flex h-full items-end p-12">
                     <div className="max-w-xl">

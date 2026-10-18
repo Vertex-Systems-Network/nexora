@@ -27,7 +27,7 @@ final class SettingsController extends Controller
                 'defaultTimezone' => $settings->get('app.default_timezone', 'UTC'),
                 'defaultLocale' => $settings->get('app.default_locale', (string) config('localization.default', 'en')),
                 'theme' => $settings->get('appearance.theme', 'system'),
-                'primary' => $settings->get('appearance.primary', '#7C3AED'),
+                'primary' => $settings->get('appearance.primary', '#625BA8'),
                 'density' => $settings->get('appearance.density', 'comfortable'),
                 'radius' => $settings->get('appearance.radius', 'medium'),
             ],
