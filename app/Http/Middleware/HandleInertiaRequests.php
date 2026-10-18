@@ -69,7 +69,7 @@ final class HandleInertiaRequests extends Middleware
                 ],
                 'auth' => ['user' => null],
                 'adminNavigation' => [],
-                'appearance' => ['theme' => 'system', 'primary' => '#7C3AED', 'density' => 'comfortable', 'radius' => 'medium'],
+                'appearance' => ['theme' => 'system', 'primary' => '#625BA8', 'density' => 'comfortable', 'radius' => 'medium'],
                 'notifications' => ['unread' => 0],
                 'enterprise' => ['current' => null, 'available' => [], 'memberRole' => null, 'impersonation' => null],
                 'localization' => $this->localization(),
@@ -105,7 +105,7 @@ final class HandleInertiaRequests extends Middleware
                 : [],
             'appearance' => [
                 'theme' => $settings->get('appearance.theme', 'system'),
-                'primary' => $settings->get('appearance.primary', '#7C3AED'),
+                'primary' => $settings->get('appearance.primary', '#625BA8'),
                 'density' => $settings->get('appearance.density', 'comfortable'),
                 'radius' => $settings->get('appearance.radius', 'medium'),
             ],

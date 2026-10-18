@@ -1,3 +1,6 @@
+import "@fontsource-variable/plus-jakarta-sans/wght.css";
+import "@fontsource-variable/bricolage-grotesque/wght.css";
+import "@fontsource-variable/jetbrains-mono/wght.css";
 import "../css/app.css";
 import { createInertiaApp } from "@inertiajs/react";
 import { AppErrorBoundary } from "@admin/providers/AppErrorBoundary";

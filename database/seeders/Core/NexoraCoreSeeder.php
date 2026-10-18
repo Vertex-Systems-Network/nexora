@@ -163,7 +163,7 @@ final class NexoraCoreSeeder extends Seeder
         $settings = [
             ['group' => 'app', 'key' => 'app.name', 'value' => 'Nexora', 'type' => 'string'],
             ['group' => 'appearance', 'key' => 'appearance.theme', 'value' => 'system', 'type' => 'string'],
-            ['group' => 'appearance', 'key' => 'appearance.primary', 'value' => '#7C3AED', 'type' => 'string'],
+            ['group' => 'appearance', 'key' => 'appearance.primary', 'value' => '#625BA8', 'type' => 'string'],
             ['group' => 'appearance', 'key' => 'appearance.density', 'value' => 'comfortable', 'type' => 'string'],
             ['group' => 'seo', 'key' => 'seo.site_name', 'value' => 'Nexora', 'type' => 'string'],
             ['group' => 'seo', 'key' => 'seo.organization_name', 'value' => '', 'type' => 'string'],

@@ -24,6 +24,7 @@ export function UntitledNavLink({ label, icon, active = false, collapsed = false
                 className,
             )}
         >
+            {active && <span aria-hidden="true" className="nx-brand-fill absolute inset-y-2 start-0 w-[3px] rounded-full" />}
             <span className="grid h-6 w-6 shrink-0 place-items-center">{icon}</span>
             {!collapsed && <span className="truncate">{label}</span>}
             {badge && <span className={cx(collapsed ? "absolute translate-x-3 -translate-y-3" : "ms-auto")}>{badge}</span>}
