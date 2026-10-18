@@ -51,10 +51,10 @@
   --nx-shadow-md: 0 12px 28px rgb(15 23 42 / 0.08);
 
   --nx-page-max-width: 100rem;
-  --nx-sidebar-width: 17rem;
-  --nx-header-height: 4rem;
-  --nx-control-height: 2.75rem;
-  --nx-content-gap: 1.5rem;
+  --nx-sidebar-width: 16rem;
+  --nx-header-height: 3.5rem;
+  --nx-control-height: 2.4rem;
+  --nx-content-gap: 1.25rem;
 }
 
 :root.dark {
@@ -74,8 +74,8 @@
 }
 
 :root[data-density="compact"] {
-  --nx-control-height: 2.375rem;
-  --nx-content-gap: 1.125rem;
+  --nx-control-height: 2.125rem;
+  --nx-content-gap: 1rem;
 }
 
 :root[data-radius="small"] { --nx-radius-control: 0.5rem; }
