@@ -38,7 +38,7 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 | 4 | `RESEARCH-DISCOVERY-100` | ResearchBrief/VOC/problem-vs-solution validation, current market/standards evidence, baseline, alternatives and CTQ inputs for substantial new work | Builder Beta | NEW_REQUIRED | AI-GOV-AUTOMATION-100 |
 | 5 | `QUALITY-GOVERNANCE-100` | Quality OS, proportional DMADV/DMAIC, CTQs, SIPOC/FMEA/root-cause/control-plan traceability and outcome-over-output policy | Builder Beta | NEW_REQUIRED | RESEARCH-DISCOVERY-100, AI-GOV-AUTOMATION-100 |
 | 6 | `ADMIN-UX-CLOSURE-001` | shared Admin design system, responsive behavior, loading/error/destructive states, accessibility baseline | Builder Beta | SOURCE_DONE — #132–#137; 61-page visual review consistent; Figma pixel-parity not certified | CORE-QA-001 |
-| 7 | `SECURITY-BASELINE-200` | MFA/passkeys plan, CSP/browser hardening, continuous AppSec CI, secrets/dependency scanning, authorization/tenancy matrices, early threat-model program | Builder Beta | NEW_REQUIRED / CRITICAL | AI-GOV-AUTOMATION-100, CORE-QA-001, QUALITY-GOVERNANCE-100 |
+| 7 | `SECURITY-BASELINE-200` | MFA/passkeys plan, CSP/browser hardening, continuous AppSec CI, secrets/dependency scanning, authorization/tenancy matrices, early threat-model program | Builder Beta | ACTIVE — owner-prioritised 2026-10-18; increment 1: TOTP MFA (SYS-MFA-TOTP) | AI-GOV-AUTOMATION-100, CORE-QA-001, QUALITY-GOVERNANCE-100 |
 | 8 | `ARCH-BOUNDARY-100` | reconcile architecture constitution with implementation; repository/persistence boundaries; broaden architecture tests | Builder Beta | NEW_REQUIRED | SECURITY-BASELINE-200 |
 
 ## Track B — close existing website-platform foundations

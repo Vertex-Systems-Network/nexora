@@ -14,6 +14,7 @@ use App\Nexora\Api\Services\ApiTokenManager;
 use App\Nexora\Enterprise\Services\SsoEnforcementPolicy;
 use App\Nexora\Enterprise\Services\TenantContext;
 use App\Nexora\Security\Audit\AuditManager;
+use App\Nexora\Security\TwoFactor\TwoFactorManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -49,12 +50,14 @@ final class AuthTokenController extends Controller
         AuditManager $audit,
         SsoEnforcementPolicy $ssoPolicy,
         TenantContext $tenant,
+        TwoFactorManager $twoFactor,
     ): JsonResponse {
         $data = $request->validate([
             'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'max:1024'],
             'device_name' => ['required', 'string', 'max:80'],
             'organization' => ['nullable', 'string', 'max:120'],
+            'code' => ['nullable', 'string', 'max:32'],
         ]);
 
         $emailHash = hash('sha256', strtolower(trim($data['email'])));
@@ -110,6 +113,25 @@ final class AuthTokenController extends Controller
             $audit->record('api.auth.token_blocked', $user, ['reason' => 'enterprise-sso-required']);
 
             return $this->error('sso_required', 'This organization requires SSO sign-in.', 403);
+        }
+
+        // SYS-MFA-TOTP: a confirmed second factor is required before any token exists.
+        if ($twoFactor->enabled($user)) {
+            $code = trim((string) ($data['code'] ?? ''));
+            if ($code === '') {
+                return $this->error('two_factor_required', 'Enter the code from your authenticator app.', 422);
+            }
+            if ($twoFactor->tooManyFailures($user)) {
+                return $this->error('rate_limited', 'Too many sign-in attempts. Try again later.', 429)
+                    ->header('Retry-After', (string) $twoFactor->failureRetryAfter($user));
+            }
+            $method = $twoFactor->verifyForLogin($user, $code);
+            if ($method === null) {
+                $audit->record('auth.two_factor.challenge_failed', $user, ['channel' => 'api']);
+
+                return $this->invalidCredentials();
+            }
+            $audit->record($method === 'recovery' ? 'auth.two_factor.recovery_used' : 'auth.two_factor.challenge_passed', $user, ['channel' => 'api']);
         }
 
         // Only a fully successful exchange resets the per-email buckets; blocked states keep counting.

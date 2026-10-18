@@ -1,3 +1,20 @@
+# SECURITY-BASELINE-200 increment 1 — TOTP MFA — 2026-10-18
+
+SYS-MFA-TOTP adds native RFC 6238 MFA:
+- Encrypted secret and hashed, single-use recovery codes.
+- Enrolment must be confirmed before it is enforced.
+- Web login challenge with a 5-minute lifetime, a 5-attempt cap and replay protection.
+- Mobile token exchange now requires `code` for users who have MFA enabled.
+
+Verification:
+- 15 new tests, including the RFC vectors.
+- Full suite: 804 passed.
+- Guard tests: with the MFA gate disabled, the bypass tests fail.
+- The migration-count pin was updated from 38 to 39 for the new registered migration.
+- The critical manifest was resealed for `routes/web.php`.
+
+Pending: an independent review on the exact head before merge.
+
 # In-progress stage completion — 2026-10-18
 
 - CORE-QA-001 is SOURCE_DONE: B04 passed on a disposable local install (61/61 routes HTTP 200, 0 JS errors).

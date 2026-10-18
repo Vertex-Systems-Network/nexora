@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 12,
+  "control_plane_revision": 13,
   "control_plane_branch": "claude/blissful-pasteur-fn8sww",
   "base_branch": "main",
   "base_sha": "5334be7acd92c9c943c0bc1ec78209f65872e140",
@@ -13,13 +13,13 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 75,
   "current_stage": {
-    "id": "AI-GOV-AUTOMATION-100",
-    "name": "AI Governance Automation",
+    "id": "SECURITY-BASELINE-200",
+    "name": "Security Baseline",
     "status": "ACTIVE",
-    "scope_note": "Verifier merged (#130-#131). Remaining: PR-to-unit traceability, which changes protected .github/workflows and needs explicit owner/governance approval before implementation. Next recommended stage: SECURITY-BASELINE-200."
+    "scope_note": "Owner-prioritised 2026-10-18 ahead of AI-GOV-AUTOMATION-100 traceability (awaiting approval) and QUALITY-GOVERNANCE-100. Increment 1: TOTP MFA incl. mobile token enforcement. Later increments: passkeys, CSP/browser hardening, AppSec CI, authorization/tenancy matrices."
   },
   "active_development_units": [
-    "SYS-AI-GOVERNANCE-AUTOMATION"
+    "SYS-MFA-TOTP"
   ],
   "completed_control_stages": [
     {
