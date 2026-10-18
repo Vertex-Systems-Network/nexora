@@ -219,7 +219,8 @@ final class TwoFactorAuthenticationTest extends TestCase
         RateLimiter::clear($key);
         $seen = null;
         \DB::listen(function ($query) use (&$seen, $key, $user): void {
-            if ($seen === null && str_contains(strtolower($query->sql), 'from "users"') && in_array($user->id, $query->bindings, false)) {
+            // Driver-agnostic: SQLite/Postgres quote "users", MySQL `users`, SQL Server [users].
+            if ($seen === null && preg_match('/\bfrom\s+["`\[]?users["`\]]?(\s|$)/i', $query->sql) === 1 && in_array($user->id, $query->bindings, false)) {
                 $seen = RateLimiter::attempts($key);
             }
         });
