@@ -56,6 +56,10 @@ final class AuthenticatedSessionController extends Controller
         if (! $user instanceof User) {
             throw ValidationException::withMessages(['email' => __('These credentials do not match our records.')]);
         }
+        // Auth::validate() skips the rehash Auth::attempt() performed; keep password hashes current.
+        if (config('hashing.rehash_on_login', true)) {
+            Auth::getProvider()->rehashPasswordIfRequired($user, ['password' => $credentials['password']]);
+        }
 
         if ($user->status !== 'active') {
             $audit->record('auth.login_blocked', $user, ['reason' => 'inactive-account']);

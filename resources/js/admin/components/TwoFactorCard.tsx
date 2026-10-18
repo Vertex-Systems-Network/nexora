@@ -11,7 +11,7 @@ export type TwoFactorState = {
 
 /** Self-service TOTP enrolment (SECURITY-BASELINE-200 / SYS-MFA-TOTP). */
 export function TwoFactorCard({ state, recoveryCodes }: { state: TwoFactorState; recoveryCodes?: string[] | null }) {
-    const passwordForm = useForm({ current_password: "" });
+    const passwordForm = useForm({ current_password: "", code: "" });
     const confirmForm = useForm({ code: "" });
     const opts = { preserveScroll: true, onSuccess: () => passwordForm.reset() };
 
@@ -81,6 +81,15 @@ export function TwoFactorCard({ state, recoveryCodes }: { state: TwoFactorState;
                     error={passwordForm.errors.current_password}
                     hint={state.enabled ? `${state.recoveryRemaining} recovery codes remaining.` : "Required to change two-factor settings."}
                 />
+                {state.enabled && (
+                    <Input
+                        label="Authenticator or recovery code (required to turn off)"
+                        value={passwordForm.data.code}
+                        onChange={(event) => passwordForm.setData("code", event.target.value)}
+                        error={passwordForm.errors.code}
+                        autoComplete="one-time-code"
+                    />
+                )}
                 <div className="flex flex-wrap justify-end gap-2">
                     {state.enabled ? (
                         <>

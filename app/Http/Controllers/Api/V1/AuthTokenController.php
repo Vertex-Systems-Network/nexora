@@ -121,6 +121,10 @@ final class AuthTokenController extends Controller
             if ($code === '') {
                 return $this->error('two_factor_required', 'Enter the code from your authenticator app.', 422);
             }
+            if ($twoFactor->tooManyFailures($user)) {
+                return $this->error('rate_limited', 'Too many sign-in attempts. Try again later.', 429)
+                    ->header('Retry-After', (string) $twoFactor->failureRetryAfter($user));
+            }
             $method = $twoFactor->verifyForLogin($user, $code);
             if ($method === null) {
                 $audit->record('auth.two_factor.challenge_failed', $user, ['channel' => 'api']);

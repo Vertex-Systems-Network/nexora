@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace App\Nexora\Security\TwoFactor;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 /** SECURITY-BASELINE-200 / SYS-MFA-TOTP user-level MFA lifecycle. */
 final class TwoFactorManager
 {
     public const RECOVERY_CODE_COUNT = 8;
+
+    public const MAX_ACCOUNT_FAILURES = 10;
+
+    public const FAILURE_DECAY_SECONDS = 900;
 
     public function __construct(private readonly TotpAuthenticator $totp) {}
 
@@ -53,31 +59,64 @@ final class TwoFactorManager
         return $codes;
     }
 
-    /** Verifies a login code; returns 'totp', 'recovery' or null. Consumes recovery codes and records the TOTP step. */
+    /** Account-wide failure cap shared by web and API, independent of IP and session (review round 1, finding 1). */
+    public function tooManyFailures(User $user): bool
+    {
+        return RateLimiter::tooManyAttempts($this->failureKey($user), self::MAX_ACCOUNT_FAILURES);
+    }
+
+    public function failureRetryAfter(User $user): int
+    {
+        return max(1, RateLimiter::availableIn($this->failureKey($user)));
+    }
+
+    /**
+     * Verifies a login code; returns 'totp', 'recovery' or null. The row is re-read under a lock and the
+     * TOTP step is advanced with a conditional update, so concurrent requests cannot both accept one code.
+     */
     public function verifyForLogin(User $user, string $code): ?string
     {
-        if (! $this->enabled($user)) {
+        if ($this->tooManyFailures($user)) {
             return null;
         }
-        $step = $this->totp->verify((string) $user->two_factor_secret, $code, $user->two_factor_last_used_step);
-        if ($step !== null) {
-            $user->forceFill(['two_factor_last_used_step' => $step])->save();
 
-            return 'totp';
-        }
-
-        $hashes = (array) ($user->two_factor_recovery_codes ?? []);
-        $candidate = $this->hashRecoveryCode($code);
-        foreach ($hashes as $index => $hash) {
-            if (is_string($hash) && hash_equals($hash, $candidate)) {
-                unset($hashes[$index]);
-                $user->forceFill(['two_factor_recovery_codes' => array_values($hashes)])->save();
-
-                return 'recovery';
+        $method = DB::transaction(function () use ($user, $code): ?string {
+            $fresh = User::query()->whereKey($user->getKey())->lockForUpdate()->first();
+            if (! $fresh instanceof User || ! $this->enabled($fresh)) {
+                return null;
             }
+
+            $step = $this->totp->verify((string) $fresh->two_factor_secret, $code, $fresh->two_factor_last_used_step);
+            if ($step !== null) {
+                $claimed = User::query()->whereKey($fresh->getKey())
+                    ->where(fn ($query) => $query->whereNull('two_factor_last_used_step')->orWhere('two_factor_last_used_step', '<', $step))
+                    ->update(['two_factor_last_used_step' => $step]);
+
+                return $claimed === 1 ? 'totp' : null;
+            }
+
+            $hashes = (array) ($fresh->two_factor_recovery_codes ?? []);
+            $candidate = $this->hashRecoveryCode($code);
+            foreach ($hashes as $index => $hash) {
+                if (is_string($hash) && hash_equals($hash, $candidate)) {
+                    unset($hashes[$index]);
+                    $fresh->forceFill(['two_factor_recovery_codes' => array_values($hashes)])->save();
+
+                    return 'recovery';
+                }
+            }
+
+            return null;
+        });
+
+        if ($method === null) {
+            RateLimiter::hit($this->failureKey($user), self::FAILURE_DECAY_SECONDS);
+        } else {
+            RateLimiter::clear($this->failureKey($user));
+            $user->refresh();
         }
 
-        return null;
+        return $method;
     }
 
     /** @return list<string> */
@@ -111,6 +150,11 @@ final class TwoFactorManager
             static fn (): string => Str::lower(Str::random(5).'-'.Str::random(5)),
             range(1, self::RECOVERY_CODE_COUNT),
         );
+    }
+
+    private function failureKey(User $user): string
+    {
+        return 'nexora-2fa-failures:'.$user->getKey();
     }
 
     private function hashRecoveryCode(string $code): string

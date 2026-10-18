@@ -53,8 +53,23 @@ TOTP shared secrets, recovery codes, authenticated sessions, API tokens, and the
 3. **A shoulder-surfed code replayed seconds later.** It is rejected by the last-used-step check.
 4. **A user who lost their device.** They sign in with a single-use recovery code; an admin reset path is a later increment, and an operator can clear the columns.
 
+## Independent review round 1 (head 3f1a20d, CHANGES_REQUIRED; no password-only bypass found)
+
+| Finding | Resolution |
+|---|---|
+| 1. MEDIUM: no account-wide cap on the challenge; the per-session counter resets on a fresh login, so many IPs could guess codes. | Fixed. A `nexora-2fa-failures:{user}` bucket allows 10 failures per 15 minutes across web, API and disable, regardless of IP or session. Locked challenges end the pending login; the API returns 429. Test: `test_account_lock_survives_fresh_logins_and_new_sessions`. |
+| 2. MEDIUM: concurrent requests could accept the same TOTP code or recovery code. | Fixed. The row is re-read under `lockForUpdate` inside a transaction, and the TOTP step is advanced with a conditional `UPDATE … WHERE last_used_step IS NULL OR < step`, where 0 rows means failure. Test: `test_one_code_cannot_be_accepted_twice`. |
+| 3. MEDIUM: enabling MFA left pre-MFA sessions and remember-me cookies valid. | Fixed. Confirm now revokes other sessions (database driver) and rotates the remember token. Test: `test_enrolment_rotates_the_remember_token`. |
+| 4. LOW: disable required only the password. | Fixed. Disable requires the password plus a current TOTP or recovery code. Test: `test_disabling_requires_the_current_password_and_a_current_code`. |
+| 5. LOW: freshly generated recovery codes sit in flash session data. | Accepted. They are flash-only for a single request, and a database or file session store keeps them only until that request completes. |
+| 6. LOW: `Auth::validate` skipped password rehashing. | Fixed. `rehashPasswordIfRequired` runs after validation. Test: `test_successful_password_login_still_rehashes_outdated_hashes`. |
+
+All five new regression tests fail against 3f1a20d.
+
 ## Residual risk
 
+- Account lockout: anyone who knows a password can trigger the 10-failure, 15-minute MFA lock. This is accepted as the price of the brute-force cap.
+- With file or cookie session drivers, other sessions cannot be enumerated for revocation on enrolment; the remember token is still rotated.
 - TOTP can be phished in real time. Passkeys, planned for a later increment, are the phishing-resistant fix.
 - MFA is opt-in per user; there is no role or organization enforcement yet.
 - There is no QR code in v1. The setup key and the `otpauth://` URI are shown instead, so no QR dependency is needed.

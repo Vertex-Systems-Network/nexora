@@ -57,6 +57,13 @@ final class TwoFactorChallengeController extends Controller
             return redirect()->route('login')->withErrors(['email' => 'This account is not available for sign in.']);
         }
 
+        if ($twoFactor->tooManyFailures($user)) {
+            $request->session()->forget(self::SESSION_KEY);
+            $audit->record('auth.two_factor.locked', $user, ['channel' => 'web']);
+
+            return redirect()->route('login')->withErrors(['email' => 'Too many invalid codes for this account. Try again later.']);
+        }
+
         $method = $twoFactor->verifyForLogin($user, $data['code']);
         if ($method === null) {
             $pending['attempts']++;

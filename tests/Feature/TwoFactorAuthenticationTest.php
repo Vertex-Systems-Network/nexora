@@ -140,15 +140,74 @@ final class TwoFactorAuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_disabling_requires_the_current_password(): void
+    public function test_disabling_requires_the_current_password_and_a_current_code(): void
     {
         $user = $this->enrolledUser('disable@example.test');
 
-        $this->actingAs($user)->delete('/admin/profile/two-factor', ['current_password' => 'wrong'])->assertSessionHasErrors('current_password');
+        $this->actingAs($user)->delete('/admin/profile/two-factor', ['current_password' => 'wrong', 'code' => $this->currentCode($user)])->assertSessionHasErrors('current_password');
+        $this->actingAs($user)->delete('/admin/profile/two-factor', ['current_password' => self::PASSWORD])->assertSessionHasErrors('code');
+        $this->actingAs($user)->delete('/admin/profile/two-factor', ['current_password' => self::PASSWORD, 'code' => '000000'])->assertSessionHasErrors('code');
         self::assertTrue(app(TwoFactorManager::class)->enabled($user->fresh()));
 
-        $this->actingAs($user)->delete('/admin/profile/two-factor', ['current_password' => self::PASSWORD])->assertSessionHasNoErrors();
+        $this->actingAs($user)->delete('/admin/profile/two-factor', ['current_password' => self::PASSWORD, 'code' => $this->currentCode($user)])->assertSessionHasNoErrors();
         self::assertFalse(app(TwoFactorManager::class)->enabled($user->fresh()));
+    }
+
+    public function test_account_lock_survives_fresh_logins_and_new_sessions(): void
+    {
+        // Review round 1, finding 1: the per-session cap alone can be reset by signing in again from new IPs.
+        $this->withoutMiddleware(ThrottleRequests::class);
+        $user = $this->enrolledUser('distributed-mfa@example.test');
+        for ($i = 0; $i < TwoFactorManager::MAX_ACCOUNT_FAILURES; $i++) {
+            $this->flushSession();
+            $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.'.($i + 1)])
+                ->post('/login', ['email' => $user->email, 'password' => self::PASSWORD]);
+            $this->post('/two-factor-challenge', ['code' => '000000']);
+        }
+
+        $this->flushSession();
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.9'])->post('/login', ['email' => $user->email, 'password' => self::PASSWORD]);
+        $this->post('/two-factor-challenge', ['code' => $this->currentCode($user)])->assertRedirect(route('login'));
+        $this->assertGuest();
+
+        RateLimiter::clear('nexora-api-auth:ip:127.0.0.1');
+        $this->postJson('/api/v1/auth/token', ['email' => $user->email, 'password' => self::PASSWORD, 'device_name' => 'x', 'code' => $this->currentCode($user)])
+            ->assertStatus(429)->assertHeader('Retry-After');
+    }
+
+    public function test_enrolment_rotates_the_remember_token(): void
+    {
+        // Review round 1, finding 3: remember-me cookies minted with the password alone must stop working.
+        $user = $this->admin('rotate@example.test');
+        $user->forceFill(['remember_token' => 'pre-mfa-remember-token'])->save();
+        $this->actingAs($user)->post('/admin/profile/two-factor', ['current_password' => self::PASSWORD]);
+
+        $this->actingAs($user)->post('/admin/profile/two-factor/confirm', ['code' => $this->currentCode($user)])->assertSessionHasNoErrors();
+        self::assertNotSame('pre-mfa-remember-token', $user->fresh()->getRememberToken());
+    }
+
+    public function test_successful_password_login_still_rehashes_outdated_hashes(): void
+    {
+        // Review round 1, finding 6: Auth::validate() alone skips the rehash Auth::attempt() performed.
+        $user = $this->admin('rehash@example.test');
+        $user->forceFill(['password' => password_hash(self::PASSWORD, PASSWORD_BCRYPT, ['cost' => 4])])->saveQuietly();
+        app('hash')->driver('bcrypt')->setRounds(5);
+        $old = $user->fresh()->getAuthPassword();
+
+        $this->post('/login', ['email' => $user->email, 'password' => self::PASSWORD])->assertRedirect(route('admin.dashboard'));
+        self::assertNotSame($old, $user->fresh()->getAuthPassword());
+    }
+
+    public function test_one_code_cannot_be_accepted_twice(): void
+    {
+        $user = $this->enrolledUser('double@example.test');
+        $manager = app(TwoFactorManager::class);
+        $code = $this->currentCode($user);
+        $stale = User::query()->findOrFail($user->id);
+
+        self::assertSame('totp', $manager->verifyForLogin($user, $code));
+        // A second request holding a stale model (loaded before the first accepted) is still refused.
+        self::assertNull($manager->verifyForLogin($stale, $code));
     }
 
     public function test_api_token_exchange_requires_the_second_factor(): void
