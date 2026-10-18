@@ -1,27 +1,34 @@
 {
   "schema_version": "1.0",
   "project": "Nexora",
-  "control_plane_revision": 13,
+  "control_plane_revision": 14,
   "control_plane_branch": "claude/blissful-pasteur-fn8sww",
   "base_branch": "main",
-  "base_sha": "5334be7acd92c9c943c0bc1ec78209f65872e140",
+  "base_sha": "a197149293541f387a9d2e90537c2094aa9750a2",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
   "source_generation": "n1-v5.29",
   "source_status": "SOURCE_DONE",
   "target_status": "BLOCKED",
-  "canonical_stage_count": 75,
+  "canonical_stage_count": 77,
   "current_stage": {
     "id": "SECURITY-BASELINE-200",
     "name": "Security Baseline",
     "status": "ACTIVE",
-    "scope_note": "Owner-prioritised 2026-10-18 ahead of AI-GOV-AUTOMATION-100 traceability (awaiting approval) and QUALITY-GOVERNANCE-100. Increment 1: TOTP MFA incl. mobile token enforcement. Later increments: passkeys, CSP/browser hardening, AppSec CI, authorization/tenancy matrices."
+    "scope_note": "Owner-prioritised 2026-10-18. Increment 1 TOTP MFA SOURCE_DONE (#140). Remaining increments in order: passkeys, CSP/browser hardening, AppSec CI (secrets/dependency scanning), authorization/tenancy matrices."
   },
   "active_development_units": [
-    "SYS-MFA-TOTP"
+    "SEC-BASELINE"
   ],
   "completed_control_stages": [
+    {
+      "id": "SECURITY-BASELINE-200/SYS-MFA-TOTP",
+      "status": "SOURCE_DONE",
+      "carrier": "#140",
+      "date": "2026-10-18",
+      "evidence": "Merged a197149; CI governance/dev-checkout(MySQL)/Windows green; independent review round 3 APPROVE on 8043345 (later commits: MySQL test quoting + restored pinned auth source contracts). TARGET_VERIFIED not claimed."
+    },
     {
       "id": "ADMIN-UX-CLOSURE-001",
       "status": "SOURCE_DONE",
@@ -88,8 +95,8 @@
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "SECURITY-BASELINE-200: threat-model-first MFA/passkeys, CSP and AppSec CI (MFA gap also listed as residual risk in MOBILE-AUTH-API-100).",
-    "AI-GOV-AUTOMATION-100: PR-to-unit traceability (protected workflow change; needs explicit governance review).",
+    "Owner decision: next SECURITY-BASELINE-200 increment (passkeys / CSP / AppSec CI) or approve AI-GOV-AUTOMATION-100 traceability.",
+    "Each increment: register unit, threat model, active plan, independent exact-head review before merge.",
     "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
     "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",
@@ -97,18 +104,10 @@
     "Only after target gates pass, mark RUNTIME-TARGET-ACCEPTANCE TARGET_VERIFIED."
   ],
   "next_stage": {
-    "id": "RUNTIME-TARGET-ACCEPTANCE",
-    "name": "Live target acceptance follow-up",
-    "advance_when": "#72 and #74 closed with operator/target evidence"
+    "id": "AI-GOV-AUTOMATION-100",
+    "name": "AI governance automation (PR-to-unit traceability)",
+    "advance_when": "SECURITY-BASELINE-200 increments complete, or owner approves the protected-workflow traceability change"
   },
-  "post_core_qa_sequence": [
-    "AI-GOV-AUTOMATION-100",
-    "RESEARCH-DISCOVERY-100",
-    "QUALITY-GOVERNANCE-100",
-    "ADMIN-UX-CLOSURE-001",
-    "SECURITY-BASELINE-200",
-    "ARCH-BOUNDARY-100"
-  ],
   "governance": {
     "development_unit_registry_required": true,
     "domain_child_registries_allowed": true,
@@ -318,5 +317,24 @@
     ],
     "source_regression": "480 backend / 4607 assertions + 6 frontend PASS",
     "target_release": "BLOCKED; no live or final release promotion"
-  }
+  },
+  "execution_sequence": [
+    "SECURITY-BASELINE-200",
+    "AI-GOV-AUTOMATION-100",
+    "RESEARCH-DISCOVERY-100",
+    "QUALITY-GOVERNANCE-100",
+    "ARCH-BOUNDARY-100",
+    "THEME-CLOSURE-001"
+  ],
+  "execution_sequence_note": "Single canonical order; full list and statuses in .ai/roadmap/stages.md 'Execution flow'. MOBILE-APPS-100 ON_HOLD (plan only).",
+  "side_tracks": [
+    {
+      "id": "RUNTIME-TARGET-ACCEPTANCE",
+      "issues": [
+        "#72",
+        "#74"
+      ],
+      "note": "Live-target evidence only; never advanced from source CI."
+    }
+  ]
 }

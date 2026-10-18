@@ -1,3 +1,7 @@
+# Checkpoint — single execution flow — 2026-10-18
+
+Main a197149 (#140 TOTP MFA merged; CI green). Current stage SECURITY-BASELINE-200 / unit SEC-BASELINE. The plan is aligned to one ordered flow (`.ai/roadmap/stages.md` → "Execution flow"). Next: owner picks the next security increment, or approves AI-GOV-AUTOMATION-100 traceability. MOBILE-APPS-100 is on hold. No target acceptance is claimed.
+
 # PR #71 clean replacement source preparation — 2026-10-01
 
 Base main 55c249c06621fe7dc14868b3a5740b657bcb6b7a. Owner requested starting the clean replacement. Eight new backend regressions / 59 assertions PASS. Original unchanged suite diagnostic FAILED (61 schema errors, 5 failures, 6 incomplete). First full replacement run had a toolchain fixture failure: inherited NPM_CONFIG_CACHE pointed at a nonexistent directory; actual writable disposable cache configured, assertions unchanged. Corrected combined backend run PASS: 488 tests / 4663 assertions. Source certification and remote exact-head CI remain separate gates. New suite covers implemented auth/admin/module-read boundaries only. Original 76 requirements remain explicitly inventoried for contract mapping; no global Core QA/target or historical key invalidation completion. Original #71 stays quarantined. Evidence: docs/pr71-clean-replacement.md. Earlier entries are historical.

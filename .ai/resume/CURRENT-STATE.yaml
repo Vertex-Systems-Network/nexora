@@ -2,24 +2,24 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 observed_main:
   branch: main
-  sha: db207374995407a4dff3c081c8846a8e557f75d2
+  sha: a197149293541f387a9d2e90537c2094aa9750a2
   observed_at: '2026-10-18'
-  semantics: '#126-#138 merged (state, core QA, AI-gov verifier, admin UX, installer rebrand, mobile sign-in API); no open PRs'
+  semantics: '#126-#140 merged (state, core QA, AI-gov verifier, admin UX, installer rebrand, mobile sign-in API, TOTP MFA); no open PRs'
 active_issue:
   number: 74
 active_pr: null
 active_branch: claude/blissful-pasteur-fn8sww
 current_stage:
   id: SECURITY-BASELINE-200
-  unit: SYS-MFA-TOTP
+  unit: SEC-BASELINE
   status: ACTIVE
 current_milestone:
-  id: SECURITY-MFA-TOTP
-  status: PLANNED
+  id: SECURITY-BASELINE-NEXT-INCREMENT
+  status: AWAITING_OWNER_SELECTION
 last_completed_milestone:
-  main_commit: db207374995407a4dff3c081c8846a8e557f75d2
-  summary: 'MOBILE-AUTH-API-100 SOURCE_DONE (#138, independent review APPROVE); MOBILE-APPS-100 on hold by owner'
-exact_next_safe_action: Await owner approval for the protected-workflow PR-to-unit traceability change; otherwise start SECURITY-BASELINE-200 threat model. No target acceptance claimed.
+  main_commit: a197149293541f387a9d2e90537c2094aa9750a2
+  summary: 'SECURITY-BASELINE-200 increment 1 TOTP MFA SOURCE_DONE (#140); plan aligned to single execution flow'
+exact_next_safe_action: Owner selects next SECURITY-BASELINE-200 increment (passkeys/CSP/AppSec CI) or approves AI-GOV-AUTOMATION-100 traceability. No target acceptance claimed.
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:

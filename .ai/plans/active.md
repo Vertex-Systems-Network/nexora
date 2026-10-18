@@ -1,3 +1,14 @@
+# Single execution flow alignment — SECURITY-BASELINE-200 — 2026-10-18 (docs only)
+
+#140 merged (a197149): SYS-MFA-TOTP is SOURCE_DONE. Stage SECURITY-BASELINE-200 stays ACTIVE under the umbrella unit SEC-BASELINE until its remaining increments are done.
+
+- `stages.md` rows are reordered and renumbered (0–76) into the real execution order, with one `▶ CURRENT` stage. A new "Execution flow" section is the single path.
+- MOBILE-AUTH-API-100 now sits after CORE-QA-001. MOBILE-APPS-100 is ON_HOLD in the Pro track (plan only).
+- Stale cursors repointed: master plan (was RUNTIME-CLOSURE-001), NEXORA_PROGRESS (was COLLAB-200/N1.13), state `next_stage` (was RUNTIME-TARGET-ACCEPTANCE, now a side track) and `post_core_qa_sequence` (replaced by `execution_sequence`). `canonical_stage_count` corrected to 77.
+- Next increments, each needing a threat model and an exact-head independent review: passkeys → CSP/browser hardening → AppSec CI → authorization/tenancy matrices. AI-GOV-AUTOMATION-100 traceability awaits owner approval.
+
+No code, schema, workflow or policy-rule changes. Rollback: revert this commit.
+
 # SECURITY-BASELINE-200 increment 1 — TOTP MFA — 2026-10-18
 
 Stage SECURITY-BASELINE-200 is ACTIVE (unit SYS-MFA-TOTP, risk critical). The owner prioritised it ahead of the AI-GOV-AUTOMATION-100 traceability work (still awaiting approval) and ahead of QUALITY-GOVERNANCE-100. This closes the MFA gap recorded as a residual risk in MOBILE-AUTH-API-100.
