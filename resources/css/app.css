@@ -4,7 +4,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 * { box-sizing: border-box; }
-html { background: var(--nx-bg); color: var(--nx-text); }
+/* 15px root: the redesign's denser scale; every rem-based size follows. */
+html { font-size: 93.75%; background: var(--nx-bg); color: var(--nx-text); }
 body {
   margin: 0;
   min-width: 320px;

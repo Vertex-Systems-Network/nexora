@@ -29,9 +29,9 @@ export function UntitledButton({
         danger: "border-transparent bg-[var(--nx-danger)] text-white shadow-sm hover:brightness-95",
     };
     const sizes: Record<ButtonSize, string> = {
-        sm: "h-9 px-3 text-sm",
-        md: "h-[var(--nx-control-height)] px-4 text-sm",
-        lg: "h-12 px-5 text-base",
+        sm: "h-8 px-3 text-[13px]",
+        md: "h-[var(--nx-control-height)] px-4 text-[13px]",
+        lg: "h-11 px-5 text-sm",
     };
 
     return (
@@ -40,7 +40,7 @@ export function UntitledButton({
             disabled={disabled || loading}
             aria-busy={loading || undefined}
             className={cx(
-                "nx-focus nx-pressable inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--nx-radius-control)] border font-semibold transition duration-150 disabled:cursor-not-allowed disabled:opacity-55",
+                "nx-focus nx-pressable inline-flex shrink-0 items-center justify-center gap-2 rounded-full border font-semibold transition duration-150 disabled:cursor-not-allowed disabled:opacity-55",
                 variants[variant],
                 sizes[size],
                 className,
