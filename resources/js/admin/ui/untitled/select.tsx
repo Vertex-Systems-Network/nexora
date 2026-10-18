@@ -84,7 +84,7 @@ export function UntitledSelect({
                             id={option.value}
                             textValue={option.label}
                             isDisabled={option.disabled}
-                            className="group flex cursor-default items-start gap-3 rounded-lg px-2.5 py-2 text-start outline-none transition-colors data-[focused]:bg-[var(--nx-surface-muted)] data-[selected]:bg-[var(--nx-brand-soft)] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-45"
+                            className="group flex cursor-default items-start gap-3 rounded-lg px-2.5 py-1.5 text-start outline-none transition-colors data-[focused]:bg-[var(--nx-surface-muted)] data-[selected]:bg-[var(--nx-brand-soft)] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-45"
                         >
                             {option.leading && (
                                 <span className="mt-0.5 grid shrink-0 place-items-center">{option.leading}</span>

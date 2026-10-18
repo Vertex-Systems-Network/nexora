@@ -18,8 +18,8 @@ export function UntitledNavLink({ label, icon, active = false, collapsed = false
             {...props}
             aria-label={collapsed ? label : undefined}
             className={cx(
-                "nx-focus nx-pressable relative flex min-h-10 items-center rounded-xl text-sm font-medium transition",
-                collapsed ? "justify-center px-2" : "gap-3 px-3 py-2",
+                "nx-focus nx-pressable relative flex min-h-9 items-center rounded-xl text-sm font-medium transition",
+                collapsed ? "justify-center px-2" : "gap-2.5 px-3 py-1.5",
                 active ? "bg-[var(--nx-surface-subtle)] text-[var(--nx-text)] shadow-[inset_0_0_0_1px_var(--nx-border)]" : "text-[var(--nx-text-secondary)] hover:bg-[var(--nx-surface-subtle)] hover:text-[var(--nx-text)]",
                 className,
             )}

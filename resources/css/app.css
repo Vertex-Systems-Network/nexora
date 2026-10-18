@@ -15,7 +15,7 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
-button, input, select, textarea { font: inherit; }
+@layer base { button, input, select, textarea { font: inherit; } }
 button, a { -webkit-tap-highlight-color: transparent; }
 ::selection { background: rgb(var(--nx-brand-rgb) / 0.18); }
 
