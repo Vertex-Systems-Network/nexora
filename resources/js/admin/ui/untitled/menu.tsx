@@ -49,7 +49,7 @@ export function UntitledMenu({ trigger, items, value, onSelect, align = "end", c
                                 type="button"
                                 disabled={item.disabled}
                                 onClick={() => { if (!item.disabled) { onSelect(item.value); setOpen(false); } }}
-                                className={cx("nx-focus nx-pressable flex w-full items-start gap-3 rounded-lg px-2.5 py-2 text-start transition hover:bg-[var(--nx-surface-subtle)] disabled:cursor-not-allowed disabled:opacity-45", selected && "bg-[var(--nx-brand-soft)]")}
+                                className={cx("nx-focus nx-pressable flex w-full items-start gap-3 rounded-lg px-2.5 py-1.5 text-start transition hover:bg-[var(--nx-surface-subtle)] disabled:cursor-not-allowed disabled:opacity-45", selected && "bg-[var(--nx-brand-soft)]")}
                             >
                                 {item.leading && <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center text-[var(--nx-text-secondary)]">{item.leading}</span>}
                                 <span className="min-w-0 flex-1">

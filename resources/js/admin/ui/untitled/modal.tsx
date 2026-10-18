@@ -26,10 +26,10 @@ export function Modal({ open, title, description, children, onClose, footer }: {
  if(!open) return null;
  return <div className="fixed inset-0 z-[80] grid place-items-center p-4" role="presentation">
    <button className="nx-pressable absolute inset-0 bg-slate-950/50 backdrop-blur-sm" onClick={onClose} aria-label="Close dialog" />
-   <div ref={panel} tabIndex={-1} className="relative w-full max-w-lg rounded-[calc(var(--nx-radius-card)+4px)] border border-[var(--nx-border)] bg-[var(--nx-surface)] p-5 shadow-xl sm:p-6" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description?descriptionId:undefined}>
-     <div className="pe-10"><h2 id={titleId} className="text-lg font-semibold tracking-tight text-[var(--nx-text)]">{title}</h2>{description && <p id={descriptionId} className="mt-1.5 text-sm leading-6 text-[var(--nx-text-muted)]">{description}</p>}</div>
-     <div className="mt-5">{children}</div>
-     {footer && <div className="mt-6 flex justify-end gap-2 border-t border-[var(--nx-border)] pt-4">{footer}</div>}
+   <div ref={panel} tabIndex={-1} className="relative w-full max-w-lg rounded-[calc(var(--nx-radius-card)+4px)] border border-[var(--nx-border)] bg-[var(--nx-surface)] p-5 shadow-xl" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description?descriptionId:undefined}>
+     <div className="pe-10"><h2 id={titleId} className="text-base font-semibold tracking-tight text-[var(--nx-text)]">{title}</h2>{description && <p id={descriptionId} className="mt-1.5 text-sm leading-6 text-[var(--nx-text-muted)]">{description}</p>}</div>
+     <div className="mt-4">{children}</div>
+     {footer && <div className="mt-5 flex justify-end gap-2 border-t border-[var(--nx-border)] pt-4">{footer}</div>}
      <Button variant="ghost" size="sm" className="absolute end-3 top-3" onClick={onClose} aria-label="Close dialog">×</Button>
    </div>
  </div>;
