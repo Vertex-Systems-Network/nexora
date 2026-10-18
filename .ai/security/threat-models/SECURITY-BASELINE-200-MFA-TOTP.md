@@ -66,6 +66,14 @@ TOTP shared secrets, recovery codes, authenticated sessions, API tokens, and the
 
 All five new regression tests fail against 3f1a20d.
 
+## Independent review round 2 (head 1501531, CHANGES_REQUIRED)
+
+Findings 2, 3, 4 and 6 were verified fixed.
+
+New finding (MEDIUM): the account cap was checked before failures were counted, so a concurrent burst from many pending sessions could overrun it.
+
+Fixed: `verifyForLogin` now increments the account bucket **before** verifying and refuses if the count exceeds the cap; only a success clears it. Test: `test_attempt_is_counted_before_verification_runs`, which asserts the counter is already 1 when the user row is read. It fails against 1501531.
+
 ## Residual risk
 
 - Account lockout: anyone who knows a password can trigger the 10-failure, 15-minute MFA lock. This is accepted as the price of the brute-force cap.

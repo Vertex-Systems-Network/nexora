@@ -76,7 +76,9 @@ final class TwoFactorManager
      */
     public function verifyForLogin(User $user, string $code): ?string
     {
-        if ($this->tooManyFailures($user)) {
+        // Count the attempt before deciding (review round 2): a concurrent burst cannot all pass a
+        // check-then-count gap. A success clears the bucket below.
+        if (RateLimiter::hit($this->failureKey($user), self::FAILURE_DECAY_SECONDS) > self::MAX_ACCOUNT_FAILURES) {
             return null;
         }
 
@@ -109,9 +111,7 @@ final class TwoFactorManager
             return null;
         });
 
-        if ($method === null) {
-            RateLimiter::hit($this->failureKey($user), self::FAILURE_DECAY_SECONDS);
-        } else {
+        if ($method !== null) {
             RateLimiter::clear($this->failureKey($user));
             $user->refresh();
         }

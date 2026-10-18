@@ -210,6 +210,26 @@ final class TwoFactorAuthenticationTest extends TestCase
         self::assertNull($manager->verifyForLogin($stale, $code));
     }
 
+    public function test_attempt_is_counted_before_verification_runs(): void
+    {
+        // Review round 2: check-then-count let a concurrent burst bypass the account cap. The attempt must
+        // already be counted when the row is read for verification, so parallel requests see each other.
+        $user = $this->enrolledUser('burst@example.test');
+        $key = 'nexora-2fa-failures:'.$user->id;
+        RateLimiter::clear($key);
+        $seen = null;
+        \DB::listen(function ($query) use (&$seen, $key, $user): void {
+            if ($seen === null && str_contains(strtolower($query->sql), 'from "users"') && in_array($user->id, $query->bindings, false)) {
+                $seen = RateLimiter::attempts($key);
+            }
+        });
+
+        app(TwoFactorManager::class)->verifyForLogin($user, '000000');
+
+        self::assertSame(1, $seen, 'The failure counter must be incremented before the code is verified.');
+        self::assertSame(1, RateLimiter::attempts($key));
+    }
+
     public function test_api_token_exchange_requires_the_second_factor(): void
     {
         $user = $this->enrolledUser('api@example.test');
