@@ -50,3 +50,9 @@ node_modules/
 .next/
 dist/
 build/
+
+# Runtime-generated (theme publish, test/runtime receipts, Sentinel quarantine); never source.
+/public/nexora-themes/
+/storage/app/nexora/runtime/
+/storage/app/nexora/certification/
+/storage/nexora/quarantine/

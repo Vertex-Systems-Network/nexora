@@ -1,3 +1,23 @@
+# In-progress stage completion — 2026-10-18
+
+- CORE-QA-001 is SOURCE_DONE: B04 passed on a disposable local install (61/61 routes HTTP 200, 0 JS errors).
+- ADMIN-UX-CLOSURE-001 is SOURCE_DONE.
+- `.gitignore` now covers runtime-generated paths.
+- The current stage is AI-GOV-AUTOMATION-100. Its remaining PR→unit traceability work needs owner approval because it changes protected workflows.
+
+# Control-plane alignment — 2026-10-18
+
+The records now match merged reality (#126–#138); this was docs only.
+
+- Current stage: ADMIN-UX-CLOSURE-001 (ACTIVE). Remaining: per-page Figma polish.
+- CORE-QA-001: ACTIVE, browser B04 pending a target.
+- AI-GOV-AUTOMATION-100: ACTIVE, PR→unit traceability pending.
+- MOBILE-AUTH-API-100: SOURCE_DONE (#138).
+- MOBILE-APPS-100: on hold by the owner.
+- RUNTIME-CLOSURE-001: SOURCE_CLOSED_WAIVED.
+- Recommended next stage after Admin UX: SECURITY-BASELINE-200 (closes the MFA gap).
+- Known red items on main, which predate this work: `installer-bootstrap-isolation-verify`, and Pint on HandleInertiaRequests/NexoraCoreSeeder.
+
 # MOBILE-AUTH-API-100 mobile sign-in token API — 2026-10-18
 
 Active stage is MOBILE-AUTH-API-100 (unit SYS-MOBILE-AUTH-API, critical), owner-prioritised for iOS/Android apps.
