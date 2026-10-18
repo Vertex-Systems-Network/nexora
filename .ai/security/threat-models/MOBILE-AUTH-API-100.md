@@ -61,7 +61,14 @@ The three HTTP routes above. There are no webhooks, uploads, jobs or CLI entry p
 | 5. The token cap matched on name prefix only. | Fixed. The cap only touches tokens whose abilities are exactly `[profile.read]`, so admin-issued tokens are never revoked. Test: `test_token_cap_never_revokes_admin_issued_tokens_sharing_the_prefix`. |
 | 6. Super-admin break-glass; email case sensitivity; timing hash cost. | Accepted. The super-admin token is still `profile.read` only. Email case behaviour matches web login. The dummy hash uses cost 12, the Laravel default; deployments that change `BCRYPT_ROUNDS` should keep it aligned. |
 
+## Independent review round 2 (reviewed head 7aa46d1, APPROVE)
+
+Findings 1, 2, 3 and 5 are verified fixed, the new tests are confirmed meaningful, and the finding 4 decision is accepted. The reviewer asked for the lockout risk below to be documented. This doc-only follow-up does not change the reviewed code.
+
 ## Residual risk
+
+- **Targeted mobile sign-in lockout.** Because the per-account bucket ignores IP, anyone who knows an email can send 30 requests every 15 minutes and keep that user's *mobile* exchange blocked, even with the correct password. Web login is unaffected. This is accepted as the price of the brute-force cap. Possible later mitigations: let recognised devices through, or replace the hard block with a CAPTCHA or progressive backoff (SECURITY-BASELINE-200).
+- `Retry-After` reports the longest timer of the three buckets, so it can overstate the wait. This is cosmetic.
 
 - No MFA exists platform-wide yet. Mobile matches web here, and MFA is scheduled in `SECURITY-BASELINE-200`.
 - Tokens are bearer tokens with no device binding. This is accepted until `SECURITY-BASELINE-200` and passkeys.
@@ -92,4 +99,4 @@ Also required: the full phpunit suite, source-guard, and the independent review 
 - [x] Critical/high threats have mitigations.
 - [x] Required tests added to active plan.
 - [x] Residual risk accepted/documented (MFA deferred to SECURITY-BASELINE-200).
-- [ ] Independent security review on exact head SHA. This is required before merge.
+- [x] Independent security review: round 1 CHANGES_REQUIRED (8bccb98) → fixed → round 2 APPROVE on 7aa46d1 (code unchanged since; doc-only follow-up).
