@@ -36,6 +36,10 @@ final class AuthTokenController extends Controller
 
     private const IP_ATTEMPTS = 20;
 
+    private const ACCOUNT_ATTEMPTS = 30;
+
+    private const ACCOUNT_DECAY_SECONDS = 900;
+
     // bcrypt of a discarded random secret; only used to equalise unknown-email timing.
     private const TIMING_DUMMY_HASH = '$2y$12$XRUyfn3oZEdfzE1wK0WTu.gCJJV9ULxENI5JX82JIIzCNvkaAqHai';
 
@@ -55,14 +59,19 @@ final class AuthTokenController extends Controller
 
         $emailHash = hash('sha256', strtolower(trim($data['email'])));
         $emailKey = 'nexora-api-auth:email:'.$emailHash.'|'.$request->ip();
+        $accountKey = 'nexora-api-auth:account:'.$emailHash;
         $ipKey = 'nexora-api-auth:ip:'.$request->ip();
-        if (RateLimiter::tooManyAttempts($emailKey, self::EMAIL_ATTEMPTS) || RateLimiter::tooManyAttempts($ipKey, self::IP_ATTEMPTS)) {
-            $retry = max(RateLimiter::availableIn($emailKey), RateLimiter::availableIn($ipKey), 1);
+        // Count first, then decide: concurrent requests cannot all pass a check-then-hit gap.
+        // The account bucket ignores IP so distributed guessing against one email stays capped.
+        $ipCount = RateLimiter::hit($ipKey, 60);
+        $emailCount = RateLimiter::hit($emailKey, 60);
+        $accountCount = RateLimiter::hit($accountKey, self::ACCOUNT_DECAY_SECONDS);
+        if ($ipCount > self::IP_ATTEMPTS || $emailCount > self::EMAIL_ATTEMPTS || $accountCount > self::ACCOUNT_ATTEMPTS) {
+            $retry = max(RateLimiter::availableIn($emailKey), RateLimiter::availableIn($ipKey), RateLimiter::availableIn($accountKey), 1);
 
             return $this->error('rate_limited', 'Too many sign-in attempts. Try again later.', 429)
                 ->header('Retry-After', (string) $retry);
         }
-        RateLimiter::hit($ipKey, 60);
 
         $user = User::query()->where('email', $data['email'])->first();
         // Hash a dummy value for unknown emails so response timing does not reveal account existence.
@@ -71,7 +80,6 @@ final class AuthTokenController extends Controller
             : Hash::check($data['password'], self::TIMING_DUMMY_HASH) && false;
 
         if (! $valid) {
-            RateLimiter::hit($emailKey, 60);
             $audit->record('api.auth.token_failed', metadata: ['email_hash' => $emailHash]);
 
             return $this->invalidCredentials();
@@ -104,7 +112,9 @@ final class AuthTokenController extends Controller
             return $this->error('sso_required', 'This organization requires SSO sign-in.', 403);
         }
 
+        // Only a fully successful exchange resets the per-email buckets; blocked states keep counting.
         RateLimiter::clear($emailKey);
+        RateLimiter::clear($accountKey);
 
         $created = $tokens->issue(
             $organization,
@@ -179,6 +189,9 @@ final class AuthTokenController extends Controller
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->get()
+            // Only tokens shaped like an exchange result; never admin-issued tokens that share the prefix.
+            ->filter(fn (ApiAccessToken $token): bool => (array) $token->abilities === [ApiAbilityRegistry::PROFILE_READ])
+            ->values()
             ->slice(self::MAX_ACTIVE_TOKENS)
             ->each(fn (ApiAccessToken $stale) => $tokens->revoke($stale, $user));
     }

@@ -50,6 +50,17 @@ The three HTTP routes above. There are no webhooks, uploads, jobs or CLI entry p
 3. A member of org A requests org B. Rejected, because `issue()` requires active membership in the requested org.
 4. A stolen device. The admin revokes the token, or it expires within 30 days at most.
 
+## Independent review round 1 (reviewed head 8bccb98, CHANGES_REQUIRED)
+
+| Finding | Resolution |
+|---|---|
+| 1. The per-email limit was keyed per IP, so distributed guessing against one account was uncapped. | Fixed. A third bucket keyed on the email alone allows 30 attempts per 15 minutes regardless of IP. Test: `test_account_limit_holds_across_rotating_ips`. |
+| 2. The check-then-hit gap let concurrent requests bypass the limit. | Fixed. All three buckets are hit first, and the decision uses the returned counts. |
+| 3. Blocked states (inactive, unverified, SSO) did not count toward the limit. | Fixed. Only a fully successful exchange clears the per-email buckets. Test: `test_blocked_states_count_toward_the_limit`. |
+| 4. SSO is evaluated per requested organization. | Accepted by design. The token is scoped to exactly that organization, and the policy is defined per organization, which matches web login. A user in org A (SSO enforced) and org B (no SSO) can obtain a B-only token. |
+| 5. The token cap matched on name prefix only. | Fixed. The cap only touches tokens whose abilities are exactly `[profile.read]`, so admin-issued tokens are never revoked. Test: `test_token_cap_never_revokes_admin_issued_tokens_sharing_the_prefix`. |
+| 6. Super-admin break-glass; email case sensitivity; timing hash cost. | Accepted. The super-admin token is still `profile.read` only. Email case behaviour matches web login. The dummy hash uses cost 12, the Laravel default; deployments that change `BCRYPT_ROUNDS` should keep it aligned. |
+
 ## Residual risk
 
 - No MFA exists platform-wide yet. Mobile matches web here, and MFA is scheduled in `SECURITY-BASELINE-200`.

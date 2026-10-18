@@ -10,6 +10,8 @@ use App\Models\EnterpriseOrganization;
 use App\Models\EnterpriseOrganizationMember;
 use App\Models\EnterpriseSsoProvider;
 use App\Models\User;
+use App\Nexora\Api\Services\ApiAbilityRegistry;
+use App\Nexora\Api\Services\ApiTokenManager;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
@@ -144,6 +146,49 @@ final class MobileAuthTokenTest extends TestCase
         $this->postJson('/api/v1/auth/token', $this->credentials($user))
             ->assertStatus(429)
             ->assertHeader('Retry-After');
+    }
+
+    public function test_account_limit_holds_across_rotating_ips(): void
+    {
+        $user = $this->member('distributed@example.test');
+        for ($i = 0; $i < 30; $i++) {
+            $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.'.($i + 1)])
+                ->postJson('/api/v1/auth/token', ['email' => $user->email, 'password' => 'guess-'.$i, 'device_name' => 'x'])
+                ->assertStatus(422);
+        }
+
+        // Correct password from yet another IP is still refused: the per-account bucket ignores IP.
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.7'])
+            ->postJson('/api/v1/auth/token', $this->credentials($user))
+            ->assertStatus(429);
+    }
+
+    public function test_blocked_states_count_toward_the_limit(): void
+    {
+        $user = $this->member('blocked-loop@example.test', ['status' => 'suspended']);
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/v1/auth/token', $this->credentials($user))->assertForbidden();
+        }
+
+        $this->postJson('/api/v1/auth/token', $this->credentials($user))->assertStatus(429);
+    }
+
+    public function test_token_cap_never_revokes_admin_issued_tokens_sharing_the_prefix(): void
+    {
+        $user = $this->member('admin-named@example.test');
+        $adminIssued = app(ApiTokenManager::class)->issue(
+            $this->defaultOrganization(),
+            $user,
+            AuthTokenController::TOKEN_NAME_PREFIX.'integration',
+            [ApiAbilityRegistry::DOCUMENTS_READ],
+            30,
+        );
+        for ($i = 0; $i < AuthTokenController::MAX_ACTIVE_TOKENS + 1; $i++) {
+            $this->travel(1)->seconds();
+            $this->issueToken($user, 'Device '.$i);
+        }
+
+        self::assertNull($adminIssued['record']->fresh()->revoked_at);
     }
 
     public function test_exchanged_token_cannot_use_other_abilities(): void
