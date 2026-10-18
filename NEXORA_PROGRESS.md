@@ -28,6 +28,12 @@ The current working branch reconciles protected main `9d1c89eed4fc67d4e1a3798992
 
 ## 1. Current checkpoint
 
+> 2026-10-18 update:
+> - Canonical state is `.ai/state.json` revision 10; the active stage is `MOBILE-AUTH-API-100`.
+> - Admin UX source batches were merged: #132–#137.
+> - The mobile sign-in token API is in source review; target evidence is not claimed and Target Power is unchanged.
+> - The detail below is the last full checkpoint and remains historical until it is re-certified.
+
 - Date: `2026-09-02` (Asia/Karachi).
 - Canonical long-lived engineering branch: `dev/n1-0b-core-functional-qa` / PR #1, still **DRAFT + OPEN**.
 - N1.12 accepted frozen product source: **`78976e9f44e290155b119ae722a77fb37fd59018`**.

@@ -1,3 +1,14 @@
+# MOBILE-AUTH-API-100 mobile sign-in token API — 2026-10-18
+
+Active stage is MOBILE-AUTH-API-100 (unit SYS-MOBILE-AUTH-API, critical), owner-prioritised for iOS/Android apps.
+
+- New routes: `POST /api/v1/auth/token`, `GET /api/v1/me`, `POST /api/v1/auth/logout`. They reuse the existing `nxapi_` token layer with no new dependency or table.
+- Exchanged tokens get only `profile.read`, last 30 days, and are capped at 10 per user. Throttles are 5/min per email+IP and 20/min per IP.
+- An SSO bypass found during implementation is fixed and covered by a regression test. `requiresSso` reads the tenant context, which API routes do not install, so it is now evaluated inside the token's organization. The test was shown to fail (201) before the fix.
+- Tests: 13 new; full suite 781 passed. Source-guard and control-plane verify PASS.
+- Threat model: `.ai/security/threat-models/MOBILE-AUTH-API-100.md`.
+- Pending: an independent review on the exact head SHA before merge. APP-MOBILE-CLIENT (Expo) is PLANNED under MOBILE-APPS-100. Target evidence is not claimed.
+
 # PR #71 clean replacement source preparation — 2026-10-01
 
 Base main 55c249c06621fe7dc14868b3a5740b657bcb6b7a. Owner requested starting the clean replacement. Eight new backend regressions / 59 assertions PASS. Original unchanged suite diagnostic FAILED (61 schema errors, 5 failures, 6 incomplete). First full replacement run had a toolchain fixture failure: inherited NPM_CONFIG_CACHE pointed at a nonexistent directory; actual writable disposable cache configured, assertions unchanged. Corrected combined backend run PASS: 488 tests / 4663 assertions. Source certification and remote exact-head CI remain separate gates. New suite covers implemented auth/admin/module-read boundaries only. Original 76 requirements remain explicitly inventoried for contract mapping; no global Core QA/target or historical key invalidation completion. Original #71 stays quarantined. Evidence: docs/pr71-clean-replacement.md. Earlier entries are historical.

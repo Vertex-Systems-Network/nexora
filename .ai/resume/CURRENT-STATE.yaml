@@ -10,8 +10,8 @@ active_issue:
 active_pr: null
 active_branch: claude/blissful-pasteur-fn8sww
 current_stage:
-  id: CORE-QA-001
-  unit: SYS-CORE-ADMIN-QA
+  id: MOBILE-AUTH-API-100
+  unit: SYS-MOBILE-AUTH-API
   status: ACTIVE
 current_milestone:
   id: CORE-QA-SOURCE-001

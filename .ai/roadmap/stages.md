@@ -136,6 +136,8 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 | 72 | `A11Y-CERT-100` | accessibility/international certification including keyboard, screen-reader, contrast and RTL | Production | LEGACY_PLANNED | PERF-CWV-CERT-100, I18N-200 |
 | 73 | `RELEASE-CERT-100` | final exact-source dependency/browser/DB/security/payment-enabled/backup/restore/HA/package/reliability/Flow evidence certification | Production | DEFERRED_CERTIFICATION | A11Y-CERT-100, SENTINEL-200, DR-PLATFORM-100, DELIVERY-EXCELLENCE-100, FLOW-INTELLIGENCE-200 |
 | 74 | `N2-STABLE-100` | stable production platform release | Production | BLOCKED | RELEASE-CERT-100 |
+| 75 | `MOBILE-AUTH-API-100` | native-app sign-in token exchange, self profile and device-token revocation on the existing scoped API-token layer (no new auth stack); owner-prioritised 2026-10-18 for iOS/Android apps | Builder Beta | NEW_REQUIRED / CRITICAL | CORE-QA-001 |
+| 76 | `MOBILE-APPS-100` | iOS/Android client apps (React Native/Expo) consuming `/api/v1` with VSN design tokens | Pro | NEW_REQUIRED | MOBILE-AUTH-API-100, ADMIN-UX-CLOSURE-001 |
 
 ## External first-party package track
 

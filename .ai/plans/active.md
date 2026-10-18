@@ -1,3 +1,31 @@
+# MOBILE-AUTH-API-100 mobile sign-in token API — 2026-10-18
+
+Stage MOBILE-AUTH-API-100 (ACTIVE, unit SYS-MOBILE-AUTH-API, critical). The owner prioritised iOS/Android apps; the decision is to keep Laravel as the single backend and add native clients (APP-MOBILE-CLIENT, MOBILE-APPS-100, PLANNED). CORE-QA-001 source QA is delivered (#127–#129); browser item B04 remains pending under RUNTIME-TARGET-ACCEPTANCE. Threat model: `.ai/security/threat-models/MOBILE-AUTH-API-100.md`.
+
+Method: proportional DMADV. The problem is that the existing `nxapi_` tokens can only be issued by an admin in the web UI, so native apps have no sign-in path. The design reuses `ApiTokenManager` and `AuthenticateApiToken` and adds no auth package, table or dependency. Routes:
+
+- `POST /api/v1/auth/token`: email, password, device_name and optional organization. Returns a 30-day token with the single ability `profile.read`.
+- `GET /api/v1/me`: allow-listed self profile.
+- `POST /api/v1/auth/logout`: revokes only the presenting token.
+
+CTQs:
+- Exchange enforces the same active-status and SSO-required rules as web login, and refuses unverified email.
+- The response gives no enumeration signal: one identical failure message.
+- Throttle: 5/min per email+IP and 20/min per IP.
+- The caller cannot choose abilities.
+- At most 10 live mobile tokens per user; the oldest is revoked when over the cap.
+- Audit records for issue, revoke and failure.
+
+Data: user PII is returned only to its owner. The token hash is stored in the existing `nx_api_access_tokens` table. No new data store, no retention change.
+
+Graph: the new edge is mobile client → `/api/v1/auth/token` → ApiTokenManager → existing token store. Evidence is declared and tested only, never observed in production.
+
+Performance: one bcrypt verification per exchange, bounded by the throttle. `/me` costs one query beyond token resolution.
+
+Reliability: exchange is idempotent per call; every call issues a new token and the cap revokes the oldest.
+
+Tests are listed in the threat model's Verification section. Rollback is code-only: revert the PR and bulk-revoke tokens named `Mobile · *`. An independent review on the exact head SHA is required before merge. The unit cannot exceed SOURCE_DONE without target evidence.
+
 # CORE-QA-001 source QA and AI-GOV-AUTOMATION-100 increments — 2026-10-17
 
 Stage CORE-QA-001 (ACTIVE, unit SYS-CORE-ADMIN-QA) after RUNTIME-CLOSURE-001 was source-closed under WVR-NEX-PR122-PHASE1-SOURCE-CLOSE-001 (#126). TARGET_VERIFIED is not claimed; #72 and #74 remain open under RUNTIME-TARGET-ACCEPTANCE.
