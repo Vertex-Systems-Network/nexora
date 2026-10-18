@@ -69,6 +69,8 @@ final class AuthenticatedSessionController extends Controller
 
         if ($ssoPolicy->requiresSso($user)) {
             $audit->record('auth.login_blocked', $user, ['reason' => 'enterprise-sso-required']);
+            // No session was created, but end any earlier one in this browser before refusing.
+            Auth::logout();
 
             throw ValidationException::withMessages([
                 'email' => 'This organization requires SSO sign-in. Use an organization SSO option below.',
@@ -116,7 +118,7 @@ final class AuthenticatedSessionController extends Controller
         $user->forceFill(['last_login_at' => now()])->save();
         $audit->record('auth.login', $user);
 
-        if ($user->canAccessAdmin()) {
+        if ($user?->canAccessAdmin()) {
             return redirect()->intended(route('admin.dashboard'));
         }
 
