@@ -4,7 +4,7 @@
   "control_plane_revision": 14,
   "control_plane_branch": "claude/wizardly-ptolemy-i21c24",
   "base_branch": "main",
-  "base_sha": "23359fd2ae62780be1973367c3cedbaba655eccd",
+  "base_sha": "5094cf26bccd48d701c05ffc548eaca6b179c4fb",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
@@ -13,13 +13,13 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 77,
   "current_stage": {
-    "id": "RESEARCH-DISCOVERY-100",
-    "name": "Research & Discovery",
+    "id": "QUALITY-GOVERNANCE-100",
+    "name": "Quality Governance",
     "status": "ACTIVE",
-    "scope_note": "Make ResearchBrief machine-readable and enforced: template, required sections, anti-fabrication (confidence needs VOC evidence; missing baseline = UNKNOWN), high/critical units need a brief or exception before ACTIVE. AI-GOV-AUTOMATION-100: SYS-AI-GOVERNANCE-AUTOMATION SOURCE_DONE (#148); its other units remain PLANNED."
+    "scope_note": "Make quality evidence machine-checkable: threat-model and FMEA references must resolve, quality.method declared for high/critical ACTIVE units, explicit fmea_required for critical ACTIVE units, control plans exist. RESEARCH-DISCOVERY-100 SOURCE_DONE (#149)."
   },
   "active_development_units": [
-    "SYS-RESEARCH-DISCOVERY"
+    "SYS-QUALITY-GOVERNANCE"
   ],
   "completed_control_stages": [
     {

@@ -1,3 +1,20 @@
+# QUALITY-GOVERNANCE-100 machine-checked quality evidence — 2026-10-23
+
+Stage QUALITY-GOVERNANCE-100 (ACTIVE, unit SYS-QUALITY-GOVERNANCE). RESEARCH-DISCOVERY-100 is SOURCE_DONE (#149).
+
+- **Problem:** threat models, FMEAs, quality method and control plans are required by `.ai/quality/engineering-lifecycle.md` and `.ai/quality/lean-six-sigma.md`, but a unit can reference a threat model or FMEA that does not exist, or start high/critical work with no declared method, without any check failing.
+- **Method:** DMADV, proportional (governance tooling, moderate risk).
+- **Design:** new rules in `scripts/ai-control-plane-verify.php` (already enforced in CI through `tests/Architecture/AiControlPlaneConsistencyTest.php`):
+  1. `security.threat_model`, when set, is an existing `.md` under `.ai/security/threat-models/`.
+  2. `threat_model_required: true` + `ACTIVE` requires `security.threat_model`.
+  3. `quality.method` ∈ {lightweight, DMADV, DMAIC}; high/critical `ACTIVE` units must declare it.
+  4. `quality.fmea_required: true` requires `quality.fmea_ref`: an existing `.md` under `.ai/quality/fmea/` with the template's Context, Failure-mode table and Control evidence sections. Critical `ACTIVE` units must set `fmea_required` explicitly.
+  5. `quality.control_plan`, when set, is an existing repository file.
+  - Existing SOURCE_DONE units are not retro-gated (only reference validity applies to them).
+- **Data / security / performance / graph:** `NOT_APPLICABLE` (repository governance tooling).
+- **Tests:** fixture tests per rule; the live repository passes.
+- **Rollback:** revert the PR.
+
 # RESEARCH-DISCOVERY-100 machine-readable ResearchBrief — 2026-10-23
 
 Stage RESEARCH-DISCOVERY-100 (ACTIVE, unit SYS-RESEARCH-DISCOVERY). AI-GOV-AUTOMATION-100's traceability unit SYS-AI-GOVERNANCE-AUTOMATION is SOURCE_DONE (#148); the stage's orchestration units remain PLANNED.
