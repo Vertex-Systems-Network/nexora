@@ -1,3 +1,10 @@
+# Handoff — ARCH-BOUNDARY-100 layer direction — 2026-10-23
+
+- Main 0abbdaa (#150 merged; SYS-QUALITY-GOVERNANCE SOURCE_DONE).
+- Stage ARCH-BOUNDARY-100 ACTIVE (SYS-ARCH-BOUNDARIES, high): brief, threat model, method recorded (first unit gated by the new research/quality rules).
+- New `LayerDirectionArchitectureTest`; `RequestContext::REQUEST_ID`; ARCHITECTURE.md "Layer direction".
+- Next: Track B (THEME-CLOSURE-001). Owner action still open: required check for PR traceability. No target acceptance claimed.
+
 # Handoff — QUALITY-GOVERNANCE-100 machine-checked quality evidence — 2026-10-23
 
 - Main 5094cf2 (#149 ResearchBrief merged; SYS-RESEARCH-DISCOVERY SOURCE_DONE).

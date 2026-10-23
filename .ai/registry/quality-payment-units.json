@@ -28,7 +28,7 @@
       "type": "core-system",
       "name": "Quality Engineering Operating System",
       "summary": "Lifecycle quality dimensions, proportional gates, DMADV/DMAIC, FMEA, traceability and control-plan governance.",
-      "status": "ACTIVE",
+      "status": "SOURCE_DONE",
       "parent_stage_id": "QUALITY-GOVERNANCE-100",
       "release_train": "builder-beta",
       "depends_on": ["RESEARCH-DISCOVERY-100", "AI-GOV-AUTOMATION-100"],

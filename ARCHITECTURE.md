@@ -20,6 +20,15 @@ Future Apps / Extensions / Themes / Integrations
 
 Third-party code must not depend on private core implementation classes.
 
+## Layer direction (ARCH-BOUNDARY-100)
+
+Within the application the direction is `App\Http` (controllers, middleware, requests) → `App\Nexora` domain services → contracts and models. Enforced by `tests/Architecture/LayerDirectionArchitectureTest.php`:
+
+- `app/Nexora` never imports or names `App\Http` classes. Values the HTTP layer hands to the domain (such as the request id attribute) are named in `App\Nexora\Http\RequestContext`.
+- Contracts never depend on service implementations or the HTTP layer.
+- Models never depend on the HTTP layer and import domain services only where listed (tenant scoping via `TenantContext`).
+- Exceptions are explicit allowlist entries with a reason; stale entries fail the test.
+
 ## Package lifecycle boundary
 
 Future installable code follows this order:
