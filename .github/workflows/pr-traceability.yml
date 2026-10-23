@@ -1,0 +1,55 @@
+name: PR traceability
+
+# AI-GOV-AUTOMATION-100 / SYS-AI-GOVERNANCE-AUTOMATION: every PR must name a registered
+# development unit or canonical stage. Lightweight and separate from the governance job so
+# editing a PR title/body re-runs only this check.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexora-pr-traceability-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  traceability:
+    name: PR-to-unit traceability
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      # The checker itself comes from the base branch, so a PR cannot edit the script that judges it.
+      # The registry/stages it reads come from the PR head, so a unit registered in the same PR counts.
+      - name: Checkout base checker
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .base-checker
+          persist-credentials: false
+
+      - name: PHP 8.4
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2.40.0
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: none
+
+      - name: Verify PR references a registered unit or stage
+        # Untrusted PR text is passed only through environment variables, never interpolated into the script.
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          checker=.base-checker/scripts/pr-unit-traceability.php
+          # Bootstrap only: the PR that introduces the checker has none on its base yet.
+          if [ ! -f "$checker" ]; then checker=scripts/pr-unit-traceability.php; fi
+          php "$checker" "$GITHUB_WORKSPACE"

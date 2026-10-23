@@ -1,3 +1,13 @@
+# Handoff — AI-GOV-AUTOMATION-100 PR traceability — 2026-10-23
+
+- Owner approved the protected-workflow change in session. Stage AI-GOV-AUTOMATION-100 ACTIVE (unit SYS-AI-GOVERNANCE-AUTOMATION).
+- New: `scripts/pr-unit-traceability.php` + `.github/workflows/pr-traceability.yml` (PR must name a registered unit/stage; dependabot exempt; read-only; untrusted text via env only).
+- Registry: SYS-MFA-PASSKEY registered (SOURCE_DONE; was missing); SEC-BASELINE → SOURCE_DONE.
+- The checker runs from the PR's base commit (a PR cannot edit the script that judges it); the registry it reads comes from the head, so registering a unit in the same PR counts.
+- Owner action: make "PR-to-unit traceability" a required status check in main's branch protection; until then it is advisory. Consider a CODEOWNERS file for `.github/**`, `.ai/**` and `scripts/`.
+- Review-independence note: owner approval for this workflow change was given in session (2026-10-23), not recorded in a durable repo artifact.
+- Next: RESEARCH-DISCOVERY-100. No target acceptance claimed.
+
 # Handoff — SECURITY-BASELINE-200 source-complete — 2026-10-23
 
 - Main 82bd8cb. SECURITY-BASELINE-200 planned increments all SOURCE_DONE: TOTP (#140), CSP + authorization matrix + secret scan (#145), passkeys (#146).
