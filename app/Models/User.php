@@ -53,6 +53,12 @@ final class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    /** @return HasMany<Passkey, $this> */
+    public function passkeys(): HasMany
+    {
+        return $this->hasMany(Passkey::class);
+    }
+
     /** @return BelongsToMany<Role, $this> */
     public function roles(): BelongsToMany
     {
