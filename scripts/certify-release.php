@@ -209,6 +209,8 @@ $run('target-remediation-contract','target environment prerequisite remediation 
     $run('concurrency-contract','Database transaction/deadlock/idempotency/concurrency contracts',$php.' '.$quote($root.'/scripts/concurrency-contract-verify.php'));
     $run('security-contract','Authentication/session/CSRF/tenant security contracts',$php.' '.$quote($root.'/scripts/security-contract-verify.php'));
     $run('frontend-contract','Frontend/runtime contract regression gate',$php.' '.$quote($root.'/scripts/frontend-contract-verify.php'));
+    $run('secret-scan-self-test','Committed-secret scanner rule self-test',$php.' '.$quote($root.'/scripts/secret-scan.php').' --self-test');
+    $run('secret-scan','Committed-secret scan of git-tracked files',$php.' '.$quote($root.'/scripts/secret-scan.php'));
     $run('source-guard','Nexora Source Guard',$php.' '.$quote($root.'/scripts/source-guard.php').' --source-only');
     $run('source-attestation-capture','Capture exact certified source tree',$command([PHP_BINARY,'scripts/source-attestation.php','--write','--expect='.$sourceAttestationInitial['tree_sha256']]));
 
