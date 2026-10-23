@@ -78,7 +78,7 @@ final class ApplyContentSecurityPolicy
         foreach (explode(',', (string) config('nexora-performance.headers.'.$key, '')) as $candidate) {
             $parts = parse_url(trim($candidate));
             if (is_array($parts) && ($parts['scheme'] ?? '') === 'https' && isset($parts['host'])
-                && ! isset($parts['path']) && ! isset($parts['query']) && ! isset($parts['user'])) {
+                && in_array($parts['path'] ?? '/', ['', '/'], true) && ! isset($parts['query']) && ! isset($parts['user'])) {
                 $origins[] = 'https://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '');
             }
         }

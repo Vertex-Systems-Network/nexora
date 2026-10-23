@@ -63,11 +63,11 @@ final class ContentSecurityPolicyTest extends TestCase
 
     public function test_form_action_allowlist_accepts_only_https_origins(): void
     {
-        config(['nexora-performance.headers.csp_form_action' => 'https://pay.example.com, http://insecure.example.com, https://x.example.com/path, *, https://ok.example.com:8443']);
+        config(['nexora-performance.headers.csp_form_action' => 'https://pay.example.com, http://insecure.example.com, https://x.example.com/path, *, https://ok.example.com:8443, https://slash.example.com/']);
 
         $policy = (new ApplyContentSecurityPolicy)->policy('n');
 
-        $this->assertStringContainsString("form-action 'self' https://pay.example.com https://ok.example.com:8443;", $policy);
+        $this->assertStringContainsString("form-action 'self' https://pay.example.com https://ok.example.com:8443 https://slash.example.com;", $policy);
         $this->assertStringNotContainsString('insecure', $policy);
         $this->assertStringNotContainsString('x.example.com', $policy);
     }
