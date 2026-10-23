@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\ApplyContentSecurityPolicy;
 use App\Http\Middleware\ApplyPerformanceHeaders;
 use App\Http\Middleware\AuthenticateApiToken;
 use App\Http\Middleware\ConfigureTrustedProxies;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             AssignRequestId::class,
             ApplyPerformanceHeaders::class,
+            ApplyContentSecurityPolicy::class,
             RedirectIfNotInstalled::class,
             RuntimeNodeHeartbeat::class,
             ResolveEnterpriseOrganization::class,
