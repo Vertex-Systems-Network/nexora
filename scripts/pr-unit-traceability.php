@@ -57,7 +57,7 @@ function nexora_pr_traceability(string $root, string $title, string $body, strin
     if ($referenced === []) {
         return ['ok' => false, 'exempt' => false, 'referenced' => [], 'errors' => [
             'The PR title or body names no registered development unit or canonical stage ID. '
-            .'Register the work first (.ai/registry/*.json, .ai/governance/development-intake.md), then reference its ID, e.g. "SECURITY-BASELINE-200: …".',
+            .'Register the work first (.ai/registry/*.json, .ai/governance/development-intake.md), then reference its ID, e.g. "SECURITY-BASELINE-200: …". IDs are case-sensitive.',
         ]];
     }
 
