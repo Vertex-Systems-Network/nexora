@@ -2,9 +2,9 @@
   "schema_version": "1.0",
   "project": "Nexora",
   "control_plane_revision": 14,
-  "control_plane_branch": "claude/blissful-pasteur-fn8sww",
+  "control_plane_branch": "claude/wizardly-ptolemy-i21c24",
   "base_branch": "main",
-  "base_sha": "82bd8cb7ce1360af4aea0af12db255030b52fd9b",
+  "base_sha": "23359fd2ae62780be1973367c3cedbaba655eccd",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
@@ -13,13 +13,13 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 77,
   "current_stage": {
-    "id": "AI-GOV-AUTOMATION-100",
-    "name": "AI Governance Automation",
+    "id": "RESEARCH-DISCOVERY-100",
+    "name": "Research & Discovery",
     "status": "ACTIVE",
-    "scope_note": "Owner approved 2026-10-23 (in session). Remaining increment: PR-to-unit traceability check in a separate lightweight workflow. Verifier already enforced via tests/Architecture/AiControlPlaneConsistencyTest.php."
+    "scope_note": "Make ResearchBrief machine-readable and enforced: template, required sections, anti-fabrication (confidence needs VOC evidence; missing baseline = UNKNOWN), high/critical units need a brief or exception before ACTIVE. AI-GOV-AUTOMATION-100: SYS-AI-GOVERNANCE-AUTOMATION SOURCE_DONE (#148); its other units remain PLANNED."
   },
   "active_development_units": [
-    "SYS-AI-GOVERNANCE-AUTOMATION"
+    "SYS-RESEARCH-DISCOVERY"
   ],
   "completed_control_stages": [
     {

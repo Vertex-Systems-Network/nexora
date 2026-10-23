@@ -1,3 +1,20 @@
+# RESEARCH-DISCOVERY-100 machine-readable ResearchBrief — 2026-10-23
+
+Stage RESEARCH-DISCOVERY-100 (ACTIVE, unit SYS-RESEARCH-DISCOVERY). AI-GOV-AUTOMATION-100's traceability unit SYS-AI-GOVERNANCE-AUTOMATION is SOURCE_DONE (#148); the stage's orchestration units remain PLANNED.
+
+- **Problem:** ResearchBrief/VOC/baseline/CTQ requirements exist only as prose (`.ai/quality/engineering-lifecycle.md`, `.ai/governance/development-intake.md`). Nothing checks them, and nothing stops an AI from asserting confidence it has no evidence for.
+- **Method:** DMADV, proportional (governance tooling, moderate risk).
+- **Design:**
+  - `.ai/research/template.md` with required sections: Problem, Users & VOC evidence, Baseline, Alternatives, CTQs, Confidence, Sources.
+  - `scripts/ai-control-plane-verify.php` gains research rules (already enforced in CI via `tests/Architecture/AiControlPlaneConsistencyTest.php`):
+    1. `research.brief` must point to an existing file under `.ai/research/` containing every required section.
+    2. Anti-fabrication: `research.confidence` other than `unknown` requires non-empty `research.voc_evidence`; `research.baseline`, when present, must be non-empty (use `UNKNOWN`).
+    3. A unit with `security.risk` high/critical cannot be `ACTIVE` without `research.brief` or a non-empty `research.exception`.
+  - Dogfood: SYS-RESEARCH-DISCOVERY gets its own brief (VOC = internal governance records only; confidence `low`).
+- **Data / security / performance / graph:** `NOT_APPLICABLE` (repository governance tooling; no runtime change).
+- **Tests:** fixture-based tests for each rule, plus the live repository passing.
+- **Rollback:** revert the PR.
+
 # AI-GOV-AUTOMATION-100 PR-to-unit traceability — 2026-10-23
 
 Stage AI-GOV-AUTOMATION-100 (ACTIVE, unit SYS-AI-GOVERNANCE-AUTOMATION). The owner approved the protected-workflow change in session on 2026-10-23. SECURITY-BASELINE-200 is SOURCE_DONE (#140, #145, #146); SYS-MFA-PASSKEY is now registered (it was missing from the registry).

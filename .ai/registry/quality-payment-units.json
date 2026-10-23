@@ -8,11 +8,19 @@
       "type": "core-system",
       "name": "Research & Discovery Governance",
       "summary": "ResearchBrief, VOC, problem validation, competitor/standards evidence, baseline and CTQ system for substantial new work.",
-      "status": "PLANNED",
+      "status": "ACTIVE",
       "parent_stage_id": "RESEARCH-DISCOVERY-100",
       "release_train": "builder-beta",
       "depends_on": ["AI-GOV-AUTOMATION-100"],
       "security": {"risk": "moderate", "threat_model_required": false},
+      "research": {
+        "brief": ".ai/research/SYS-RESEARCH-DISCOVERY.md",
+        "problem": "ResearchBrief/VOC/baseline/CTQ requirements are prose only; nothing verifies them or stops unsupported confidence claims.",
+        "voc_evidence": [".ai/quality/engineering-lifecycle.md (owner-authored requirement)", ".ai/governance/development-intake.md (owner-authored requirement)"],
+        "baseline": "UNKNOWN",
+        "confidence": "low",
+        "ctqs": ["Every brief referenced by a unit exists and has all required sections", "No confidence above unknown without VOC evidence", "No high/critical unit is ACTIVE without a brief or recorded exception"]
+      },
       "acceptance_criteria": ["Substantial new capabilities carry evidence-backed problem/VOC/baseline/CTQ decisions before solution implementation."]
     },
     {
