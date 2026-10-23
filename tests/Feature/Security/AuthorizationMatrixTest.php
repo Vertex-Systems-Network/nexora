@@ -25,6 +25,7 @@ final class AuthorizationMatrixTest extends TestCase
         'admin.saved-views.store' => 'creates a view owned by the acting user only',
         'admin.saved-views.destroy' => 'controller aborts 404 unless the view belongs to the acting user',
         'admin.enterprise.impersonation.stop' => 'must remain available to end an active impersonation',
+        'admin.extensions.marketplace.catalog.stage' => 'MarketplacePackageStager::authorizeStage checks themes.install/extensions.install by package type plus tenant scope',
     ];
 
     public function test_every_admin_mutation_requires_a_permission(): void
@@ -91,7 +92,8 @@ final class AuthorizationMatrixTest extends TestCase
     {
         return array_values(array_filter(
             Router::getRoutes()->getRoutes(),
-            fn (Route $route): bool => str_starts_with((string) $route->getName(), 'admin.'),
+            // Select by URI, not name: other route files (e.g. forms.admin.*) also mount under /admin.
+            fn (Route $route): bool => $route->uri() === 'admin' || str_starts_with($route->uri(), 'admin/'),
         ));
     }
 
