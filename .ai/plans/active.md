@@ -1,3 +1,14 @@
+# ARCH-BOUNDARY-100 layer-direction boundaries — 2026-10-23
+
+Stage ARCH-BOUNDARY-100 (ACTIVE, unit SYS-ARCH-BOUNDARIES, risk high). QUALITY-GOVERNANCE-100 is SOURCE_DONE (#150).
+
+- **ResearchBrief:** `.ai/research/SYS-ARCH-BOUNDARIES.md` (baseline measured at `0abbdaa`).
+- **Threat model:** `.ai/security/threat-models/ARCH-BOUNDARY-100-LAYER-DIRECTION.md`.
+- **Method:** DMADV; FMEA not required (test-only change plus a constant move).
+- **Design:** `tests/Architecture/LayerDirectionArchitectureTest.php` enforces: no `App\Http` in `app/Nexora` (one reasoned allowlist entry); contracts never import services/HTTP; models never import HTTP and only allowlisted services (`TenantContext`); allowlists cannot go stale. `App\Nexora\Http\RequestContext::REQUEST_ID` replaces three domain imports of the middleware; the middleware constant aliases it. `ARCHITECTURE.md` gains a "Layer direction" section.
+- **Data / performance / graph:** `NOT_APPLICABLE` (same attribute value; no runtime change).
+- **Rollback:** revert the PR.
+
 # QUALITY-GOVERNANCE-100 machine-checked quality evidence — 2026-10-23
 
 Stage QUALITY-GOVERNANCE-100 (ACTIVE, unit SYS-QUALITY-GOVERNANCE). RESEARCH-DISCOVERY-100 is SOURCE_DONE (#149).

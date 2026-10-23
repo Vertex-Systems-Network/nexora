@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Nexora\Security\Audit;
 
-use App\Http\Middleware\AssignRequestId;
+use App\Nexora\Http\RequestContext;
 use App\Models\AuditLog;
 use App\Nexora\Enterprise\Services\TenantContext;
 use App\Nexora\Observability\Services\TelemetrySanitizer;
@@ -32,7 +32,7 @@ final class AuditManager
             throw new InvalidArgumentException('Audit event name cannot be empty.');
         }
 
-        $incomingRequestId = (string) ($request->attributes->get(AssignRequestId::ATTRIBUTE)
+        $incomingRequestId = (string) ($request->attributes->get(RequestContext::REQUEST_ID)
             ?: $request->headers->get('X-Request-Id')
             ?: '');
         $requestId = preg_match('/^[A-Za-z0-9._:-]{1,100}$/', $incomingRequestId) === 1

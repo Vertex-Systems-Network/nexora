@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Nexora\Http\RequestContext;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -11,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class AssignRequestId
 {
-    public const ATTRIBUTE = 'nexora_request_id';
+    public const ATTRIBUTE = RequestContext::REQUEST_ID;
 
     public function handle(Request $request, Closure $next): Response
     {

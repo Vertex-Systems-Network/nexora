@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Nexora\Http;
 
-use App\Http\Middleware\AssignRequestId;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -53,7 +52,7 @@ final class ErrorPresenter
             default => 'Nexora could not complete this request. The incident reference below can be used to find the server log entry.',
         };
 
-        $requestId = (string) ($request->attributes->get(AssignRequestId::ATTRIBUTE)
+        $requestId = (string) ($request->attributes->get(RequestContext::REQUEST_ID)
             ?: $request->headers->get('X-Request-Id')
             ?: Str::uuid());
 

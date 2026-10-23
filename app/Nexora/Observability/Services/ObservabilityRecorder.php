@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Nexora\Observability\Services;
 
-use App\Http\Middleware\AssignRequestId;
+use App\Nexora\Http\RequestContext;
 use App\Models\ApiAccessToken;
 use App\Models\ObservabilityIncident;
 use App\Nexora\Cloud\Services\NodeIdentity;
@@ -41,7 +41,7 @@ final readonly class ObservabilityRecorder
                 return null;
             }
 
-            $requestId = (string) ($request->attributes->get(AssignRequestId::ATTRIBUTE)
+            $requestId = (string) ($request->attributes->get(RequestContext::REQUEST_ID)
                 ?: $request->headers->get('X-Request-Id')
                 ?: '');
             if (preg_match('/^[A-Za-z0-9._:-]{1,100}$/', $requestId) !== 1) {
