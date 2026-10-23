@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Passkey;
 use App\Models\User;
 use App\Nexora\Security\Audit\AuditManager;
+use App\Nexora\Security\Passkeys\PasskeyManager;
 use App\Nexora\Security\Session\SessionSecurityManager;
 use App\Nexora\Security\TwoFactor\TotpAuthenticator;
 use App\Nexora\Security\TwoFactor\TwoFactorManager;
@@ -52,6 +54,13 @@ final class ProfileController extends Controller
             'sessionDriver' => config('session.driver'),
             'twoFactor' => $this->twoFactorProps($user),
             'recoveryCodes' => $request->session()->get('two_factor_recovery_codes'),
+            'passkeys' => $user->passkeys()->latest()->get()->map(static fn (Passkey $passkey): array => [
+                'id' => $passkey->id,
+                'name' => $passkey->name,
+                'createdAt' => $passkey->created_at?->toIso8601String(),
+                'lastUsedAt' => $passkey->last_used_at?->toIso8601String(),
+            ])->values()->all(),
+            'maxPasskeys' => PasskeyManager::MAX_PER_USER,
             'locales' => array_map(static fn (array $meta, string $code): array => [
                 'code' => $code,
                 'label' => trim((string) ($meta['name'] ?? $meta['native'] ?? $code).((string) ($meta['country'] ?? '') !== '' ? ' — '.(string) $meta['country'] : '')),

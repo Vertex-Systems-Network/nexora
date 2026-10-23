@@ -15,8 +15,8 @@ final class N100Rc5DatabaseArchitectureTest extends TestCase
         $result=\nexoraAnalyzeDatabaseContracts($root);
 
         self::assertSame([], $result['errors'], implode("\n", $result['errors']));
-        self::assertSame(39, $result['metrics']['migrations']);
-        self::assertSame(146, $result['metrics']['tables']);
+        self::assertSame(40, $result['metrics']['migrations']);
+        self::assertSame(147, $result['metrics']['tables']);
         self::assertGreaterThanOrEqual(70, $result['metrics']['foreign_targets']);
         self::assertSame(51, $result['metrics']['tenant_tables']);
         self::assertSame(51, $result['metrics']['tenant_models']);

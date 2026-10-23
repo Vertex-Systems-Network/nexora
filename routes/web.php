@@ -58,6 +58,7 @@ use App\Http\Controllers\Public\MediaController as PublicMediaController;
 use App\Http\Controllers\Public\RssFeedController;
 use App\Http\Controllers\Public\NewsletterSubscriptionController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ProfilePasskeyController;
 use App\Http\Controllers\Admin\ProfileTwoFactorController;
 use App\Http\Controllers\Admin\Publishing\ArticleController;
 use App\Http\Controllers\Admin\Publishing\AuthorProfileController;
@@ -84,6 +85,7 @@ use App\Http\Controllers\Admin\System\ModuleRuntimeController;
 use App\Http\Controllers\Admin\System\RuntimeSyncController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\PasskeyLoginController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
@@ -149,6 +151,9 @@ Route::middleware('guest')->group(function (): void {
     // SECURITY-BASELINE-200 / SYS-MFA-TOTP: second login step; shares the auth: throttle bucket.
     Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])->name('two-factor.challenge');
     Route::post('/two-factor-challenge', [TwoFactorChallengeController::class, 'store'])->middleware('throttle:5,1,auth:')->name('two-factor.challenge.store');
+    // SECURITY-BASELINE-200 / SYS-MFA-PASSKEY: passwordless sign-in; verification shares the auth: throttle bucket.
+    Route::post('/passkeys/login/options', [PasskeyLoginController::class, 'options'])->middleware('throttle:20,1')->name('passkeys.login.options');
+    Route::post('/passkeys/login', [PasskeyLoginController::class, 'store'])->middleware('throttle:5,1,auth:')->name('passkeys.login');
 });
 
 Route::middleware('auth')->group(function (): void {
@@ -186,6 +191,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin',
     Route::post('/profile/two-factor/confirm', [ProfileTwoFactorController::class, 'confirm'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.two-factor.confirm');
     Route::post('/profile/two-factor/recovery-codes', [ProfileTwoFactorController::class, 'recoveryCodes'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.two-factor.recovery');
     Route::delete('/profile/two-factor', [ProfileTwoFactorController::class, 'destroy'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.two-factor.destroy');
+    Route::post('/profile/passkeys/options', [ProfilePasskeyController::class, 'options'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.passkeys.options');
+    Route::post('/profile/passkeys', [ProfilePasskeyController::class, 'store'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.passkeys.store');
+    Route::delete('/profile/passkeys/{passkey}', [ProfilePasskeyController::class, 'destroy'])->middleware(['permission:profile.manage', 'throttle:10,1'])->name('profile.passkeys.destroy');
 
     Route::get('/audit', AuditLogController::class)->middleware('permission:audit.view')->name('audit.index');
     Route::get('/notifications', [NotificationController::class, 'index'])->middleware('permission:notifications.view')->name('notifications.index');
