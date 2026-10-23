@@ -84,10 +84,12 @@ function nexora_ai_control_plane_errors(string $root): array
                 $briefPath = is_string($brief) ? $root.'/'.ltrim($brief, '/') : '';
                 $real = $briefPath !== '' ? realpath($briefPath) : false;
                 $researchDir = realpath($ai.'/research');
-                if (! is_string($brief) || $real === false || $researchDir === false || ! str_starts_with($real, $researchDir.DIRECTORY_SEPARATOR)) {
-                    $errors[] = "Unit {$id} research.brief must be an existing file under .ai/research/.";
+                if (! is_string($brief) || $real === false || $researchDir === false || ! is_file($real)
+                    || ! str_ends_with($real, '.md') || ! str_starts_with($real, $researchDir.DIRECTORY_SEPARATOR)) {
+                    $errors[] = "Unit {$id} research.brief must be an existing .md file under .ai/research/.";
                 } else {
-                    $text = (string) file_get_contents($real);
+                    // Headings inside fenced code blocks do not count as sections.
+                    $text = (string) preg_replace('/^```.*?^```/ms', '', (string) file_get_contents($real));
                     foreach ($briefSections as $section) {
                         if (! preg_match('/^## '.preg_quote($section, '/').'\s*$/m', $text)) {
                             $errors[] = "Unit {$id} ResearchBrief {$brief} is missing section \"## {$section}\".";
@@ -98,7 +100,8 @@ function nexora_ai_control_plane_errors(string $root): array
             $confidence = $research['confidence'] ?? 'unknown';
             if (! in_array($confidence, ['unknown', 'low', 'medium', 'high'], true)) {
                 $errors[] = "Unit {$id} research.confidence must be unknown, low, medium or high.";
-            } elseif ($confidence !== 'unknown' && array_filter((array) ($research['voc_evidence'] ?? []), static fn ($v): bool => is_string($v) && trim($v) !== '') === []) {
+            } elseif ($confidence !== 'unknown' && (! is_array($research['voc_evidence'] ?? null) || ! array_is_list($research['voc_evidence'])
+                || array_filter($research['voc_evidence'], static fn ($v): bool => is_string($v) && trim($v) !== '') === [])) {
                 // Anti-fabrication: confidence must be backed by cited evidence.
                 $errors[] = "Unit {$id} claims research confidence {$confidence} without research.voc_evidence.";
             }
@@ -106,10 +109,21 @@ function nexora_ai_control_plane_errors(string $root): array
                 $errors[] = "Unit {$id} research.baseline is empty; write UNKNOWN when there is no measurement.";
             }
         }
+        // Gated at ACTIVE: existing SOURCE_DONE units predate this rule and are not retro-gated.
         if (in_array($risk, ['high', 'critical'], true) && ($unit['status'] ?? null) === 'ACTIVE') {
             $hasBrief = is_array($research) && is_string($research['brief'] ?? null) && $research['brief'] !== '';
-            $hasException = is_array($research) && is_string($research['exception'] ?? null) && trim($research['exception']) !== '';
-            if (! $hasBrief && ! $hasException) {
+            $exception = is_array($research) ? ($research['exception'] ?? null) : null;
+            if ($exception !== null) {
+                // A research exception is a waiver: scoped reason, named approver, expiry (AGENTS.md "Waivers").
+                $valid = is_array($exception)
+                    && is_string($exception['reason'] ?? null) && trim($exception['reason']) !== ''
+                    && is_string($exception['approver'] ?? null) && trim($exception['approver']) !== ''
+                    && is_string($exception['expires'] ?? null) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $exception['expires']) === 1
+                    && $exception['expires'] >= gmdate('Y-m-d');
+                if (! $valid) {
+                    $errors[] = "Unit {$id} research.exception must be {reason, approver, expires: YYYY-MM-DD} and not expired.";
+                }
+            } elseif (! $hasBrief) {
                 $errors[] = "Unit {$id} is ACTIVE with {$risk} risk but has no research.brief or research.exception.";
             }
         }

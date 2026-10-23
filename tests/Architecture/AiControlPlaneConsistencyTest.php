@@ -105,17 +105,25 @@ final class AiControlPlaneConsistencyTest extends TestCase
     public function test_research_brief_must_exist_under_research_dir_with_every_section(): void
     {
         $this->setUnitResearch(['brief' => '.ai/research/missing.md']);
-        self::assertStringContainsString('research.brief must be an existing file under .ai/research/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+        self::assertStringContainsString('research.brief must be an existing .md file under .ai/research/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
 
         $this->write('.ai/outside.md', $this->brief());
         $this->setUnitResearch(['brief' => '.ai/research/../outside.md']);
-        self::assertStringContainsString('research.brief must be an existing file under .ai/research/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+        self::assertStringContainsString('research.brief must be an existing .md file under .ai/research/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
 
         $this->write('.ai/research/partial.md', "# Brief\n\n## Problem\n\nx\n");
         $this->setUnitResearch(['brief' => '.ai/research/partial.md']);
         $errors = implode("\n", nexora_ai_control_plane_errors($this->fixture));
         self::assertStringContainsString('is missing section "## Baseline"', $errors);
         self::assertStringContainsString('is missing section "## CTQs"', $errors);
+
+        $this->write('.ai/research/notes.txt', $this->brief());
+        $this->setUnitResearch(['brief' => '.ai/research/notes.txt']);
+        self::assertStringContainsString('must be an existing .md file', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->write('.ai/research/fenced.md', "```\n".$this->brief()."```\n");
+        $this->setUnitResearch(['brief' => '.ai/research/fenced.md']);
+        self::assertStringContainsString('is missing section "## Problem"', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
 
         $this->write('.ai/research/full.md', $this->brief());
         $this->setUnitResearch(['brief' => '.ai/research/full.md']);
@@ -128,6 +136,9 @@ final class AiControlPlaneConsistencyTest extends TestCase
         $errors = implode("\n", nexora_ai_control_plane_errors($this->fixture));
         self::assertStringContainsString('claims research confidence high without research.voc_evidence', $errors);
         self::assertStringContainsString('research.baseline is empty; write UNKNOWN', $errors);
+
+        $this->setUnitResearch(['confidence' => 'low', 'voc_evidence' => 'just a string']);
+        self::assertStringContainsString('claims research confidence low without research.voc_evidence', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
 
         $this->setUnitResearch(['confidence' => 'certain']);
         self::assertStringContainsString('research.confidence must be unknown, low, medium or high', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
@@ -143,7 +154,13 @@ final class AiControlPlaneConsistencyTest extends TestCase
         $this->setUnit(['security' => ['risk' => 'critical']]);
         self::assertStringContainsString('is ACTIVE with critical risk but has no research.brief or research.exception', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
 
-        $this->setUnit(['security' => ['risk' => 'high'], 'research' => ['exception' => 'Defect fix under DMAIC; owner-approved.']]);
+        // A bare string is not a waiver.
+        $this->setUnit(['security' => ['risk' => 'high'], 'research' => ['exception' => 'n/a']]);
+        self::assertStringContainsString('research.exception must be {reason, approver, expires', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+        $this->setUnit(['security' => ['risk' => 'high'], 'research' => ['exception' => ['reason' => 'x', 'approver' => 'owner', 'expires' => '2000-01-01']]]);
+        self::assertStringContainsString('and not expired', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->setUnit(['security' => ['risk' => 'high'], 'research' => ['exception' => ['reason' => 'Defect fix under DMAIC.', 'approver' => 'owner', 'expires' => '2999-01-01']]]);
         self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
 
         $this->write('.ai/research/full.md', $this->brief());

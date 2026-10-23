@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "project": "Nexora",
   "control_plane_revision": 14,
-  "control_plane_branch": "claude/blissful-pasteur-fn8sww",
+  "control_plane_branch": "claude/wizardly-ptolemy-i21c24",
   "base_branch": "main",
   "base_sha": "23359fd2ae62780be1973367c3cedbaba655eccd",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",

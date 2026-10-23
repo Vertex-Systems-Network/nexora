@@ -2,7 +2,7 @@
 
 <!--
 Required for high/critical units before they become ACTIVE (RESEARCH-DISCOVERY-100).
-Every "## " heading below is required. Do not invent evidence: write UNKNOWN for a
+Every "## " heading below is required, spelled exactly as shown (headings inside code fences do not count). Do not invent evidence: write UNKNOWN for a
 missing baseline and keep confidence at `unknown` until VOC evidence is cited.
 Reference this file from the unit's `research.brief` in .ai/registry/*.json.
 -->
