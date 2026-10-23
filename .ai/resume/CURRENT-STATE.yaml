@@ -2,7 +2,7 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 observed_main:
   branch: main
-  sha: 23359fd2ae62780be1973367c3cedbaba655eccd
+  sha: 5094cf2
   observed_at: '2026-10-23'
   semantics: '#126-#146 merged (incl. TOTP #140, CSP/authz matrix/secret scan #145, passkeys #146); open: dependabot #143/#144 (conflicted)'
 active_issue:
@@ -10,16 +10,16 @@ active_issue:
 active_pr: null
 active_branch: claude/wizardly-ptolemy-i21c24
 current_stage:
-  id: RESEARCH-DISCOVERY-100
-  unit: SYS-RESEARCH-DISCOVERY
+  id: QUALITY-GOVERNANCE-100
+  unit: SYS-QUALITY-GOVERNANCE
   status: ACTIVE
 current_milestone:
-  id: RESEARCH-BRIEF-MACHINE-READABLE
+  id: QUALITY-EVIDENCE-MACHINE-CHECKED
   status: IN_PROGRESS
 last_completed_milestone:
   main_commit: 82bd8cb7ce1360af4aea0af12db255030b52fd9b
   summary: 'SECURITY-BASELINE-200 all planned increments SOURCE_DONE (#140, #145, #146)'
-exact_next_safe_action: Land machine-readable ResearchBrief (template + verifier rules) with green CI and independent review; then QUALITY-GOVERNANCE-100. No target acceptance claimed.
+exact_next_safe_action: Land machine-checked quality evidence (threat model / FMEA / method / control plan) with green CI and independent review; then ARCH-BOUNDARY-100. No target acceptance claimed.
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:

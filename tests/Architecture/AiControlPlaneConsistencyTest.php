@@ -160,15 +160,68 @@ final class AiControlPlaneConsistencyTest extends TestCase
         $this->setUnit(['security' => ['risk' => 'high'], 'research' => ['exception' => ['reason' => 'x', 'approver' => 'owner', 'expires' => '2000-01-01']]]);
         self::assertStringContainsString('and not expired', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
 
-        $this->setUnit(['security' => ['risk' => 'high'], 'research' => ['exception' => ['reason' => 'Defect fix under DMAIC.', 'approver' => 'owner', 'expires' => '2999-01-01']]]);
+        $this->setUnit(['security' => ['risk' => 'high'], 'quality' => ['method' => 'DMAIC'], 'research' => ['exception' => ['reason' => 'Defect fix under DMAIC.', 'approver' => 'owner', 'expires' => '2999-01-01']]]);
         self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
 
         $this->write('.ai/research/full.md', $this->brief());
-        $this->setUnit(['security' => ['risk' => 'critical'], 'research' => ['brief' => '.ai/research/full.md']]);
+        $this->setUnit(['security' => ['risk' => 'critical'], 'quality' => ['method' => 'DMADV', 'fmea_required' => false], 'research' => ['brief' => '.ai/research/full.md']]);
         self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
 
         // PLANNED high/critical units are not gated until they start.
         $this->setUnit(['security' => ['risk' => 'critical']], 'PLANNED');
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+    }
+
+    public function test_threat_model_reference_must_resolve_and_be_present_when_required(): void
+    {
+        $this->setUnit(['security' => ['risk' => 'moderate', 'threat_model' => '.ai/security/threat-models/ghost.md']]);
+        self::assertStringContainsString('security.threat_model must be an existing .md file under .ai/security/threat-models/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->setUnit(['security' => ['risk' => 'moderate', 'threat_model_required' => true]]);
+        self::assertStringContainsString('requires a threat model but has no security.threat_model', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->write('.ai/security/threat-models/tm.md', "# TM\n");
+        $this->setUnit(['security' => ['risk' => 'moderate', 'threat_model_required' => true, 'threat_model' => '.ai/security/threat-models/tm.md']]);
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+
+        // Not retro-gated: a finished unit without a threat model path is fine, but a broken path is not.
+        $this->setUnit(['security' => ['risk' => 'moderate', 'threat_model_required' => true]], 'SOURCE_DONE');
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+    }
+
+    public function test_high_risk_active_unit_declares_method_and_critical_states_fmea(): void
+    {
+        $this->write('.ai/research/full.md', $this->brief());
+        $brief = ['brief' => '.ai/research/full.md'];
+
+        $this->setUnit(['security' => ['risk' => 'high'], 'research' => $brief]);
+        self::assertStringContainsString('declares no quality.method', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->setUnit(['security' => ['risk' => 'high'], 'research' => $brief, 'quality' => ['method' => 'Agile']]);
+        self::assertStringContainsString('quality.method must be lightweight, DMADV or DMAIC', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->setUnit(['security' => ['risk' => 'critical'], 'research' => $brief, 'quality' => ['method' => 'DMADV']]);
+        self::assertStringContainsString('does not state quality.fmea_required', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->setUnit(['security' => ['risk' => 'critical'], 'research' => $brief, 'quality' => ['method' => 'DMADV', 'fmea_required' => false]]);
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+    }
+
+    public function test_fmea_and_control_plan_references_must_resolve(): void
+    {
+        $this->setUnit(['quality' => ['fmea_required' => true, 'fmea_ref' => '.ai/quality/fmea/ghost.md']]);
+        self::assertStringContainsString('quality.fmea_ref is not an existing .md file under .ai/quality/fmea/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->write('.ai/quality/fmea/partial.md', "# FMEA\n\n## Context\n");
+        $this->setUnit(['quality' => ['fmea_required' => true, 'fmea_ref' => '.ai/quality/fmea/partial.md']]);
+        self::assertStringContainsString('is missing section "## Failure-mode table"', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->write('.ai/quality/fmea/full.md', "# FMEA\n\n## Context\n\n## Failure-mode table\n\n## Control evidence\n");
+        $this->setUnit(['quality' => ['fmea_required' => true, 'fmea_ref' => '.ai/quality/fmea/full.md', 'control_plan' => 'docs/missing.md']]);
+        self::assertStringContainsString('quality.control_plan must be an existing repository file', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->write('docs/control.md', "# Control\n");
+        $this->setUnit(['quality' => ['fmea_required' => true, 'fmea_ref' => '.ai/quality/fmea/full.md', 'control_plan' => 'docs/control.md']]);
         self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
     }
 

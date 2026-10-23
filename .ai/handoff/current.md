@@ -1,3 +1,11 @@
+# Handoff — QUALITY-GOVERNANCE-100 machine-checked quality evidence — 2026-10-23
+
+- Main 5094cf2 (#149 ResearchBrief merged; SYS-RESEARCH-DISCOVERY SOURCE_DONE).
+- Stage QUALITY-GOVERNANCE-100 ACTIVE (unit SYS-QUALITY-GOVERNANCE).
+- New verifier rules: threat-model / FMEA / control-plan references must resolve; ACTIVE + threat_model_required needs a threat model; high/critical ACTIVE declares quality.method; critical ACTIVE states fmea_required. Not retro-gated for SOURCE_DONE units.
+- Owner action still open: make "PR-to-unit traceability" a required check.
+- Next: ARCH-BOUNDARY-100. No target acceptance claimed.
+
 # Handoff — RESEARCH-DISCOVERY-100 machine-readable ResearchBrief — 2026-10-23
 
 - Main 23359fd (#148 PR traceability merged; SYS-AI-GOVERNANCE-AUTOMATION SOURCE_DONE; other AI-GOV units PLANNED).

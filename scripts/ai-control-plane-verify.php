@@ -129,6 +129,66 @@ function nexora_ai_control_plane_errors(string $root): array
         }
     }
 
+    // QUALITY-GOVERNANCE-100: quality evidence references must resolve; high/critical work declares its method.
+    $markdownUnder = static function (mixed $path, string $dir) use ($root): bool {
+        if (! is_string($path) || $path === '') {
+            return false;
+        }
+        $real = realpath($root.'/'.ltrim($path, '/'));
+        $base = realpath($root.'/'.$dir);
+
+        return $real !== false && $base !== false && is_file($real) && str_ends_with($real, '.md')
+            && str_starts_with($real, $base.DIRECTORY_SEPARATOR);
+    };
+    $fmeaSections = ['Context', 'Failure-mode table', 'Control evidence'];
+    foreach ($units as $id => $unit) {
+        $status = $unit['status'] ?? null;
+        $risk = $unit['security']['risk'] ?? null;
+        $security = is_array($unit['security'] ?? null) ? $unit['security'] : [];
+        $quality = $unit['quality'] ?? null;
+        if ($quality !== null && ! is_array($quality)) {
+            $errors[] = "Unit {$id} quality must be an object.";
+            $quality = null;
+        }
+
+        if (array_key_exists('threat_model', $security) && ! $markdownUnder($security['threat_model'], '.ai/security/threat-models')) {
+            $errors[] = "Unit {$id} security.threat_model must be an existing .md file under .ai/security/threat-models/.";
+        }
+        if ($status === 'ACTIVE' && ($security['threat_model_required'] ?? false) === true && ! array_key_exists('threat_model', $security)) {
+            $errors[] = "Unit {$id} is ACTIVE and requires a threat model but has no security.threat_model.";
+        }
+
+        if (is_array($quality) && array_key_exists('method', $quality) && ! in_array($quality['method'], ['lightweight', 'DMADV', 'DMAIC'], true)) {
+            $errors[] = "Unit {$id} quality.method must be lightweight, DMADV or DMAIC.";
+        }
+        $highRiskActive = $status === 'ACTIVE' && in_array($risk, ['high', 'critical'], true);
+        if ($highRiskActive && ! (is_array($quality) && array_key_exists('method', $quality))) {
+            $errors[] = "Unit {$id} is ACTIVE with {$risk} risk but declares no quality.method.";
+        }
+        if ($status === 'ACTIVE' && $risk === 'critical' && ! (is_array($quality) && is_bool($quality['fmea_required'] ?? null))) {
+            $errors[] = "Unit {$id} is ACTIVE with critical risk but does not state quality.fmea_required (true/false).";
+        }
+        if (is_array($quality) && ($quality['fmea_required'] ?? false) === true) {
+            if (! $markdownUnder($quality['fmea_ref'] ?? null, '.ai/quality/fmea')) {
+                $errors[] = "Unit {$id} requires an FMEA but quality.fmea_ref is not an existing .md file under .ai/quality/fmea/.";
+            } else {
+                $fmea = (string) preg_replace('/^```.*?^```/ms', '', (string) file_get_contents($root.'/'.ltrim($quality['fmea_ref'], '/')));
+                foreach ($fmeaSections as $section) {
+                    if (! preg_match('/^## '.preg_quote($section, '/').'\s*$/m', $fmea)) {
+                        $errors[] = "Unit {$id} FMEA {$quality['fmea_ref']} is missing section \"## {$section}\".";
+                    }
+                }
+            }
+        }
+        if (is_array($quality) && array_key_exists('control_plan', $quality)) {
+            $plan = $quality['control_plan'];
+            $real = is_string($plan) && $plan !== '' ? realpath($root.'/'.ltrim($plan, '/')) : false;
+            if ($real === false || ! is_file($real) || ! str_starts_with($real, (string) realpath($root).DIRECTORY_SEPARATOR)) {
+                $errors[] = "Unit {$id} quality.control_plan must be an existing repository file.";
+            }
+        }
+    }
+
     foreach ($units as $id => $unit) {
         $parent = $unit['parent_stage_id'] ?? null;
         if (is_string($parent) && $parent !== '' && ! isset($stages[$parent])) {

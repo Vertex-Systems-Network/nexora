@@ -25,7 +25,7 @@ This is the one ordered path. Table numbers below follow it; exactly one stage i
 1. ✅ `AI-GOV-001` → `RUNTIME-CLOSURE-001` → `CORE-QA-001` → `MOBILE-AUTH-API-100` → `ADMIN-UX-CLOSURE-001` — DONE (source).
 2. ✅ `SECURITY-BASELINE-200` — DONE (source): TOTP MFA (#140); CSP, authorization matrix, secret scanning (#145); passkeys (#146).
 3. ✅ `AI-GOV-AUTOMATION-100` — PR→unit traceability DONE (#148); remaining orchestration units stay PLANNED.
-4. ▶ `RESEARCH-DISCOVERY-100` — CURRENT. Then `QUALITY-GOVERNANCE-100` → `ARCH-BOUNDARY-100`.
+4. ✅ `RESEARCH-DISCOVERY-100` (#149) → ▶ `QUALITY-GOVERNANCE-100` — CURRENT → `ARCH-BOUNDARY-100`.
 5. Track B closures: Theme → Extension → Studio → CMS publishing → Media/distribution → SEO/search → Automation.
 6. Track C kernel (Builder Beta): content model → data governance → taxonomy → query → routing → navigation → theme contract → Ext SDK → site builder → … → privacy/consent.
 7. Track D Pro → Track E Platform/commerce → Track F cloud/enterprise/ops → Track G production certification.
@@ -53,8 +53,8 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 | 4 | `ADMIN-UX-CLOSURE-001` | shared Admin design system, responsive behavior, loading/error/destructive states, accessibility baseline | Builder Beta | SOURCE_DONE — #132–#137; 61-page visual review consistent; Figma pixel-parity not certified | CORE-QA-001 |
 | 5 | `SECURITY-BASELINE-200` | MFA/passkeys plan, CSP/browser hardening, continuous AppSec CI, secrets/dependency scanning, authorization/tenancy matrices, early threat-model program | Builder Beta | SOURCE_DONE — TOTP (#140); CSP, authorization matrix, secret scanning (#145); passkeys (#146) | CORE-QA-001 (owner pulled ahead of AI-GOV-AUTOMATION-100 / QUALITY-GOVERNANCE-100 on 2026-10-18) |
 | 6 | `AI-GOV-AUTOMATION-100` | machine-check `.ai` registries/stages/plans/DoD/state/handoff so CI rejects unplanned/inconsistent work | Builder Beta | SOURCE_DONE (traceability, #148); remaining orchestration units PLANNED | CORE-QA-001 |
-| 7 | `RESEARCH-DISCOVERY-100` | ResearchBrief/VOC/problem-vs-solution validation, current market/standards evidence, baseline, alternatives and CTQ inputs for substantial new work | Builder Beta | ACTIVE ▶ CURRENT — machine-readable ResearchBrief | AI-GOV-AUTOMATION-100 |
-| 8 | `QUALITY-GOVERNANCE-100` | Quality OS, proportional DMADV/DMAIC, CTQs, SIPOC/FMEA/root-cause/control-plan traceability and outcome-over-output policy | Builder Beta | NEW_REQUIRED | RESEARCH-DISCOVERY-100, AI-GOV-AUTOMATION-100 |
+| 7 | `RESEARCH-DISCOVERY-100` | ResearchBrief/VOC/problem-vs-solution validation, current market/standards evidence, baseline, alternatives and CTQ inputs for substantial new work | Builder Beta | SOURCE_DONE — machine-readable ResearchBrief (#149) | AI-GOV-AUTOMATION-100 |
+| 8 | `QUALITY-GOVERNANCE-100` | Quality OS, proportional DMADV/DMAIC, CTQs, SIPOC/FMEA/root-cause/control-plan traceability and outcome-over-output policy | Builder Beta | ACTIVE ▶ CURRENT — machine-checked quality evidence | RESEARCH-DISCOVERY-100, AI-GOV-AUTOMATION-100 |
 | 9 | `ARCH-BOUNDARY-100` | reconcile architecture constitution with implementation; repository/persistence boundaries; broaden architecture tests | Builder Beta | NEW_REQUIRED | SECURITY-BASELINE-200 |
 
 ## Track B — close existing website-platform foundations
