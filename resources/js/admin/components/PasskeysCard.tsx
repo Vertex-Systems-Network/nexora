@@ -6,8 +6,9 @@ import { credentialToJson, firstError, passkeysSupported, postJson, toCreationOp
 export type PasskeySummary = { id: number; name: string; createdAt: string | null; lastUsedAt: string | null };
 
 /** Self-service passkeys (SECURITY-BASELINE-200 / SYS-MFA-PASSKEY). Adding or removing one re-proves the password. */
-export function PasskeysCard({ passkeys, max }: { passkeys: PasskeySummary[]; max: number }) {
+export function PasskeysCard({ passkeys, max, requireCode = false }: { passkeys: PasskeySummary[]; max: number; requireCode?: boolean }) {
     const [password, setPassword] = useState("");
+    const [code, setCode] = useState("");
     const [name, setName] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
@@ -17,7 +18,7 @@ export function PasskeysCard({ passkeys, max }: { passkeys: PasskeySummary[]; ma
         setError(null);
         setBusy(true);
         try {
-            const options = await postJson("/admin/profile/passkeys/options", { current_password: password });
+            const options = await postJson("/admin/profile/passkeys/options", requireCode ? { current_password: password, code } : { current_password: password });
             if (!options.ok) return setError(firstError(options.data, "Could not start passkey setup."));
             const credential = (await navigator.credentials.create({
                 publicKey: toCreationOptions(options.data.publicKey as Record<string, unknown>),
@@ -26,7 +27,7 @@ export function PasskeysCard({ passkeys, max }: { passkeys: PasskeySummary[]; ma
             router.post(
                 "/admin/profile/passkeys",
                 { name: name.trim() || "Passkey", credential: credentialToJson(credential) },
-                { preserveScroll: true, onSuccess: () => { setPassword(""); setName(""); }, onError: (errors) => setError(Object.values(errors)[0] ?? "Could not add passkey.") },
+                { preserveScroll: true, onSuccess: () => { setPassword(""); setCode(""); setName(""); }, onError: (errors) => setError(Object.values(errors)[0] ?? "Could not add passkey.") },
             );
         } catch (exception) {
             // NotAllowedError = the user dismissed the device prompt; nothing was stored.
@@ -81,10 +82,13 @@ export function PasskeysCard({ passkeys, max }: { passkeys: PasskeySummary[]; ma
             ) : (
                 <form className="mt-5 grid gap-3" onSubmit={(event) => { event.preventDefault(); void add(); }}>
                     <Input label="Current password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
+                    {requireCode && (
+                        <Input label="Authenticator or recovery code" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(event) => setCode(event.target.value)} />
+                    )}
                     <Input label="Passkey name" placeholder="e.g. Work laptop" maxLength={120} value={name} onChange={(event) => setName(event.target.value)} />
                     {error && <p className="text-sm font-medium text-[var(--nx-danger)]">{error}</p>}
                     <div className="flex justify-end">
-                        <Button type="submit" loading={busy} disabled={!password || passkeys.length >= max}>Add a passkey</Button>
+                        <Button type="submit" loading={busy} disabled={!password || (requireCode && !code) || passkeys.length >= max}>Add a passkey</Button>
                     </div>
                 </form>
             )}

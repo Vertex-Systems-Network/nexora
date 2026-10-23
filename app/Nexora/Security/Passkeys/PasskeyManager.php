@@ -89,7 +89,7 @@ final class PasskeyManager
                 return null;
             }
             $record = AuthenticatorAttestationResponseValidator::create($this->ceremonies($request)->creationCeremony())
-                ->check($credential->response, $pending['options'], $request->getHost());
+                ->check($credential->response, $pending['options'], $this->relyingPartyId($request));
         } catch (Throwable) {
             return null;
         }
@@ -158,7 +158,7 @@ final class PasskeyManager
 
             try {
                 $record = AuthenticatorAssertionResponseValidator::create($this->ceremonies($request)->requestCeremony())
-                    ->check($this->deserializeRecord($passkey->credential_record), $response, $pending['options'], $request->getHost(), $userHandle);
+                    ->check($this->deserializeRecord($passkey->credential_record), $response, $pending['options'], $this->relyingPartyId($request), $userHandle);
             } catch (Throwable) {
                 return null;
             }
@@ -178,16 +178,35 @@ final class PasskeyManager
         return hash_hmac('sha256', 'nexora-passkey-user:'.$user->getKey(), (string) config('app.key'), true);
     }
 
+    /**
+     * The configured APP_URL is authoritative: behind a TLS-terminating proxy the request may look like
+     * http://, which would never match the browser's https:// origin. Falls back to the request only when
+     * APP_URL has no usable host.
+     *
+     * @return array{rp_id:string,origin:string}
+     */
+    private function relyingParty(Request $request): array
+    {
+        $parts = parse_url((string) config('app.url'));
+        if (is_array($parts) && isset($parts['scheme'], $parts['host']) && in_array($parts['scheme'], ['http', 'https'], true)) {
+            $host = strtolower($parts['host']);
+
+            return ['rp_id' => $host, 'origin' => $parts['scheme'].'://'.$host.(isset($parts['port']) ? ':'.$parts['port'] : '')];
+        }
+
+        return ['rp_id' => $request->getHost(), 'origin' => $request->getSchemeAndHttpHost()];
+    }
+
     private function relyingPartyId(Request $request): string
     {
-        return $request->getHost();
+        return $this->relyingParty($request)['rp_id'];
     }
 
     private function ceremonies(Request $request): CeremonyStepManagerFactory
     {
         $factory = new CeremonyStepManagerFactory;
-        // Exact scheme + host + port of this request; no subdomains, no other origins.
-        $factory->setAllowedOrigins([$request->getSchemeAndHttpHost()]);
+        // Exactly one origin (scheme + host + port); no subdomains, no other origins.
+        $factory->setAllowedOrigins([$this->relyingParty($request)['origin']]);
 
         return $factory;
     }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Passkey;
 use App\Nexora\Security\Audit\AuditManager;
 use App\Nexora\Security\Passkeys\PasskeyManager;
+use App\Nexora\Security\TwoFactor\TwoFactorManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,10 +17,18 @@ use Illuminate\Validation\ValidationException;
 /** Self-service passkey management (SECURITY-BASELINE-200 / SYS-MFA-PASSKEY). Adding or removing one re-proves the password. */
 final class ProfilePasskeyController extends Controller
 {
-    public function options(Request $request, PasskeyManager $passkeys): JsonResponse
+    public function options(Request $request, PasskeyManager $passkeys, TwoFactorManager $twoFactor): JsonResponse
     {
         $request->validate(['current_password' => ['required', 'current_password']]);
         $user = $request->user();
+        // A passkey signs in without TOTP, so adding one must not be weaker than TOTP: a hijacked session plus
+        // the password alone cannot plant a passkey on an MFA account.
+        if ($twoFactor->enabled($user)) {
+            $code = (string) $request->validate(['code' => ['required', 'string', 'max:32']])['code'];
+            if ($twoFactor->verifyForLogin($user, $code) === null) {
+                throw ValidationException::withMessages(['code' => 'Enter a current authenticator or recovery code to add a passkey.']);
+            }
+        }
         if ($user->passkeys()->count() >= PasskeyManager::MAX_PER_USER) {
             throw ValidationException::withMessages(['passkey' => 'You have reached the maximum of '.PasskeyManager::MAX_PER_USER.' passkeys. Remove one first.']);
         }

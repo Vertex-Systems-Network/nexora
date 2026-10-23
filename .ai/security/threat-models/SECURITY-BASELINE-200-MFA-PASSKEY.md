@@ -43,13 +43,14 @@ Passkey public keys and signature counters, authenticated sessions, and the audi
 
 | Threat | Control |
 |---|---|
-| Phishing / relay from another origin | Origin is checked for an exact scheme+host+port match against the request (`CheckAllowedOrigins`), and rpIdHash must equal `sha256(host)`. A credential registered for one host cannot sign for another. Tested with an attacker origin. |
+| Phishing / relay from another origin | Origin is checked for an exact scheme+host+port match against the `APP_URL` origin (`CheckAllowedOrigins`), and rpIdHash must equal `sha256(rp id)`. A credential registered for one host cannot sign for another. Tested with an attacker origin. |
 | Forged assertion for a known credential id | The signature is verified with the stored public key. Tested with the same credential id and a different private key. |
 | Challenge replay | Options are stored in the session and pulled (removed) before verification, so each challenge is single-use and expires after 5 minutes. Tested. |
 | Signing in as another user | The assertion's `userHandle` must equal the owner's HMAC handle, and the library's `CheckUserHandle` also applies. Tested. |
 | Weak "user present only" assertions | `userVerification=required` is set in the options and enforced by the ceremony. A UP-only assertion is rejected (tested). A passkey therefore counts as MFA on its own, so passkey sign-in does not additionally require TOTP. |
 | Cloned authenticator | Signature counter checks use the library's default `ThrowExceptionIfInvalid`. Counter updates are serialized with `lockForUpdate` per credential. |
-| Session-hijack adds an attacker passkey | Starting registration requires the current password, and registration options are bound to the requesting user id. |
+| Session-hijack adds an attacker passkey | Starting registration requires the current password. If the account has TOTP enabled it also requires a current authenticator or recovery code, because passkey sign-in skips TOTP and adding one must not be weaker. Registration options are bound to the requesting user id. Tested. |
+| Wrong origin behind a TLS-terminating proxy | The relying-party ID and the single allowed origin come from the configured `APP_URL`, not from the request, so an `http://` view of an `https://` site still matches. The request is used only when `APP_URL` has no host. Tested (mutation-checked). One consequence is that passkeys work only on the `APP_URL` host; `www.` and the apex domain are not interchangeable. |
 | Session-hijack removes passkeys | Removal requires the current password and ownership; another user gets 404. Tested. |
 | Account or SSO policy bypass | Passkey sign-in applies the same `status === active` and `SsoEnforcementPolicy::requiresSso` checks as password login. Inactive accounts are tested. |
 | Credential brute force / enumeration | Verification shares the `auth:` throttle (5/min). Options are throttled at 20/min. Every failure returns the same generic message and is audited as `auth.passkey.login_failed`. |
@@ -59,8 +60,8 @@ Passkey public keys and signature counters, authenticated sessions, and the audi
 
 ## Verification
 
-- `tests/Feature/PasskeyAuthenticationTest.php`: 11 tests against a real software authenticator (`tests/Support/SoftwareAuthenticator.php`) using P-256 keys, CBOR attestation and ECDSA signatures.
-- Mutation check: with assertion verification removed, the forged-signature and UV/origin tests fail.
+- `tests/Feature/PasskeyAuthenticationTest.php`: 14 tests (including TOTP-gated registration, expired ceremony and the proxy/`APP_URL` origin) against a real software authenticator (`tests/Support/SoftwareAuthenticator.php`) using P-256 keys, CBOR attestation and ECDSA signatures.
+- Mutation checks: with assertion verification removed, the forged-signature and UV/origin tests fail; with the origin taken from the request instead of `APP_URL`, the proxy test fails.
 - `resources/js/admin/tests/passkeys.test.ts`: base64url and options conversion.
 - Full PHPUnit suite: 831/831 (SQLite, local). `tsc --noEmit` clean. Production build passes. Source certification passes.
 

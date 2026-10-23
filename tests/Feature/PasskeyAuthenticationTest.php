@@ -11,6 +11,8 @@ use App\Models\Role;
 use App\Models\User;
 use App\Nexora\Cloud\Services\RuntimeDeploymentIdentity;
 use App\Nexora\Security\Passkeys\PasskeyManager;
+use App\Nexora\Security\TwoFactor\TotpAuthenticator;
+use App\Nexora\Security\TwoFactor\TwoFactorManager;
 use Database\Seeders\Core\NexoraCoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -168,6 +170,55 @@ final class PasskeyAuthenticationTest extends TestCase
 
         $this->actingAs($owner)->delete('/admin/profile/passkeys/'.$passkey->id, ['current_password' => self::PASSWORD])->assertSessionHasNoErrors();
         $this->assertModelMissing($passkey);
+    }
+
+    public function test_adding_a_passkey_to_an_mfa_account_requires_a_current_code(): void
+    {
+        $user = $this->admin('mfa-add@example.test');
+        $twoFactor = app(TwoFactorManager::class);
+        $totp = app(TotpAuthenticator::class);
+        $twoFactor->begin($user);
+        $twoFactor->confirm($user, $totp->codeAt((string) $user->fresh()->two_factor_secret, $totp->currentStep() - 1));
+        $user = $user->fresh();
+
+        // Hijacked session + password, no second factor: refused.
+        $this->actingAs($user)->postJson('/admin/profile/passkeys/options', ['current_password' => self::PASSWORD])
+            ->assertStatus(422)->assertJsonValidationErrors('code');
+        $this->actingAs($user)->postJson('/admin/profile/passkeys/options', ['current_password' => self::PASSWORD, 'code' => '000000'])
+            ->assertStatus(422)->assertJsonValidationErrors('code');
+
+        $code = $totp->codeAt((string) $user->two_factor_secret, $totp->currentStep());
+        $this->actingAs($user)->postJson('/admin/profile/passkeys/options', ['current_password' => self::PASSWORD, 'code' => $code])
+            ->assertOk()->assertJsonStructure(['publicKey' => ['challenge']]);
+    }
+
+    public function test_an_expired_login_ceremony_is_rejected(): void
+    {
+        $user = $this->admin('expired@example.test');
+        $authenticator = $this->registerPasskey($user);
+        auth()->logout();
+
+        $credential = $this->assertion($authenticator, $user);
+        $this->travel(PasskeyManager::TTL_SECONDS + 1)->seconds();
+
+        $this->postJson('/passkeys/login', ['credential' => $credential])->assertStatus(422);
+        $this->assertGuest();
+    }
+
+    public function test_relying_party_follows_app_url_behind_a_tls_proxy(): void
+    {
+        // The app sees http://localhost (proxy terminated TLS) but users browse https://login.example.test.
+        config(['app.url' => 'https://login.example.test']);
+        $user = $this->admin('proxy@example.test');
+        $authenticator = new SoftwareAuthenticator('https://login.example.test', 'login.example.test');
+
+        $options = $this->actingAs($user)->postJson('/admin/profile/passkeys/options', ['current_password' => self::PASSWORD])->assertOk()->json('publicKey');
+        $this->assertSame('login.example.test', $options['rp']['id']);
+        $this->actingAs($user)->post('/admin/profile/passkeys', ['name' => 'Proxy', 'credential' => $authenticator->create($options)])->assertSessionHasNoErrors();
+        auth()->logout();
+
+        $this->postJson('/passkeys/login', ['credential' => $this->assertion($authenticator, $user)])->assertOk();
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_user_handle_is_opaque(): void
