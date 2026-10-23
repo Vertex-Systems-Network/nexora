@@ -14,6 +14,12 @@ use RecursiveIteratorIterator;
  */
 final class LayerDirectionArchitectureTest extends TestCase
 {
+    /** App\Http with one or two backslashes (escaped strings) and a word boundary (namespace aliases). */
+    private const HTTP = '/(?<![A-Za-z0-9_])App\\\\{1,2}Http\\b/';
+
+    /** A service namespace, also inside grouped use statements: App\Nexora\X\Services\… or App\Nexora\X\{Services\…}. */
+    private const SERVICES = '/(?<![A-Za-z0-9_])App\\\\{1,2}Nexora\\\\{1,2}[A-Za-z]+\\\\{1,2}\\{?Services\\b/';
+
     /** Domain files allowed to name App\Http classes, with the reason. */
     private const DOMAIN_HTTP_REFERENCES = [
         'app/Nexora/Installation/SourceActivationIdentity.php' => 'source-integrity inventory of loaded installer classes; names the controller, does not call it',
@@ -31,7 +37,7 @@ final class LayerDirectionArchitectureTest extends TestCase
             if (isset(self::DOMAIN_HTTP_REFERENCES[$relative])) {
                 continue;
             }
-            if (preg_match('/\\\\?App\\\\Http\\\\/', $this->code($source)) === 1) {
+            if (preg_match(self::HTTP, $this->code($source)) === 1) {
                 $violations[] = $relative;
             }
         }
@@ -46,7 +52,8 @@ final class LayerDirectionArchitectureTest extends TestCase
             if (! str_contains($relative, '/Contracts/')) {
                 continue;
             }
-            if (preg_match('/^use App\\\\(Http\\\\|Nexora\\\\[A-Za-z]+\\\\Services\\\\)/m', $source) === 1) {
+            $code = $this->code($source);
+            if (preg_match(self::HTTP, $code) === 1 || preg_match(self::SERVICES, $code) === 1) {
                 $violations[] = $relative;
             }
         }
@@ -58,7 +65,7 @@ final class LayerDirectionArchitectureTest extends TestCase
     {
         $violations = [];
         foreach ($this->phpFiles('app/Models') as $relative => $source) {
-            if (preg_match('/\\\\?App\\\\Http\\\\/', $this->code($source)) === 1) {
+            if (preg_match(self::HTTP, $this->code($source)) === 1) {
                 $violations[] = $relative.' imports App\\Http';
             }
             preg_match_all('/^use (App\\\\Nexora\\\\[A-Za-z]+\\\\Services\\\\[A-Za-z\\\\]+);/m', $source, $matches);
@@ -79,8 +86,10 @@ final class LayerDirectionArchitectureTest extends TestCase
             self::assertFileExists($root.'/'.$file);
             self::assertMatchesRegularExpression('/\\\\App\\\\Http\\\\/', (string) file_get_contents($root.'/'.$file), "Stale allowlist entry {$file}.");
         }
+        $models = implode("\n", $this->phpFiles('app/Models'));
         foreach (array_keys(self::MODEL_SERVICE_IMPORTS) as $class) {
             self::assertTrue(class_exists($class), "Stale allowlist entry {$class}.");
+            self::assertStringContainsString('use '.$class.';', $models, "Allowlist entry {$class} is no longer imported by any model.");
         }
     }
 
