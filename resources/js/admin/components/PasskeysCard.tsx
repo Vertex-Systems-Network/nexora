@@ -83,7 +83,14 @@ export function PasskeysCard({ passkeys, max, requireCode = false }: { passkeys:
                 <form className="mt-5 grid gap-3" onSubmit={(event) => { event.preventDefault(); void add(); }}>
                     <Input label="Current password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
                     {requireCode && (
-                        <Input label="Authenticator or recovery code" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(event) => setCode(event.target.value)} />
+                        <Input
+                            label="Authenticator or recovery code"
+                            hint="The code is used when setup starts. A recovery code used here is spent even if you cancel the device prompt."
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            value={code}
+                            onChange={(event) => setCode(event.target.value)}
+                        />
                     )}
                     <Input label="Passkey name" placeholder="e.g. Work laptop" maxLength={120} value={name} onChange={(event) => setName(event.target.value)} />
                     {error && <p className="text-sm font-medium text-[var(--nx-danger)]">{error}</p>}
