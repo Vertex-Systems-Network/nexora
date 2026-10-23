@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex,nofollow">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <title>Install Nexora</title>
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {
             const saved = localStorage.getItem('nexora-installer-theme') || 'system';
             const resolved = saved === 'system'
@@ -188,8 +188,8 @@
     </main>
 </div>
 
-<script src="{{ asset('installer/nexora-ui.js') }}"></script>
-<script>
+<script src="{{ asset('installer/nexora-ui.js') }}" nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}"></script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
 (() => {
     window.NexoraInstallerUI?.enhanceSelects();
     const form = document.getElementById('installer-form');

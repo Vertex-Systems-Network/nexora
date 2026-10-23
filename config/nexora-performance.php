@@ -55,5 +55,7 @@ return [
         'hsts' => (bool) $env('NEXORA_HSTS', true),
         'hsts_max_age' => (int) $env('NEXORA_HSTS_MAX_AGE', 31536000),
         'hsts_include_subdomains' => (bool) $env('NEXORA_HSTS_INCLUDE_SUBDOMAINS', true),
+        // enforce | report-only | off — nonce-based Content-Security-Policy for HTML.
+        'csp' => (string) $env('NEXORA_CSP', 'enforce'),
     ],
 ];
