@@ -1,3 +1,13 @@
+# THEME-CLOSURE-001 theme lifecycle closure — 2026-10-23
+
+Stage THEME-CLOSURE-001 (ACTIVE, unit SYS-THEME-ENGINE, risk high). ARCH-BOUNDARY-100 is SOURCE_DONE (#151).
+
+- **ResearchBrief:** `.ai/research/SYS-THEME-ENGINE.md`. **Threat model:** `.ai/security/threat-models/THEME-CLOSURE-001-LIFECYCLE.md`.
+- **Method:** DMAIC (existing capability; close verification gaps). FMEA not required (no production change).
+- **Design:** `tests/Feature/Themes/ThemeLifecycleClosureTest.php` — two-theme switch with rendered output and rollback render; preview page renders the candidate while the public site is unchanged; Sentinel blocks a theme carrying PHP and redirects to the scan report; non-privileged users get 403 on install/activate/rollback. Cleans installed theme files in tearDown.
+- **Not claimed:** the registry acceptance criterion requires *target* verification; this increment is source-level only (RUNTIME-TARGET-ACCEPTANCE, #74).
+- **Rollback:** revert the PR (tests and records only).
+
 # ARCH-BOUNDARY-100 layer-direction boundaries — 2026-10-23
 
 Stage ARCH-BOUNDARY-100 (ACTIVE, unit SYS-ARCH-BOUNDARIES, risk high). QUALITY-GOVERNANCE-100 is SOURCE_DONE (#150).
