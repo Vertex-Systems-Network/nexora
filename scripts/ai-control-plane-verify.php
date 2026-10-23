@@ -69,6 +69,52 @@ function nexora_ai_control_plane_errors(string $root): array
         $errors[] = 'No registered development units found.';
     }
 
+    // RESEARCH-DISCOVERY-100: machine-readable ResearchBrief rules.
+    $briefSections = ['Problem', 'Users & VOC evidence', 'Baseline', 'Alternatives', 'CTQs', 'Confidence', 'Sources'];
+    foreach ($units as $id => $unit) {
+        $research = $unit['research'] ?? null;
+        $risk = $unit['security']['risk'] ?? null;
+        if ($research !== null && ! is_array($research)) {
+            $errors[] = "Unit {$id} research must be an object.";
+            $research = null;
+        }
+        if (is_array($research)) {
+            $brief = $research['brief'] ?? null;
+            if ($brief !== null) {
+                $briefPath = is_string($brief) ? $root.'/'.ltrim($brief, '/') : '';
+                $real = $briefPath !== '' ? realpath($briefPath) : false;
+                $researchDir = realpath($ai.'/research');
+                if (! is_string($brief) || $real === false || $researchDir === false || ! str_starts_with($real, $researchDir.DIRECTORY_SEPARATOR)) {
+                    $errors[] = "Unit {$id} research.brief must be an existing file under .ai/research/.";
+                } else {
+                    $text = (string) file_get_contents($real);
+                    foreach ($briefSections as $section) {
+                        if (! preg_match('/^## '.preg_quote($section, '/').'\s*$/m', $text)) {
+                            $errors[] = "Unit {$id} ResearchBrief {$brief} is missing section \"## {$section}\".";
+                        }
+                    }
+                }
+            }
+            $confidence = $research['confidence'] ?? 'unknown';
+            if (! in_array($confidence, ['unknown', 'low', 'medium', 'high'], true)) {
+                $errors[] = "Unit {$id} research.confidence must be unknown, low, medium or high.";
+            } elseif ($confidence !== 'unknown' && array_filter((array) ($research['voc_evidence'] ?? []), static fn ($v): bool => is_string($v) && trim($v) !== '') === []) {
+                // Anti-fabrication: confidence must be backed by cited evidence.
+                $errors[] = "Unit {$id} claims research confidence {$confidence} without research.voc_evidence.";
+            }
+            if (array_key_exists('baseline', $research) && (! is_string($research['baseline']) || trim($research['baseline']) === '')) {
+                $errors[] = "Unit {$id} research.baseline is empty; write UNKNOWN when there is no measurement.";
+            }
+        }
+        if (in_array($risk, ['high', 'critical'], true) && ($unit['status'] ?? null) === 'ACTIVE') {
+            $hasBrief = is_array($research) && is_string($research['brief'] ?? null) && $research['brief'] !== '';
+            $hasException = is_array($research) && is_string($research['exception'] ?? null) && trim($research['exception']) !== '';
+            if (! $hasBrief && ! $hasException) {
+                $errors[] = "Unit {$id} is ACTIVE with {$risk} risk but has no research.brief or research.exception.";
+            }
+        }
+    }
+
     foreach ($units as $id => $unit) {
         $parent = $unit['parent_stage_id'] ?? null;
         if (is_string($parent) && $parent !== '' && ! isset($stages[$parent])) {

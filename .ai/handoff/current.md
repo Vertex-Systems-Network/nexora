@@ -1,3 +1,11 @@
+# Handoff — RESEARCH-DISCOVERY-100 machine-readable ResearchBrief — 2026-10-23
+
+- Main 23359fd (#148 PR traceability merged; SYS-AI-GOVERNANCE-AUTOMATION SOURCE_DONE; other AI-GOV units PLANNED).
+- Stage RESEARCH-DISCOVERY-100 ACTIVE (unit SYS-RESEARCH-DISCOVERY).
+- New: `.ai/research/template.md`, first brief `.ai/research/SYS-RESEARCH-DISCOVERY.md`; `scripts/ai-control-plane-verify.php` research rules (brief exists with all sections; confidence needs VOC evidence; empty baseline rejected; high/critical ACTIVE needs brief or exception).
+- Owner action still open: make "PR-to-unit traceability" a required check in branch protection.
+- Next: QUALITY-GOVERNANCE-100. No target acceptance claimed.
+
 # Handoff — AI-GOV-AUTOMATION-100 PR traceability — 2026-10-23
 
 - Owner approved the protected-workflow change in session. Stage AI-GOV-AUTOMATION-100 ACTIVE (unit SYS-AI-GOVERNANCE-AUTOMATION).

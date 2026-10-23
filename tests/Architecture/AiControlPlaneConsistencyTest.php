@@ -102,6 +102,78 @@ final class AiControlPlaneConsistencyTest extends TestCase
         $this->write($path, (string) json_encode($data, JSON_PRETTY_PRINT));
     }
 
+    public function test_research_brief_must_exist_under_research_dir_with_every_section(): void
+    {
+        $this->setUnitResearch(['brief' => '.ai/research/missing.md']);
+        self::assertStringContainsString('research.brief must be an existing file under .ai/research/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->write('.ai/outside.md', $this->brief());
+        $this->setUnitResearch(['brief' => '.ai/research/../outside.md']);
+        self::assertStringContainsString('research.brief must be an existing file under .ai/research/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->write('.ai/research/partial.md', "# Brief\n\n## Problem\n\nx\n");
+        $this->setUnitResearch(['brief' => '.ai/research/partial.md']);
+        $errors = implode("\n", nexora_ai_control_plane_errors($this->fixture));
+        self::assertStringContainsString('is missing section "## Baseline"', $errors);
+        self::assertStringContainsString('is missing section "## CTQs"', $errors);
+
+        $this->write('.ai/research/full.md', $this->brief());
+        $this->setUnitResearch(['brief' => '.ai/research/full.md']);
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+    }
+
+    public function test_confidence_without_voc_evidence_and_empty_baseline_are_rejected(): void
+    {
+        $this->setUnitResearch(['confidence' => 'high', 'voc_evidence' => [' '], 'baseline' => '']);
+        $errors = implode("\n", nexora_ai_control_plane_errors($this->fixture));
+        self::assertStringContainsString('claims research confidence high without research.voc_evidence', $errors);
+        self::assertStringContainsString('research.baseline is empty; write UNKNOWN', $errors);
+
+        $this->setUnitResearch(['confidence' => 'certain']);
+        self::assertStringContainsString('research.confidence must be unknown, low, medium or high', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->setUnitResearch(['confidence' => 'unknown', 'baseline' => 'UNKNOWN']);
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+        $this->setUnitResearch(['confidence' => 'medium', 'voc_evidence' => ['issue #12'], 'baseline' => 'p95 420ms']);
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+    }
+
+    public function test_high_or_critical_active_unit_needs_a_brief_or_exception(): void
+    {
+        $this->setUnit(['security' => ['risk' => 'critical']]);
+        self::assertStringContainsString('is ACTIVE with critical risk but has no research.brief or research.exception', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+
+        $this->setUnit(['security' => ['risk' => 'high'], 'research' => ['exception' => 'Defect fix under DMAIC; owner-approved.']]);
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+
+        $this->write('.ai/research/full.md', $this->brief());
+        $this->setUnit(['security' => ['risk' => 'critical'], 'research' => ['brief' => '.ai/research/full.md']]);
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+
+        // PLANNED high/critical units are not gated until they start.
+        $this->setUnit(['security' => ['risk' => 'critical']], 'PLANNED');
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+    }
+
+    /** @param array<string,mixed> $research */
+    private function setUnitResearch(array $research): void
+    {
+        $this->setUnit(['research' => $research]);
+    }
+
+    /** @param array<string,mixed> $extra */
+    private function setUnit(array $extra, string $status = 'ACTIVE'): void
+    {
+        $this->writeJson('.ai/registry/development-units.json', ['units' => [
+            array_merge(['id' => 'SYS-CORE-ADMIN-QA', 'status' => $status, 'parent_stage_id' => 'CORE-QA-001', 'depends_on' => ['RUNTIME-CLOSURE-001']], $extra),
+        ]]);
+    }
+
+    private function brief(): string
+    {
+        return "# Brief\n\n## Problem\n\n## Users & VOC evidence\n\n## Baseline\n\nUNKNOWN\n\n## Alternatives\n\n## CTQs\n\n## Confidence\n\n## Sources\n";
+    }
+
     private function write(string $path, string $contents): void
     {
         $full = $this->fixture.'/'.$path;
