@@ -4,7 +4,7 @@
   "control_plane_revision": 14,
   "control_plane_branch": "claude/wizardly-ptolemy-i21c24",
   "base_branch": "main",
-  "base_sha": "0abbdaa738799e2cb85b93268403b8aeabbc75b5",
+  "base_sha": "8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
@@ -13,13 +13,13 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 77,
   "current_stage": {
-    "id": "ARCH-BOUNDARY-100",
-    "name": "Architecture Boundaries",
+    "id": "THEME-CLOSURE-001",
+    "name": "Theme Closure",
     "status": "ACTIVE",
-    "scope_note": "Enforce layer direction: domain never depends on App\\Http; contracts never on services/HTTP; models never on HTTP and only on allowlisted services. Request-id attribute name moved to App\\Nexora\\Http\\RequestContext. QUALITY-GOVERNANCE-100 SOURCE_DONE (#150)."
+    "scope_note": "Source-level proof of the theme lifecycle gaps: two-theme switch + rollback render, preview page, Sentinel block of unsafe theme, authorization. Target/browser verification remains with RUNTIME-TARGET-ACCEPTANCE. ARCH-BOUNDARY-100 SOURCE_DONE (#151)."
   },
   "active_development_units": [
-    "SYS-ARCH-BOUNDARIES"
+    "SYS-THEME-ENGINE"
   ],
   "completed_control_stages": [
     {

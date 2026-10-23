@@ -1,3 +1,9 @@
+# Handoff — THEME-CLOSURE-001 theme lifecycle closure — 2026-10-23
+
+- Main 8c0a2d7 (#151 layer direction merged; SYS-ARCH-BOUNDARIES SOURCE_DONE).
+- Stage THEME-CLOSURE-001 ACTIVE (SYS-THEME-ENGINE): source-level lifecycle proof in `ThemeLifecycleClosureTest` (switch, preview page, rollback render, Sentinel block, authz). Target/browser verification still open (#74).
+- Next: EXTENSION-CLOSURE-001.
+
 # Handoff — ARCH-BOUNDARY-100 layer direction — 2026-10-23
 
 - Main 0abbdaa (#150 merged; SYS-QUALITY-GOVERNANCE SOURCE_DONE).
