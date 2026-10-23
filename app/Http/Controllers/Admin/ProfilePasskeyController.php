@@ -17,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 /** Self-service passkey management (SECURITY-BASELINE-200 / SYS-MFA-PASSKEY). Adding or removing one re-proves the password. */
 final class ProfilePasskeyController extends Controller
 {
-    public function options(Request $request, PasskeyManager $passkeys, TwoFactorManager $twoFactor): JsonResponse
+    public function options(Request $request, PasskeyManager $passkeys, TwoFactorManager $twoFactor, AuditManager $audit): JsonResponse
     {
         $request->validate(['current_password' => ['required', 'current_password']]);
         $user = $request->user();
@@ -25,8 +25,12 @@ final class ProfilePasskeyController extends Controller
         // the password alone cannot plant a passkey on an MFA account.
         if ($twoFactor->enabled($user)) {
             $code = (string) $request->validate(['code' => ['required', 'string', 'max:32']])['code'];
-            if ($twoFactor->verifyForLogin($user, $code) === null) {
+            $method = $twoFactor->verifyForLogin($user, $code);
+            if ($method === null) {
                 throw ValidationException::withMessages(['code' => 'Enter a current authenticator or recovery code to add a passkey.']);
+            }
+            if ($method === 'recovery') {
+                $audit->record('auth.two_factor.recovery_used', $user, ['purpose' => 'passkey-registration', 'remaining_recovery_codes' => $twoFactor->remainingRecoveryCodes($user)]);
             }
         }
         if ($user->passkeys()->count() >= PasskeyManager::MAX_PER_USER) {

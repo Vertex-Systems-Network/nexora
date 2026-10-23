@@ -188,10 +188,13 @@ final class PasskeyManager
     private function relyingParty(Request $request): array
     {
         $parts = parse_url((string) config('app.url'));
-        if (is_array($parts) && isset($parts['scheme'], $parts['host']) && in_array($parts['scheme'], ['http', 'https'], true)) {
+        $scheme = is_array($parts) ? strtolower((string) ($parts['scheme'] ?? '')) : '';
+        if (is_array($parts) && isset($parts['host']) && in_array($scheme, ['http', 'https'], true)) {
             $host = strtolower($parts['host']);
+            // Browsers omit default ports from the origin they report.
+            $port = isset($parts['port']) && $parts['port'] !== ($scheme === 'https' ? 443 : 80) ? ':'.$parts['port'] : '';
 
-            return ['rp_id' => $host, 'origin' => $parts['scheme'].'://'.$host.(isset($parts['port']) ? ':'.$parts['port'] : '')];
+            return ['rp_id' => $host, 'origin' => $scheme.'://'.$host.$port];
         }
 
         return ['rp_id' => $request->getHost(), 'origin' => $request->getSchemeAndHttpHost()];

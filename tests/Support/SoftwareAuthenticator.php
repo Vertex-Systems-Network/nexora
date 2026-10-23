@@ -20,8 +20,17 @@ final class SoftwareAuthenticator
 
     private int $counter = 0;
 
-    public function __construct(private readonly string $origin = 'http://localhost', private readonly string $rpId = 'localhost', ?string $credentialId = null)
+    private readonly string $origin;
+
+    private readonly string $rpId;
+
+    /** Defaults to the application's APP_URL, which is also where Laravel's test client sends requests. */
+    public function __construct(?string $origin = null, ?string $rpId = null, ?string $credentialId = null)
     {
+        $appUrl = parse_url((string) config('app.url'));
+        $host = strtolower((string) ($appUrl['host'] ?? 'localhost'));
+        $this->origin = $origin ?? strtolower((string) ($appUrl['scheme'] ?? 'http')).'://'.$host.(isset($appUrl['port']) ? ':'.$appUrl['port'] : '');
+        $this->rpId = $rpId ?? $host;
         $key = openssl_pkey_new(['private_key_type' => OPENSSL_KEYTYPE_EC, 'curve_name' => 'prime256v1']);
         if (! $key instanceof OpenSSLAsymmetricKey) {
             throw new RuntimeException('Unable to create a P-256 test key.');

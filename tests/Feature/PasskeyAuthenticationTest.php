@@ -221,6 +221,17 @@ final class PasskeyAuthenticationTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
+    public function test_app_url_default_port_and_scheme_case_are_normalized(): void
+    {
+        config(['app.url' => 'HTTPS://Login.Example.Test:443']);
+        $user = $this->admin('normalize@example.test');
+        $authenticator = new SoftwareAuthenticator('https://login.example.test', 'login.example.test');
+
+        $options = $this->actingAs($user)->postJson('/admin/profile/passkeys/options', ['current_password' => self::PASSWORD])->assertOk()->json('publicKey');
+        $this->assertSame('login.example.test', $options['rp']['id']);
+        $this->actingAs($user)->post('/admin/profile/passkeys', ['name' => 'Normalized', 'credential' => $authenticator->create($options)])->assertSessionHasNoErrors();
+    }
+
     public function test_user_handle_is_opaque(): void
     {
         $user = $this->admin('opaque@example.test');
