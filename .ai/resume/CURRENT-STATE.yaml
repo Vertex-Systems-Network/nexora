@@ -2,7 +2,7 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 observed_main:
   branch: main
-  sha: 5094cf2
+  sha: 5094cf26bccd48d701c05ffc548eaca6b179c4fb
   observed_at: '2026-10-23'
   semantics: '#126-#146 merged (incl. TOTP #140, CSP/authz matrix/secret scan #145, passkeys #146); open: dependabot #143/#144 (conflicted)'
 active_issue:

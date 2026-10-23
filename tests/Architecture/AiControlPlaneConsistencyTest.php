@@ -211,6 +211,9 @@ final class AiControlPlaneConsistencyTest extends TestCase
     {
         $this->setUnit(['quality' => ['fmea_required' => true, 'fmea_ref' => '.ai/quality/fmea/ghost.md']]);
         self::assertStringContainsString('quality.fmea_ref is not an existing .md file under .ai/quality/fmea/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
+        // A declared but broken reference is caught even when no FMEA is required.
+        $this->setUnit(['quality' => ['fmea_required' => false, 'fmea_ref' => '.ai/quality/fmea/ghost.md']]);
+        self::assertStringContainsString('quality.fmea_ref is not an existing .md file under .ai/quality/fmea/', implode("\n", nexora_ai_control_plane_errors($this->fixture)));
 
         $this->write('.ai/quality/fmea/partial.md', "# FMEA\n\n## Context\n");
         $this->setUnit(['quality' => ['fmea_required' => true, 'fmea_ref' => '.ai/quality/fmea/partial.md']]);

@@ -168,9 +168,10 @@ function nexora_ai_control_plane_errors(string $root): array
         if ($status === 'ACTIVE' && $risk === 'critical' && ! (is_array($quality) && is_bool($quality['fmea_required'] ?? null))) {
             $errors[] = "Unit {$id} is ACTIVE with critical risk but does not state quality.fmea_required (true/false).";
         }
-        if (is_array($quality) && ($quality['fmea_required'] ?? false) === true) {
+        $fmeaRequired = is_array($quality) && ($quality['fmea_required'] ?? false) === true;
+        if (is_array($quality) && ($fmeaRequired || array_key_exists('fmea_ref', $quality))) {
             if (! $markdownUnder($quality['fmea_ref'] ?? null, '.ai/quality/fmea')) {
-                $errors[] = "Unit {$id} requires an FMEA but quality.fmea_ref is not an existing .md file under .ai/quality/fmea/.";
+                $errors[] = "Unit {$id} quality.fmea_ref is not an existing .md file under .ai/quality/fmea/.";
             } else {
                 $fmea = (string) preg_replace('/^```.*?^```/ms', '', (string) file_get_contents($root.'/'.ltrim($quality['fmea_ref'], '/')));
                 foreach ($fmeaSections as $section) {
