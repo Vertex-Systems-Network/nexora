@@ -1,3 +1,15 @@
+# AI-GOV-AUTOMATION-100 PR-to-unit traceability — 2026-10-23
+
+Stage AI-GOV-AUTOMATION-100 (ACTIVE, unit SYS-AI-GOVERNANCE-AUTOMATION). The owner approved the protected-workflow change in session on 2026-10-23. SECURITY-BASELINE-200 is SOURCE_DONE (#140, #145, #146); SYS-MFA-PASSKEY is now registered (it was missing from the registry).
+
+- **Problem:** nothing machine-checks that a PR names the registered unit or stage it implements, so unregistered work can merge (the pre-planning rule is procedural only).
+- **Method:** DMADV, proportional.
+- **Design:** `scripts/pr-unit-traceability.php` requires the PR title or body to name at least one registered development unit or canonical stage ID (from `.ai/registry/*.json` and `.ai/roadmap/stages.md`). Bot dependency PRs (`dependabot[bot]`) are exempt. A new workflow `.github/workflows/pr-traceability.yml` runs it on `opened`, `synchronize`, `reopened` and `edited`, read-only permissions, with title/body passed via environment variables (no expression interpolation in shell, preventing script injection). The existing heavy `governance` job is unchanged.
+- **Security:** the new job has `contents: read` only, no secrets, and executes only repository code from the PR head. It does not weaken any existing check.
+- **Tests:** `tests/Architecture/PrUnitTraceabilityTest.php` covers known/unknown IDs, dependabot exemption, empty input and partial-token false matches.
+- **Graph / performance / data:** `NOT_APPLICABLE`; CI-only, no runtime or data change.
+- **Rollback:** delete the workflow file and script.
+
 # Single execution flow alignment — SECURITY-BASELINE-200 — 2026-10-18 (docs only)
 
 #140 merged (a197149): SYS-MFA-TOTP is SOURCE_DONE. Stage SECURITY-BASELINE-200 stays ACTIVE under the umbrella unit SEC-BASELINE until its remaining increments are done.

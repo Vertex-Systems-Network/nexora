@@ -13,13 +13,13 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 77,
   "current_stage": {
-    "id": "SECURITY-BASELINE-200",
-    "name": "Security Baseline",
-    "status": "SOURCE_DONE",
-    "scope_note": "Owner-prioritised 2026-10-18. All planned increments SOURCE_DONE: TOTP MFA (#140); CSP/browser hardening, route authorization matrix, committed-secret scanning (#145); passkeys/WebAuthn (#146, web-auth/webauthn-lib owner-approved). Dependency audit already in CI. Follow-ups: img-src/media-src allowlist, remove style-src unsafe-inline, body-nonce test. No target/browser acceptance claimed."
+    "id": "AI-GOV-AUTOMATION-100",
+    "name": "AI Governance Automation",
+    "status": "ACTIVE",
+    "scope_note": "Owner approved 2026-10-23 (in session). Remaining increment: PR-to-unit traceability check in a separate lightweight workflow. Verifier already enforced via tests/Architecture/AiControlPlaneConsistencyTest.php."
   },
   "active_development_units": [
-    "SEC-BASELINE"
+    "SYS-AI-GOVERNANCE-AUTOMATION"
   ],
   "completed_control_stages": [
     {

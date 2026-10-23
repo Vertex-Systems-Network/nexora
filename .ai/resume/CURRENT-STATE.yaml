@@ -10,16 +10,16 @@ active_issue:
 active_pr: null
 active_branch: claude/wizardly-ptolemy-i21c24
 current_stage:
-  id: SECURITY-BASELINE-200
-  unit: SEC-BASELINE
-  status: SOURCE_DONE
+  id: AI-GOV-AUTOMATION-100
+  unit: SYS-AI-GOVERNANCE-AUTOMATION
+  status: ACTIVE
 current_milestone:
-  id: SECURITY-BASELINE-200-COMPLETE
-  status: SOURCE_DONE
+  id: AI-GOV-PR-UNIT-TRACEABILITY
+  status: IN_REVIEW
 last_completed_milestone:
   main_commit: 82bd8cb7ce1360af4aea0af12db255030b52fd9b
   summary: 'SECURITY-BASELINE-200 all planned increments SOURCE_DONE (#140, #145, #146)'
-exact_next_safe_action: Next flow stage AI-GOV-AUTOMATION-100 (PR-to-unit traceability; protected workflow change, needs owner approval), then RESEARCH-DISCOVERY-100. No target acceptance claimed.
+exact_next_safe_action: Land PR-to-unit traceability (scripts/pr-unit-traceability.php + .github/workflows/pr-traceability.yml) with green CI and independent review; then RESEARCH-DISCOVERY-100. No target acceptance claimed.
 pending_runner_ids: []
 blocked_runner_ids: []
 current_blockers:
