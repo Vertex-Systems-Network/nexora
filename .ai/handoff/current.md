@@ -1,3 +1,13 @@
+# Handoff — SECURITY-BASELINE-200 source-complete — 2026-10-23
+
+- Main 82bd8cb. SECURITY-BASELINE-200 planned increments all SOURCE_DONE: TOTP (#140), CSP + authorization matrix + secret scan (#145), passkeys (#146).
+- Passkey threat model and dependency record: `.ai/security/threat-models/SECURITY-BASELINE-200-MFA-PASSKEY.md`.
+- Follow-ups (non-blocking): CSP img-src/media-src allowlist, remove style-src 'unsafe-inline', body-nonce test; passkey second-factor code is spent at ceremony start.
+- Open PRs: Dependabot #143/#144 conflicted (awaiting Dependabot rebase; #144's vitest bump already on main).
+- Next flow stage: AI-GOV-AUTOMATION-100 (protected workflow change; owner approval) → RESEARCH-DISCOVERY-100.
+- Side track: RUNTIME-TARGET-ACCEPTANCE (#74 open; #72 closed). No target/browser acceptance claimed.
+- Superseded: notes below naming AI-GOV-AUTOMATION-100 as current (2026-10-18) are historical.
+
 # Handoff — single execution flow — 2026-10-18
 
 - #140 merged (a197149), and SYS-MFA-TOTP is SOURCE_DONE. Its independent review approved 8043345; the commits after that are a MySQL test-quoting fix and restored pinned auth source contracts.

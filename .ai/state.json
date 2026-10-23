@@ -4,7 +4,7 @@
   "control_plane_revision": 14,
   "control_plane_branch": "claude/blissful-pasteur-fn8sww",
   "base_branch": "main",
-  "base_sha": "a197149293541f387a9d2e90537c2094aa9750a2",
+  "base_sha": "82bd8cb7ce1360af4aea0af12db255030b52fd9b",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
@@ -15,8 +15,8 @@
   "current_stage": {
     "id": "SECURITY-BASELINE-200",
     "name": "Security Baseline",
-    "status": "ACTIVE",
-    "scope_note": "Owner-prioritised 2026-10-18. Increment 1 TOTP MFA SOURCE_DONE (#140). Remaining increments in order: passkeys, CSP/browser hardening, AppSec CI (secrets/dependency scanning), authorization/tenancy matrices."
+    "status": "SOURCE_DONE",
+    "scope_note": "Owner-prioritised 2026-10-18. All planned increments SOURCE_DONE: TOTP MFA (#140); CSP/browser hardening, route authorization matrix, committed-secret scanning (#145); passkeys/WebAuthn (#146, web-auth/webauthn-lib owner-approved). Dependency audit already in CI. Follow-ups: img-src/media-src allowlist, remove style-src unsafe-inline, body-nonce test. No target/browser acceptance claimed."
   },
   "active_development_units": [
     "SEC-BASELINE"
@@ -228,7 +228,7 @@
   "phase_5_scope": "Matured Nexora into a closed-loop Quality Engineering OS with Research/VOC/CTQ, DMADV/DMAIC/FMEA, formal Data Governance, Reliability Engineering, Product Outcomes, Delivery Excellence, FinOps and PAYMENT-SECURITY-200 with provider-hosted/tokenized payment security boundaries. No runtime/product implementation was claimed by that planning revision.",
   "phase_6_scope": "Added SYSTEM-GRAPH-100 and FLOW-INTELLIGENCE-200 as an evidence-backed platform topology and GUI intelligence system with evidence-class separation, drift detection, replay, impact, incident and modelled what-if capabilities. These remain planning commitments, not product implementation claims.",
   "phase_7_scope": "Audited the AI-native development workflow itself and expanded AI-GOV-AUTOMATION-100 with governed development-agent orchestration controls. No additional top-level roadmap stage was added; the canonical stage count remains 75. These are planning commitments, not autonomous-development implementation claims.",
-  "updated_at": "2026-10-18",
+  "updated_at": "2026-10-23",
   "historical_current_target": {
     "environment": "operator-provided target environment",
     "path": "<operator-provided-target-path>",
