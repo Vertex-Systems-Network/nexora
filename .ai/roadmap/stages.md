@@ -23,8 +23,8 @@ Stable semantic stage IDs are canonical. Historical `N0.x`, `N1.x`, `DEV-x` labe
 This is the one ordered path. Table numbers below follow it; exactly one stage is `▶ CURRENT`. Status legend: DONE = SOURCE_DONE / SOURCE_CLOSED_WAIVED (target acceptance tracked separately in `RUNTIME-TARGET-ACCEPTANCE`, #72/#74).
 
 1. ✅ `AI-GOV-001` → `RUNTIME-CLOSURE-001` → `CORE-QA-001` → `MOBILE-AUTH-API-100` → `ADMIN-UX-CLOSURE-001` — DONE (source).
-2. ▶ `SECURITY-BASELINE-200` — CURRENT. Increment 1 TOTP MFA DONE (#140). Remaining: passkeys → CSP/browser hardening → AppSec CI (secrets/dependency scanning) → authorization/tenancy matrices.
-3. ⏸ `AI-GOV-AUTOMATION-100` — PR→unit traceability; needs owner approval (protected workflow change).
+2. ✅ `SECURITY-BASELINE-200` — DONE (source): TOTP MFA (#140); CSP, authorization matrix, secret scanning (#145); passkeys (#146).
+3. ▶ `AI-GOV-AUTOMATION-100` — CURRENT. PR→unit traceability; needs owner approval (protected workflow change).
 4. `RESEARCH-DISCOVERY-100` → `QUALITY-GOVERNANCE-100` → `ARCH-BOUNDARY-100`.
 5. Track B closures: Theme → Extension → Studio → CMS publishing → Media/distribution → SEO/search → Automation.
 6. Track C kernel (Builder Beta): content model → data governance → taxonomy → query → routing → navigation → theme contract → Ext SDK → site builder → … → privacy/consent.
@@ -51,7 +51,7 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 | 2 | `CORE-QA-001` | login/session, direct routes, Admin boot, users/roles/settings/media/core CRUD | Builder Beta | SOURCE_DONE — source QA #127–#129 + B04 browser PASS on disposable-local (EVD-CORE-QA-B04-LOCAL-2026-10-18); live target → #72/#74 | RUNTIME-CLOSURE-001 |
 | 3 | `MOBILE-AUTH-API-100` | native-app sign-in token exchange, self profile and device-token revocation on the existing scoped API-token layer (no new auth stack); owner-prioritised 2026-10-18 for iOS/Android apps | Builder Beta | SOURCE_DONE (#138, independent review APPROVE) | CORE-QA-001 |
 | 4 | `ADMIN-UX-CLOSURE-001` | shared Admin design system, responsive behavior, loading/error/destructive states, accessibility baseline | Builder Beta | SOURCE_DONE — #132–#137; 61-page visual review consistent; Figma pixel-parity not certified | CORE-QA-001 |
-| 5 | `SECURITY-BASELINE-200` | MFA/passkeys plan, CSP/browser hardening, continuous AppSec CI, secrets/dependency scanning, authorization/tenancy matrices, early threat-model program | Builder Beta | ACTIVE ▶ CURRENT — increment 1 TOTP MFA SOURCE_DONE (#140); next increments: passkeys, CSP/browser hardening, AppSec CI, authz/tenancy matrices | CORE-QA-001 (owner pulled ahead of AI-GOV-AUTOMATION-100 / QUALITY-GOVERNANCE-100 on 2026-10-18) |
+| 5 | `SECURITY-BASELINE-200` | MFA/passkeys plan, CSP/browser hardening, continuous AppSec CI, secrets/dependency scanning, authorization/tenancy matrices, early threat-model program | Builder Beta | SOURCE_DONE — TOTP (#140); CSP, authorization matrix, secret scanning (#145); passkeys (#146) | CORE-QA-001 (owner pulled ahead of AI-GOV-AUTOMATION-100 / QUALITY-GOVERNANCE-100 on 2026-10-18) |
 | 6 | `AI-GOV-AUTOMATION-100` | machine-check `.ai` registries/stages/plans/DoD/state/handoff so CI rejects unplanned/inconsistent work | Builder Beta | PARTIAL — verifier merged (#130–#131); PR→unit traceability awaits owner approval (protected workflow) | CORE-QA-001 |
 | 7 | `RESEARCH-DISCOVERY-100` | ResearchBrief/VOC/problem-vs-solution validation, current market/standards evidence, baseline, alternatives and CTQ inputs for substantial new work | Builder Beta | NEW_REQUIRED | AI-GOV-AUTOMATION-100 |
 | 8 | `QUALITY-GOVERNANCE-100` | Quality OS, proportional DMADV/DMAIC, CTQs, SIPOC/FMEA/root-cause/control-plan traceability and outcome-over-output policy | Builder Beta | NEW_REQUIRED | RESEARCH-DISCOVERY-100, AI-GOV-AUTOMATION-100 |

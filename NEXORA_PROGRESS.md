@@ -1,3 +1,7 @@
+# SECURITY-BASELINE-200 source-complete checkpoint — 2026-10-23
+
+Main `82bd8cb` after #142 (deps), #145 (CSP, authorization matrix, secret scan) and #146 (passkeys). Exact-head CI green on each; local full PHPUnit 835/835 (SQLite) at #146 head. Remaining gates: #74 live target/TLS/provider/browser evidence; release certification. Target Power unchanged (50.0%); not increased from source CI.
+
 # PR #71 clean replacement source preparation — 2026-10-01
 
 Base main 55c249c06621fe7dc14868b3a5740b657bcb6b7a. Owner requested starting the clean replacement. Eight new backend regressions / 59 assertions PASS. Original unchanged suite diagnostic FAILED (61 schema errors, 5 failures, 6 incomplete). First full replacement run had a toolchain fixture failure: inherited NPM_CONFIG_CACHE pointed at a nonexistent directory; actual writable disposable cache configured, assertions unchanged. Corrected combined backend run PASS: 488 tests / 4663 assertions. Source certification and remote exact-head CI remain separate gates. New suite covers implemented auth/admin/module-read boundaries only. Original 76 requirements remain explicitly inventoried for contract mapping; no global Core QA/target or historical key invalidation completion. Original #71 stays quarantined. Evidence: docs/pr71-clean-replacement.md. Earlier entries are historical.

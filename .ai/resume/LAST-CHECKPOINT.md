@@ -1,3 +1,7 @@
+# Checkpoint — SECURITY-BASELINE-200 source-complete — 2026-10-23
+
+Main 82bd8cb. Merged: #142 (deps), #145 (CSP, route authorization matrix, committed-secret scan, vitest 5.0.5), #146 (passkeys/WebAuthn; web-auth/webauthn-lib owner-approved). Each had green exact-head CI and an independent AI review (separate context; not a human review). Next: AI-GOV-AUTOMATION-100 (needs owner approval). Target acceptance (#74) unchanged, not claimed.
+
 # Checkpoint — single execution flow — 2026-10-18
 
 Main a197149 (#140 TOTP MFA merged; CI green). Current stage SECURITY-BASELINE-200 / unit SEC-BASELINE. The plan is aligned to one ordered flow (`.ai/roadmap/stages.md` → "Execution flow"). Next: owner picks the next security increment, or approves AI-GOV-AUTOMATION-100 traceability. MOBILE-APPS-100 is on hold. No target acceptance is claimed.
