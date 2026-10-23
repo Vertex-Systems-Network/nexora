@@ -28,6 +28,7 @@ final class ContentSecurityPolicyTest extends TestCase
         $this->assertStringContainsString("object-src 'none'", $policy);
         $this->assertStringContainsString("base-uri 'self'", $policy);
         $this->assertStringContainsString("frame-ancestors 'self'", $policy);
+        $this->assertStringContainsString("form-action 'self';", $policy);
         $this->assertStringNotContainsString("'unsafe-eval'", $policy);
         $this->assertDoesNotMatchRegularExpression("/script-src[^;]*'unsafe-inline'/", $policy);
     }
@@ -58,6 +59,17 @@ final class ContentSecurityPolicyTest extends TestCase
         $response = $this->get('/login');
         $this->assertFalse($response->headers->has('Content-Security-Policy'));
         $this->assertFalse($response->headers->has('Content-Security-Policy-Report-Only'));
+    }
+
+    public function test_form_action_allowlist_accepts_only_https_origins(): void
+    {
+        config(['nexora-performance.headers.csp_form_action' => 'https://pay.example.com, http://insecure.example.com, https://x.example.com/path, *, https://ok.example.com:8443']);
+
+        $policy = (new ApplyContentSecurityPolicy)->policy('n');
+
+        $this->assertStringContainsString("form-action 'self' https://pay.example.com https://ok.example.com:8443;", $policy);
+        $this->assertStringNotContainsString('insecure', $policy);
+        $this->assertStringNotContainsString('x.example.com', $policy);
     }
 
     public function test_unknown_mode_fails_closed_to_enforce(): void

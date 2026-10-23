@@ -60,7 +60,7 @@ final class ApplyContentSecurityPolicy
             'worker-src' => ["'self'", 'blob:'],
             'object-src' => ["'none'"],
             'base-uri' => ["'self'"],
-            'form-action' => ["'self'", 'https:'],
+            'form-action' => ["'self'", ...$this->extraOrigins('csp_form_action')],
             'frame-ancestors' => ["'self'"],
         ];
 
@@ -69,6 +69,21 @@ final class ApplyContentSecurityPolicy
             array_keys($directives),
             $directives,
         ));
+    }
+
+    /** @return list<string> Explicit https origins from a comma-separated config value. */
+    private function extraOrigins(string $key): array
+    {
+        $origins = [];
+        foreach (explode(',', (string) config('nexora-performance.headers.'.$key, '')) as $candidate) {
+            $parts = parse_url(trim($candidate));
+            if (is_array($parts) && ($parts['scheme'] ?? '') === 'https' && isset($parts['host'])
+                && ! isset($parts['path']) && ! isset($parts['query']) && ! isset($parts['user'])) {
+                $origins[] = 'https://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '');
+            }
+        }
+
+        return $origins;
     }
 
     private function isHtml(Response $response): bool

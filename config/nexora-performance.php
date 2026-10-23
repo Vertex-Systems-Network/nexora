@@ -57,5 +57,7 @@ return [
         'hsts_include_subdomains' => (bool) $env('NEXORA_HSTS_INCLUDE_SUBDOMAINS', true),
         // enforce | report-only | off — nonce-based Content-Security-Policy for HTML.
         'csp' => (string) $env('NEXORA_CSP', 'enforce'),
+        // Comma-separated https origins forms may post to besides self (e.g. a payment provider).
+        'csp_form_action' => (string) $env('NEXORA_CSP_FORM_ACTION', ''),
     ],
 ];
