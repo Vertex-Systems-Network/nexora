@@ -303,13 +303,44 @@ tasks:
     source_issue_or_pr: 'PR #152'
     command_or_workflow: automatic PR governance, checkout QA, Windows bootstrap QA and traceability
     source_ref: claude/wizardly-ptolemy-i21c24
-    source_sha: null
+    source_sha: 15967f1f3550a263cb1bf0ca2e557230b8e1a682
     environment_matrix_input_fixture: existing repository GitHub Actions workflows
     authorization_state: user-authorized source continuation; automatic CI only
     security_critical: true
     merge_blocking: true
     expected_runner_time: null
     deterministic_dedup_key: nexora:pr152:authorization-fixture-followup-20261128
-    status: BLOCKED_BINDING
-    immutable_evidence: null
-    note: 'Bind exact published SHA and live run result on PR before accepting evidence. No local PHP available; no local PHPUnit claim.'
+    status: FAIL
+    immutable_evidence: 'run 46084084434 / job 140789486157 Composer audit FAIL: 25 advisories across 8 packages; archived baseline excerpt in candidate evidence'
+    note: 'Single intake snapshot: checkout QA still running, Windows/traceability pass; no later conclusion inferred. This failure is preserved, not edited to PASS.'
+
+  - id: RB-NEX-PR152-SECURITY-CANDIDATE-001
+    source_work: SEC-THEME-CI-DEPS-001
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: isolated Composer candidate update/audits, no-script install and focused theme/passkey/TOTP PHPUnit
+    source_ref: claude/wizardly-ptolemy-i21c24
+    source_sha: 15967f1f3550a263cb1bf0ca2e557230b8e1a682
+    environment_matrix_input_fixture: rootless Debian PHP 8.4.28 and Composer 2.10.3; disposable candidate copied from exact source manifests/locks
+    authorization_state: user-authorized source continuation; isolated candidate only, no target authority
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:15967f1:security-candidate-001
+    status: PASS
+    immutable_evidence: '.ai/evidence/theme-security-candidate-20261128.json and archive; audits zero, focused PHPUnit 33 tests/233 assertions PASS'
+    note: 'No root lock promotion. Candidate audit, provenance, compatibility and independent review required.'
+
+  - id: RB-NEX-PR152-REVIEW-CANDIDATE
+    source_work: SEC-THEME-CI-DEPS-001
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: independent candidate review and canonical-toolchain A/B dossier
+    source_ref: claude/wizardly-ptolemy-i21c24
+    source_sha: 15967f1f3550a263cb1bf0ca2e557230b8e1a682
+    environment_matrix_input_fixture: candidate Composer SHA-256 11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05
+    authorization_state: source review only; no promotion or target authority claimed
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:15967f1:candidate-review
+    status: BLOCKED
+    immutable_evidence: 'CodeRabbit 0.9.7 auth status not_authenticated; auth login --agent returned environment_unsupported; no review ran'

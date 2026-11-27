@@ -24,14 +24,13 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## AI-Native Progress Ledger
 
-- **Observed:** 2026-11-28 (Asia/Karachi)
-- **Observed main:** `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb` — #151 integrated architecture layer-direction tests
-- **Current stage/unit:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE` — ACTIVE; review follow-up VERIFYING
-- **Current PR:** #152; prior head `7137a29b6487911fd5716ce451aa5d0930128174` passed governance, Development checkout QA, Windows bootstrap QA and traceability. Fresh follow-up head CI and independent review are pending; the prior checks do not certify new changes.
-- **Change:** authorization regression explicitly activates an uploaded theme and verifies its exact baseline and public render after denied mutations; current handoff/progress mirrors reconciled.
-- **Target/release:** BLOCKED; no live target provisioned. #74 remains open; #72 is closed on GitHub, which alone does not establish target acceptance.
-- **Other PRs:** dependency #160/#161/#162/#165/#166/#167/#169/#170/#171 have failed governance checks (#166 also failed checkout QA). #143 is green but review/base reconciliation remains unestablished. None merged this pass.
-- **Next safe action:** exact-head CI and independent review of #152; retain target acceptance gate before promotion.
+- **Observed:** 2026-11-28 (Asia/Karachi); main `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`
+- **Current stage/unit:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE`; blocker unit `SEC-THEME-CI-DEPS-001` — BLOCKED on candidate review/promotion
+- **PR/source:** #152 / `15967f1f3550a263cb1bf0ca2e557230b8e1a682`; governance run `46084084434`, job `140789486157` **FAIL** (25 Composer advisories / 8 packages). Checkout QA still running at the single observation; Windows/traceability PASS. These are observations of that exact source only.
+- **Prepared:** isolated eight-package patch candidate; Composer/npm audits zero vulnerabilities; provenance/lock validation PASS; focused theme/passkey/TOTP **33 tests / 233 assertions PASS** (PHP 8.4.28, SQLite). Exact candidate and raw evidence: [report](docs/theme-security-candidate-20261128.md).
+- **Not promoted:** root locks still vulnerable. Canonical-toolchain A/B dossier, independent review (authentication unavailable), governed root promotion and fresh full exact-head CI remain required. No merge, workflow rerun or stage advancement.
+- **Target/release:** BLOCKED; #74 open, no live target provisioned. No target acceptance inferred from source tests.
+- **Next safe action:** complete candidate review/promotion gates and rerun normal exact-head CI after the accepted dependency source change.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

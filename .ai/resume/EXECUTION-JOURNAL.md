@@ -1,3 +1,11 @@
+# Security candidate checkpoint — 2026-11-28
+
+PR #152, stage THEME-CLOSURE-001, source 15967f1f3550a263cb1bf0ca2e557230b8e1a682; observed main 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb. Governance run 46084084434/job 140789486157 FAIL: 25 Composer advisories across 8 packages before PHPUnit. Checkout QA was still running at the single intake snapshot; Windows/traceability passed. No workflow rerun or repeated status refresh.
+
+Registered SEC-THEME-CI-DEPS-001 before isolated candidate preparation. Rootless PHP 8.4.28 + Composer 2.10.3 now available. Exactly the eight affected libraries updated in an isolated candidate: Composer/npm audit zero vulnerabilities, candidate provenance/lock validation PASS, focused theme/passkey/TOTP tests 33/33 with 233 assertions PASS on git-archived source plus candidate lock. No root lock promotion, independent approval or target acceptance. Candidate dossier and exact archived locks/raw test evidence: docs/theme-security-candidate-20261128.md and .ai/evidence/theme-security-candidate-20261128.{json,tar.gz}.
+
+Milestone BLOCKED on canonical-toolchain A/B dossier, independent review (CodeRabbit login environment_unsupported), governed promotion and fresh full exact-head CI. Root dependencies remain vulnerable; #74 target remains blocked. Next: complete candidate review/promotion gates; do not advance to extensions. Earlier checkpoints are historical observations.
+
 # Theme lifecycle review follow-up — 2026-11-28
 
 PR #152 / THEME-CLOSURE-001 / SYS-THEME-ENGINE remains VERIFYING. Main is `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`; pre-follow-up head `7137a29b6487911fd5716ce451aa5d0930128174` has successful governance, Development checkout QA, Windows PowerShell bootstrap QA and PR-to-unit traceability checks. Those results do not certify this follow-up.

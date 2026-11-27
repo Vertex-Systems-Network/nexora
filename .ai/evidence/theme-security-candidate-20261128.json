@@ -1,0 +1,264 @@
+{
+  "schema": 1,
+  "unit": "SEC-THEME-CI-DEPS-001",
+  "stage": "THEME-CLOSURE-001",
+  "status": "CANDIDATE_PREPARED_REVIEW_REQUIRED",
+  "source_sha": "15967f1f3550a263cb1bf0ca2e557230b8e1a682",
+  "main_sha": "8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb",
+  "baseline": {
+    "run": 46084084434,
+    "job": 140789486157,
+    "result": "FAIL",
+    "advisories": 25,
+    "affected_packages": 8,
+    "phpunit_in_governance": "NOT_RUN"
+  },
+  "toolchain": {
+    "php": "8.4.28 Debian rootless CLI",
+    "composer": "2.10.3",
+    "npm": "11.19.1",
+    "profile": "disposable SQLite source compatibility; not canonical CI toolchain certification"
+  },
+  "candidate": {
+    "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+    "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+    "composer_json_sha256": "33fdef43209a432aeeaafc383a5f80595ad2cf31fafa0f9f602450db1413a9fc",
+    "changes": [
+      {
+        "name": "laravel/framework",
+        "from": "v13.36.0",
+        "to": "v13.44.1",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/laravel/framework.git",
+          "reference": "8a8c4a84852869e13190d89f9da873cd9a70f14c"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/laravel/framework/zipball/8a8c4a84852869e13190d89f9da873cd9a70f14c",
+          "reference": "8a8c4a84852869e13190d89f9da873cd9a70f14c",
+          "shasum": ""
+        },
+        "license": [
+          "MIT"
+        ],
+        "type": "library",
+        "scripts": {}
+      },
+      {
+        "name": "symfony/http-foundation",
+        "from": "v7.4.21",
+        "to": "v7.4.25",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/symfony/http-foundation.git",
+          "reference": "1ebfef402856383ce114ff009d4fc961bf290743"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/symfony/http-foundation/zipball/1ebfef402856383ce114ff009d4fc961bf290743",
+          "reference": "1ebfef402856383ce114ff009d4fc961bf290743",
+          "shasum": ""
+        },
+        "license": [
+          "MIT"
+        ],
+        "type": "library",
+        "scripts": {}
+      },
+      {
+        "name": "symfony/http-kernel",
+        "from": "v7.4.21",
+        "to": "v7.4.25",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/symfony/http-kernel.git",
+          "reference": "b510604a58547c9c28a599a16ad7ab0d8df64076"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/symfony/http-kernel/zipball/b510604a58547c9c28a599a16ad7ab0d8df64076",
+          "reference": "b510604a58547c9c28a599a16ad7ab0d8df64076",
+          "shasum": ""
+        },
+        "license": [
+          "MIT"
+        ],
+        "type": "library",
+        "scripts": {}
+      },
+      {
+        "name": "symfony/mailer",
+        "from": "v7.4.19",
+        "to": "v7.4.24",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/symfony/mailer.git",
+          "reference": "19470de2526c9d5cdb136c5574e504024f523882"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/symfony/mailer/zipball/19470de2526c9d5cdb136c5574e504024f523882",
+          "reference": "19470de2526c9d5cdb136c5574e504024f523882",
+          "shasum": ""
+        },
+        "license": [
+          "MIT"
+        ],
+        "type": "library",
+        "scripts": {}
+      },
+      {
+        "name": "symfony/mime",
+        "from": "v7.4.19",
+        "to": "v7.4.24",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/symfony/mime.git",
+          "reference": "de952f839520f9945b337eeab67e49c68b24ea6b"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/symfony/mime/zipball/de952f839520f9945b337eeab67e49c68b24ea6b",
+          "reference": "de952f839520f9945b337eeab67e49c68b24ea6b",
+          "shasum": ""
+        },
+        "license": [
+          "MIT"
+        ],
+        "type": "library",
+        "scripts": {}
+      },
+      {
+        "name": "symfony/routing",
+        "from": "v7.4.21",
+        "to": "v7.4.24",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/symfony/routing.git",
+          "reference": "63fd985c6afe7ac69f89fb90a72715ca20cddc08"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/symfony/routing/zipball/63fd985c6afe7ac69f89fb90a72715ca20cddc08",
+          "reference": "63fd985c6afe7ac69f89fb90a72715ca20cddc08",
+          "shasum": ""
+        },
+        "license": [
+          "MIT"
+        ],
+        "type": "library",
+        "scripts": {}
+      },
+      {
+        "name": "symfony/serializer",
+        "from": "v7.4.21",
+        "to": "v7.4.25",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/symfony/serializer.git",
+          "reference": "95bea3dda2008f543f12087a31ad20281d6e1689"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/symfony/serializer/zipball/95bea3dda2008f543f12087a31ad20281d6e1689",
+          "reference": "95bea3dda2008f543f12087a31ad20281d6e1689",
+          "shasum": ""
+        },
+        "license": [
+          "MIT"
+        ],
+        "type": "library",
+        "scripts": {}
+      },
+      {
+        "name": "web-auth/webauthn-lib",
+        "from": "5.3.9",
+        "to": "5.3.17",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/web-auth/webauthn-lib.git",
+          "reference": "7f38dbcf07cd22ec104fa6eb720df22eb4196b47"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/web-auth/webauthn-lib/zipball/7f38dbcf07cd22ec104fa6eb720df22eb4196b47",
+          "reference": "7f38dbcf07cd22ec104fa6eb720df22eb4196b47",
+          "shasum": ""
+        },
+        "license": [
+          "MIT"
+        ],
+        "type": "library",
+        "scripts": {}
+      }
+    ],
+    "new_packages": 0,
+    "removed_packages": 0,
+    "archive_sha256": "bbaa7047abb41aed606e285836ecadf0c9e32e0dff8001d85ed5c6633c46dd15"
+  },
+  "checks": {
+    "composer_validate_strict": "PASS",
+    "composer_locked_audit": {
+      "advisories": [],
+      "abandoned": [],
+      "filter": []
+    },
+    "npm_audit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "provenance": {
+      "schema": 2,
+      "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+      "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+      "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+      "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab",
+      "composer_urls_checked": 254,
+      "npm_urls_checked": 214,
+      "composer_hosts": [
+        "api.github.com",
+        "github.com"
+      ],
+      "npm_hosts": [
+        "registry.npmjs.org"
+      ],
+      "npm_integrity_missing": 0,
+      "npm_integrity_bundled_covered": 6,
+      "errors": [],
+      "fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+      "status": "pass"
+    },
+    "focused_phpunit": {
+      "result": "PASS",
+      "tests": 33,
+      "assertions": 233,
+      "duration_ms": 9810,
+      "filter": "ThemeLifecycleClosureTest|ThemeEngineFlowTest|PasskeyAuthenticationTest|TotpAuthenticatorTest",
+      "junit_sha256": "31e83d225c15db9a7e9a476bc1ed50a18c973799a786ebe90dd80dbcb98e1445"
+    },
+    "candidate_lock_pair_validation": "PASS; 127 Composer packages, 220 npm packages; zero errors/warnings",
+    "control_plane": "PASS after replacing invalid draft exception with actual ResearchBrief",
+    "theme_test_php_syntax": "PASS"
+  },
+  "root_locks_mutated": false,
+  "target_verified": false,
+  "independent_review": {
+    "status": "BLOCKED_AUTH",
+    "tool": "CodeRabbit 0.9.7",
+    "error": "environment_unsupported: browser login unavailable; requires Agentic API key authentication or user-controlled terminal login",
+    "claimed": false
+  },
+  "remaining_gates": [
+    "Canonical dependency toolchain and A/B candidate reproducibility dossier",
+    "Independent exact-source/candidate review",
+    "Governed root lock promotion via existing scripts; no hand-copy",
+    "Fresh full exact-head CI (including auth/theme regressions)",
+    "Live target/browser acceptance #74 remains separate"
+  ],
+  "rollback": "Discard isolated candidate; root source locks and deployed target were not modified."
+}

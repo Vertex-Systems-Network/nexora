@@ -16,10 +16,11 @@
     "id": "THEME-CLOSURE-001",
     "name": "Theme Closure",
     "status": "ACTIVE",
-    "scope_note": "PR #152 theme lifecycle source proof; review follow-up strengthens the authorization fixture. Fresh exact-head CI and independent review pending. Target/browser verification remains BLOCKED (#74). ARCH-BOUNDARY-100 source integrated (#151)."
+    "scope_note": "PR #152 security audit FAIL on 15967f1: 25 advisories across 8 packages. Isolated same-family patch candidate has zero Composer/npm advisories and 33 focused tests/233 assertions PASS; root locks unchanged. Canonical A/B dossier, independent review authentication, governed promotion and fresh exact-head CI remain blocked. No target claim (#74)."
   },
   "active_development_units": [
-    "SYS-THEME-ENGINE"
+    "SYS-THEME-ENGINE",
+    "SEC-THEME-CI-DEPS-001"
   ],
   "completed_control_stages": [
     {

@@ -4,9 +4,9 @@ updated_at: '2026-09-30'
 items:
 - id: NEX-THEME-152-FOLLOWUP
   source: 'PR #152 / SYS-THEME-ENGINE'
-  status: VERIFYING
+  status: BLOCKED
   priority: 1
-  note: 'Follow-up fixture/evidence reconciliation; fresh exact-head CI and independent review pending. No target promotion.'
+  note: '15967f1 governance audit FAIL; isolated security candidate prepared (33/233 PASS), canonical A/B dossier/independent review/promotion pending. Root locks unchanged.'
 - id: NEX-ORCH-74
   source: 'Issue #74'
   status: ACTIVE_TARGET_CLOSURE

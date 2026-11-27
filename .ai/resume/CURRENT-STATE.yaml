@@ -14,16 +14,18 @@ current_stage:
   unit: SYS-THEME-ENGINE
   status: ACTIVE
 current_milestone:
-  id: THEME-LIFECYCLE-SOURCE-PROOF
-  status: VERIFYING
+  id: THEME-CI-SECURITY-CANDIDATE
+  status: BLOCKED
 last_completed_milestone:
   main_commit: 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb
   summary: 'ARCH-BOUNDARY-100 source integrated (#151)'
-exact_next_safe_action: Verify fresh exact-head CI and independent review of PR 152; keep target acceptance blocked and extensions planned.
-pending_runner_ids:
-- RB-NEX-PR152-FOLLOWUP
-blocked_runner_ids: []
+exact_next_safe_action: Complete canonical A/B candidate dossier and authenticated independent review, then governed lock promotion and fresh full CI; no target or extension advancement.
+pending_runner_ids: []
+blocked_runner_ids:
+- RB-NEX-PR152-REVIEW-CANDIDATE
 current_blockers:
+- Root Composer audit FAIL on 15967f1; isolated patched candidate is not promoted.
+- Independent review login environment_unsupported; canonical A/B promotion dossier pending.
 - No live TLS target/five-engine acceptance established.
 - Target acceptance follow-up RUNTIME-TARGET-ACCEPTANCE (#74) open; #72 closed on GitHub; TARGET_VERIFIED not claimed.
 timeout_control:

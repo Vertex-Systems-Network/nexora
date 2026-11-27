@@ -1,3 +1,7 @@
+# Latest 2026-11-28 observation supersedes the earlier current-observation comment:
+# PR #152 head 15967f1 governance FAIL (25 advisories/8 packages). Isolated candidate
+# has zero Composer/npm advisories and 33 tests/233 assertions PASS. Root locks unchanged;
+# independent review/canonical A/B dossier/promotion/full CI remain blocked. Target #74 BLOCKED.
 # Current observation — 2026-11-28: main 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb;
 # PR #152 follow-up VERIFYING; THEME-CLOSURE-001 ACTIVE; #74 target BLOCKED.
 # Earlier claims below are historical observations, not the current execution cursor.
