@@ -1,3 +1,12 @@
+# THEME-CLOSURE-001 review follow-up — 2026-11-28
+
+- Scope: existing PR #152; test fixture and evidence/state mirrors only, no production/policy/dependency changes. Base head `7137a29b6487911fd5716ce451aa5d0930128174`; main `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`.
+- DMAIC: denied-action assertions previously used an implicitly seeded active theme; explicitly activate the uploaded theme, assert exact baseline version, and verify public rendering after denied actions.
+- Data, architecture, runtime performance, graph, migration, network, package contracts: NOT_APPLICABLE; existing fixture behavior only. No checks weakened.
+- Allowed writes: theme lifecycle test and existing plan/state/progress/resume/coordination/runner/registry mirrors. Single writer on existing PR branch; expected-head publication. No target access, secrets, workflow or security-policy changes.
+- Verification: previous head CI successful; fresh CI required for this follow-up. PHP absent locally. Independent review must bind published head; author self-review is insufficient. Rollback: revert follow-up commit.
+- Stage remains ACTIVE / unit ACTIVE; target BLOCKED; milestone VERIFYING. Do not advance to extensions or merge while applicable evidence is missing.
+
 # THEME-CLOSURE-001 theme lifecycle closure — 2026-10-23
 
 Stage THEME-CLOSURE-001 (ACTIVE, unit SYS-THEME-ENGINE, risk high). ARCH-BOUNDARY-100 is SOURCE_DONE (#151).

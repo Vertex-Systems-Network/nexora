@@ -1,3 +1,11 @@
+# Theme lifecycle review follow-up — 2026-11-28
+
+PR #152 / THEME-CLOSURE-001 / SYS-THEME-ENGINE remains VERIFYING. Main is `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`; pre-follow-up head `7137a29b6487911fd5716ce451aa5d0930128174` has successful governance, Development checkout QA, Windows PowerShell bootstrap QA and PR-to-unit traceability checks. Those results do not certify this follow-up.
+
+The authorization fixture now explicitly activates the uploaded Alpha theme and asserts its exact version before denied mutations, then checks public rendering afterwards. Progress/state mirrors are reconciled without advancing the stage. Local PHP is unavailable; no local PHPUnit PASS is claimed. Fresh exact-head CI and independent review are required. Target/browser acceptance remains blocked under #74; no target is provisioned. Dependency PRs #160/#161/#162/#165/#166/#167/#169/#170/#171 have failed governance checks (#166 also failed Development checkout QA); #143 is green but not reviewed or reconciled with current main. None was merged.
+
+Next: validate the published #152 head in CI and independent review, resolve findings, and retain the target gate. EXTENSION-CLOSURE-001 remains PLANNED.
+
 # PR #71 clean replacement source preparation — 2026-10-01
 
 Base main 55c249c06621fe7dc14868b3a5740b657bcb6b7a. Owner requested starting the clean replacement. Eight new backend regressions / 59 assertions PASS. Original unchanged suite diagnostic FAILED (61 schema errors, 5 failures, 6 incomplete). First full replacement run had a toolchain fixture failure: inherited NPM_CONFIG_CACHE pointed at a nonexistent directory; actual writable disposable cache configured, assertions unchanged. Corrected combined backend run PASS: 488 tests / 4663 assertions. Source certification and remote exact-head CI remain separate gates. New suite covers implemented auth/admin/module-read boundaries only. Original 76 requirements remain explicitly inventoried for contract mapping; no global Core QA/target or historical key invalidation completion. Original #71 stays quarantined. Evidence: docs/pr71-clean-replacement.md. Earlier entries are historical.

@@ -16,7 +16,7 @@
     "id": "THEME-CLOSURE-001",
     "name": "Theme Closure",
     "status": "ACTIVE",
-    "scope_note": "Source-level proof of the theme lifecycle gaps: two-theme switch + rollback render, preview page, Sentinel block of unsafe theme, authorization. Target/browser verification remains with RUNTIME-TARGET-ACCEPTANCE. ARCH-BOUNDARY-100 SOURCE_DONE (#151)."
+    "scope_note": "PR #152 theme lifecycle source proof; review follow-up strengthens the authorization fixture. Fresh exact-head CI and independent review pending. Target/browser verification remains BLOCKED (#74). ARCH-BOUNDARY-100 source integrated (#151)."
   },
   "active_development_units": [
     "SYS-THEME-ENGINE"

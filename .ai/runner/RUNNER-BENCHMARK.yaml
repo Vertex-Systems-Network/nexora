@@ -297,3 +297,19 @@ tasks:
     status: BLOCKED_BINDING
     immutable_evidence: null
     note: "Published exact head/run binding recorded on carrier PR; working-tree 488/4663 PASS is not remote CI."
+
+  - id: RB-NEX-PR152-FOLLOWUP
+    source_work: THEME-CLOSURE-001 authorization fixture and evidence reconciliation
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: automatic PR governance, checkout QA, Windows bootstrap QA and traceability
+    source_ref: claude/wizardly-ptolemy-i21c24
+    source_sha: null
+    environment_matrix_input_fixture: existing repository GitHub Actions workflows
+    authorization_state: user-authorized source continuation; automatic CI only
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:authorization-fixture-followup-20261128
+    status: BLOCKED_BINDING
+    immutable_evidence: null
+    note: 'Bind exact published SHA and live run result on PR before accepting evidence. No local PHP available; no local PHPUnit claim.'

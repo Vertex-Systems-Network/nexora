@@ -24,14 +24,14 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## AI-Native Progress Ledger
 
-- **Observed:** 2026-09-30
-- **Last verified source baseline:** `3439ac7e324e867046674044ba4ad1586bd963af` — protected-main release certification `36742999910` **SUCCESS**
-- **Product acceptance stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Current source batch:** nine-point plan/evidence reconciliation in #102; #103/#104/#105 integrated and exact source/main CI verified
-- **Current deployment:** disposable SQLite/loopback HTTP tested; no live target provisioned
-- **Open remediation Issues:** #72 historical bootstrap-key non-use/rotation; #74 live runtime acceptance; #87 closed NOT_PLANNED
-- **Open planning PR:** #102 is current plan reconciliation; #1 closed; #103/#104/#105 merged
-- **Next safe action:** verify and integrate the updated #102 plan/evidence; target/key/release acceptance remains separate.
+- **Observed:** 2026-11-28 (Asia/Karachi)
+- **Observed main:** `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb` — #151 integrated architecture layer-direction tests
+- **Current stage/unit:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE` — ACTIVE; review follow-up VERIFYING
+- **Current PR:** #152; prior head `7137a29b6487911fd5716ce451aa5d0930128174` passed governance, Development checkout QA, Windows bootstrap QA and traceability. Fresh follow-up head CI and independent review are pending; the prior checks do not certify new changes.
+- **Change:** authorization regression explicitly activates an uploaded theme and verifies its exact baseline and public render after denied mutations; current handoff/progress mirrors reconciled.
+- **Target/release:** BLOCKED; no live target provisioned. #74 remains open; #72 is closed on GitHub, which alone does not establish target acceptance.
+- **Other PRs:** dependency #160/#161/#162/#165/#166/#167/#169/#170/#171 have failed governance checks (#166 also failed checkout QA). #143 is green but review/base reconciliation remains unestablished. None merged this pass.
+- **Next safe action:** exact-head CI and independent review of #152; retain target acceptance gate before promotion.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

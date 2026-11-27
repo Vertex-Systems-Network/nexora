@@ -2,6 +2,11 @@ schema_version: 1
 repository: Vertex-Systems-Network/nexora
 updated_at: '2026-09-30'
 items:
+- id: NEX-THEME-152-FOLLOWUP
+  source: 'PR #152 / SYS-THEME-ENGINE'
+  status: VERIFYING
+  priority: 1
+  note: 'Follow-up fixture/evidence reconciliation; fresh exact-head CI and independent review pending. No target promotion.'
 - id: NEX-ORCH-74
   source: 'Issue #74'
   status: ACTIVE_TARGET_CLOSURE

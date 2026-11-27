@@ -108,6 +108,8 @@ final class ThemeLifecycleClosureTest extends TestCase
     {
         $admin = $this->admin();
         $alpha = $this->install($admin, 'acme.alpha', 'Alpha Shell');
+        $this->actingAs($admin)->post('/admin/appearance/themes/versions/'.$alpha.'/activate')->assertSessionHasNoErrors();
+        self::assertSame($alpha, app(ThemeManagerContract::class)->active()?->id);
         $member = User::factory()->create(['email_verified_at' => now()]);
         $member->roles()->attach(Role::query()->where('slug', 'user')->value('id'));
         $before = app(ThemeManagerContract::class)->active()?->id;
@@ -121,6 +123,8 @@ final class ThemeLifecycleClosureTest extends TestCase
 
         self::assertFalse(Theme::query()->where('identifier', 'acme.member')->exists());
         self::assertSame($before, app(ThemeManagerContract::class)->active()?->id);
+        auth()->logout();
+        $this->get('/')->assertOk()->assertSee('Alpha Shell');
     }
 
     private function admin(): User
