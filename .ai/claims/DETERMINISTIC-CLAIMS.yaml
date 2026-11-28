@@ -1,3 +1,7 @@
+# Latest observation: PR152 at 28bb3e1 checkout/Windows/traceability PASS, governance FAIL.
+# Candidate A/B exact reproduction PASS on policy-valid toolchain. Full-suite retry FAIL:
+# 855 tests / 845 pass / 10 fixture failures / 7304 assertions. Root locks unchanged;
+# prior A/B gap superseded; runner fidelity, independent review, promotion and target still blocked.
 # Latest 2026-11-28 observation supersedes the earlier current-observation comment:
 # PR #152 head 15967f1 governance FAIL (25 advisories/8 packages). Isolated candidate
 # has zero Composer/npm advisories and 33 tests/233 assertions PASS. Root locks unchanged;

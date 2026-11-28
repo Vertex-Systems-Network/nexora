@@ -14,20 +14,20 @@ current_stage:
   unit: SYS-THEME-ENGINE
   status: ACTIVE
 current_milestone:
-  id: THEME-CI-SECURITY-CANDIDATE
+  id: THEME-CI-AB-FULL-DIAGNOSTIC
   status: BLOCKED
 last_completed_milestone:
   main_commit: 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb
   summary: 'ARCH-BOUNDARY-100 source integrated (#151)'
-exact_next_safe_action: Complete canonical A/B candidate dossier and authenticated independent review, then governed lock promotion and fresh full CI; no target or extension advancement.
+exact_next_safe_action: Correct disposable checkout fidelity and rootless PHP empty-environment loading, then rerun unchanged full suite; independent review, governed promotion and exact-head CI still required.
 pending_runner_ids: []
 blocked_runner_ids:
 - RB-NEX-PR152-REVIEW-CANDIDATE
 current_blockers:
-- Root Composer audit FAIL on 15967f1; isolated patched candidate is not promoted.
-- Independent review login environment_unsupported; canonical A/B promotion dossier pending.
-- No live TLS target/five-engine acceptance established.
-- Target acceptance follow-up RUNTIME-TARGET-ACCEPTANCE (#74) open; #72 closed on GitHub; TARGET_VERIFIED not claimed.
+- Full candidate suite FAIL: 845 of 855 pass; nine PHP loader errors and one export-ignored workflow omission in disposable fixture.
+- Root Composer audit FAIL on 28bb3e1; isolated reproducible candidate not promoted.
+- Independent review authentication unavailable; no review or promotion approval.
+- No live target provisioned; #74 open; TARGET_VERIFIED not claimed.
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
   tight_polling_forbidden: true

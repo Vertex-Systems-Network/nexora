@@ -6,7 +6,7 @@ items:
   source: 'PR #152 / SYS-THEME-ENGINE'
   status: BLOCKED
   priority: 1
-  note: '15967f1 governance audit FAIL; isolated security candidate prepared (33/233 PASS), canonical A/B dossier/independent review/promotion pending. Root locks unchanged.'
+  note: '28bb3e1 root audit FAIL; A/B candidate reproduction PASS; full suite 845/855 pass with 10 fixture failures. Correct checkout/runner before unchanged full regression; review/promotion pending.'
 - id: NEX-ORCH-74
   source: 'Issue #74'
   status: ACTIVE_TARGET_CLOSURE

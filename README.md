@@ -25,12 +25,12 @@ This rule applies on every AI development start, including work resumed from an 
 ## AI-Native Progress Ledger
 
 - **Observed:** 2026-11-28 (Asia/Karachi); main `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`
-- **Current stage/unit:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE`; blocker unit `SEC-THEME-CI-DEPS-001` — BLOCKED on candidate review/promotion
-- **PR/source:** #152 / `15967f1f3550a263cb1bf0ca2e557230b8e1a682`; governance run `46084084434`, job `140789486157` **FAIL** (25 Composer advisories / 8 packages). Checkout QA still running at the single observation; Windows/traceability PASS. These are observations of that exact source only.
-- **Prepared:** isolated eight-package patch candidate; Composer/npm audits zero vulnerabilities; provenance/lock validation PASS; focused theme/passkey/TOTP **33 tests / 233 assertions PASS** (PHP 8.4.28, SQLite). Exact candidate and raw evidence: [report](docs/theme-security-candidate-20261128.md).
-- **Not promoted:** root locks still vulnerable. Canonical-toolchain A/B dossier, independent review (authentication unavailable), governed root promotion and fresh full exact-head CI remain required. No merge, workflow rerun or stage advancement.
-- **Target/release:** BLOCKED; #74 open, no live target provisioned. No target acceptance inferred from source tests.
-- **Next safe action:** complete candidate review/promotion gates and rerun normal exact-head CI after the accepted dependency source change.
+- **Current stage/unit:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE`; blocker `SEC-THEME-CI-DEPS-001` — BLOCKED on full-runner fidelity/review/promotion
+- **Source/PR:** #152 / `28bb3e11737a77c14239f4631c68818487100c55`; checkout QA/Windows/traceability PASS; governance job `140792504014` FAIL with 25 advisories across eight root-locked packages.
+- **New evidence:** A/B candidate raw locks, semantic digests and supply-chain fingerprints match; same previously archived eight-package candidate. PHP 8.4.28 / Composer 2.10.3 / Node 22.14.0 / npm 10.9.2 pass existing toolchain validation. Both audits/provenance/lock validators PASS.
+- **Full suite FAIL:** default 128M attempt exhausted memory; fresh 512M/CI-URL retry completed 855 tests, 845 passed, 10 failed, 7304 assertions. Nine empty-environment rootless PHP loader failures; one git-archive export-ignored workflow omission. No tests/assertions changed. [Exact evidence and next fix](docs/theme-security-reproduction-002.md).
+- **Not promoted:** root locks unchanged; fix runner/checkout fidelity, run unchanged suite, obtain independent review, then governed promotion and fresh exact-head CI. No merge or target acceptance.
+- **Target/release:** BLOCKED; #74 open, no live target provisioned.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

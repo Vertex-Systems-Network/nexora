@@ -1,0 +1,562 @@
+{
+  "schema": 1,
+  "unit": "SEC-THEME-CI-DEPS-001",
+  "source_sha": "28bb3e11737a77c14239f4631c68818487100c55",
+  "status": "REPRODUCIBLE_CANDIDATE_FULL_SUITE_BLOCKED",
+  "reproduction": {
+    "source_sha": "28bb3e11737a77c14239f4631c68818487100c55",
+    "toolchain": {
+      "schema": 1,
+      "php": {
+        "version": "8.4.28",
+        "binary": "php8.4",
+        "binary_sha256": "17e0140bb4d405893952f4ad016533a1a8fde974ab4197204f003b7561f51d09"
+      },
+      "composer": {
+        "available": true,
+        "version": "2.10.3",
+        "source": "PATH",
+        "binary_sha256": "7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6"
+      },
+      "node": {
+        "available": true,
+        "version": "22.14.0",
+        "binary": "node",
+        "binary_sha256": "1abce2374a485bddae3c27b17a3e3143e2780232026e627c4fe74ddde3f380a1",
+        "execution_mode": "direct",
+        "launcher": "node"
+      },
+      "npm": {
+        "available": true,
+        "version": "10.9.2",
+        "binary": "npm",
+        "binary_sha256": "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
+        "execution_mode": "direct",
+        "launcher": "npm"
+      },
+      "policy": {
+        "php": {
+          "minimum": "8.3.0",
+          "maximum_exclusive": "8.5.0"
+        },
+        "composer": {
+          "minimum": "2.7.0",
+          "maximum_exclusive": "3.0.0"
+        },
+        "node": {
+          "minimum_major": 22,
+          "maximum_major_exclusive": 25
+        },
+        "npm": {
+          "minimum_major": 10,
+          "maximum_major_exclusive": 11
+        }
+      },
+      "errors": [],
+      "status": "pass",
+      "fingerprint_sha256": "ec4b28bac8ae81313df480c8024256e5662635240df1dfb7470c6343efe81a22"
+    },
+    "workspaces": [
+      {
+        "workspace": "A",
+        "hashes": {
+          "composer.json": "33fdef43209a432aeeaafc383a5f80595ad2cf31fafa0f9f602450db1413a9fc",
+          "composer.lock": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+          "package.json": "5d0c12a867bb8f880cdb2357351f1292e25fb09a3fb105ac4840c481425299b9",
+          "package-lock.json": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+        },
+        "checks": {
+          "supply_chain": {
+            "schema": 1,
+            "status": "pass",
+            "provenance": {
+              "schema": 2,
+              "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+              "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+              "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+              "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab",
+              "composer_urls_checked": 254,
+              "npm_urls_checked": 214,
+              "composer_hosts": [
+                "api.github.com",
+                "github.com"
+              ],
+              "npm_hosts": [
+                "registry.npmjs.org"
+              ],
+              "npm_integrity_missing": 0,
+              "npm_integrity_bundled_covered": 6,
+              "errors": [],
+              "fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+              "status": "pass"
+            },
+            "audit": {
+              "composer": {
+                "exit_code": 0,
+                "stdout_sha256": "3c4d81d3a3f1d68f4dc3bd2e0fb0d02c98ad3dce6fe912121b623f65ac5b346a",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+              },
+              "npm": {
+                "exit_code": 0,
+                "stdout_sha256": "470085540b8ef922d8367d4918de108c4728d22ce71044ccf65ce5f0091f7f00",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+              }
+            },
+            "errors": [],
+            "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475"
+          },
+          "validation": {
+            "errors": [],
+            "warnings": [],
+            "composer_packages": 127,
+            "npm_packages": 220,
+            "laravel_framework_locked_version": "13.44.1",
+            "npm_integrity_missing": 0,
+            "npm_integrity_bundled_covered": 6,
+            "npm_unsafe_sources": 0
+          },
+          "semantic": {
+            "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+            "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+          }
+        },
+        "resolve_exit_code": 0,
+        "checks_exit_code": 0
+      },
+      {
+        "workspace": "B",
+        "hashes": {
+          "composer.json": "33fdef43209a432aeeaafc383a5f80595ad2cf31fafa0f9f602450db1413a9fc",
+          "composer.lock": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+          "package.json": "5d0c12a867bb8f880cdb2357351f1292e25fb09a3fb105ac4840c481425299b9",
+          "package-lock.json": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+        },
+        "checks": {
+          "supply_chain": {
+            "schema": 1,
+            "status": "pass",
+            "provenance": {
+              "schema": 2,
+              "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+              "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+              "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+              "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab",
+              "composer_urls_checked": 254,
+              "npm_urls_checked": 214,
+              "composer_hosts": [
+                "api.github.com",
+                "github.com"
+              ],
+              "npm_hosts": [
+                "registry.npmjs.org"
+              ],
+              "npm_integrity_missing": 0,
+              "npm_integrity_bundled_covered": 6,
+              "errors": [],
+              "fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+              "status": "pass"
+            },
+            "audit": {
+              "composer": {
+                "exit_code": 0,
+                "stdout_sha256": "3c4d81d3a3f1d68f4dc3bd2e0fb0d02c98ad3dce6fe912121b623f65ac5b346a",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+              },
+              "npm": {
+                "exit_code": 0,
+                "stdout_sha256": "470085540b8ef922d8367d4918de108c4728d22ce71044ccf65ce5f0091f7f00",
+                "stderr_sha256": "7b152a56a1802bc6101d371e7ada52f6af817f791ba3d875824e3f552a261f83"
+              }
+            },
+            "errors": [],
+            "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475"
+          },
+          "validation": {
+            "errors": [],
+            "warnings": [],
+            "composer_packages": 127,
+            "npm_packages": 220,
+            "laravel_framework_locked_version": "13.44.1",
+            "npm_integrity_missing": 0,
+            "npm_integrity_bundled_covered": 6,
+            "npm_unsafe_sources": 0
+          },
+          "semantic": {
+            "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+            "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+          }
+        },
+        "resolve_exit_code": 0,
+        "checks_exit_code": 0
+      }
+    ],
+    "raw_exact_match": true,
+    "semantic_exact_match": true,
+    "supply_chain_exact_match": true,
+    "prior_candidate_exact_match": true,
+    "root_lockfiles_mutated": false,
+    "promotion_ready": false,
+    "remaining": [
+      "independent review",
+      "official promotion metadata/source binding",
+      "fresh full exact-head CI",
+      "target acceptance remains separate"
+    ]
+  },
+  "promotion_dossier": {
+    "schema": 3,
+    "status": "review-required",
+    "generator": "measured partial-update A/B preparation; existing Nexora validators; not dependency-lock-refresh.php invocation",
+    "platform_version": "1.0.0-rc.94",
+    "source_git_sha": "28bb3e11737a77c14239f4631c68818487100c55",
+    "source_tree_sha256": "41747694c398667264f7d805ee059d5940e447f977061ffd6f77115734e13e7c",
+    "manifest_hashes": {
+      "composer_manifest_sha256": "33fdef43209a432aeeaafc383a5f80595ad2cf31fafa0f9f602450db1413a9fc",
+      "package_manifest_sha256": "5d0c12a867bb8f880cdb2357351f1292e25fb09a3fb105ac4840c481425299b9"
+    },
+    "run_id": "PR152-AB-FULL-002",
+    "created_at": "2026-11-28T00:05:01+00:00",
+    "candidate_hashes": {
+      "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+      "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+    },
+    "candidate_semantic_hashes": {
+      "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+      "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+    },
+    "reproducible": true,
+    "reproduction": {
+      "workspace_a_hashes": {
+        "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+        "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+      },
+      "workspace_b_hashes": {
+        "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+        "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+      },
+      "workspace_a_semantic_hashes": {
+        "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+        "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+      },
+      "workspace_b_semantic_hashes": {
+        "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+        "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+      },
+      "raw_exact_match": true,
+      "semantic_exact_match": true,
+      "exact_match": true
+    },
+    "supply_chain": {
+      "status": "pass",
+      "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475",
+      "workspace_a": {
+        "schema": 1,
+        "status": "pass",
+        "provenance": {
+          "schema": 2,
+          "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+          "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+          "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+          "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab",
+          "composer_urls_checked": 254,
+          "npm_urls_checked": 214,
+          "composer_hosts": [
+            "api.github.com",
+            "github.com"
+          ],
+          "npm_hosts": [
+            "registry.npmjs.org"
+          ],
+          "npm_integrity_missing": 0,
+          "npm_integrity_bundled_covered": 6,
+          "errors": [],
+          "fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+          "status": "pass"
+        },
+        "audit": {
+          "composer": {
+            "exit_code": 0,
+            "stdout_sha256": "3c4d81d3a3f1d68f4dc3bd2e0fb0d02c98ad3dce6fe912121b623f65ac5b346a",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "npm": {
+            "exit_code": 0,
+            "stdout_sha256": "470085540b8ef922d8367d4918de108c4728d22ce71044ccf65ce5f0091f7f00",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "errors": [],
+        "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475"
+      },
+      "workspace_b": {
+        "schema": 1,
+        "status": "pass",
+        "provenance": {
+          "schema": 2,
+          "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+          "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+          "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+          "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab",
+          "composer_urls_checked": 254,
+          "npm_urls_checked": 214,
+          "composer_hosts": [
+            "api.github.com",
+            "github.com"
+          ],
+          "npm_hosts": [
+            "registry.npmjs.org"
+          ],
+          "npm_integrity_missing": 0,
+          "npm_integrity_bundled_covered": 6,
+          "errors": [],
+          "fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+          "status": "pass"
+        },
+        "audit": {
+          "composer": {
+            "exit_code": 0,
+            "stdout_sha256": "3c4d81d3a3f1d68f4dc3bd2e0fb0d02c98ad3dce6fe912121b623f65ac5b346a",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "npm": {
+            "exit_code": 0,
+            "stdout_sha256": "470085540b8ef922d8367d4918de108c4728d22ce71044ccf65ce5f0091f7f00",
+            "stderr_sha256": "7b152a56a1802bc6101d371e7ada52f6af817f791ba3d875824e3f552a261f83"
+          }
+        },
+        "errors": [],
+        "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475"
+      },
+      "exact_match": true
+    },
+    "supply_chain_fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475",
+    "toolchain": {
+      "schema": 1,
+      "php": {
+        "version": "8.4.28",
+        "binary": "php8.4",
+        "binary_sha256": "17e0140bb4d405893952f4ad016533a1a8fde974ab4197204f003b7561f51d09"
+      },
+      "composer": {
+        "available": true,
+        "version": "2.10.3",
+        "source": "PATH",
+        "binary_sha256": "7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6"
+      },
+      "node": {
+        "available": true,
+        "version": "22.14.0",
+        "binary": "node",
+        "binary_sha256": "1abce2374a485bddae3c27b17a3e3143e2780232026e627c4fe74ddde3f380a1",
+        "execution_mode": "direct",
+        "launcher": "node"
+      },
+      "npm": {
+        "available": true,
+        "version": "10.9.2",
+        "binary": "npm",
+        "binary_sha256": "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
+        "execution_mode": "direct",
+        "launcher": "npm"
+      },
+      "policy": {
+        "php": {
+          "minimum": "8.3.0",
+          "maximum_exclusive": "8.5.0"
+        },
+        "composer": {
+          "minimum": "2.7.0",
+          "maximum_exclusive": "3.0.0"
+        },
+        "node": {
+          "minimum_major": 22,
+          "maximum_major_exclusive": 25
+        },
+        "npm": {
+          "minimum_major": 10,
+          "maximum_major_exclusive": 11
+        }
+      },
+      "errors": [],
+      "status": "pass",
+      "fingerprint_sha256": "ec4b28bac8ae81313df480c8024256e5662635240df1dfb7470c6343efe81a22"
+    },
+    "toolchain_fingerprint_sha256": "ec4b28bac8ae81313df480c8024256e5662635240df1dfb7470c6343efe81a22",
+    "validation": {
+      "errors": [],
+      "warnings": [],
+      "composer_packages": 127,
+      "npm_packages": 220,
+      "laravel_framework_locked_version": "13.44.1",
+      "npm_integrity_missing": 0,
+      "npm_integrity_bundled_covered": 6,
+      "npm_unsafe_sources": 0
+    },
+    "diff": {
+      "composer": {
+        "added": [],
+        "removed": [],
+        "changed": {
+          "laravel/framework": {
+            "before": "v13.36.0",
+            "after": "v13.44.1"
+          },
+          "symfony/http-foundation": {
+            "before": "v7.4.21",
+            "after": "v7.4.25"
+          },
+          "symfony/http-kernel": {
+            "before": "v7.4.21",
+            "after": "v7.4.25"
+          },
+          "symfony/mailer": {
+            "before": "v7.4.19",
+            "after": "v7.4.24"
+          },
+          "symfony/mime": {
+            "before": "v7.4.19",
+            "after": "v7.4.24"
+          },
+          "symfony/routing": {
+            "before": "v7.4.21",
+            "after": "v7.4.24"
+          },
+          "symfony/serializer": {
+            "before": "v7.4.21",
+            "after": "v7.4.25"
+          },
+          "web-auth/webauthn-lib": {
+            "before": "5.3.9",
+            "after": "5.3.17"
+          }
+        }
+      },
+      "npm": {
+        "added": [],
+        "removed": [],
+        "changed": []
+      }
+    },
+    "review": {
+      "status": "NOT_RUN",
+      "approval": null
+    },
+    "root_locks_mutated": false,
+    "promotion_executed": false,
+    "next_action": "Independent exact-candidate review, then revalidate source/toolchain in existing governed promotion; no approval inferred from this dossier."
+  },
+  "full_suite_attempt1": {
+    "source_sha": "28bb3e11737a77c14239f4631c68818487100c55",
+    "profile": "SQLite, APP_URL http://localhost:8080, default PHP memory_limit 128M",
+    "exit_code": 2,
+    "status": "FAIL",
+    "reason": "Allowed memory size 134217728 exhausted in FileinfoMimeTypeGuesser; PHPUnit process terminated at MediaLibraryFlowTest",
+    "assertions_changed": false,
+    "retry_profile": "512M bounded test-runner memory and CI APP_URL https://nexora.test; fresh fixture"
+  },
+  "full_suite_attempt2": {
+    "result": {
+      "tool": "phpunit",
+      "result": "failed",
+      "tests": 855,
+      "passed": 845,
+      "assertions": 7304,
+      "duration_ms": 100602,
+      "failed": 10,
+      "failures": [
+        {
+          "test": "Tests\\Unit\\TargetProcessCaptureTest::concurrent_heavy_stdout_stderr_do_not_deadlock",
+          "file": "/tmp/nexora-full-fixture-003/tests/Unit/TargetProcessCaptureTest.php",
+          "line": 26,
+          "message": "/tmp/nexora-php-runtime/root/usr/bin/php8.4: error while loading shared libraries: libargon2.so.1: cannot open shared object file: No such file or directory\n\nFailed asserting that 127 is identical to 0."
+        },
+        {
+          "test": "Tests\\Unit\\TargetProcessCaptureTest::argument_vector_preserves_spaces_and_shell_metacharacters",
+          "file": "/tmp/nexora-full-fixture-003/tests/Unit/TargetProcessCaptureTest.php",
+          "line": 36,
+          "message": "Failed asserting that 127 is identical to 0."
+        },
+        {
+          "test": "Tests\\Unit\\TargetProcessCaptureTest::failed_process_retains_nonzero_exit_and_stderr",
+          "file": "/tmp/nexora-full-fixture-003/tests/Unit/TargetProcessCaptureTest.php",
+          "line": 44,
+          "message": "Failed asserting that 127 is identical to 17."
+        },
+        {
+          "test": "Tests\\Unit\\TargetProcessCaptureTest::output_over_limit_fails_closed",
+          "file": "/tmp/nexora-full-fixture-003/tests/Unit/TargetProcessCaptureTest.php",
+          "line": 53,
+          "message": "Failed asserting that '/tmp/nexora-php-runtime/root/usr/bin/php8.4: error while loading shared libraries: libargon2.so.1: cannot open shared object file: No such file or directory\\n\n' [ASCII](length: 157) contains \"exceeded\" [ASCII](length: 8)."
+        },
+        {
+          "test": "Tests\\Unit\\TargetProcessCaptureTest::closed_output_pipes_must_not_bypass_timeout",
+          "file": "/tmp/nexora-full-fixture-003/tests/Unit/TargetProcessCaptureTest.php",
+          "line": 63,
+          "message": "Failed asserting that '/tmp/nexora-php-runtime/root/usr/bin/php8.4: error while loading shared libraries: libargon2.so.1: cannot open shared object file: No such file or directory\\n\n' [ASCII](length: 157) contains \"timed out\" [ASCII](length: 9)."
+        },
+        {
+          "test": "Tests\\Unit\\TargetProcessCaptureTest::timeout_force_stops_a_child_that_ignores_sigterm",
+          "file": "/tmp/nexora-full-fixture-003/tests/Unit/TargetProcessCaptureTest.php",
+          "line": 79,
+          "message": "Failed asserting that '/tmp/nexora-php-runtime/root/usr/bin/php8.4: error while loading shared libraries: libargon2.so.1: cannot open shared object file: No such file or directory\\n\n' [ASCII](length: 157) contains \"timed out\" [ASCII](length: 9)."
+        },
+        {
+          "test": "Tests\\Unit\\TargetProcessCaptureTest::child_exit_code_is_retained_after_both_pipes_close",
+          "file": "/tmp/nexora-full-fixture-003/tests/Unit/TargetProcessCaptureTest.php",
+          "line": 89,
+          "message": "Failed asserting that 127 is identical to 37."
+        },
+        {
+          "test": "Tests\\Unit\\TargetProcessCaptureTest::stalled_process_is_terminated",
+          "file": "/tmp/nexora-full-fixture-003/tests/Unit/TargetProcessCaptureTest.php",
+          "line": 97,
+          "message": "Failed asserting that '/tmp/nexora-php-runtime/root/usr/bin/php8.4: error while loading shared libraries: libargon2.so.1: cannot open shared object file: No such file or directory\\n\n' [ASCII](length: 157) contains \"timed out\" [ASCII](length: 9)."
+        },
+        {
+          "test": "Tests\\Architecture\\BrowserSessionBootstrapBehaviourTest::persistent_sessions_are_allowed_only_for_a_disposable_local_browser_fixture",
+          "file": "/tmp/nexora-full-fixture-003/tests/Architecture/BrowserSessionBootstrapBehaviourTest.php",
+          "line": 82,
+          "message": "Disposable bootstrap must exit cleanly: /tmp/nexora-php-runtime/root/usr/bin/php8.4: error while loading shared libraries: libargon2.so.1: cannot open shared object file: No such file or directory\n\nFailed asserting that 127 is identical to 0.",
+          "trace": [
+            "/tmp/nexora-full-fixture-003/tests/Architecture/BrowserSessionBootstrapBehaviourTest.php:82",
+            "/tmp/nexora-full-fixture-003/tests/Architecture/BrowserSessionBootstrapBehaviourTest.php:50"
+          ]
+        },
+        {
+          "test": "Tests\\Architecture\\N100Rc20FinalClosureIntegrityArchitectureTest::rc20_final_closure_integrity_contracts_are_current",
+          "file": "/tmp/nexora-full-fixture-003/tests/Architecture/N100Rc20FinalClosureIntegrityArchitectureTest.php",
+          "line": 18,
+          "message": "missing RC20 artifact [.github/workflows/release-certification.yml]\nFailed asserting that two arrays are identical.\n--- Expected\n+++ Actual\n@@ @@\n-Array &0 []\n+Array &0 [\n+    0 => 'missing RC20 artifact [.github/workflows/release-certification.yml]',\n+]"
+        }
+      ]
+    },
+    "exit_code": 1,
+    "profile": {
+      "php": "8.4.28",
+      "memory_limit": "512M",
+      "composer": "2.10.3",
+      "node": "22.14.0",
+      "npm": "10.9.2",
+      "database": "SQLite in-memory",
+      "APP_URL": "https://nexora.test",
+      "fixture": "git archive of exact source plus reproduced candidate lock; scripts/plugins disabled during vendor setup"
+    },
+    "diagnosis": {
+      "nine_failures": "rootless PHP_BINARY subprocesses launched with empty environment cannot locate libargon2.so.1; exit 127",
+      "one_failure": "git archive honors /.github export-ignore, so required workflow missing in disposable fixture"
+    },
+    "assertions_changed": false,
+    "junit_sha256": "c33d622ef613aa464d8279933e9de83b8f5972678fd85d233b67fc14da39f0f4"
+  },
+  "root_lockfiles_mutated": false,
+  "independent_review": "NOT_RUN; authentication unavailable, no approval inferred",
+  "remaining_gates": [
+    "Faithful disposable checkout including export-ignored tracked workflow artifacts",
+    "Subprocess-capable PHP test runner that works with intentionally empty environment",
+    "Fresh unchanged full-suite result on corrected fixture; current full suite FAIL preserved",
+    "Independent exact-source/candidate review",
+    "Revalidate promotion dossier/source/toolchain using existing governed promotion path; root locks unchanged",
+    "Fresh full exact-head CI after accepted promotion; actual target #74 separate"
+  ],
+  "archive_sha256": "1fbb6024699bbe87bc6a74a46cc83c812f4531cf05377b76eebf4611e3701f6a"
+}

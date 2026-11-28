@@ -16,7 +16,7 @@
     "id": "THEME-CLOSURE-001",
     "name": "Theme Closure",
     "status": "ACTIVE",
-    "scope_note": "PR #152 security audit FAIL on 15967f1: 25 advisories across 8 packages. Isolated same-family patch candidate has zero Composer/npm advisories and 33 focused tests/233 assertions PASS; root locks unchanged. Canonical A/B dossier, independent review authentication, governed promotion and fresh exact-head CI remain blocked. No target claim (#74)."
+    "scope_note": "PR #152 / SEC-THEME-CI-DEPS-001: A/B candidate raw/semantic/supply-chain reproducibility PASS on policy-valid toolchain. Full-suite retry: 855 tests, 845 pass, 10 fail, 7304 assertions; rootless PHP empty-env loader and git-archive workflow omission require fixture correction. Root locks unchanged; independent review/governed promotion/full exact-head CI remain blocked. Target #74 separate."
   },
   "active_development_units": [
     "SYS-THEME-ENGINE",

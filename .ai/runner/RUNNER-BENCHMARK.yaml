@@ -344,3 +344,34 @@ tasks:
     deterministic_dedup_key: nexora:pr152:15967f1:candidate-review
     status: BLOCKED
     immutable_evidence: 'CodeRabbit 0.9.7 auth status not_authenticated; auth login --agent returned environment_unsupported; no review ran'
+
+  - id: RB-NEX-PR152-AB-FULL-002
+    source_work: SEC-THEME-CI-DEPS-001
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: two isolated minimal Composer updates, audits/provenance/toolchain identity and unchanged full PHPUnit
+    source_ref: claude/wizardly-ptolemy-i21c24
+    source_sha: 28bb3e11737a77c14239f4631c68818487100c55
+    environment_matrix_input_fixture: original locked inputs plus disposable candidate; policy-valid PHP/Composer/Node/npm; SQLite, no target
+    authorization_state: user-authorized source continuation; no root promotion or target mutation
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:28bb3e1:ab-full-002
+    status: FAIL
+    immutable_evidence: '.ai/evidence/theme-security-reproduction-002.json + archive: A/B reproducibility PASS; full attempt 1 aborted at default 128M (exit 2). Failure preserved.'
+
+  - id: RB-NEX-PR152-FULL-RETRY-003
+    source_work: SEC-THEME-CI-DEPS-001
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: unchanged full PHPUnit --display-warnings --fail-on-warning, fresh disposable fixture
+    source_ref: claude/wizardly-ptolemy-i21c24
+    source_sha: 28bb3e11737a77c14239f4631c68818487100c55
+    environment_matrix_input_fixture: PHP 8.4.28, memory_limit 512M, Composer 2.10.3, Node 22.14.0, npm 10.9.2, SQLite, CI APP_URL https://nexora.test; candidate lock SHA 11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05
+    authorization_state: user-authorized disposable source regression only
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:28bb3e1:full-retry-003
+    status: FAIL
+    immutable_evidence: '.ai/evidence/theme-security-reproduction-002.json + archive: 855 tests / 845 pass / 10 fail / 7304 assertions; exit 1. Nine PHP loader errors, one export-ignore workflow omission.'
+    note: 'Attempt 1 exhausted default 128M at media test; preserve failure; one bounded retry with explicit resource profile. No tests/assertions changed.'

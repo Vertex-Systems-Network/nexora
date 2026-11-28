@@ -1,3 +1,11 @@
+# A/B reproduction and full-suite diagnostic — 2026-11-28
+
+Source 28bb3e11737a77c14239f4631c68818487100c55, PR #152 / THEME-CLOSURE-001 / SEC-THEME-CI-DEPS-001. Two isolated resolutions on policy-valid PHP 8.4.28, Composer 2.10.3, Node 22.14.0 and npm 10.9.2 produce byte-identical locks matching the earlier candidate; semantic/supply-chain fingerprints match. Both audits/provenance/lock validators PASS; review-required dossier has exact source/manifest/toolchain binding.
+
+Full attempt 1 exhausted default 128M. A bounded fresh-fixture retry at 512M and CI APP_URL completed 855 tests: 845 PASS, 10 FAIL, 7304 assertions. Nine failures report missing libargon2.so.1 when tests clear the rootless PHP child environment; one reports the workflow excluded by git archive's /.github export-ignore. Both failures are preserved; tests/assertions unchanged. Full suite is not green. Evidence: docs/theme-security-reproduction-002.md and .ai/evidence/theme-security-reproduction-002.{json,tar.gz}.
+
+Live intake for 28bb3e1: checkout QA/Windows/traceability PASS; governance job 140792504014 FAIL, still 25 Composer advisories. Root locks unchanged; no promotion/merge/release/target acceptance. Next: fix the disposable checkout/PHP-runner fidelity, then unchanged full regression; independent authenticated review and governed root promotion/fresh exact-head CI remain required. #74 actual target stays blocked. Earlier checkpoint blockers about missing A/B proof are superseded only for that measured gate.
+
 # Security candidate checkpoint — 2026-11-28
 
 PR #152, stage THEME-CLOSURE-001, source 15967f1f3550a263cb1bf0ca2e557230b8e1a682; observed main 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb. Governance run 46084084434/job 140789486157 FAIL: 25 Composer advisories across 8 packages before PHPUnit. Checkout QA was still running at the single intake snapshot; Windows/traceability passed. No workflow rerun or repeated status refresh.
