@@ -406,3 +406,18 @@ tasks:
     status: BLOCKED_BINDING
     immutable_evidence: null
     note: 'Independent review deliberately owner-waived, not PASS; bind published exact SHA and real CI results before acceptance. No target or production claim.'
+
+  - id: RB-NEX-PR152-OWNER-LOCAL-005
+    source_work: SEC-THEME-CI-DEPS-001 + SEC-REVIEW-OVERRIDE-PR152
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: focused governance/traceability/architecture/theme/passkey regressions, warning-hard; no test edits
+    source_ref: local committed owner policy + root fix
+    source_sha: 3db3b51727a1db7ca85319fa3de25e8cfea079b8
+    environment_matrix_input_fixture: faithful tracked checkout, candidate-root vendor, PHP8.4.28 corrected runner/512M/SQLite/CI APP_URL
+    authorization_state: explicit owner-directed source work; review-only exception
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:owner-local-005
+    status: PASS
+    immutable_evidence: '.ai/evidence/pr152-owner-local-validation-20261128.json: 41 tests / 346 assertions PASS on actual committed root+owner-policy source; warning-hard, exit0'

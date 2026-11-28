@@ -4,6 +4,8 @@ The user explicitly overrides the independent-review blocker for current PR #152
 
 Local policy commit 87e3fe5 records the owner exception. The existing guarded dependency promotion revalidated source/manifests/toolchain/candidate/provenance and fresh audits, completed backups/journal/attestation, and returned reviewed-promoted with zero errors/warnings. Root Composer lock now equals exact previously verified candidate 11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05; npm lock/root constraints unchanged. Actual root Composer audit zero advisories; strict root-lock/control-plane/diff validation PASS. Previous candidate full855/7363 PASS retains its original source identity; fresh final-head CI is required.
 
+Fresh local actual root/policy commit 3db3b51727a1db7ca85319fa3de25e8cfea079b8: 41 governance/traceability/architecture/theme/passkey tests, 346 assertions PASS (warning-hard). Evidence .ai/evidence/pr152-owner-local-validation-20261128.json.
+
 Latest prior PR head e1e5a9d CI finished: checkout/Windows/traceability PASS, governance FAIL before this dependency fix. Separate local commits are coordinated into one authenticated connector publication because native git push has no credentials. Next: observe fresh exact-head CI, resolve actual failures, and retain source/target/release separation. No target mutation, merge/deployment/release or target acceptance is claimed; #74 remains open. Evidence: docs/pr152-owner-review-override.md and .ai/evidence/pr152-owner-promotion-20261128.json.
 
 # Corrected fixture — full candidate regression PASS — 2026-11-28
