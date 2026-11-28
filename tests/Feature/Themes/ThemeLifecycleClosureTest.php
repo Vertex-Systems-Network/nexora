@@ -7,6 +7,7 @@ namespace Tests\Feature\Themes;
 use App\Models\Role;
 use App\Models\SecurityScan;
 use App\Models\Theme;
+use App\Models\ThemeVersion;
 use App\Models\User;
 use App\Nexora\Cloud\Services\RuntimeDeploymentIdentity;
 use App\Nexora\Themes\Contracts\ThemeManagerContract;
@@ -129,6 +130,65 @@ final class ThemeLifecycleClosureTest extends TestCase
         self::assertSame($activeBefore, app(ThemeManagerContract::class)->active()?->id);
         auth()->logout();
         $this->get('/')->assertOk()->assertDontSee('Beta Shell');
+    }
+
+    public function test_missing_theme_files_reject_activation_and_rollback_without_changing_active_state(): void
+    {
+        $admin = $this->admin();
+        $alpha = $this->install($admin, 'acme.alpha', 'Alpha Shell');
+        $beta = $this->install($admin, 'acme.beta', 'Beta Shell');
+        $alphaVersion = ThemeVersion::query()->findOrFail($alpha);
+        $betaVersion = ThemeVersion::query()->findOrFail($beta);
+        $manager = app(ThemeManagerContract::class);
+        $manager->activate($alphaVersion, $admin->id);
+
+        $stylesheet = $betaVersion->install_path.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'theme.css';
+        $originalCss = File::get($stylesheet);
+        self::assertTrue(File::delete($stylesheet));
+        try {
+            try {
+                $manager->activate($betaVersion, $admin->id);
+                self::fail('Activation accepted a missing declared stylesheet.');
+            } catch (\RuntimeException $exception) {
+                self::assertStringContainsString('declared stylesheet is missing', $exception->getMessage());
+            }
+            self::assertSame($alpha, $manager->active()?->id);
+            self::assertSame('active', Theme::query()->where('identifier', 'acme.alpha')->value('status'));
+            self::assertSame('inactive', Theme::query()->where('identifier', 'acme.beta')->value('status'));
+        } finally {
+            File::put($stylesheet, $originalCss);
+        }
+
+        $manager->activate($betaVersion, $admin->id);
+        $alphaHome = $alphaVersion->install_path.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR.'home.html';
+        self::assertTrue(File::delete($alphaHome));
+        try {
+            $manager->rollback($admin->id);
+            self::fail('Rollback accepted a missing required template.');
+        } catch (\RuntimeException $exception) {
+            self::assertStringContainsString('required [home] template is missing', $exception->getMessage());
+        }
+        self::assertSame($beta, $manager->active()?->id);
+        self::assertSame('active', Theme::query()->where('identifier', 'acme.beta')->value('status'));
+        self::assertSame('inactive', Theme::query()->where('identifier', 'acme.alpha')->value('status'));
+    }
+
+    public function test_public_render_falls_back_when_active_theme_loses_required_template(): void
+    {
+        $admin = $this->admin();
+        $candidate = $this->install($admin, 'acme.beta', 'Beta Shell');
+        $version = ThemeVersion::query()->findOrFail($candidate);
+        $manager = app(ThemeManagerContract::class);
+        $manager->activate($version, $admin->id);
+        auth()->logout();
+        $this->get('/')->assertOk()->assertSee('Beta Shell');
+
+        $home = $version->install_path.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR.'home.html';
+        self::assertTrue(File::delete($home));
+        self::assertSame('nexora.base', $manager->active()?->theme?->identifier);
+        $this->get('/')->assertOk()->assertDontSee('Beta Shell');
+        self::assertSame('active', Theme::query()->where('identifier', 'acme.beta')->value('status'));
+        self::assertSame($candidate, (int) Theme::query()->where('identifier', 'acme.beta')->value('current_version_id'));
     }
 
     public function test_sentinel_blocks_a_theme_carrying_executable_php(): void
