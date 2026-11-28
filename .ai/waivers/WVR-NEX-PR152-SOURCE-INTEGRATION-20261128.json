@@ -1,0 +1,36 @@
+{
+  "id": "WVR-NEX-PR152-SOURCE-INTEGRATION-20261128",
+  "scope": "One source-only merge of PR #152, including exact warning-only cut and necessary independently reviewed scope/evidence records; sole exception is merge-time live-target prerequisite. No target acceptance or stage advancement.",
+  "carrier": "https://github.com/Vertex-Systems-Network/nexora/pull/152",
+  "base_main_sha": "8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb",
+  "original_pr_head_sha": "3e7685c47aac888f6e56fad67c13b4e7f067d41e",
+  "warning_candidate_sha": "eae4cc6560afaf362b7b157f0d5164816d56fc5f",
+  "warning_candidate_tree": "9470f191c24b480bbe5fa57c7d1da4d2b7ef782e",
+  "planning_commit_sha": "910c83ddcd7566f2bc08ef0a2fa39d8ac3b9a10e",
+  "planning_tree": "58dc2c1be5e2f7c2178240f0cb3cbca5fce6ca17",
+  "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+  "npm_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+  "approver": "Repository owner directing this session, explicit scoped approval",
+  "approval_record": {
+    "source": "Current user message",
+    "verbatim": "I approve WVR-NEX-PR152-SOURCE-INTEGRATION-20261128 for the narrowly scoped source-only integration of PR #152 and its warning correction. Proceed with implementation and all remaining review and CI gates. Keep target acceptance blocked. No deployment or release.",
+    "proposal": "https://github.com/Vertex-Systems-Network/nexora/pull/152#issuecomment-7231608400"
+  },
+  "created_at": "2026-11-28",
+  "expires_at": "2026-12-28",
+  "expires_on_event": "One merge or closure of #152, revocation, base/candidate/scope drift, whichever first.",
+  "waived_gates": [
+    "Merge-time live-target prerequisite for one source-only merge of PR #152, conditional on independent review and every applicable source gate."
+  ],
+  "not_waived": [
+    "Independent exact-head review of combined protected changes and full scope; original waiver does not extend.",
+    "Existing automated tests and actual zero PHPUnit warnings; locked audits zero; all CI, provenance, native GitHub protections and review threads.",
+    "Real-target acceptance and theme lifecycle target criterion; #74 stays open/BLOCKED; no TARGET_VERIFIED, deployment, release or stage advancement.",
+    "No approval fabrication or self-approval."
+  ],
+  "revocation_status": "NOT_REVOKED",
+  "activation_status": "OWNER_APPROVED_PENDING_INDEPENDENT_REVIEW_AND_EXACT_HEAD_CI",
+  "consumption_status": "NOT_CONSUMED",
+  "final_head_binding": "Record exact final SHA, review identity/decision and all fresh check/run IDs on PR #152. No self-referential commit hash.",
+  "rollback": "Discard unmerged candidate or governed revert PR; never rewrite protected main."
+}

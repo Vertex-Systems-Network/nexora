@@ -6,7 +6,7 @@ items:
   source: 'PR #152 / SYS-THEME-ENGINE'
   status: VERIFYING
   priority: 1
-  note: 'Owner overrides separate review for PR152/candidate; guarded root promotion and actual root audit PASS. Fresh exact-head CI pending; target separate.'
+  note: 'Owner approved scoped source integration; minimal warning cut verified on prior SHA. Combined-head independent review and fresh CI pending; target BLOCKED.'
 - id: NEX-ORCH-74
   source: 'Issue #74'
   status: ACTIVE_TARGET_CLOSURE

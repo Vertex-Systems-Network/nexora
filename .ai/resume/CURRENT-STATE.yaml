@@ -14,17 +14,17 @@ current_stage:
   unit: SYS-THEME-ENGINE
   status: ACTIVE
 current_milestone:
-  id: OWNER-AUTHORIZED-ROOT-PROMOTION-005
+  id: NEX-PR152-SOURCE-INTEGRATION-013
   status: VERIFYING
 last_completed_milestone:
   main_commit: 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb
   summary: 'ARCH-BOUNDARY-100 source integrated (#151)'
-exact_next_safe_action: Publish accumulated owner-policy and root dependency fix together, verify fresh exact-head CI starts, then resolve failures; independent-review gate is owner-overridden for this scope.
+exact_next_safe_action: Publish minimal warning cut and reviewed-scope records together; verify fresh exact-head CI and obtain independent protected-change review before merge; no target advancement.
 pending_runner_ids:
-- RB-NEX-PR152-OWNER-ROOT-CI-005
+- RB-NEX-PR152-SOURCE-INTEGRATION-013
 blocked_runner_ids: []
 current_blockers:
-- Fresh final-head required CI not yet accepted; prior head root audit failure is historical after guarded root promotion.
+- Fresh combined-head CI and independent review pending; prior warning-only cut 856/7368 PASS is historical to that SHA.
 - #74 actual target acceptance remains open; no live target provisioned or mutated.
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1

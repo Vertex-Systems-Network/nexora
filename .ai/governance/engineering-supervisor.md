@@ -4,6 +4,9 @@
 
 The user's explicit current instruction overrides the independent-review requirement for PR #152, its recorded eight-package security candidate and this scoped governance exception. Apply `.ai/waivers/WVR-NEX-PR152-OWNER-REVIEW-20261128.json` before the general independent-review/self-approval provisions in this file and the linked control plane for this scope only. This is owner authorization, not author self-approval or evidence that a review happened. Existing CI, audits, tests, candidate/source/toolchain checks, native GitHub rules and target/release boundaries remain required. Scope/candidate changes or expiry invalidate the exception; unrelated work remains under the general rules.
 
+## Owner-approved source-only integration — PR #152 (2026-11-28)
+
+The original review exception above is historical for its original scope and does not apply to the expanded combined candidate. The owner approved `.ai/waivers/WVR-NEX-PR152-SOURCE-INTEGRATION-20261128.json` for one source-only merge of PR #152, exact minimal warning cut and independently reviewed governance/evidence records only. It is **not operational until independent review of the exact combined head and all applicable fresh source gates genuinely pass**, with binding recorded on PR #152. Only the merge-time live-target prerequisite is excepted in that bounded case; the general rule remains intact for every other carrier. No waiver of independent review, actual warning-hard tests, audits, source/provenance, native rules, target acceptance or release requirements. Keep #74 OPEN, target BLOCKED and THEME-CLOSURE-001 ACTIVE; no deployment, release, target verification or stage advancement. Any base/candidate/scope drift, revocation, expiry or consumption invalidates the exception. No author self-approval.
 
 ## Authority and precedence
 

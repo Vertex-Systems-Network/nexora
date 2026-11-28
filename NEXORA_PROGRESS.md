@@ -1,3 +1,7 @@
+# Owner-approved source-only integration candidate — 2026-11-28
+
+PR #152 / THEME-CLOSURE-001 / SEC-PR152-SOURCE-INTEGRATION: owner explicitly approved WVR-NEX-PR152-SOURCE-INTEGRATION-20261128; conditional on independent review and fresh exact combined-head source CI, not operational yet. Protected main 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb; original #152 3e7685c47aac888f6e56fad67c13b4e7f067d41e 5/5 green but actual one PHPUnit warning; warning-only cut eae4cc6560afaf362b7b157f0d5164816d56fc5f prior release 46089727462: 856 passed / 7368 assertions, zero warnings, both locked audits zero, traceability PASS. Four later #172 regression commits remain excluded at d62fcc6. Planning commit 910c83ddcd7566f2bc08ef0a2fa39d8ac3b9a10e. Original review waiver does not extend to combined scope. No runtime/lock/workflow/native rule change. Fresh CI and independent protected-change review pending; bind exact final published head on #152. No merge, target/release claim, or stage advancement; #74 stays BLOCKED. Source integration proposal https://github.com/Vertex-Systems-Network/nexora/pull/152#issuecomment-7231608400. Prior checkpoints below are historical.
+
 # Owner-authorized root dependency promotion — 2026-11-28
 
 The user explicitly overrides the independent-review blocker for current PR #152 via WVR-NEX-PR152-OWNER-REVIEW-20261128. Owner authorization is recorded; no independent review is claimed. AGENTS and governance entry points cite the bounded exception. No CI/audit/test/native GitHub/target boundary is relaxed.
@@ -260,8 +264,8 @@ Only carrier `449ea9b3d5c0d2ad176031a1849ed80c349e0023` / run `33563871904` is c
 
 ```text
 Stable stage: THEME-CLOSURE-001 (ACTIVE; PR #152 follow-up VERIFYING)
-Registered unit: SYS-THEME-ENGINE
-Next: fresh exact-head CI and independent review; target gate #74 remains BLOCKED
+Registered units: SYS-THEME-ENGINE / SEC-PR152-SOURCE-INTEGRATION
+Next: fresh combined-head CI and independent review; source-only exception conditional; target gate #74 remains BLOCKED
 Order: .ai/roadmap/stages.md "Execution flow"
 ```
 
@@ -417,8 +421,7 @@ RELEASE POWER   25.0%
 ## 10. Exact next action
 
 ```text
-Current (2026-11-28): verify the published PR #152 follow-up with fresh exact-head CI
-and independent review; retain #74 target gate. Target Power unchanged.
+Current (2026-11-28): verify combined PR #152 warning-fix and scoped governance records with fresh exact-head CI and independent review; retain #74 target gate. Target Power unchanged.
 ```
 
 Historical next-action list (N1.13 era):

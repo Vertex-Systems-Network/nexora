@@ -25,16 +25,13 @@ This rule applies on every AI development start, including work resumed from an 
 ## AI-Native Progress Ledger
 
 - **Observed:** 2026-11-28 (Asia/Karachi); main `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`
-- **Stage/units:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE`, `SEC-THEME-CI-DEPS-001`, `SEC-REVIEW-OVERRIDE-PR152` — VERIFYING final source
-- **Owner instruction:** independent-review requirement overridden for this PR/candidate via `WVR-NEX-PR152-OWNER-REVIEW-20261128`; no independent review is claimed. Existing CI, audits, tests and native/target gates unchanged.
-- **Implemented:** guarded root promotion completed; only eight affected Composer packages updated to the previously verified candidate. Root Composer audit **zero advisories**; strict lock/control-plane checks PASS; npm lock and constraints unchanged. [Promotion and authorization](docs/pr152-owner-review-override.md).
-- **Fresh local validation:** actual local root/policy commit `3db3b51727a1db7ca85319fa3de25e8cfea079b8`: governance/traceability/architecture/theme/passkey **41 tests / 346 assertions PASS**, warning-hard. Final published-head CI remains required.
-- **Tests:** prior exact candidate full suite **855/855 / 7,363 assertions PASS**, A/B/provenance/audits PASS; retained at measured identities. Fresh final-head CI remains required, not inferred from prior checks.
-- **Previous head e1e5a9d:** checkout/Windows/traceability PASS; governance FAIL on old dependencies. The fix requires new exact-head results; no failure edited into PASS.
-- **Next safe action:** publish accumulated policy/dependency commits together, verify fresh CI start and resolve actionable failures. No merge/deploy/release authorization inferred from review override.
-- **Target/release:** BLOCKED; #74 actual target remains separate; no live target mutation.
-- **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
-- **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
+- **Stage/units:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE`, `SEC-THEME-CI-DEPS-001`, `SEC-REVIEW-OVERRIDE-PR152`, `SEC-PR152-SOURCE-INTEGRATION` — ACTIVE / VERIFYING.
+- **Owner instruction:** `WVR-NEX-PR152-SOURCE-INTEGRATION-20261128` approved for one bounded source-only merge, conditional on independent review and fresh CI. Original review waiver does not extend to combined scope.
+- **Implemented:** minimal warning cut `eae4cc6560afaf362b7b157f0d5164816d56fc5f` plus scoped governance/evidence records; guarded root locks unchanged. Prior cut release 46089727462 **856 tests / 7,368 assertions PASS**, zero PHPUnit warnings and locked audit findings; traceability PASS. Prior results not transferred to new head.
+- **Next safe action:** fresh exact combined-head CI and independent protected-change review; inspect actual warning-hard summary, both locked audits, main-target QA and thread resolution before ordinary merge. #172 later regressions excluded.
+- **Target/release:** BLOCKED; #74 remains open, no target mutation, stage advancement, deployment or release.
+- **Current module progress:** `[??????????]` N/A — canonical numeric metric unavailable
+- **Overall progress:** `[??????????]` N/A — canonical numeric metric unavailable
 
 ## Current runtime closure
 

@@ -1,3 +1,4 @@
+# Current: owner approved scoped source-only integration; independent exact combined-head review and fresh CI pending. Prior warning cut eae4cc6 856/7368 PASS. Target #74 BLOCKED; no stage/release promotion.
 # Latest owner-authorized transition: PR152 review requirement overridden by current user
 # instruction under WVR-NEX-PR152-OWNER-REVIEW-20261128; independent review NOT claimed.
 # Guarded root lock promotion complete; actual root audit zero; fresh final-head CI pending.

@@ -421,3 +421,19 @@ tasks:
     deterministic_dedup_key: nexora:pr152:owner-local-005
     status: PASS
     immutable_evidence: '.ai/evidence/pr152-owner-local-validation-20261128.json: 41 tests / 346 assertions PASS on actual committed root+owner-policy source; warning-hard, exit0'
+
+  - id: RB-NEX-PR152-SOURCE-INTEGRATION-013
+    source_work: SEC-PR152-SOURCE-INTEGRATION
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: existing release certification, strict actual PHPUnit summary, locked audits, development checkout, Windows bootstrap, traceability and independent protected-change review
+    source_ref: claude/wizardly-ptolemy-i21c24
+    source_sha: null
+    environment_matrix_input_fixture: unchanged workflows and reviewed-promoted lock pair; main-target development PHP 8.3 and release PHP 8.4; exact published head binding on PR
+    authorization_state: owner approved narrow source merge-time exception; independent review and fresh exact-head CI required; no target/release authority
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:source-integration-013
+    status: BLOCKED_BINDING
+    immutable_evidence: null
+    note: 'Prior warning-only cut eae4cc6 856/7368 PASS; no fresh combined-head PASS until actual logs/review verified. Target #74 remains BLOCKED.'
