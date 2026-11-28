@@ -1,3 +1,24 @@
+# Current: owner-directed AI source review policy, fresh exact-head CI and AI_SELF_CHECK pending; prior 87051c9 856/7369 PASS. Target #74 BLOCKED.
+# Current: owner approved scoped source-only integration; independent exact combined-head review and fresh CI pending. Prior warning cut eae4cc6 856/7368 PASS. Target #74 BLOCKED; no stage/release promotion.
+# Latest owner-authorized transition: PR152 review requirement overridden by current user
+# instruction under WVR-NEX-PR152-OWNER-REVIEW-20261128; independent review NOT claimed.
+# Guarded root lock promotion complete; actual root audit zero; fresh final-head CI pending.
+# Previous candidate 855/7363 PASS remains scoped to original identity; target #74 unchanged.
+# Latest: candidate on source99274ce, corrected disposable runner/checkout: 855/855 tests,
+# 7363 assertions PASS; rebound A/B proof PASS. Prior 10 fixture failures preserved and superseded.
+# Root locks unchanged; independent reviewer identity/authentication, promotion, new root CI and
+# actual target #74 remain outstanding. Earlier observations below are historical.
+# Latest observation: PR152 at 28bb3e1 checkout/Windows/traceability PASS, governance FAIL.
+# Candidate A/B exact reproduction PASS on policy-valid toolchain. Full-suite retry FAIL:
+# 855 tests / 845 pass / 10 fixture failures / 7304 assertions. Root locks unchanged;
+# prior A/B gap superseded; runner fidelity, independent review, promotion and target still blocked.
+# Latest 2026-11-28 observation supersedes the earlier current-observation comment:
+# PR #152 head 15967f1 governance FAIL (25 advisories/8 packages). Isolated candidate
+# has zero Composer/npm advisories and 33 tests/233 assertions PASS. Root locks unchanged;
+# independent review/canonical A/B dossier/promotion/full CI remain blocked. Target #74 BLOCKED.
+# Current observation — 2026-11-28: main 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb;
+# PR #152 follow-up VERIFYING; THEME-CLOSURE-001 ACTIVE; #74 target BLOCKED.
+# Earlier claims below are historical observations, not the current execution cursor.
 schema_version: 1
 repository: Vertex-Systems-Network/nexora
 updated_at: '2026-09-30'

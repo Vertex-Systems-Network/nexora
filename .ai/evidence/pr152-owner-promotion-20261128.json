@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "status": "ROOT_PROMOTED_OWNER_AUTHORIZED",
+  "waiver_id": "WVR-NEX-PR152-OWNER-REVIEW-20261128",
+  "independent_review_performed": false,
+  "authorization": "Explicit current user instruction; no AI self-approval",
+  "pre_promotion_local_commit": "87e3fe5597f5a98e566f4503be1d02ddbc87295c",
+  "remote_base_commit": "e1e5a9d7d8464852c88b7d76dde9b0b26e1eb298",
+  "promotion_command": "dependency-lock-promote.php --reviewer=OWNER-WAIVER-WVR-NEX-PR152-20261128 --confirm=PROMOTE-REVIEWED --json",
+  "promotion": {
+    "schema": 1,
+    "status": "reviewed-promoted",
+    "platform_version": "1.0.0-rc.94",
+    "source_tree_sha256": "41747694c398667264f7d805ee059d5940e447f977061ffd6f77115734e13e7c",
+    "promotion_run_id": "20261128T002734Z-41747694c398",
+    "candidate_run_id": "PR152-FIXTURE-004",
+    "reviewer": "OWNER-WAIVER-WVR-NEX-PR152-20261128",
+    "candidate_hashes": {
+      "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+      "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+    },
+    "toolchain_fingerprint_sha256": "97c3e3105e04a248d9b04f52bca1ae4bcec72962f11fc5eef599143f0105477b",
+    "candidate_reproducible": true,
+    "candidate_supply_chain_status": "pass",
+    "candidate_supply_chain_fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475",
+    "candidate_provenance_fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+    "candidate_supply_chain_evidence_sha256": "7df4714c6f2228fc4c34e49e874821e96c6695817fe26cde8ad9ac8df0240814",
+    "root_hashes_after": {
+      "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+      "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+    },
+    "review_exit_code": 0,
+    "rollback_required": false,
+    "rollback_verified": null,
+    "errors": [],
+    "warnings": [],
+    "next_action": "Reviewed root lock pair is ready. Run `scripts\\n1-target-fast-track.bat --install-deps --operator=\"YOUR NAME\"`.",
+    "finished_at": "2026-11-28T00:27:53+00:00"
+  },
+  "root_composer_audit": {
+    "advisories": [],
+    "abandoned": [],
+    "filter": []
+  },
+  "composer_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+  "npm_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+  "root_lock_contract": "PASS",
+  "control_plane": "PASS",
+  "target_mutated": false,
+  "remaining": [
+    "Fresh final-source local/remote validation",
+    "Required exact-head CI before integration",
+    "Actual target #74 remains separate"
+  ]
+}

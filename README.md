@@ -24,16 +24,14 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## AI-Native Progress Ledger
 
-- **Observed:** 2026-09-30
-- **Last verified source baseline:** `3439ac7e324e867046674044ba4ad1586bd963af` — protected-main release certification `36742999910` **SUCCESS**
-- **Product acceptance stage/unit:** `RUNTIME-CLOSURE-001 / SYS-RUNTIME-IDENTITY` — **BLOCKED**
-- **Current source batch:** nine-point plan/evidence reconciliation in #102; #103/#104/#105 integrated and exact source/main CI verified
-- **Current deployment:** disposable SQLite/loopback HTTP tested; no live target provisioned
-- **Open remediation Issues:** #72 historical bootstrap-key non-use/rotation; #74 live runtime acceptance; #87 closed NOT_PLANNED
-- **Open planning PR:** #102 is current plan reconciliation; #1 closed; #103/#104/#105 merged
-- **Next safe action:** verify and integrate the updated #102 plan/evidence; target/key/release acceptance remains separate.
-- **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
-- **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
+- **Observed:** 2026-11-28 (Asia/Karachi); main `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`.
+- **Stage/units:** THEME-CLOSURE-001 / SYS-THEME-ENGINE / SEC-THEME-CI-DEPS-001 / SEC-REVIEW-OVERRIDE-PR152 / SEC-PR152-SOURCE-INTEGRATION / SEC-AI-SOURCE-REVIEW-POLICY — ACTIVE / VERIFYING.
+- **Owner decision:** mandatory separate reviewer removed for source-only work; exact-head AI_SELF_CHECK required, no fabricated independent review. [Policy](.ai/governance/source-review-policy.md).
+- **Previous exact-head evidence:** `87051c9c18fa9ae0ef6350f771b5910fab3fed0b` 856 tests / 7369 assertions, zero PHPUnit warnings, locked audits zero, full CI PASS. Prior SHA only. Warning fix and locks unchanged.
+- **Next:** fresh CI and exact-head AI_SELF_CHECK before normal source merge of #152 under its revised bounded exception. Native, domain/target/release requirements unchanged.
+- **Target/release:** BLOCKED, #74 stays open; no live target, deployment, release or stage advancement.
+- **Current module progress:** `[??????????]` N/A — canonical numeric metric unavailable
+- **Overall progress:** `[??????????]` N/A — canonical numeric metric unavailable
 
 ## Current runtime closure
 

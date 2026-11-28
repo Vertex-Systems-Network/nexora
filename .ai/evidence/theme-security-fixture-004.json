@@ -1,0 +1,574 @@
+{
+  "schema": 1,
+  "unit": "SEC-THEME-CI-DEPS-001",
+  "stage": "THEME-CLOSURE-001",
+  "status": "LOCAL_CANDIDATE_FULL_VERIFIED_REVIEW_REQUIRED",
+  "source_sha": "99274cedd8117f149da5f0e56ce3ab1312eb1833",
+  "candidate_composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+  "runner_correction": {
+    "before_sha256": "17e0140bb4d405893952f4ad016533a1a8fde974ab4197204f003b7561f51d09",
+    "after_sha256": "1d8012df5a22ff889df33cbc38d04c81e6c580d68e9873562f0e5f77a4be768b",
+    "empty_environment_probe": {
+      "exit_code": 0,
+      "stdout": "8.4.28",
+      "stderr": ""
+    },
+    "runpath": "/tmp/nexora-php-runtime/root/usr/lib/x86_64-linux-gnu",
+    "patchelf_sha256": "db7d1d1be4a257c75a5bae14e68c2bc825a3be3d2bc13a405436bc56272cfc37"
+  },
+  "toolchain": {
+    "schema": 1,
+    "php": {
+      "version": "8.4.28",
+      "binary": "php8.4",
+      "binary_sha256": "1d8012df5a22ff889df33cbc38d04c81e6c580d68e9873562f0e5f77a4be768b"
+    },
+    "composer": {
+      "available": true,
+      "version": "2.10.3",
+      "source": "PATH",
+      "binary_sha256": "7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6"
+    },
+    "node": {
+      "available": true,
+      "version": "22.14.0",
+      "binary": "node",
+      "binary_sha256": "1abce2374a485bddae3c27b17a3e3143e2780232026e627c4fe74ddde3f380a1",
+      "execution_mode": "direct",
+      "launcher": "node"
+    },
+    "npm": {
+      "available": true,
+      "version": "10.9.2",
+      "binary": "npm",
+      "binary_sha256": "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
+      "execution_mode": "direct",
+      "launcher": "npm"
+    },
+    "policy": {
+      "php": {
+        "minimum": "8.3.0",
+        "maximum_exclusive": "8.5.0"
+      },
+      "composer": {
+        "minimum": "2.7.0",
+        "maximum_exclusive": "3.0.0"
+      },
+      "node": {
+        "minimum_major": 22,
+        "maximum_major_exclusive": 25
+      },
+      "npm": {
+        "minimum_major": 10,
+        "maximum_major_exclusive": 11
+      }
+    },
+    "errors": [],
+    "status": "pass",
+    "fingerprint_sha256": "97c3e3105e04a248d9b04f52bca1ae4bcec72962f11fc5eef599143f0105477b"
+  },
+  "checkout": {
+    "source_sha": "99274cedd8117f149da5f0e56ce3ab1312eb1833",
+    "tracked_blobs": 2008,
+    "blob_validation_errors": [],
+    "all_tracked_blobs_materialized": true,
+    "export_ignored_workflow_present": true,
+    "only_tracked_overlay": "composer.lock candidate 11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05"
+  },
+  "targeted_regression": {
+    "tool": "phpunit",
+    "result": "passed",
+    "tests": 10,
+    "passed": 10,
+    "assertions": 77,
+    "duration_ms": 3819
+  },
+  "full_regression": {
+    "tool": "phpunit",
+    "result": "passed",
+    "tests": 855,
+    "passed": 855,
+    "assertions": 7363,
+    "duration_ms": 96996
+  },
+  "junit_counts": {
+    "testcase": 855,
+    "failure": 0,
+    "error": 0,
+    "skipped": 0
+  },
+  "full_junit_sha256": "0cc7d23ee5028d3fd8b417c72ff458015c690acacd0c2c8749d9abc6a69ca795",
+  "full_exit": {
+    "exit_code": 0,
+    "source_sha": "99274cedd8117f149da5f0e56ce3ab1312eb1833",
+    "candidate_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+    "profile": "PHP8.4.28 RUNPATH corrected; 512M; SQLite; CI APP_URL https://nexora.test; fresh faithful tracked checkout",
+    "command": [
+      "php",
+      "-d",
+      "memory_limit=512M",
+      "vendor/bin/phpunit",
+      "--display-warnings",
+      "--fail-on-warning",
+      "--log-junit",
+      "/tmp/nexora-fixture-evidence-004/full.xml"
+    ]
+  },
+  "rebound_reproduction": {
+    "source_sha": "99274cedd8117f149da5f0e56ce3ab1312eb1833",
+    "toolchain": {
+      "schema": 1,
+      "php": {
+        "version": "8.4.28",
+        "binary": "php8.4",
+        "binary_sha256": "1d8012df5a22ff889df33cbc38d04c81e6c580d68e9873562f0e5f77a4be768b"
+      },
+      "composer": {
+        "available": true,
+        "version": "2.10.3",
+        "source": "PATH",
+        "binary_sha256": "7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6"
+      },
+      "node": {
+        "available": true,
+        "version": "22.14.0",
+        "binary": "node",
+        "binary_sha256": "1abce2374a485bddae3c27b17a3e3143e2780232026e627c4fe74ddde3f380a1",
+        "execution_mode": "direct",
+        "launcher": "node"
+      },
+      "npm": {
+        "available": true,
+        "version": "10.9.2",
+        "binary": "npm",
+        "binary_sha256": "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
+        "execution_mode": "direct",
+        "launcher": "npm"
+      },
+      "policy": {
+        "php": {
+          "minimum": "8.3.0",
+          "maximum_exclusive": "8.5.0"
+        },
+        "composer": {
+          "minimum": "2.7.0",
+          "maximum_exclusive": "3.0.0"
+        },
+        "node": {
+          "minimum_major": 22,
+          "maximum_major_exclusive": 25
+        },
+        "npm": {
+          "minimum_major": 10,
+          "maximum_major_exclusive": 11
+        }
+      },
+      "errors": [],
+      "status": "pass",
+      "fingerprint_sha256": "97c3e3105e04a248d9b04f52bca1ae4bcec72962f11fc5eef599143f0105477b"
+    },
+    "workspaces": [
+      {
+        "workspace": "A",
+        "hashes": {
+          "composer.json": "33fdef43209a432aeeaafc383a5f80595ad2cf31fafa0f9f602450db1413a9fc",
+          "composer.lock": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+          "package.json": "5d0c12a867bb8f880cdb2357351f1292e25fb09a3fb105ac4840c481425299b9",
+          "package-lock.json": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+        },
+        "checks": {
+          "supply_chain": {
+            "schema": 1,
+            "status": "pass",
+            "provenance": {
+              "schema": 2,
+              "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+              "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+              "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+              "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab",
+              "composer_urls_checked": 254,
+              "npm_urls_checked": 214,
+              "composer_hosts": [
+                "api.github.com",
+                "github.com"
+              ],
+              "npm_hosts": [
+                "registry.npmjs.org"
+              ],
+              "npm_integrity_missing": 0,
+              "npm_integrity_bundled_covered": 6,
+              "errors": [],
+              "fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+              "status": "pass"
+            },
+            "audit": {
+              "composer": {
+                "exit_code": 0,
+                "stdout_sha256": "3c4d81d3a3f1d68f4dc3bd2e0fb0d02c98ad3dce6fe912121b623f65ac5b346a",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+              },
+              "npm": {
+                "exit_code": 0,
+                "stdout_sha256": "470085540b8ef922d8367d4918de108c4728d22ce71044ccf65ce5f0091f7f00",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+              }
+            },
+            "errors": [],
+            "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475"
+          },
+          "validation": {
+            "errors": [],
+            "warnings": [],
+            "composer_packages": 127,
+            "npm_packages": 220,
+            "laravel_framework_locked_version": "13.44.1",
+            "npm_integrity_missing": 0,
+            "npm_integrity_bundled_covered": 6,
+            "npm_unsafe_sources": 0
+          },
+          "semantic": {
+            "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+            "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+          }
+        },
+        "resolve_exit_code": 0,
+        "checks_exit_code": 0
+      },
+      {
+        "workspace": "B",
+        "hashes": {
+          "composer.json": "33fdef43209a432aeeaafc383a5f80595ad2cf31fafa0f9f602450db1413a9fc",
+          "composer.lock": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+          "package.json": "5d0c12a867bb8f880cdb2357351f1292e25fb09a3fb105ac4840c481425299b9",
+          "package-lock.json": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+        },
+        "checks": {
+          "supply_chain": {
+            "schema": 1,
+            "status": "pass",
+            "provenance": {
+              "schema": 2,
+              "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+              "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+              "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+              "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab",
+              "composer_urls_checked": 254,
+              "npm_urls_checked": 214,
+              "composer_hosts": [
+                "api.github.com",
+                "github.com"
+              ],
+              "npm_hosts": [
+                "registry.npmjs.org"
+              ],
+              "npm_integrity_missing": 0,
+              "npm_integrity_bundled_covered": 6,
+              "errors": [],
+              "fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+              "status": "pass"
+            },
+            "audit": {
+              "composer": {
+                "exit_code": 0,
+                "stdout_sha256": "3c4d81d3a3f1d68f4dc3bd2e0fb0d02c98ad3dce6fe912121b623f65ac5b346a",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+              },
+              "npm": {
+                "exit_code": 0,
+                "stdout_sha256": "470085540b8ef922d8367d4918de108c4728d22ce71044ccf65ce5f0091f7f00",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+              }
+            },
+            "errors": [],
+            "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475"
+          },
+          "validation": {
+            "errors": [],
+            "warnings": [],
+            "composer_packages": 127,
+            "npm_packages": 220,
+            "laravel_framework_locked_version": "13.44.1",
+            "npm_integrity_missing": 0,
+            "npm_integrity_bundled_covered": 6,
+            "npm_unsafe_sources": 0
+          },
+          "semantic": {
+            "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+            "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+          }
+        },
+        "resolve_exit_code": 0,
+        "checks_exit_code": 0
+      }
+    ],
+    "raw_exact_match": true,
+    "semantic_exact_match": true,
+    "supply_chain_exact_match": true,
+    "prior_candidate_exact_match": true,
+    "root_lockfiles_mutated": false,
+    "promotion_ready": false,
+    "remaining": [
+      "independent review",
+      "official promotion metadata/source binding",
+      "fresh full exact-head CI",
+      "target acceptance remains separate"
+    ]
+  },
+  "rebound_promotion_dossier": {
+    "schema": 3,
+    "status": "review-required",
+    "generator": "measured partial-update A/B preparation; existing Nexora validators; not dependency-lock-refresh.php invocation",
+    "platform_version": "1.0.0-rc.94",
+    "source_git_sha": "99274cedd8117f149da5f0e56ce3ab1312eb1833",
+    "source_tree_sha256": "41747694c398667264f7d805ee059d5940e447f977061ffd6f77115734e13e7c",
+    "manifest_hashes": {
+      "composer_manifest_sha256": "33fdef43209a432aeeaafc383a5f80595ad2cf31fafa0f9f602450db1413a9fc",
+      "package_manifest_sha256": "5d0c12a867bb8f880cdb2357351f1292e25fb09a3fb105ac4840c481425299b9"
+    },
+    "run_id": "PR152-FIXTURE-004",
+    "created_at": "2026-11-28T00:17:08+00:00",
+    "candidate_hashes": {
+      "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+      "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+    },
+    "candidate_semantic_hashes": {
+      "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+      "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+    },
+    "reproducible": true,
+    "reproduction": {
+      "workspace_a_hashes": {
+        "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+        "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+      },
+      "workspace_b_hashes": {
+        "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+        "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078"
+      },
+      "workspace_a_semantic_hashes": {
+        "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+        "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+      },
+      "workspace_b_semantic_hashes": {
+        "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+        "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab"
+      },
+      "raw_exact_match": true,
+      "semantic_exact_match": true,
+      "exact_match": true
+    },
+    "supply_chain": {
+      "status": "pass",
+      "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475",
+      "workspace_a": {
+        "schema": 1,
+        "status": "pass",
+        "provenance": {
+          "schema": 2,
+          "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+          "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+          "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+          "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab",
+          "composer_urls_checked": 254,
+          "npm_urls_checked": 214,
+          "composer_hosts": [
+            "api.github.com",
+            "github.com"
+          ],
+          "npm_hosts": [
+            "registry.npmjs.org"
+          ],
+          "npm_integrity_missing": 0,
+          "npm_integrity_bundled_covered": 6,
+          "errors": [],
+          "fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+          "status": "pass"
+        },
+        "audit": {
+          "composer": {
+            "exit_code": 0,
+            "stdout_sha256": "3c4d81d3a3f1d68f4dc3bd2e0fb0d02c98ad3dce6fe912121b623f65ac5b346a",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "npm": {
+            "exit_code": 0,
+            "stdout_sha256": "470085540b8ef922d8367d4918de108c4728d22ce71044ccf65ce5f0091f7f00",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "errors": [],
+        "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475"
+      },
+      "workspace_b": {
+        "schema": 1,
+        "status": "pass",
+        "provenance": {
+          "schema": 2,
+          "composer_lock_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+          "package_lock_sha256": "7af42f7277c522ee71e761a5a374608815e9cf3e9f5d431efca482c7db31b078",
+          "composer_lock_semantic_sha256": "d0ddca7e910b41c9dc8dbb440bd728d3d3ee6a906a81e4dbfa5aa9f566196723",
+          "package_lock_semantic_sha256": "e51c94c214f895c95e2c47942ae19405a1cd55073de19f81d5f33267468cb7ab",
+          "composer_urls_checked": 254,
+          "npm_urls_checked": 214,
+          "composer_hosts": [
+            "api.github.com",
+            "github.com"
+          ],
+          "npm_hosts": [
+            "registry.npmjs.org"
+          ],
+          "npm_integrity_missing": 0,
+          "npm_integrity_bundled_covered": 6,
+          "errors": [],
+          "fingerprint_sha256": "6156299c14d64ba4b95e25597b9fdb69ee1e64ee1c909a7525236752f713702f",
+          "status": "pass"
+        },
+        "audit": {
+          "composer": {
+            "exit_code": 0,
+            "stdout_sha256": "3c4d81d3a3f1d68f4dc3bd2e0fb0d02c98ad3dce6fe912121b623f65ac5b346a",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "npm": {
+            "exit_code": 0,
+            "stdout_sha256": "470085540b8ef922d8367d4918de108c4728d22ce71044ccf65ce5f0091f7f00",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "errors": [],
+        "fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475"
+      },
+      "exact_match": true
+    },
+    "supply_chain_fingerprint_sha256": "121e05598c85ce354f65827d10354dee5563dc7dfdf1b6858414fd52a9c25475",
+    "toolchain": {
+      "schema": 1,
+      "php": {
+        "version": "8.4.28",
+        "binary": "php8.4",
+        "binary_sha256": "1d8012df5a22ff889df33cbc38d04c81e6c580d68e9873562f0e5f77a4be768b"
+      },
+      "composer": {
+        "available": true,
+        "version": "2.10.3",
+        "source": "PATH",
+        "binary_sha256": "7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6"
+      },
+      "node": {
+        "available": true,
+        "version": "22.14.0",
+        "binary": "node",
+        "binary_sha256": "1abce2374a485bddae3c27b17a3e3143e2780232026e627c4fe74ddde3f380a1",
+        "execution_mode": "direct",
+        "launcher": "node"
+      },
+      "npm": {
+        "available": true,
+        "version": "10.9.2",
+        "binary": "npm",
+        "binary_sha256": "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
+        "execution_mode": "direct",
+        "launcher": "npm"
+      },
+      "policy": {
+        "php": {
+          "minimum": "8.3.0",
+          "maximum_exclusive": "8.5.0"
+        },
+        "composer": {
+          "minimum": "2.7.0",
+          "maximum_exclusive": "3.0.0"
+        },
+        "node": {
+          "minimum_major": 22,
+          "maximum_major_exclusive": 25
+        },
+        "npm": {
+          "minimum_major": 10,
+          "maximum_major_exclusive": 11
+        }
+      },
+      "errors": [],
+      "status": "pass",
+      "fingerprint_sha256": "97c3e3105e04a248d9b04f52bca1ae4bcec72962f11fc5eef599143f0105477b"
+    },
+    "toolchain_fingerprint_sha256": "97c3e3105e04a248d9b04f52bca1ae4bcec72962f11fc5eef599143f0105477b",
+    "validation": {
+      "errors": [],
+      "warnings": [],
+      "composer_packages": 127,
+      "npm_packages": 220,
+      "laravel_framework_locked_version": "13.44.1",
+      "npm_integrity_missing": 0,
+      "npm_integrity_bundled_covered": 6,
+      "npm_unsafe_sources": 0
+    },
+    "diff": {
+      "composer": {
+        "added": [],
+        "removed": [],
+        "changed": {
+          "laravel/framework": {
+            "before": "v13.36.0",
+            "after": "v13.44.1"
+          },
+          "symfony/http-foundation": {
+            "before": "v7.4.21",
+            "after": "v7.4.25"
+          },
+          "symfony/http-kernel": {
+            "before": "v7.4.21",
+            "after": "v7.4.25"
+          },
+          "symfony/mailer": {
+            "before": "v7.4.19",
+            "after": "v7.4.24"
+          },
+          "symfony/mime": {
+            "before": "v7.4.19",
+            "after": "v7.4.24"
+          },
+          "symfony/routing": {
+            "before": "v7.4.21",
+            "after": "v7.4.24"
+          },
+          "symfony/serializer": {
+            "before": "v7.4.21",
+            "after": "v7.4.25"
+          },
+          "web-auth/webauthn-lib": {
+            "before": "5.3.9",
+            "after": "5.3.17"
+          }
+        }
+      },
+      "npm": {
+        "added": [],
+        "removed": [],
+        "changed": []
+      }
+    },
+    "review": {
+      "status": "NOT_RUN",
+      "approval": null
+    },
+    "root_locks_mutated": false,
+    "promotion_executed": false,
+    "next_action": "Independent exact-candidate review, then revalidate source/toolchain in existing governed promotion; no approval inferred from this dossier."
+  },
+  "root_lockfiles_mutated": false,
+  "independent_review": "NOT_RUN; GitHub reviewer identity or authenticated review service required",
+  "promotion_executed": false,
+  "target_verified": false,
+  "prior_failures_preserved": [
+    ".ai/evidence/theme-security-reproduction-002.json",
+    ".ai/evidence/theme-security-reproduction-002.tar.gz"
+  ],
+  "remaining_gates": [
+    "Independent exact-source/candidate review; author cannot self-approve",
+    "Revalidate source/candidate/toolchain binding and run existing governed root promotion only after review",
+    "Fresh full exact-head CI for promoted root lockfile change",
+    "Actual target acceptance #74 remains separate"
+  ],
+  "archive_sha256": "7b4098ae5b3a9acc5c53aeb88cf61b9f7d72f3b8a1e25415bb0782f439ecf715"
+}

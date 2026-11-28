@@ -1,5 +1,17 @@
 # Nexora AI-Native Development Orchestration
 
+## Owner-directed AI source review policy — 2026-11-28
+
+For AI-assisted **source-only** development and integration, the owner's explicit instruction "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha" removes the repository-only separate-reviewer prerequisite. Follow `.ai/governance/source-review-policy.md`: mandatory exact-head AI_SELF_CHECK, actual findings and fresh machine evidence; no false independent approval. This supersedes earlier source-only independent-review requirements and historical #152 review waiver conditions; native rules, domain-specific/external approval, protected test oracles, security/audit/CI, provenance, target/provider/release acceptance and authorization remain unchanged. No self-issued waiver or owner approval fabrication. #152's approved one-use merge-time target exception remains narrow, with revised source review mode and expiry; #74 BLOCKED, theme ACTIVE, no deployment/release or stage advancement.
+
+## Owner-directed exception for PR #152 — 2026-11-28
+
+The user's explicit current instruction overrides the independent-review requirement for PR #152, its recorded eight-package security candidate and this scoped governance exception. Apply `.ai/waivers/WVR-NEX-PR152-OWNER-REVIEW-20261128.json` before the general independent-review/self-approval provisions in this file and the linked control plane for this scope only. This is owner authorization, not author self-approval or evidence that a review happened. Existing CI, audits, tests, candidate/source/toolchain checks, native GitHub rules and target/release boundaries remain required. Scope/candidate changes or expiry invalidate the exception; unrelated work remains under the general rules.
+
+## Owner-approved source-only integration — PR #152 (2026-11-28)
+
+The original review exception above is historical for its original scope and does not apply to the expanded combined candidate. The owner approved `.ai/waivers/WVR-NEX-PR152-SOURCE-INTEGRATION-20261128.json` for one source-only merge of PR #152, exact minimal warning cut and independently reviewed governance/evidence records only. It is **not operational until independent review of the exact combined head and all applicable fresh source gates genuinely pass**, with binding recorded on PR #152. Only the merge-time live-target prerequisite is excepted in that bounded case; the general rule remains intact for every other carrier. No waiver of independent review, actual warning-hard tests, audits, source/provenance, native rules, target acceptance or release requirements. Keep #74 OPEN, target BLOCKED and THEME-CLOSURE-001 ACTIVE; no deployment, release, target verification or stage advancement. Any base/candidate/scope drift, revocation, expiry or consumption invalidates the exception. No author self-approval.
+
 ## Purpose
 
 AI-assisted development is itself a privileged software-supply-chain workflow. It must not be treated as a trusted developer typing faster.
@@ -43,7 +55,7 @@ IMPLEMENT IN ISOLATED CHANGESET
         ↓
 SELF-CHECK
         ↓
-INDEPENDENT REVIEW / SECURITY REVIEW AS REQUIRED
+EXACT-HEAD AI SELF-CHECK / SECURITY REVIEW AS REQUIRED
         ↓
 CI / TEST / TARGET / PROVIDER VERIFICATION
         ↓
@@ -212,9 +224,9 @@ Protected control-plane paths include at minimum:
 Rules:
 
 - a product/runtime change cannot weaken a governing check in the same run merely to obtain PASS;
-- policy weakening requires an explicit governance development unit/change rationale and independent review;
+- policy weakening requires an explicit owner-authorized governance development unit/change rationale and exact-head review under the source-review policy;
 - a check removed, bypassed, changed from fail→warn, or excluded from required status is treated as security-sensitive;
-- critical protected-path changes cannot self-approve;
+- critical protected-path changes cannot self-authorize or falsely claim independent approval;
 - the validator compares effective policy before/after, not just syntax;
 - exceptions use the waiver system rather than deleting controls.
 
@@ -248,7 +260,7 @@ Controls:
 - deleted assertions, skipped tests, broadened tolerances and changed expected values are first-class review signals;
 - test modifications require a reason tied to the changed contract/requirement;
 - critical invariants have protected/golden/architecture/security fixtures that normal feature runs cannot silently rewrite;
-- high/critical work uses independent test review and adversarial/negative tests;
+- high/critical work uses exact-head test-oracle review, protected independent machine evidence and adversarial/negative tests;
 - mutation testing, differential testing, property tests or invariant checks are used where they add real signal;
 - flaky-test quarantine cannot convert a release-blocking critical test into silent PASS;
 - generated tests do not count as independent evidence merely because they are numerous;
@@ -287,21 +299,9 @@ CI-generated release/package artifacts should support SLSA-compatible provenance
 
 No evidence may be edited in place to change FAIL→PASS; supersede with new evidence.
 
-## 10. Review Independence
+## 10. Exact-head review and independence
 
-`self-check` and `independent review` are different states.
-
-For high/critical architecture/security/payment/AI-execution/package-runtime/governance work:
-
-- reviewer receives exact base/head diff and acceptance criteria;
-- reviewer is a distinct review pass/context and preferably a distinct actor/runtime;
-- review output records reviewer identity and reviewed head SHA;
-- the author run cannot count its own explanation as independent approval;
-- material changes after approval invalidate/stale that approval;
-- security/payment review uses domain-specific reviewer criteria;
-- reviewer may request changes but may not silently rewrite evidence to PASS.
-
-A human may remain final approval authority for designated risk classes, but automation still supplies objective evidence.
+AI_SELF_CHECK and independent review are different states. For source-only work, a separate reviewer is optional under the owner-directed source-review policy. The implementing AI performs an exact-head diff and risk review, records its identity/role, actual findings, disposition and exact SHA, and verifies unchanged protected oracles and fresh CI. Material changes invalidate review. No self-authorization or fabricated independent approval. Security/payment review uses domain-specific criteria; applicable native, third-party, target/provider/release review requirements remain mandatory. Independent machine evidence cannot be replaced by AI prose.
 
 ## 11. Multi-Agent Orchestration
 
@@ -502,7 +502,7 @@ A change can be promoted only when the exact head/artifact being promoted has:
 - valid registered scope;
 - non-stale run/plan/policy context;
 - required source/static/test/security/performance/reliability evidence;
-- required independent reviews on the exact head;
+- required exact-head review under the source-review policy, plus independently required native/domain/target approvals;
 - no expired/missing critical waiver;
 - no unresolved merge/conflict drift;
 - artifact/source provenance where release artifacts are involved;
@@ -535,7 +535,7 @@ The AI-governance stage is not complete until representative fixtures prove that
 5. governance self-weakening;
 6. test-oracle weakening used to obtain PASS;
 7. forged/self-authored target evidence;
-8. same-run critical self-approval;
+8. unauthorized same-run critical self-approval or fabricated independent approval;
 9. prompt injection from repository/external artifacts;
 10. dependency introduction without intake;
 11. runaway repeated-failure loops;

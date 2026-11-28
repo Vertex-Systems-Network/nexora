@@ -25,8 +25,8 @@ This is the one ordered path. Table numbers below follow it; exactly one stage i
 1. ✅ `AI-GOV-001` → `RUNTIME-CLOSURE-001` → `CORE-QA-001` → `MOBILE-AUTH-API-100` → `ADMIN-UX-CLOSURE-001` — DONE (source).
 2. ✅ `SECURITY-BASELINE-200` — DONE (source): TOTP MFA (#140); CSP, authorization matrix, secret scanning (#145); passkeys (#146).
 3. ✅ `AI-GOV-AUTOMATION-100` — PR→unit traceability DONE (#148); remaining orchestration units stay PLANNED.
-4. ✅ `RESEARCH-DISCOVERY-100` (#149) → ✅ `QUALITY-GOVERNANCE-100` (#150) → ▶ `ARCH-BOUNDARY-100` — CURRENT.
-5. Track B closures: Theme → Extension → Studio → CMS publishing → Media/distribution → SEO/search → Automation.
+4. ✅ `RESEARCH-DISCOVERY-100` (#149) → ✅ `QUALITY-GOVERNANCE-100` (#150) → ✅ `ARCH-BOUNDARY-100` (#151).
+5. Track B closures: ▶ Theme (`THEME-CLOSURE-001` — CURRENT) → Extension → Studio → CMS publishing → Media/distribution → SEO/search → Automation.
 6. Track C kernel (Builder Beta): content model → data governance → taxonomy → query → routing → navigation → theme contract → Ext SDK → site builder → … → privacy/consent.
 7. Track D Pro → Track E Platform/commerce → Track F cloud/enterprise/ops → Track G production certification.
 8. ⏸ `MOBILE-APPS-100` — ON_HOLD by owner (plan only); resumes only on explicit owner instruction.
@@ -55,13 +55,13 @@ See `.ai/roadmap/release-trains.md` for commercial gates.
 | 6 | `AI-GOV-AUTOMATION-100` | machine-check `.ai` registries/stages/plans/DoD/state/handoff so CI rejects unplanned/inconsistent work | Builder Beta | SOURCE_DONE (traceability, #148); remaining orchestration units PLANNED | CORE-QA-001 |
 | 7 | `RESEARCH-DISCOVERY-100` | ResearchBrief/VOC/problem-vs-solution validation, current market/standards evidence, baseline, alternatives and CTQ inputs for substantial new work | Builder Beta | SOURCE_DONE — machine-readable ResearchBrief (#149) | AI-GOV-AUTOMATION-100 |
 | 8 | `QUALITY-GOVERNANCE-100` | Quality OS, proportional DMADV/DMAIC, CTQs, SIPOC/FMEA/root-cause/control-plan traceability and outcome-over-output policy | Builder Beta | SOURCE_DONE — machine-checked quality evidence (#150) | RESEARCH-DISCOVERY-100, AI-GOV-AUTOMATION-100 |
-| 9 | `ARCH-BOUNDARY-100` | reconcile architecture constitution with implementation; repository/persistence boundaries; broaden architecture tests | Builder Beta | ACTIVE ▶ CURRENT — layer-direction tests | SECURITY-BASELINE-200 |
+| 9 | `ARCH-BOUNDARY-100` | reconcile architecture constitution with implementation; repository/persistence boundaries; broaden architecture tests | Builder Beta | SOURCE_DONE — layer-direction tests (#151) | SECURITY-BASELINE-200 |
 
 ## Track B — close existing website-platform foundations
 
 | # | Stage | Scope | Train | Status | Depends on |
 |---:|---|---|---|---|---|
-| 10 | `THEME-CLOSURE-001` | current theme upload → Sentinel → install → preview → activate → switch → rollback → render | Builder Beta | PLANNED | ADMIN-UX-CLOSURE-001, ARCH-BOUNDARY-100 |
+| 10 | `THEME-CLOSURE-001` | current theme upload → Sentinel → install → preview → activate → switch → rollback → render | Builder Beta | ACTIVE ▶ CURRENT — source lifecycle proof; target verification pending | ADMIN-UX-CLOSURE-001, ARCH-BOUNDARY-100 |
 | 11 | `EXTENSION-CLOSURE-001` | current extension/app/integration/studio-pack lifecycle, capability grants, dependencies, rollback/uninstall | Builder Beta | PLANNED | THEME-CLOSURE-001, SECURITY-BASELINE-200 |
 | 12 | `STUDIO-CLOSURE-001` | current Studio edit/responsive/dynamic/revision/publish/render workflow | Builder Beta | PLANNED | EXTENSION-CLOSURE-001 |
 | 13 | `CMS-PUBLISHING-CLOSURE-001` | Documents, Writer, revisions, editorial workflow, Blog/Article, authors, current publishing taxonomies/series/archives | Builder Beta | PLANNED | STUDIO-CLOSURE-001 |

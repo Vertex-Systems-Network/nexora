@@ -1,0 +1,18 @@
+# Owner-directed AI source review policy
+
+Decision ID: NEX-AI-SOURCE-REVIEW-015. Owner instruction, 2026-11-28: "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha". Scope: AI-assisted repository **source-only** development and integration. This is an explicit owner-directed governance change, not author-granted approval. Effective on protected main after normal exact-head CI/integration; for its adopting PR #152, the owner's explicit decision authorizes this policy change and replaces the repository-only independent-review prerequisite, subject to all other gates. Do not represent this as independent review.
+
+## Required source review
+
+A separate human or AI reviewer is optional, not a prerequisite to source integration. The implementing AI must perform and document an exact-base/head diff and risk review as **AI_SELF_CHECK**, including protected controls, contract/test integrity, scope, supply chain, threat model and residual risks. Record actual actor/role, reviewed SHA, findings, disposition and fresh CI evidence. Stop on unresolved findings; any material head/base change invalidates the check. Optional independent feedback remains valuable and unresolved review threads must be resolved. Do not submit fictitious GitHub APPROVE or label author work independent. An AI self-check is not owner authorization; explicit owner scope is still required for changes to governance/security policy.
+
+## Controls unchanged
+
+- Native GitHub protections, any native required reviewers, thread resolution, current-base and all exact-head required CI remain mandatory. No force push, bypass or relaxation of workflow/test/security controls.
+- Existing automated tests, immutable/protected test oracles, security and architecture reviews, adversarial tests, actual zero PHPUnit warnings, locked audits, provenance, dependency intake/promotion and applicable risk evidence remain required. Independent machine evidence is not replaced by prose. Do not remove contractual checks requiring third-party or domain-specific approval; if applicable, those remain gates.
+- Target/provider/browser/production/payment and release acceptance evidence, independent verification required for those acceptance claims, owner permissions and authorization boundaries are unchanged. This policy is not permission to deploy/release, promote target state, advance a stage, access secrets or change production. No change to real-target acceptance, #74, or general target merge restriction. Existing explicitly authorized narrow source-only merge-time target exception for #152 remains the only such exception here.
+- No source/runtime run may silently weaken its own governing checks to obtain PASS. Material governance changes must be explicitly owner-authorized, separately planned/registered, scoped, reviewed by AI and validated by fresh CI. No self-issued waiver or false evidence. Record governance decision and rollback path.
+
+## Precedence and historical records
+
+For source-only review, this owner-directed policy supersedes older repository-only separate-review requirements in AGENTS.md, development-intake, engineering-supervisor, ai-development-orchestration, automation-plan, DoD, active plans and registry; historical reviewer requirements/waivers/results remain historical evidence. It does not override native rules or independently required target/provider/release controls. The prior #152 scoped independent-review waiver and earlier version of its source integration record remain historical; the revised record binds the owner-approved scope, review mode and final SHA externally on PR #152. No independent review is claimed. Revert this policy through a governed PR if owner revokes it; existing source/target/release controls remain in force.

@@ -1,0 +1,13 @@
+# PR #152 — explicit owner review override and root dependency remediation
+
+On 2026-11-28 the user explicitly instructed: "koi ni ha ai hi ha rule ko overwrite kkro". `WVR-NEX-PR152-OWNER-REVIEW-20261128` replaces the unavailable separate-review gate for this PR/candidate and the exception itself. This is owner authorization; no independent reviewer or approval is invented. It does not disable CI/audits/tests, alter native GitHub rules, grant target/release acceptance, or authorize unrelated changes. AGENTS and the linked governance entry points point to this scoped exception.
+
+The existing `dependency-lock-promote.php` command revalidated source/manifest/toolchain identities, candidate hashes/provenance and fresh Composer/npm audits before root writes. Its durable journal reached complete; raw result is reviewed-promoted with zero errors/warnings. The supplied reviewer identity explicitly names the owner waiver. Strict root-lock verification and actual root Composer audit PASS; no advisories/abandoned packages. No root lock was manually copied or hand-edited. This resolves the previous root-audit blocker at source level; exact-head CI still must accept the final source.
+
+Only eight existing Composer libraries change: Laravel 13.44.1; Symfony HTTP Foundation/Kernel/Serializer 7.4.25, Mailer/Mime/Routing 7.4.24; WebAuthn 5.3.17. npm lock and root constraints remain unchanged. The same candidate previously passed corrected-fixture 855 tests/7,363 assertions and rebound A/B proof. Those results retain their original source identities, not relabelled as a new-head run.
+
+Machine promotion/audit evidence: `.ai/evidence/pr152-owner-promotion-20261128.json`. Previous failed runs and candidate proofs remain immutable. The runtime promotion directory contains local before/after backups and revalidation receipts; it is not a release artifact and must not be committed. No live installation, credentials, provider or production target was modified.
+
+The protocol uses separate meaningful local commits and a single coordinated branch-ref publication after the prior CI completed. Native git push lacks credentials in this environment; the authenticated GitHub connector publishes equivalent commit trees and preserves exact parent protection. Final published identities and CI results belong on PR #152. No merge/deploy/release is inferred from the review exception.
+
+Fresh local actual committed root/policy source `3db3b51727a1db7ca85319fa3de25e8cfea079b8` passes 41 governance/traceability/architecture/theme/passkey tests / 346 assertions, warning-hard, exit 0. Evidence `.ai/evidence/pr152-owner-local-validation-20261128.json`. This does not substitute for required final published-head CI.

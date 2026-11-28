@@ -4,7 +4,7 @@
   "control_plane_revision": 14,
   "control_plane_branch": "claude/wizardly-ptolemy-i21c24",
   "base_branch": "main",
-  "base_sha": "0abbdaa738799e2cb85b93268403b8aeabbc75b5",
+  "base_sha": "8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb",
   "last_verified_source_sha": "3439ac7e324e867046674044ba4ad1586bd963af",
   "source_release": "1.0.0-rc.94",
   "installer_protocol": "v5.29",
@@ -13,13 +13,17 @@
   "target_status": "BLOCKED",
   "canonical_stage_count": 77,
   "current_stage": {
-    "id": "ARCH-BOUNDARY-100",
-    "name": "Architecture Boundaries",
+    "id": "THEME-CLOSURE-001",
+    "name": "Theme Closure",
     "status": "ACTIVE",
-    "scope_note": "Enforce layer direction: domain never depends on App\\Http; contracts never on services/HTTP; models never on HTTP and only on allowlisted services. Request-id attribute name moved to App\\Nexora\\Http\\RequestContext. QUALITY-GOVERNANCE-100 SOURCE_DONE (#150)."
+    "scope_note": "Owner approved AI_SELF_CHECK for source-only review and the narrow PR #152 source integration exception; fresh exact-head CI and AI_SELF_CHECK pending. Target BLOCKED, theme ACTIVE; no release claim."
   },
   "active_development_units": [
-    "SYS-ARCH-BOUNDARIES"
+    "SYS-THEME-ENGINE",
+    "SEC-THEME-CI-DEPS-001",
+    "SEC-REVIEW-OVERRIDE-PR152",
+    "SEC-PR152-SOURCE-INTEGRATION",
+    "SEC-AI-SOURCE-REVIEW-POLICY"
   ],
   "completed_control_stages": [
     {
@@ -95,8 +99,8 @@
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "Owner decision: next SECURITY-BASELINE-200 increment (passkeys / CSP / AppSec CI) or approve AI-GOV-AUTOMATION-100 traceability.",
-    "Each increment: register unit, threat model, active plan, independent exact-head review before merge.",
+    "PR #152: perform exact-head AI_SELF_CHECK and verify fresh CI including actual warning-hard test summary. Merge only under the approved narrow exception after all source gates pass; #74 stays BLOCKED.",
+    "Each increment: register unit, threat model, active plan, exact-head source AI_SELF_CHECK and applicable external/domain/target review before merge.",
     "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
     "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",
@@ -161,7 +165,7 @@
     "ai_dev_exact_base_plan_policy_identity_required_for_autonomous_writes": true,
     "ai_dev_reviewed_head_must_match_promoted_head": true,
     "ai_dev_machine_evidence_must_identify_producer_and_source": true,
-    "ai_dev_governance_policy_changes_require_independent_review": true,
+    "ai_dev_governance_policy_changes_require_independent_review": false,
     "ai_dev_branch_protection_is_operational_evidence_not_documentation_claim": true,
     "security_review_required_for_high_risk_boundaries": true,
     "payment_security_review_required_for_payment_integrations": true,

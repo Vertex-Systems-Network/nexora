@@ -1,3 +1,53 @@
+# Owner-directed AI source review policy — 2026-11-28
+
+Owner instruction: "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha". NEX-AI-SOURCE-REVIEW-015 / SEC-AI-SOURCE-REVIEW-POLICY; source-only separate reviewer requirement replaced by mandatory exact-head AI_SELF_CHECK with no fabricated approval. .ai/governance/source-review-policy.md. Previous #152 head 87051c9c18fa9ae0ef6350f771b5910fab3fed0b certified 856/7369 zero warnings, audits zero, checkout/Windows/browser/traceability PASS; evidence https://github.com/Vertex-Systems-Network/nexora/pull/152#issuecomment-7232115142. New head must run fresh CI, then record actual AI_SELF_CHECK. No tests/workflows/locks/runtime/native protections changed. Original scoped #152 source merge-time exception rebinds to revised source review policy; target #74 BLOCKED, stage ACTIVE, no stage advance/deployment/release. Separate planning commit c272aba7649d7815321bcba1bbbedac0cd8af076; policy commit 2b34241a8aa7ced542b1d26fe920691ef3b0cf44; publish once with expected head. Prior records below historical.
+
+# Owner-approved source-only integration candidate — 2026-11-28
+
+PR #152 / THEME-CLOSURE-001 / SEC-PR152-SOURCE-INTEGRATION: owner explicitly approved WVR-NEX-PR152-SOURCE-INTEGRATION-20261128; conditional on independent review and fresh exact combined-head source CI, not operational yet. Protected main 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb; original #152 3e7685c47aac888f6e56fad67c13b4e7f067d41e 5/5 green but actual one PHPUnit warning; warning-only cut eae4cc6560afaf362b7b157f0d5164816d56fc5f prior release 46089727462: 856 passed / 7368 assertions, zero warnings, both locked audits zero, traceability PASS. Four later #172 regression commits remain excluded at d62fcc6. Planning commit 910c83ddcd7566f2bc08ef0a2fa39d8ac3b9a10e. Original review waiver does not extend to combined scope. No runtime/lock/workflow/native rule change. Fresh CI and independent protected-change review pending; bind exact final published head on #152. No merge, target/release claim, or stage advancement; #74 stays BLOCKED. Source integration proposal https://github.com/Vertex-Systems-Network/nexora/pull/152#issuecomment-7231608400. Prior checkpoints below are historical.
+
+# Owner-authorized root dependency promotion — 2026-11-28
+
+The user explicitly overrides the independent-review blocker for current PR #152 via WVR-NEX-PR152-OWNER-REVIEW-20261128. Owner authorization is recorded; no independent review is claimed. AGENTS and governance entry points cite the bounded exception. No CI/audit/test/native GitHub/target boundary is relaxed.
+
+Local policy commit 87e3fe5 records the owner exception. The existing guarded dependency promotion revalidated source/manifests/toolchain/candidate/provenance and fresh audits, completed backups/journal/attestation, and returned reviewed-promoted with zero errors/warnings. Root Composer lock now equals exact previously verified candidate 11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05; npm lock/root constraints unchanged. Actual root Composer audit zero advisories; strict root-lock/control-plane/diff validation PASS. Previous candidate full855/7363 PASS retains its original source identity; fresh final-head CI is required.
+
+Fresh local actual root/policy commit 3db3b51727a1db7ca85319fa3de25e8cfea079b8: 41 governance/traceability/architecture/theme/passkey tests, 346 assertions PASS (warning-hard). Evidence .ai/evidence/pr152-owner-local-validation-20261128.json.
+
+Latest prior PR head e1e5a9d CI finished: checkout/Windows/traceability PASS, governance FAIL before this dependency fix. Separate local commits are coordinated into one authenticated connector publication because native git push has no credentials. Next: observe fresh exact-head CI, resolve actual failures, and retain source/target/release separation. No target mutation, merge/deployment/release or target acceptance is claimed; #74 remains open. Evidence: docs/pr152-owner-review-override.md and .ai/evidence/pr152-owner-promotion-20261128.json.
+
+# Corrected fixture — full candidate regression PASS — 2026-11-28
+
+Measured source 99274cedd8117f149da5f0e56ce3ab1312eb1833, PR #152 / THEME-CLOSURE-001 / SEC-THEME-CI-DEPS-001. Disposable PHP RUNPATH correction permits empty-environment subprocesses; all 2,008 tracked blobs were checked out with original hashes/modes, including export-ignored workflow files. Only tracked fixture overlay is the same candidate Composer lock; repository production/test source and root locks unchanged.
+
+Previously failing classes: 10 tests / 77 assertions PASS. Unchanged full PHPUnit at 512M/SQLite/CI APP_URL: 855/855 tests, 7,363 assertions PASS; JUnit zero failure/error/skipped cases. Corrected PHP SHA 1d8012df5a22ff889df33cbc38d04c81e6c580d68e9873562f0e5f77a4be768b; policy-valid toolchain fingerprint 97c3e3105e04a248d9b04f52bca1ae4bcec72962f11fc5eef599143f0105477b. Rebound A/B resolutions and review-required dossier PASS, same archived candidate lock SHA. Prior failed runs/proof identities preserved, not rewritten. Exact evidence: docs/theme-security-fixture-004.md and .ai/evidence/theme-security-fixture-004.{json,tar.gz}.
+
+Local runner/test milestone complete; integration remains WAITING_EXTERNAL_REVIEW. Current intake for 99274ce: Windows/traceability PASS, checkout QA in progress, governance FAIL. No later result inferred. Independent reviewer identity or authenticated review service required before governed root promotion and fresh full exact-head CI. Root dependencies still vulnerable; no promotion/merge/target/release/stage advancement. #74 actual target remains separate and blocked.
+
+# A/B reproduction and full-suite diagnostic — 2026-11-28
+
+Source 28bb3e11737a77c14239f4631c68818487100c55, PR #152 / THEME-CLOSURE-001 / SEC-THEME-CI-DEPS-001. Two isolated resolutions on policy-valid PHP 8.4.28, Composer 2.10.3, Node 22.14.0 and npm 10.9.2 produce byte-identical locks matching the earlier candidate; semantic/supply-chain fingerprints match. Both audits/provenance/lock validators PASS; review-required dossier has exact source/manifest/toolchain binding.
+
+Full attempt 1 exhausted default 128M. A bounded fresh-fixture retry at 512M and CI APP_URL completed 855 tests: 845 PASS, 10 FAIL, 7304 assertions. Nine failures report missing libargon2.so.1 when tests clear the rootless PHP child environment; one reports the workflow excluded by git archive's /.github export-ignore. Both failures are preserved; tests/assertions unchanged. Full suite is not green. Evidence: docs/theme-security-reproduction-002.md and .ai/evidence/theme-security-reproduction-002.{json,tar.gz}.
+
+Live intake for 28bb3e1: checkout QA/Windows/traceability PASS; governance job 140792504014 FAIL, still 25 Composer advisories. Root locks unchanged; no promotion/merge/release/target acceptance. Next: fix the disposable checkout/PHP-runner fidelity, then unchanged full regression; independent authenticated review and governed root promotion/fresh exact-head CI remain required. #74 actual target stays blocked. Earlier checkpoint blockers about missing A/B proof are superseded only for that measured gate.
+
+# Security candidate checkpoint — 2026-11-28
+
+PR #152, stage THEME-CLOSURE-001, source 15967f1f3550a263cb1bf0ca2e557230b8e1a682; observed main 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb. Governance run 46084084434/job 140789486157 FAIL: 25 Composer advisories across 8 packages before PHPUnit. Checkout QA was still running at the single intake snapshot; Windows/traceability passed. No workflow rerun or repeated status refresh.
+
+Registered SEC-THEME-CI-DEPS-001 before isolated candidate preparation. Rootless PHP 8.4.28 + Composer 2.10.3 now available. Exactly the eight affected libraries updated in an isolated candidate: Composer/npm audit zero vulnerabilities, candidate provenance/lock validation PASS, focused theme/passkey/TOTP tests 33/33 with 233 assertions PASS on git-archived source plus candidate lock. No root lock promotion, independent approval or target acceptance. Candidate dossier and exact archived locks/raw test evidence: docs/theme-security-candidate-20261128.md and .ai/evidence/theme-security-candidate-20261128.{json,tar.gz}.
+
+Milestone BLOCKED on canonical-toolchain A/B dossier, independent review (CodeRabbit login environment_unsupported), governed promotion and fresh full exact-head CI. Root dependencies remain vulnerable; #74 target remains blocked. Next: complete candidate review/promotion gates; do not advance to extensions. Earlier checkpoints are historical observations.
+
+# Theme lifecycle review follow-up — 2026-11-28
+
+PR #152 / THEME-CLOSURE-001 / SYS-THEME-ENGINE remains VERIFYING. Main is `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`; pre-follow-up head `7137a29b6487911fd5716ce451aa5d0930128174` has successful governance, Development checkout QA, Windows PowerShell bootstrap QA and PR-to-unit traceability checks. Those results do not certify this follow-up.
+
+The authorization fixture now explicitly activates the uploaded Alpha theme and asserts its exact version before denied mutations, then checks public rendering afterwards. Progress/state mirrors are reconciled without advancing the stage. Local PHP is unavailable; no local PHPUnit PASS is claimed. Fresh exact-head CI and independent review are required. Target/browser acceptance remains blocked under #74; no target is provisioned. Dependency PRs #160/#161/#162/#165/#166/#167/#169/#170/#171 have failed governance checks (#166 also failed Development checkout QA); #143 is green but not reviewed or reconciled with current main. None was merged.
+
+Next: validate the published #152 head in CI and independent review, resolve findings, and retain the target gate. EXTENSION-CLOSURE-001 remains PLANNED.
+
 # PR #71 clean replacement source preparation — 2026-10-01
 
 Base main 55c249c06621fe7dc14868b3a5740b657bcb6b7a. Owner requested starting the clean replacement. Eight new backend regressions / 59 assertions PASS. Original unchanged suite diagnostic FAILED (61 schema errors, 5 failures, 6 incomplete). First full replacement run had a toolchain fixture failure: inherited NPM_CONFIG_CACHE pointed at a nonexistent directory; actual writable disposable cache configured, assertions unchanged. Corrected combined backend run PASS: 488 tests / 4663 assertions. Source certification and remote exact-head CI remain separate gates. New suite covers implemented auth/admin/module-read boundaries only. Original 76 requirements remain explicitly inventoried for contract mapping; no global Core QA/target or historical key invalidation completion. Original #71 stays quarantined. Evidence: docs/pr71-clean-replacement.md. Earlier entries are historical.

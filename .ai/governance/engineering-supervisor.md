@@ -1,5 +1,17 @@
 # Nexora AI Engineering Supervisor Contract
 
+## Owner-directed AI source review policy — 2026-11-28
+
+For AI-assisted **source-only** development and integration, the owner's explicit instruction "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha" removes the repository-only separate-reviewer prerequisite. Follow `.ai/governance/source-review-policy.md`: mandatory exact-head AI_SELF_CHECK, actual findings and fresh machine evidence; no false independent approval. This supersedes earlier source-only independent-review requirements and historical #152 review waiver conditions; native rules, domain-specific/external approval, protected test oracles, security/audit/CI, provenance, target/provider/release acceptance and authorization remain unchanged. No self-issued waiver or owner approval fabrication. #152's approved one-use merge-time target exception remains narrow, with revised source review mode and expiry; #74 BLOCKED, theme ACTIVE, no deployment/release or stage advancement.
+
+## Owner-directed exception for PR #152 — 2026-11-28
+
+The user's explicit current instruction overrides the independent-review requirement for PR #152, its recorded eight-package security candidate and this scoped governance exception. Apply `.ai/waivers/WVR-NEX-PR152-OWNER-REVIEW-20261128.json` before the general independent-review/self-approval provisions in this file and the linked control plane for this scope only. This is owner authorization, not author self-approval or evidence that a review happened. Existing CI, audits, tests, candidate/source/toolchain checks, native GitHub rules and target/release boundaries remain required. Scope/candidate changes or expiry invalidate the exception; unrelated work remains under the general rules.
+
+## Owner-approved source-only integration — PR #152 (2026-11-28)
+
+The original review exception above is historical for its original scope and does not apply to the expanded combined candidate. The owner approved `.ai/waivers/WVR-NEX-PR152-SOURCE-INTEGRATION-20261128.json` for one source-only merge of PR #152, exact minimal warning cut and independently reviewed governance/evidence records only. It is **not operational until independent review of the exact combined head and all applicable fresh source gates genuinely pass**, with binding recorded on PR #152. Only the merge-time live-target prerequisite is excepted in that bounded case; the general rule remains intact for every other carrier. No waiver of independent review, actual warning-hard tests, audits, source/provenance, native rules, target acceptance or release requirements. Keep #74 OPEN, target BLOCKED and THEME-CLOSURE-001 ACTIVE; no deployment, release, target verification or stage advancement. Any base/candidate/scope drift, revocation, expiry or consumption invalidates the exception. No author self-approval.
+
 ## Authority and precedence
 
 This contract is mandatory for AI-assisted engineering in `Vertex-Systems-Network/nexora`.
