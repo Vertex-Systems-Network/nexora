@@ -7,6 +7,7 @@ namespace Tests\Feature\Themes;
 use App\Models\Role;
 use App\Models\SecurityScan;
 use App\Models\Theme;
+use App\Models\ThemeVersion;
 use App\Models\User;
 use App\Nexora\Cloud\Services\RuntimeDeploymentIdentity;
 use App\Nexora\Themes\Contracts\ThemeManagerContract;
@@ -84,6 +85,110 @@ final class ThemeLifecycleClosureTest extends TestCase
         auth()->logout();
         $this->get('/')->assertOk()->assertSee('Alpha Shell')->assertDontSee('Beta Shell');
         self::assertSame('acme.alpha', app(ThemeManagerContract::class)->active()?->theme?->identifier);
+    }
+
+    public function test_preview_is_owner_bound_expiring_private_and_permission_gated(): void
+    {
+        $owner = $this->admin();
+        $otherAdmin = $this->admin();
+        $candidate = $this->install($owner, 'acme.beta', 'Beta Shell');
+        $activeBefore = app(ThemeManagerContract::class)->active()?->id;
+        self::assertNotNull($activeBefore);
+        self::assertNotSame($candidate, $activeBefore);
+
+        $url = (string) $this->actingAs($owner)
+            ->postJson('/admin/appearance/themes/versions/'.$candidate.'/preview')
+            ->assertOk()->assertJsonPath('expires_in_minutes', 20)->json('url');
+        self::assertMatchesRegularExpression('#/theme-preview/[a-f0-9]{64}$#', $url);
+        $path = parse_url($url, PHP_URL_PATH);
+        self::assertIsString($path);
+
+        $preview = $this->actingAs($owner)->get($path)
+            ->assertOk()->assertSee('Beta Shell')->assertSee('noindex,nofollow', false);
+        self::assertTrue($preview->baseResponse->headers->hasCacheControlDirective('private'));
+        self::assertTrue($preview->baseResponse->headers->hasCacheControlDirective('no-store'));
+
+        // A different administrator has the same permissions but does not own this token.
+        $this->actingAs($otherAdmin)->get($path)->assertNotFound()->assertDontSee('Beta Shell');
+        $this->actingAs($owner)->get($path)->assertOk()->assertSee('Beta Shell');
+
+        $member = User::factory()->create(['email_verified_at' => now()]);
+        $member->roles()->attach(Role::query()->where('slug', 'user')->value('id'));
+        $this->actingAs($member)->postJson('/admin/appearance/themes/versions/'.$candidate.'/preview')->assertForbidden();
+
+        auth()->logout();
+        $this->get($path)->assertRedirect(route('login'));
+
+        $this->actingAs($owner);
+        $this->travel(21)->minutes();
+        try {
+            $this->get($path)->assertNotFound()->assertDontSee('Beta Shell');
+        } finally {
+            $this->travelBack();
+        }
+
+        self::assertSame($activeBefore, app(ThemeManagerContract::class)->active()?->id);
+        auth()->logout();
+        $this->get('/')->assertOk()->assertDontSee('Beta Shell');
+    }
+
+    public function test_missing_theme_files_reject_activation_and_rollback_without_changing_active_state(): void
+    {
+        $admin = $this->admin();
+        $alpha = $this->install($admin, 'acme.alpha', 'Alpha Shell');
+        $beta = $this->install($admin, 'acme.beta', 'Beta Shell');
+        $alphaVersion = ThemeVersion::query()->findOrFail($alpha);
+        $betaVersion = ThemeVersion::query()->findOrFail($beta);
+        $manager = app(ThemeManagerContract::class);
+        $manager->activate($alphaVersion, $admin->id);
+
+        $stylesheet = $betaVersion->install_path.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'theme.css';
+        $originalCss = File::get($stylesheet);
+        self::assertTrue(File::delete($stylesheet));
+        try {
+            try {
+                $manager->activate($betaVersion, $admin->id);
+                self::fail('Activation accepted a missing declared stylesheet.');
+            } catch (\RuntimeException $exception) {
+                self::assertStringContainsString('declared stylesheet is missing', $exception->getMessage());
+            }
+            self::assertSame($alpha, $manager->active()?->id);
+            self::assertSame('active', Theme::query()->where('identifier', 'acme.alpha')->value('status'));
+            self::assertSame('inactive', Theme::query()->where('identifier', 'acme.beta')->value('status'));
+        } finally {
+            File::put($stylesheet, $originalCss);
+        }
+
+        $manager->activate($betaVersion, $admin->id);
+        $alphaHome = $alphaVersion->install_path.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR.'home.html';
+        self::assertTrue(File::delete($alphaHome));
+        try {
+            $manager->rollback($admin->id);
+            self::fail('Rollback accepted a missing required template.');
+        } catch (\RuntimeException $exception) {
+            self::assertStringContainsString('required [home] template is missing', $exception->getMessage());
+        }
+        self::assertSame($beta, $manager->active()?->id);
+        self::assertSame('active', Theme::query()->where('identifier', 'acme.beta')->value('status'));
+        self::assertSame('inactive', Theme::query()->where('identifier', 'acme.alpha')->value('status'));
+    }
+
+    public function test_public_render_falls_back_when_active_theme_loses_required_template(): void
+    {
+        $admin = $this->admin();
+        $candidate = $this->install($admin, 'acme.beta', 'Beta Shell');
+        $version = ThemeVersion::query()->findOrFail($candidate);
+        $manager = app(ThemeManagerContract::class);
+        $manager->activate($version, $admin->id);
+        auth()->logout();
+        $this->get('/')->assertOk()->assertSee('Beta Shell');
+
+        $home = $version->install_path.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR.'home.html';
+        self::assertTrue(File::delete($home));
+        self::assertSame('nexora.base', $manager->active()?->theme?->identifier);
+        $this->get('/')->assertOk()->assertDontSee('Beta Shell');
+        self::assertSame('active', Theme::query()->where('identifier', 'acme.beta')->value('status'));
+        self::assertSame($candidate, (int) Theme::query()->where('identifier', 'acme.beta')->value('current_version_id'));
     }
 
     public function test_sentinel_blocks_a_theme_carrying_executable_php(): void

@@ -1,0 +1,7 @@
+# Isolated PR #152 control-plane warning remediation
+
+Work item NEX-PR152-DOD-WARNING-006 / runner RB-NEX-PR152-DOD-WARNING-006. Source parent: `3e7685c47aac888f6e56fad67c13b4e7f067d41e`. Prior release certification run 46088574435 job 140803850474: 854 passed, one warning, 7364 assertions. Missing DoD fixture warning reproduced from the original exact conditional in an isolated PHP 8.4.24 harness with a warning-to-exception handler (including suppressed warnings).
+
+Local harness after change: missing, empty, whitespace-only, valid, directory, dangling symlink passed as root and as unprivileged `nobody`; unreadable file passed as nobody (not measurable as root). `php -l` on harness passed. Same diagnostic preserved for rejected inputs. Original `@` retained only for the actual read, and file-kind/readability preconditions are checked before attempting it. Existing negative-test assertions unchanged; four new assertions test empty, whitespace, directory, restored valid file. This is targeted snippet/harness evidence, not repository PHPUnit or full source lint. Native git checkout unavailable (GitHub DNS resolution failure); exact parent blobs read using connector and changes committed to full Git trees through GitHub API. No dependency, workflow, policy or waiver change.
+
+Publication is an isolated stacked draft; independent review and fresh CI required before integration. Active PR #152 head and target #74 unchanged. No source completion, merge, target or release claimed.

@@ -249,7 +249,8 @@ function nexora_ai_control_plane_errors(string $root): array
         }
     }
 
-    if (trim((string) @file_get_contents($ai.'/quality/definition-of-done.md')) === '') {
+    $dodPath = $ai.'/quality/definition-of-done.md';
+    if (! is_file($dodPath) || ! is_readable($dodPath) || trim((string) @file_get_contents($dodPath)) === '') {
         $errors[] = 'quality/definition-of-done.md is missing or empty.';
     }
 
