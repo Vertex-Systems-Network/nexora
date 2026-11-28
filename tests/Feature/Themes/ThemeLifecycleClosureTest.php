@@ -86,6 +86,51 @@ final class ThemeLifecycleClosureTest extends TestCase
         self::assertSame('acme.alpha', app(ThemeManagerContract::class)->active()?->theme?->identifier);
     }
 
+    public function test_preview_is_owner_bound_expiring_private_and_permission_gated(): void
+    {
+        $owner = $this->admin();
+        $otherAdmin = $this->admin();
+        $candidate = $this->install($owner, 'acme.beta', 'Beta Shell');
+        $activeBefore = app(ThemeManagerContract::class)->active()?->id;
+        self::assertNotNull($activeBefore);
+        self::assertNotSame($candidate, $activeBefore);
+
+        $url = (string) $this->actingAs($owner)
+            ->postJson('/admin/appearance/themes/versions/'.$candidate.'/preview')
+            ->assertOk()->assertJsonPath('expires_in_minutes', 20)->json('url');
+        self::assertMatchesRegularExpression('#/theme-preview/[a-f0-9]{64}$#', $url);
+        $path = parse_url($url, PHP_URL_PATH);
+        self::assertIsString($path);
+
+        $preview = $this->actingAs($owner)->get($path)
+            ->assertOk()->assertSee('Beta Shell')->assertSee('noindex,nofollow', false);
+        self::assertTrue($preview->baseResponse->headers->hasCacheControlDirective('private'));
+        self::assertTrue($preview->baseResponse->headers->hasCacheControlDirective('no-store'));
+
+        // A different administrator has the same permissions but does not own this token.
+        $this->actingAs($otherAdmin)->get($path)->assertNotFound()->assertDontSee('Beta Shell');
+        $this->actingAs($owner)->get($path)->assertOk()->assertSee('Beta Shell');
+
+        $member = User::factory()->create(['email_verified_at' => now()]);
+        $member->roles()->attach(Role::query()->where('slug', 'user')->value('id'));
+        $this->actingAs($member)->postJson('/admin/appearance/themes/versions/'.$candidate.'/preview')->assertForbidden();
+
+        auth()->logout();
+        $this->get($path)->assertRedirect(route('login'));
+
+        $this->actingAs($owner);
+        $this->travel(21)->minutes();
+        try {
+            $this->get($path)->assertNotFound()->assertDontSee('Beta Shell');
+        } finally {
+            $this->travelBack();
+        }
+
+        self::assertSame($activeBefore, app(ThemeManagerContract::class)->active()?->id);
+        auth()->logout();
+        $this->get('/')->assertOk()->assertDontSee('Beta Shell');
+    }
+
     public function test_sentinel_blocks_a_theme_carrying_executable_php(): void
     {
         $admin = $this->admin();
