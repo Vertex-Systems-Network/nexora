@@ -1,3 +1,9 @@
+# THEME-CLOSURE-001 / SYS-THEME-ENGINE / SEC-THEME-CI-DEPS-001 / SEC-REVIEW-OVERRIDE-PR152 — missing-file recovery regression batch
+
+- NEX-THEME-FALLBACK-008, same existing unit and isolated carrier #172, no stage advancement. Baseline ThemeManager blob 2988d6c25f42607282d29a823132c54d88a5ebdd: activate checks required files before DB transaction; rollback invokes activate; active falls back to nexora.base on missing files. CTQs: missing stylesheet rejects activation, missing prior home template rejects rollback, both preserve active DB state; missing active home template triggers public fallback without silently changing persisted active identity. File presence is not cryptographic content verification.
+- Test-only allowed writes: active plan and tests/Feature/Themes/ThemeLifecycleClosureTest.php. Local sparse commits 0798709 and c580ef8; lint/diff checks PASS; candidate blob fc463b386b96c99826c3ef9c6180e7d8452b5c7d. No production/contract/target/lock/governance policy change. Existing threat model applies; independent review required, no expansion of #152 waiver. Rollback: revert isolated commits.
+- Runner RB-NEX-THEME-FALLBACK-008: same fresh exact-head release and traceability as preview batch, no full functional PASS until observed. Preserve source/target evidence separation; #74 blocked. Reconcile base and main-target QA after integration authorization.
+
 # THEME-CLOSURE-001 / SYS-THEME-ENGINE / SEC-THEME-CI-DEPS-001 / SEC-REVIEW-OVERRIDE-PR152 — preview regression batch
 
 - Work item NEX-THEME-PREVIEW-007; existing SYS-THEME-ENGINE, test-only maintenance. Stacked PR #172, base head eae4cc6560afaf362b7b157f0d5164816d56fc5f, parent #152 3e7685c47aac888f6e56fad67c13b4e7f067d41e. Prior warning-fix exact-head release run 46089727462 completed success: 856 passed / 7368 assertions / zero PHPUnit warnings; traceability 46089727450 PASS. Prior evidence stays bound to prior SHA.
