@@ -1,3 +1,11 @@
+# Owner-authorized root dependency promotion — 2026-11-28
+
+The user explicitly overrides the independent-review blocker for current PR #152 via WVR-NEX-PR152-OWNER-REVIEW-20261128. Owner authorization is recorded; no independent review is claimed. AGENTS and governance entry points cite the bounded exception. No CI/audit/test/native GitHub/target boundary is relaxed.
+
+Local policy commit 87e3fe5 records the owner exception. The existing guarded dependency promotion revalidated source/manifests/toolchain/candidate/provenance and fresh audits, completed backups/journal/attestation, and returned reviewed-promoted with zero errors/warnings. Root Composer lock now equals exact previously verified candidate 11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05; npm lock/root constraints unchanged. Actual root Composer audit zero advisories; strict root-lock/control-plane/diff validation PASS. Previous candidate full855/7363 PASS retains its original source identity; fresh final-head CI is required.
+
+Latest prior PR head e1e5a9d CI finished: checkout/Windows/traceability PASS, governance FAIL before this dependency fix. Separate local commits are coordinated into one authenticated connector publication because native git push has no credentials. Next: observe fresh exact-head CI, resolve actual failures, and retain source/target/release separation. No target mutation, merge/deployment/release or target acceptance is claimed; #74 remains open. Evidence: docs/pr152-owner-review-override.md and .ai/evidence/pr152-owner-promotion-20261128.json.
+
 # Corrected fixture — full candidate regression PASS — 2026-11-28
 
 Measured source 99274cedd8117f149da5f0e56ce3ab1312eb1833, PR #152 / THEME-CLOSURE-001 / SEC-THEME-CI-DEPS-001. Disposable PHP RUNPATH correction permits empty-environment subprocesses; all 2,008 tracked blobs were checked out with original hashes/modes, including export-ignored workflow files. Only tracked fixture overlay is the same candidate Composer lock; repository production/test source and root locks unchanged.

@@ -4,9 +4,9 @@ updated_at: '2026-09-30'
 items:
 - id: NEX-THEME-152-FOLLOWUP
   source: 'PR #152 / SYS-THEME-ENGINE'
-  status: BLOCKED
+  status: VERIFYING
   priority: 1
-  note: '99274ce candidate locally verified: corrected fixture 855/855 tests, 7363 assertions PASS; rebound A/B proof. Independent reviewer identity/authentication and governed root promotion/full CI pending.'
+  note: 'Owner overrides separate review for PR152/candidate; guarded root promotion and actual root audit PASS. Fresh exact-head CI pending; target separate.'
 - id: NEX-ORCH-74
   source: 'Issue #74'
   status: ACTIVE_TARGET_CLOSURE

@@ -1,3 +1,7 @@
+# Latest owner-authorized transition: PR152 review requirement overridden by current user
+# instruction under WVR-NEX-PR152-OWNER-REVIEW-20261128; independent review NOT claimed.
+# Guarded root lock promotion complete; actual root audit zero; fresh final-head CI pending.
+# Previous candidate 855/7363 PASS remains scoped to original identity; target #74 unchanged.
 # Latest: candidate on source99274ce, corrected disposable runner/checkout: 855/855 tests,
 # 7363 assertions PASS; rebound A/B proof PASS. Prior 10 fixture failures preserved and superseded.
 # Root locks unchanged; independent reviewer identity/authentication, promotion, new root CI and

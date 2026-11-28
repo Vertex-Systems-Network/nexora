@@ -25,12 +25,13 @@ This rule applies on every AI development start, including work resumed from an 
 ## AI-Native Progress Ledger
 
 - **Observed:** 2026-11-28 (Asia/Karachi); main `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`
-- **Current stage/unit:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE`; blocker `SEC-THEME-CI-DEPS-001` — WAITING_EXTERNAL_REVIEW / root promotion
-- **Measured source/PR:** #152 / `99274cedd8117f149da5f0e56ce3ab1312eb1833`; intake: Windows/traceability PASS, checkout QA in progress, governance FAIL. No later conclusion inferred.
-- **New local evidence:** disposable PHP RUNPATH and faithful tracked checkout fix both earlier fixture gaps. Previously failing classes **10 tests / 77 assertions PASS**. Unchanged full suite **855/855 tests / 7,363 assertions PASS**, warning-hard, zero JUnit failures/errors/skips.
-- **Candidate identity:** same eight-package candidate; A/B locks/semantic/supply-chain fingerprints match on corrected policy-valid toolchain; review-required dossier rebound to it. Prior failures remain immutable. [Exact evidence](docs/theme-security-fixture-004.md).
-- **Next safe action / blocker:** supply independent reviewer identity or authenticate review service. After accepted review, revalidate source/toolchain and use governed root promotion, then fresh full exact-head CI. Root locks remain unchanged and vulnerable; no merge or stage advancement.
-- **Target/release:** BLOCKED; #74 open, no live target provisioned. Local candidate tests do not establish actual target acceptance.
+- **Stage/units:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE`, `SEC-THEME-CI-DEPS-001`, `SEC-REVIEW-OVERRIDE-PR152` — VERIFYING final source
+- **Owner instruction:** independent-review requirement overridden for this PR/candidate via `WVR-NEX-PR152-OWNER-REVIEW-20261128`; no independent review is claimed. Existing CI, audits, tests and native/target gates unchanged.
+- **Implemented:** guarded root promotion completed; only eight affected Composer packages updated to the previously verified candidate. Root Composer audit **zero advisories**; strict lock/control-plane checks PASS; npm lock and constraints unchanged. [Promotion and authorization](docs/pr152-owner-review-override.md).
+- **Tests:** prior exact candidate full suite **855/855 / 7,363 assertions PASS**, A/B/provenance/audits PASS; retained at measured identities. Fresh final-head CI remains required, not inferred from prior checks.
+- **Previous head e1e5a9d:** checkout/Windows/traceability PASS; governance FAIL on old dependencies. The fix requires new exact-head results; no failure edited into PASS.
+- **Next safe action:** publish accumulated policy/dependency commits together, verify fresh CI start and resolve actionable failures. No merge/deploy/release authorization inferred from review override.
+- **Target/release:** BLOCKED; #74 actual target remains separate; no live target mutation.
 - **Current module progress:** `[??????????] N/A — canonical numeric metric unavailable`
 - **Overall progress:** `[??????????] N/A — canonical numeric metric unavailable`
 

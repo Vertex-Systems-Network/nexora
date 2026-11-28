@@ -390,3 +390,19 @@ tasks:
     deterministic_dedup_key: nexora:pr152:99274ce:fixture-004
     status: PASS
     immutable_evidence: '.ai/evidence/theme-security-fixture-004.json and archive: empty-env runner/2008-blob checkout verified; targeted10/77 PASS; full855/7363 PASS; A/B rebound and policy-valid toolchain PASS. No root promotion or independent review.'
+
+  - id: RB-NEX-PR152-OWNER-ROOT-CI-005
+    source_work: SEC-THEME-CI-DEPS-001 + SEC-REVIEW-OVERRIDE-PR152
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: automatic existing governance/development checkout/Windows/traceability CI after coordinated publication
+    source_ref: claude/wizardly-ptolemy-i21c24
+    source_sha: null
+    environment_matrix_input_fixture: unchanged repository workflows; promoted Composer candidate SHA11cf1db0; exact published head binding recorded on PR
+    authorization_state: explicit owner review override plus user-authorized source continuation; automated tests/audits remain required
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:owner-root-promotion-005
+    status: BLOCKED_BINDING
+    immutable_evidence: null
+    note: 'Independent review deliberately owner-waived, not PASS; bind published exact SHA and real CI results before acceptance. No target or production claim.'
