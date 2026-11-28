@@ -16,12 +16,13 @@
     "id": "THEME-CLOSURE-001",
     "name": "Theme Closure",
     "status": "ACTIVE",
-    "scope_note": "Owner explicitly overrides separate-review gate for current PR/candidate via WVR-NEX-PR152-OWNER-REVIEW-20261128. Existing guarded promotion and fresh CI/audits/tests remain required. Source candidate locally verified; root promotion in progress. No target/release claim."
+    "scope_note": "Owner approved WVR-NEX-PR152-SOURCE-INTEGRATION-20261128 for narrowly scoped source-only integration with warning fix; independent exact combined-head review and fresh CI pending. Previous review waiver does not extend to combined scope. Theme stage ACTIVE; target BLOCKED; no release claim."
   },
   "active_development_units": [
     "SYS-THEME-ENGINE",
     "SEC-THEME-CI-DEPS-001",
-    "SEC-REVIEW-OVERRIDE-PR152"
+    "SEC-REVIEW-OVERRIDE-PR152",
+    "SEC-PR152-SOURCE-INTEGRATION"
   ],
   "completed_control_stages": [
     {
@@ -97,7 +98,7 @@
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "Owner decision: next SECURITY-BASELINE-200 increment (passkeys / CSP / AppSec CI) or approve AI-GOV-AUTOMATION-100 traceability.",
+    "PR #152: independently review exact combined source-only carrier and verify fresh CI including actual warning-hard test summary. Merge only under the approved narrow exception after all source gates pass; #74 stays BLOCKED.",
     "Each increment: register unit, threat model, active plan, independent exact-head review before merge.",
     "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
