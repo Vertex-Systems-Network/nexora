@@ -43,6 +43,25 @@ final class AiControlPlaneConsistencyTest extends TestCase
         self::assertStringContainsString('definition-of-done.md is missing or empty', $errors);
     }
 
+    public function test_empty_whitespace_and_nonregular_dod_are_rejected(): void
+    {
+        $path = $this->fixture.'/.ai/quality/definition-of-done.md';
+        $expected = ['quality/definition-of-done.md is missing or empty.'];
+
+        foreach (['', " \n\t"] as $contents) {
+            $this->write('.ai/quality/definition-of-done.md', $contents);
+            self::assertSame($expected, nexora_ai_control_plane_errors($this->fixture));
+        }
+
+        unlink($path);
+        mkdir($path);
+        self::assertSame($expected, nexora_ai_control_plane_errors($this->fixture));
+
+        rmdir($path);
+        $this->write('.ai/quality/definition-of-done.md', "# Definition of Done\n");
+        self::assertSame([], nexora_ai_control_plane_errors($this->fixture));
+    }
+
     protected function tearDown(): void
     {
         (new Filesystem)->deleteDirectory($this->fixture);
