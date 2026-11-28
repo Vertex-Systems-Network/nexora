@@ -1,3 +1,12 @@
+# THEME-CLOSURE-001 / SYS-THEME-ENGINE / SEC-THEME-CI-DEPS-001 / SEC-REVIEW-OVERRIDE-PR152 — owner-directed continuation
+
+- User explicitly overrode the independent-review blocker on 2026-11-28. Scoped owner waiver WVR-NEX-PR152-OWNER-REVIEW-20261128 binds PR #152, observed head e1e5a9d7d8464852c88b7d76dde9b0b26e1eb298 and Composer candidate 11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05. No separate review is claimed. No CI/audit/test/native-protection/target boundary is waived.
+- DMAIC: genuine external reviewer absence blocked an already tested source candidate; owner authorizes a bounded exception. Scope is policy annotation + explicit waiver, then existing guarded dependency promotion and exact-head validation. ResearchBrief/threat model below. No application contract, migration, target, secret, frontend, data/graph/performance change is introduced by the exception.
+- Work profile: make separate meaningful local commits for owner exception and dependency fix; run available validation; previous CI has completed (checkout/Windows/traceability pass, governance audit fail); coordinate a single batch push. Continue only independently eligible active-scope tasks during running work; no polling loops or premature source-stage advancement.
+- Promotion: stage unchanged A/B candidate pair and actual measured dossier, revalidate current source/manifest/toolchain identities (do not relabel old evidence), invoke existing dependency-lock-promote.php with explicit owner-waiver identity. Preserve before/after and revalidation evidence; restore on failure. No hand-copy to root, no invented independent reviewer.
+- Required validation: policy/control-plane verifier, actual locked Composer/npm audits, package identity diff, full applicable exact-head CI. Previous local 855 tests/7363 assertions PASS remains scoped to candidate source; new root/source requires fresh checks. No merge or production release while required gates are missing.
+- Rollback: revert these commits or existing promotion journal rollback. Expiry: 2026-12-28 or PR closure/candidate/scope change, whichever first. Source/target/release evidence remain separate; #74 stays open.
+
 # THEME-CLOSURE-001 security dependency blocker — 2026-11-28
 
 - Unit `SEC-THEME-CI-DEPS-001`, high risk, DMAIC; blocking dependency of SYS-THEME-ENGINE source verification, not a new product stage. Base `15967f1f3550a263cb1bf0ca2e557230b8e1a682`; main `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`.

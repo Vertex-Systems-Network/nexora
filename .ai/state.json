@@ -16,11 +16,12 @@
     "id": "THEME-CLOSURE-001",
     "name": "Theme Closure",
     "status": "ACTIVE",
-    "scope_note": "PR #152 candidate verified locally on source 99274ce: corrected disposable PHP/faithful checkout, 855/855 tests and 7363 assertions PASS; A/B candidate/dossier rebound to corrected toolchain. Root locks unchanged and vulnerable. Independent review identity/authentication required, followed by governed promotion and fresh full exact-head CI. No target claim (#74)."
+    "scope_note": "Owner explicitly overrides separate-review gate for current PR/candidate via WVR-NEX-PR152-OWNER-REVIEW-20261128. Existing guarded promotion and fresh CI/audits/tests remain required. Source candidate locally verified; root promotion in progress. No target/release claim."
   },
   "active_development_units": [
     "SYS-THEME-ENGINE",
-    "SEC-THEME-CI-DEPS-001"
+    "SEC-THEME-CI-DEPS-001",
+    "SEC-REVIEW-OVERRIDE-PR152"
   ],
   "completed_control_stages": [
     {

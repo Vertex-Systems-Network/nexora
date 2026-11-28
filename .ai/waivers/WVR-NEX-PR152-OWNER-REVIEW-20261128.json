@@ -1,0 +1,37 @@
+{
+  "id": "WVR-NEX-PR152-OWNER-REVIEW-20261128",
+  "scope": "PR #152 theme lifecycle source tests, eight-package dependency candidate promotion, and this owner-directed governance exception only; no future unrelated work.",
+  "carrier": "https://github.com/Vertex-Systems-Network/nexora/pull/152",
+  "base_main_sha": "8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb",
+  "observed_pr_head_sha": "e1e5a9d7d8464852c88b7d76dde9b0b26e1eb298",
+  "candidate_composer_sha256": "11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05",
+  "approver": "User directing repository work; explicit in-session instruction on 2026-11-28",
+  "approval_record": {
+    "source": "current user message",
+    "verbatim": "koi ni ha ai hi ha rule ko overwrite kkro",
+    "interpretation": "Owner-directed override of the independent-review blocker for current PR; not an AI self-waiver or independent review result."
+  },
+  "created_at": "2026-11-28",
+  "expires_at": "2026-12-28",
+  "expires_on_event": "PR #152 merged/closed, candidate identity change or scope expansion, whichever occurs first",
+  "waived_gates": [
+    "Separate human/AI reviewer approval for the current PR and exact recorded dependency candidate",
+    "Independent review of this explicit owner-directed exception itself"
+  ],
+  "not_waived": [
+    "Existing CI/security audit/test assertions and required exact-head checks",
+    "Source/manifest/toolchain/candidate provenance and promotion integrity checks",
+    "Native GitHub rules; no branch protection change or bypass",
+    "Target #74, production/deployment/release acceptance and authorizations",
+    "No independent review/PASS/approval may be fabricated"
+  ],
+  "compensating_controls": [
+    "855/855 unchanged local candidate tests; 7363 assertions; zero JUnit failures/errors/skips",
+    "Rebound A/B candidate/raw/semantic/provenance/audit proof",
+    "Fresh supply-chain validation before root writes through existing promotion command with durable backups and rollback",
+    "Fresh full exact-head CI after root lock change",
+    "Explicit owner override is cited instead of invented reviewer approval"
+  ],
+  "revocation_status": "ACTIVE",
+  "consumption_status": "PENDING; exact final carrier head and CI to be recorded on PR without source-head churn"
+}
