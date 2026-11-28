@@ -1,5 +1,9 @@
 # Nexora Development Intake & Pre-Planning Protocol
 
+## Owner-directed AI source review policy — 2026-11-28
+
+For AI-assisted **source-only** development and integration, the owner's explicit instruction "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha" removes the repository-only separate-reviewer prerequisite. Follow `.ai/governance/source-review-policy.md`: mandatory exact-head AI_SELF_CHECK, actual findings and fresh machine evidence; no false independent approval. This supersedes earlier source-only independent-review requirements and historical #152 review waiver conditions; native rules, domain-specific/external approval, protected test oracles, security/audit/CI, provenance, target/provider/release acceptance and authorization remain unchanged. No self-issued waiver or owner approval fabrication. #152's approved one-use merge-time target exception remains narrow, with revised source review mode and expiry; #74 BLOCKED, theme ACTIVE, no deployment/release or stage advancement.
+
 This protocol applies to every new Core system, module, feature, extension, app, integration, studio pack, theme, AI tool/agent, API surface, migration adapter, security control and operational capability.
 
 ## Non-negotiable rule
@@ -160,7 +164,7 @@ Every substantial unit records:
 
 ### Governance self-protection
 
-Protected governance/workflow/security files cannot be weakened by a product/runtime change merely to make that same change pass. A material control weakening is separately planned/reviewed and cannot use author self-approval.
+Protected governance/workflow/security files cannot be weakened by a product/runtime change merely to make that same change pass. A material control weakening is separately owner-authorized, planned and exact-head reviewed under the source-review policy; no self-authorization or false approval.
 
 ### Test oracle
 
@@ -172,7 +176,7 @@ AI-authored `PASS`, `observed`, `tested` or `TARGET_VERIFIED` prose is not machi
 
 ### Exact-head review
 
-Independent review is bound to the exact reviewed SHA. Material changes after approval make that review stale.
+AI_SELF_CHECK or independent review is bound to the exact reviewed SHA. Material changes make the review stale.
 
 ### Concurrency
 
@@ -249,7 +253,7 @@ Security is continuous. `high`/`critical` units require threat models. Performan
 
 ## AI development rule
 
-AI can plan/implement/test but cannot self-certify critical correctness. Independent review evidence is required for high-risk architecture/security/payment/AI execution/package-runtime/System-Graph/governance work. AI may not invent VOC/baselines/root cause/performance/security/reliability/outcome/Flow/target PASS evidence.
+AI can plan/implement/test and perform an exact-head source AI_SELF_CHECK under the owner-directed policy, but cannot self-certify critical correctness. Native/domain/target/provider/release review requirements and objective machine evidence remain mandatory. AI may not invent VOC/baselines/root cause/performance/security/reliability/outcome/Flow/target PASS evidence.
 
 ## Enforcement destination
 

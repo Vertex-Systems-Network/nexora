@@ -1,5 +1,9 @@
 # Nexora Agent Entry Point
 
+## Owner-directed AI source review policy — 2026-11-28
+
+For AI-assisted **source-only** development and integration, the owner's explicit instruction "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha" removes the repository-only separate-reviewer prerequisite. Follow `.ai/governance/source-review-policy.md`: mandatory exact-head AI_SELF_CHECK, actual findings and fresh machine evidence; no false independent approval. This supersedes earlier source-only independent-review requirements and historical #152 review waiver conditions; native rules, domain-specific/external approval, protected test oracles, security/audit/CI, provenance, target/provider/release acceptance and authorization remain unchanged. No self-issued waiver or owner approval fabrication. #152's approved one-use merge-time target exception remains narrow, with revised source review mode and expiry; #74 BLOCKED, theme ACTIVE, no deployment/release or stage advancement.
+
 ## Owner-directed exception for PR #152 — 2026-11-28
 
 The user's explicit current instruction overrides the independent-review requirement for PR #152, its recorded eight-package security candidate and this scoped governance exception. Apply `.ai/waivers/WVR-NEX-PR152-OWNER-REVIEW-20261128.json` before the general independent-review/self-approval provisions in this file and the linked control plane for this scope only. This is owner authorization, not author self-approval or evidence that a review happened. Existing CI, audits, tests, candidate/source/toolchain checks, native GitHub rules and target/release boundaries remain required. Scope/candidate changes or expiry invalidate the exception; unrelated work remains under the general rules.
@@ -104,7 +108,7 @@ Parallel agents must use isolated scope/branch/worktree ownership. No two agents
 
 ### Governance self-protection
 
-`AGENTS.md`, `.ai/**`, `.github/workflows/**`, `ARCHITECTURE.md`, `SECURITY.md` and future repository rules/CODEOWNERS are protected control-plane surfaces. A feature/runtime change may not weaken the check/policy that judges that same change merely to obtain PASS. Material policy weakening requires explicit governance scope and independent review.
+`AGENTS.md`, `.ai/**`, `.github/workflows/**`, `ARCHITECTURE.md`, `SECURITY.md` and future repository rules/CODEOWNERS are protected control-plane surfaces. A feature/runtime change may not weaken the check/policy that judges that same change merely to obtain PASS. Material policy weakening requires explicit owner-authorized governance scope, exact-head review under the source-review policy and all applicable machine/native controls.
 
 ### Test oracle integrity
 
@@ -197,7 +201,7 @@ Work only on the active stage in `.ai/state.json` unless the user explicitly cha
 
 Before substantial implementation, the active plan must contain the required research/quality/architecture/data/security/privacy/design/API/theme/Studio/AI/performance/System-Graph/reliability/observability/testing/verification/rollback decisions.
 
-High/critical units require a threat model and independent review evidence as defined by governance. Payment/financial work additionally requires FMEA/payment-specific evidence. Canonical graph trust-boundary/provider/storage changes are high-risk architecture work.
+High/critical units require a threat model and exact-head review evidence as defined by the source-review policy and applicable domain/target gates. Payment/financial work additionally requires FMEA/payment-specific evidence. Canonical graph trust-boundary/provider/storage changes are high-risk architecture work.
 
 Every meaningful pass updates `.ai/state.json`, `.ai/handoff/current.md`, the active plan and affected registry entries. Scope changes update relevant roadmap/capability/quality/data/security/performance/flow/reliability/governance docs.
 

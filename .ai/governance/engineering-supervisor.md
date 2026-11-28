@@ -1,5 +1,9 @@
 # Nexora AI Engineering Supervisor Contract
 
+## Owner-directed AI source review policy — 2026-11-28
+
+For AI-assisted **source-only** development and integration, the owner's explicit instruction "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha" removes the repository-only separate-reviewer prerequisite. Follow `.ai/governance/source-review-policy.md`: mandatory exact-head AI_SELF_CHECK, actual findings and fresh machine evidence; no false independent approval. This supersedes earlier source-only independent-review requirements and historical #152 review waiver conditions; native rules, domain-specific/external approval, protected test oracles, security/audit/CI, provenance, target/provider/release acceptance and authorization remain unchanged. No self-issued waiver or owner approval fabrication. #152's approved one-use merge-time target exception remains narrow, with revised source review mode and expiry; #74 BLOCKED, theme ACTIVE, no deployment/release or stage advancement.
+
 ## Owner-directed exception for PR #152 — 2026-11-28
 
 The user's explicit current instruction overrides the independent-review requirement for PR #152, its recorded eight-package security candidate and this scoped governance exception. Apply `.ai/waivers/WVR-NEX-PR152-OWNER-REVIEW-20261128.json` before the general independent-review/self-approval provisions in this file and the linked control plane for this scope only. This is owner authorization, not author self-approval or evidence that a review happened. Existing CI, audits, tests, candidate/source/toolchain checks, native GitHub rules and target/release boundaries remain required. Scope/candidate changes or expiry invalidate the exception; unrelated work remains under the general rules.

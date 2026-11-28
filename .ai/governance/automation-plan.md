@@ -1,5 +1,9 @@
 # AI-GOV-AUTOMATION-100 — Machine Enforcement Plan
 
+## Owner-directed AI source review policy — 2026-11-28
+
+For AI-assisted **source-only** development and integration, the owner's explicit instruction "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha" removes the repository-only separate-reviewer prerequisite. Follow `.ai/governance/source-review-policy.md`: mandatory exact-head AI_SELF_CHECK, actual findings and fresh machine evidence; no false independent approval. This supersedes earlier source-only independent-review requirements and historical #152 review waiver conditions; native rules, domain-specific/external approval, protected test oracles, security/audit/CI, provenance, target/provider/release acceptance and authorization remain unchanged. No self-issued waiver or owner approval fabrication. #152's approved one-use merge-time target exception remains narrow, with revised source review mode and expiry; #74 BLOCKED, theme ACTIVE, no deployment/release or stage advancement.
+
 This pre-plans the validator/orchestration controls that convert `.ai` governance from procedural policy into CI- and run-enforced repository controls. No validator or autonomous development runtime implementation is claimed here.
 
 Detailed AI-run architecture lives in `.ai/governance/ai-development-orchestration.md`.
@@ -138,7 +142,7 @@ Detect effective policy weakening such as:
 - review/status requirement relaxed;
 - security threshold reduced.
 
-A product/runtime run cannot use its own control weakening to obtain PASS. Material weakening needs explicit governance scope, independent review and valid waiver/approval policy where allowed.
+A product/runtime run cannot use its own control weakening to obtain PASS. Material weakening needs explicit owner-authorized governance scope, exact-head review under the source-review policy and valid waiver/approval policy where allowed.
 
 ## 9. Operational repository protection evidence
 
@@ -201,14 +205,14 @@ Rules:
 
 ## 12. Review independence / exact-head gate
 
-For high/critical architecture/security/payment/AI-execution/package-runtime/governance work require:
+For high/critical source work require an exact-head AI_SELF_CHECK or optional independent review; applicable native/domain/target/provider/release reviews remain required:
 
 - distinct review pass/context;
 - reviewer identity/role;
 - reviewed exact head SHA;
 - domain-specific review where required;
 - stale approval invalidation after material head change;
-- author self-review cannot satisfy independent-review requirement.
+- author self-review must be labeled AI_SELF_CHECK, never independent review; it cannot satisfy a separately applicable native/domain/target/provider/release independent-review requirement.
 
 ## 13. Retry / attempt circuit breaker
 
@@ -359,7 +363,7 @@ checkout exact source
 → tests/build
 → performance/reliability checks
 → graph/static/drift/path evidence
-→ independent exact-head review status
+→ exact-head AI_SELF_CHECK / applicable independent review status
 → integration/browser/provider/target workflows where applicable
 → evidence attestation / artifact provenance
 → promotion gate

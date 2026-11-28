@@ -1,6 +1,6 @@
 {
   "id": "WVR-NEX-PR152-SOURCE-INTEGRATION-20261128",
-  "scope": "One source-only merge of PR #152, including exact warning-only cut and necessary independently reviewed scope/evidence records; sole exception is merge-time live-target prerequisite. No target acceptance or stage advancement.",
+  "scope": "One source-only merge of #152 with exact warning cut, existing scope records and explicitly owner-authorized source-review policy change; only merge-time live-target prerequisite excepted. No target acceptance or stage advancement.",
   "carrier": "https://github.com/Vertex-Systems-Network/nexora/pull/152",
   "base_main_sha": "8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb",
   "original_pr_head_sha": "3e7685c47aac888f6e56fad67c13b4e7f067d41e",
@@ -20,17 +20,26 @@
   "expires_at": "2026-12-28",
   "expires_on_event": "One merge or closure of #152, revocation, base/candidate/scope drift, whichever first.",
   "waived_gates": [
-    "Merge-time live-target prerequisite for one source-only merge of PR #152, conditional on independent review and every applicable source gate."
+    "Merge-time live-target prerequisite for one source-only merge of #152, conditional on exact-head AI_SELF_CHECK and every other source gate. Separate reviewer no longer a repository-only source requirement under owner-directed policy."
   ],
   "not_waived": [
-    "Independent exact-head review of combined protected changes and full scope; original waiver does not extend.",
+    "Exact-head documented AI_SELF_CHECK, all applicable native/domain/target/provider/release approval and evidence requirements; no fabricated independent approval or self-authorization.",
     "Existing automated tests and actual zero PHPUnit warnings; locked audits zero; all CI, provenance, native GitHub protections and review threads.",
-    "Real-target acceptance and theme lifecycle target criterion; #74 stays open/BLOCKED; no TARGET_VERIFIED, deployment, release or stage advancement.",
-    "No approval fabrication or self-approval."
+    "Real-target acceptance and theme lifecycle target criterion; #74 stays open/BLOCKED; no TARGET_VERIFIED, deployment, release or stage advancement."
   ],
   "revocation_status": "NOT_REVOKED",
-  "activation_status": "OWNER_APPROVED_PENDING_INDEPENDENT_REVIEW_AND_EXACT_HEAD_CI",
+  "activation_status": "OWNER_APPROVED_PENDING_EXACT_HEAD_AI_SELF_CHECK_AND_CI",
   "consumption_status": "NOT_CONSUMED",
-  "final_head_binding": "Record exact final SHA, review identity/decision and all fresh check/run IDs on PR #152. No self-referential commit hash.",
-  "rollback": "Discard unmerged candidate or governed revert PR; never rewrite protected main."
+  "final_head_binding": "Record exact final SHA, AI_SELF_CHECK identity/findings/disposition and all fresh check/run IDs on PR #152; no self-referential commit hash.",
+  "rollback": "Discard unmerged candidate or governed revert PR; never rewrite protected main.",
+  "previous_record_head": "87051c9c18fa9ae0ef6350f771b5910fab3fed0b",
+  "review_policy": ".ai/governance/source-review-policy.md",
+  "review_mode": "AI_SELF_CHECK",
+  "scope_revision_authorization": {
+    "verbatim": "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha",
+    "date": "2026-11-28",
+    "previous_record_head": "87051c9c18fa9ae0ef6350f771b5910fab3fed0b",
+    "previous_approval_preserved": true,
+    "interpretation": "Remove repository-only separate reviewer prerequisite for source work, including this adopting carrier. All other approved integration conditions retained."
+  }
 }

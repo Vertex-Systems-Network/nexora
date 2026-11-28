@@ -16,7 +16,7 @@
     "id": "THEME-CLOSURE-001",
     "name": "Theme Closure",
     "status": "ACTIVE",
-    "scope_note": "Owner approved WVR-NEX-PR152-SOURCE-INTEGRATION-20261128 for narrowly scoped source-only integration with warning fix; independent exact combined-head review and fresh CI pending. Previous review waiver does not extend to combined scope. Theme stage ACTIVE; target BLOCKED; no release claim."
+    "scope_note": "Owner approved AI_SELF_CHECK for source-only review and the narrow PR #152 source integration exception; fresh exact-head CI and AI_SELF_CHECK pending. Target BLOCKED, theme ACTIVE; no release claim."
   },
   "active_development_units": [
     "SYS-THEME-ENGINE",
@@ -99,8 +99,8 @@
     "guardrail": "Do not advance from source/CI, AI prose, app.url ownership, a bare /login 200, or historical repair evidence alone. Do not weaken TLS, redirects, child bounds, lock review, or target identity controls. Keep Source, Target and Release evidence separate."
   },
   "next_actions": [
-    "PR #152: independently review exact combined source-only carrier and verify fresh CI including actual warning-hard test summary. Merge only under the approved narrow exception after all source gates pass; #74 stays BLOCKED.",
-    "Each increment: register unit, threat model, active plan, independent exact-head review before merge.",
+    "PR #152: perform exact-head AI_SELF_CHECK and verify fresh CI including actual warning-hard test summary. Merge only under the approved narrow exception after all source gates pass; #74 stays BLOCKED.",
+    "Each increment: register unit, threat model, active plan, exact-head source AI_SELF_CHECK and applicable external/domain/target review before merge.",
     "After an actual target is provisioned, obtain fresh readiness/current receipt evidence through the governed install/recovery path appropriate to its installed release.",
     "Require the configured app.url web process to consume a fresh target-local one-time source/runtime challenge and verify the same acknowledgement through the exact target CLI.",
     "Obtain authoritative /login evidence on that exact proven origin with TLS verification enabled and redirects disabled.",
@@ -165,7 +165,7 @@
     "ai_dev_exact_base_plan_policy_identity_required_for_autonomous_writes": true,
     "ai_dev_reviewed_head_must_match_promoted_head": true,
     "ai_dev_machine_evidence_must_identify_producer_and_source": true,
-    "ai_dev_governance_policy_changes_require_independent_review": true,
+    "ai_dev_governance_policy_changes_require_independent_review": false,
     "ai_dev_branch_protection_is_operational_evidence_not_documentation_claim": true,
     "security_review_required_for_high_risk_boundaries": true,
     "payment_security_review_required_for_payment_integrations": true,
