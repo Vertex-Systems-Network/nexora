@@ -24,12 +24,12 @@ This rule applies on every AI development start, including work resumed from an 
 
 ## AI-Native Progress Ledger
 
-- **Observed:** 2026-11-28 (Asia/Karachi); main `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`
-- **Stage/units:** `THEME-CLOSURE-001 / SYS-THEME-ENGINE`, `SEC-THEME-CI-DEPS-001`, `SEC-REVIEW-OVERRIDE-PR152`, `SEC-PR152-SOURCE-INTEGRATION` — ACTIVE / VERIFYING.
-- **Owner instruction:** `WVR-NEX-PR152-SOURCE-INTEGRATION-20261128` approved for one bounded source-only merge, conditional on independent review and fresh CI. Original review waiver does not extend to combined scope.
-- **Implemented:** minimal warning cut `eae4cc6560afaf362b7b157f0d5164816d56fc5f` plus scoped governance/evidence records; guarded root locks unchanged. Prior cut release 46089727462 **856 tests / 7,368 assertions PASS**, zero PHPUnit warnings and locked audit findings; traceability PASS. Prior results not transferred to new head.
-- **Next safe action:** fresh exact combined-head CI and independent protected-change review; inspect actual warning-hard summary, both locked audits, main-target QA and thread resolution before ordinary merge. #172 later regressions excluded.
-- **Target/release:** BLOCKED; #74 remains open, no target mutation, stage advancement, deployment or release.
+- **Observed:** 2026-11-28 (Asia/Karachi); main `8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb`.
+- **Stage/units:** THEME-CLOSURE-001 / SYS-THEME-ENGINE / SEC-THEME-CI-DEPS-001 / SEC-REVIEW-OVERRIDE-PR152 / SEC-PR152-SOURCE-INTEGRATION / SEC-AI-SOURCE-REVIEW-POLICY — ACTIVE / VERIFYING.
+- **Owner decision:** mandatory separate reviewer removed for source-only work; exact-head AI_SELF_CHECK required, no fabricated independent review. [Policy](.ai/governance/source-review-policy.md).
+- **Previous exact-head evidence:** `87051c9c18fa9ae0ef6350f771b5910fab3fed0b` 856 tests / 7369 assertions, zero PHPUnit warnings, locked audits zero, full CI PASS. Prior SHA only. Warning fix and locks unchanged.
+- **Next:** fresh CI and exact-head AI_SELF_CHECK before normal source merge of #152 under its revised bounded exception. Native, domain/target/release requirements unchanged.
+- **Target/release:** BLOCKED, #74 stays open; no live target, deployment, release or stage advancement.
 - **Current module progress:** `[??????????]` N/A — canonical numeric metric unavailable
 - **Overall progress:** `[??????????]` N/A — canonical numeric metric unavailable
 

@@ -1,3 +1,7 @@
+# Owner-directed AI source review policy — 2026-11-28
+
+Owner instruction: "reviewer wala ruleremove kr do jo krna ha AI ne khud krna ha". NEX-AI-SOURCE-REVIEW-015 / SEC-AI-SOURCE-REVIEW-POLICY; source-only separate reviewer requirement replaced by mandatory exact-head AI_SELF_CHECK with no fabricated approval. .ai/governance/source-review-policy.md. Previous #152 head 87051c9c18fa9ae0ef6350f771b5910fab3fed0b certified 856/7369 zero warnings, audits zero, checkout/Windows/browser/traceability PASS; evidence https://github.com/Vertex-Systems-Network/nexora/pull/152#issuecomment-7232115142. New head must run fresh CI, then record actual AI_SELF_CHECK. No tests/workflows/locks/runtime/native protections changed. Original scoped #152 source merge-time exception rebinds to revised source review policy; target #74 BLOCKED, stage ACTIVE, no stage advance/deployment/release. Separate planning commit c272aba7649d7815321bcba1bbbedac0cd8af076; policy commit 2b34241a8aa7ced542b1d26fe920691ef3b0cf44; publish once with expected head. Prior records below historical.
+
 # Owner-approved source-only integration candidate — 2026-11-28
 
 PR #152 / THEME-CLOSURE-001 / SEC-PR152-SOURCE-INTEGRATION: owner explicitly approved WVR-NEX-PR152-SOURCE-INTEGRATION-20261128; conditional on independent review and fresh exact combined-head source CI, not operational yet. Protected main 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb; original #152 3e7685c47aac888f6e56fad67c13b4e7f067d41e 5/5 green but actual one PHPUnit warning; warning-only cut eae4cc6560afaf362b7b157f0d5164816d56fc5f prior release 46089727462: 856 passed / 7368 assertions, zero warnings, both locked audits zero, traceability PASS. Four later #172 regression commits remain excluded at d62fcc6. Planning commit 910c83ddcd7566f2bc08ef0a2fa39d8ac3b9a10e. Original review waiver does not extend to combined scope. No runtime/lock/workflow/native rule change. Fresh CI and independent protected-change review pending; bind exact final published head on #152. No merge, target/release claim, or stage advancement; #74 stays BLOCKED. Source integration proposal https://github.com/Vertex-Systems-Network/nexora/pull/152#issuecomment-7231608400. Prior checkpoints below are historical.
@@ -265,7 +269,7 @@ Only carrier `449ea9b3d5c0d2ad176031a1849ed80c349e0023` / run `33563871904` is c
 ```text
 Stable stage: THEME-CLOSURE-001 (ACTIVE; PR #152 follow-up VERIFYING)
 Registered units: SYS-THEME-ENGINE / SEC-PR152-SOURCE-INTEGRATION
-Next: fresh combined-head CI and independent review; source-only exception conditional; target gate #74 remains BLOCKED
+Next: fresh exact-head CI and AI_SELF_CHECK; source-only exception conditional; target gate #74 remains BLOCKED
 Order: .ai/roadmap/stages.md "Execution flow"
 ```
 
@@ -421,7 +425,7 @@ RELEASE POWER   25.0%
 ## 10. Exact next action
 
 ```text
-Current (2026-11-28): verify combined PR #152 warning-fix and scoped governance records with fresh exact-head CI and independent review; retain #74 target gate. Target Power unchanged.
+Current (2026-11-28): verify AI source-review policy head with fresh CI and exact-head AI_SELF_CHECK; retain #74 target gate. Target Power unchanged.
 ```
 
 Historical next-action list (N1.13 era):

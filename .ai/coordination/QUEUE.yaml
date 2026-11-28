@@ -6,7 +6,7 @@ items:
   source: 'PR #152 / SYS-THEME-ENGINE'
   status: VERIFYING
   priority: 1
-  note: 'Owner approved scoped source integration; minimal warning cut verified on prior SHA. Combined-head independent review and fresh CI pending; target BLOCKED.'
+  note: 'Owner removed mandatory separate reviewer for AI source work; exact-head AI_SELF_CHECK and fresh CI pending; target BLOCKED.'
 - id: NEX-ORCH-74
   source: 'Issue #74'
   status: ACTIVE_TARGET_CLOSURE

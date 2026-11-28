@@ -1,3 +1,4 @@
+# Current: owner-directed AI source review policy, fresh exact-head CI and AI_SELF_CHECK pending; prior 87051c9 856/7369 PASS. Target #74 BLOCKED.
 # Current: owner approved scoped source-only integration; independent exact combined-head review and fresh CI pending. Prior warning cut eae4cc6 856/7368 PASS. Target #74 BLOCKED; no stage/release promotion.
 # Latest owner-authorized transition: PR152 review requirement overridden by current user
 # instruction under WVR-NEX-PR152-OWNER-REVIEW-20261128; independent review NOT claimed.

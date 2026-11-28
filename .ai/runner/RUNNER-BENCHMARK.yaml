@@ -437,3 +437,19 @@ tasks:
     status: BLOCKED_BINDING
     immutable_evidence: null
     note: 'Prior warning-only cut eae4cc6 856/7368 PASS; no fresh combined-head PASS until actual logs/review verified. Target #74 remains BLOCKED.'
+
+  - id: RB-NEX-AI-SOURCE-REVIEW-015
+    source_work: SEC-AI-SOURCE-REVIEW-POLICY
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: existing release certification and actual zero warning PHPUnit, locked audits, PHP 8.3 checkout, Windows bootstrap, traceability, exact-head AI_SELF_CHECK
+    source_ref: claude/wizardly-ptolemy-i21c24
+    source_sha: null
+    environment_matrix_input_fixture: unchanged workflows and promoted locks; exact head binding on PR
+    authorization_state: explicit owner source-review policy decision; no target/release authorization
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:ai-source-review-015
+    status: BLOCKED_BINDING
+    immutable_evidence: null
+    note: 'Previous 87051c9 CI passed 856/7369; no new-head PASS until actual results and AI_SELF_CHECK. Target #74 BLOCKED.'

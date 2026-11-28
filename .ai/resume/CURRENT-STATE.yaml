@@ -14,17 +14,17 @@ current_stage:
   unit: SYS-THEME-ENGINE
   status: ACTIVE
 current_milestone:
-  id: NEX-PR152-SOURCE-INTEGRATION-013
+  id: NEX-AI-SOURCE-REVIEW-015
   status: VERIFYING
 last_completed_milestone:
   main_commit: 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb
   summary: 'ARCH-BOUNDARY-100 source integrated (#151)'
-exact_next_safe_action: Publish minimal warning cut and reviewed-scope records together; verify fresh exact-head CI and obtain independent protected-change review before merge; no target advancement.
+exact_next_safe_action: Publish owner-authorized AI source-review policy; verify fresh CI and exact-head AI_SELF_CHECK before source merge; no target advancement.
 pending_runner_ids:
-- RB-NEX-PR152-SOURCE-INTEGRATION-013
+- RB-NEX-AI-SOURCE-REVIEW-015
 blocked_runner_ids: []
 current_blockers:
-- Fresh combined-head CI and independent review pending; prior warning-only cut 856/7368 PASS is historical to that SHA.
+- Fresh policy-head CI and exact-head AI_SELF_CHECK pending; previous 856/7369 PASS is historical to previous head.
 - #74 actual target acceptance remains open; no live target provisioned or mutated.
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1
