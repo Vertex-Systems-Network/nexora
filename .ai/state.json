@@ -16,7 +16,7 @@
     "id": "THEME-CLOSURE-001",
     "name": "Theme Closure",
     "status": "ACTIVE",
-    "scope_note": "PR #152 / SEC-THEME-CI-DEPS-001: A/B candidate raw/semantic/supply-chain reproducibility PASS on policy-valid toolchain. Full-suite retry: 855 tests, 845 pass, 10 fail, 7304 assertions; rootless PHP empty-env loader and git-archive workflow omission require fixture correction. Root locks unchanged; independent review/governed promotion/full exact-head CI remain blocked. Target #74 separate."
+    "scope_note": "PR #152 candidate verified locally on source 99274ce: corrected disposable PHP/faithful checkout, 855/855 tests and 7363 assertions PASS; A/B candidate/dossier rebound to corrected toolchain. Root locks unchanged and vulnerable. Independent review identity/authentication required, followed by governed promotion and fresh full exact-head CI. No target claim (#74)."
   },
   "active_development_units": [
     "SYS-THEME-ENGINE",

@@ -14,19 +14,19 @@ current_stage:
   unit: SYS-THEME-ENGINE
   status: ACTIVE
 current_milestone:
-  id: THEME-CI-AB-FULL-DIAGNOSTIC
-  status: BLOCKED
+  id: THEME-CI-CANDIDATE-FULL-PASS-004
+  status: WAITING_EXTERNAL_REVIEW
 last_completed_milestone:
   main_commit: 8c0a2d7bdf8e4df8e98b21e3c0d7ba4d3518e4eb
   summary: 'ARCH-BOUNDARY-100 source integrated (#151)'
-exact_next_safe_action: Correct disposable checkout fidelity and rootless PHP empty-environment loading, then rerun unchanged full suite; independent review, governed promotion and exact-head CI still required.
+exact_next_safe_action: Obtain independent exact-source/candidate review using supplied reviewer identity or authenticated service; then revalidate binding and use governed root promotion plus fresh full exact-head CI.
 pending_runner_ids: []
 blocked_runner_ids:
 - RB-NEX-PR152-REVIEW-CANDIDATE
 current_blockers:
-- Full candidate suite FAIL: 845 of 855 pass; nine PHP loader errors and one export-ignored workflow omission in disposable fixture.
-- Root Composer audit FAIL on 28bb3e1; isolated reproducible candidate not promoted.
-- Independent review authentication unavailable; no review or promotion approval.
+- Independent review identity/authentication unavailable; author cannot self-approve high-risk work.
+- Root Composer audit still fails; locally verified reproducible candidate not promoted.
+- Fresh exact-head CI required after accepted root promotion.
 - No live target provisioned; #74 open; TARGET_VERIFIED not claimed.
 timeout_control:
   max_consolidated_status_refreshes_per_milestone: 1

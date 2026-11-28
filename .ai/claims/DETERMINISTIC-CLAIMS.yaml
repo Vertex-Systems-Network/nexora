@@ -1,3 +1,7 @@
+# Latest: candidate on source99274ce, corrected disposable runner/checkout: 855/855 tests,
+# 7363 assertions PASS; rebound A/B proof PASS. Prior 10 fixture failures preserved and superseded.
+# Root locks unchanged; independent reviewer identity/authentication, promotion, new root CI and
+# actual target #74 remain outstanding. Earlier observations below are historical.
 # Latest observation: PR152 at 28bb3e1 checkout/Windows/traceability PASS, governance FAIL.
 # Candidate A/B exact reproduction PASS on policy-valid toolchain. Full-suite retry FAIL:
 # 855 tests / 845 pass / 10 fixture failures / 7304 assertions. Root locks unchanged;

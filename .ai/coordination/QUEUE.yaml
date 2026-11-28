@@ -6,7 +6,7 @@ items:
   source: 'PR #152 / SYS-THEME-ENGINE'
   status: BLOCKED
   priority: 1
-  note: '28bb3e1 root audit FAIL; A/B candidate reproduction PASS; full suite 845/855 pass with 10 fixture failures. Correct checkout/runner before unchanged full regression; review/promotion pending.'
+  note: '99274ce candidate locally verified: corrected fixture 855/855 tests, 7363 assertions PASS; rebound A/B proof. Independent reviewer identity/authentication and governed root promotion/full CI pending.'
 - id: NEX-ORCH-74
   source: 'Issue #74'
   status: ACTIVE_TARGET_CLOSURE

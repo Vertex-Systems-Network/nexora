@@ -1,3 +1,11 @@
+# Corrected fixture — full candidate regression PASS — 2026-11-28
+
+Measured source 99274cedd8117f149da5f0e56ce3ab1312eb1833, PR #152 / THEME-CLOSURE-001 / SEC-THEME-CI-DEPS-001. Disposable PHP RUNPATH correction permits empty-environment subprocesses; all 2,008 tracked blobs were checked out with original hashes/modes, including export-ignored workflow files. Only tracked fixture overlay is the same candidate Composer lock; repository production/test source and root locks unchanged.
+
+Previously failing classes: 10 tests / 77 assertions PASS. Unchanged full PHPUnit at 512M/SQLite/CI APP_URL: 855/855 tests, 7,363 assertions PASS; JUnit zero failure/error/skipped cases. Corrected PHP SHA 1d8012df5a22ff889df33cbc38d04c81e6c580d68e9873562f0e5f77a4be768b; policy-valid toolchain fingerprint 97c3e3105e04a248d9b04f52bca1ae4bcec72962f11fc5eef599143f0105477b. Rebound A/B resolutions and review-required dossier PASS, same archived candidate lock SHA. Prior failed runs/proof identities preserved, not rewritten. Exact evidence: docs/theme-security-fixture-004.md and .ai/evidence/theme-security-fixture-004.{json,tar.gz}.
+
+Local runner/test milestone complete; integration remains WAITING_EXTERNAL_REVIEW. Current intake for 99274ce: Windows/traceability PASS, checkout QA in progress, governance FAIL. No later result inferred. Independent reviewer identity or authenticated review service required before governed root promotion and fresh full exact-head CI. Root dependencies still vulnerable; no promotion/merge/target/release/stage advancement. #74 actual target remains separate and blocked.
+
 # A/B reproduction and full-suite diagnostic — 2026-11-28
 
 Source 28bb3e11737a77c14239f4631c68818487100c55, PR #152 / THEME-CLOSURE-001 / SEC-THEME-CI-DEPS-001. Two isolated resolutions on policy-valid PHP 8.4.28, Composer 2.10.3, Node 22.14.0 and npm 10.9.2 produce byte-identical locks matching the earlier candidate; semantic/supply-chain fingerprints match. Both audits/provenance/lock validators PASS; review-required dossier has exact source/manifest/toolchain binding.

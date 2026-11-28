@@ -375,3 +375,18 @@ tasks:
     status: FAIL
     immutable_evidence: '.ai/evidence/theme-security-reproduction-002.json + archive: 855 tests / 845 pass / 10 fail / 7304 assertions; exit 1. Nine PHP loader errors, one export-ignore workflow omission.'
     note: 'Attempt 1 exhausted default 128M at media test; preserve failure; one bounded retry with explicit resource profile. No tests/assertions changed.'
+
+  - id: RB-NEX-PR152-FIXTURE-004
+    source_work: SEC-THEME-CI-DEPS-001
+    source_issue_or_pr: 'PR #152'
+    command_or_workflow: correct rootless PHP RUNPATH, verify empty-environment loading; faithful tracked-blob fixture; failed-test regression then unchanged full PHPUnit; A/B rebind to corrected runner
+    source_ref: claude/wizardly-ptolemy-i21c24
+    source_sha: 99274cedd8117f149da5f0e56ce3ab1312eb1833
+    environment_matrix_input_fixture: PHP 8.4.28 runner-only RUNPATH correction fingerprinted separately; Composer 2.10.3, Node 22.14.0, npm 10.9.2; SQLite and CI APP_URL; candidate Composer SHA 11cf1db05f0abc833e3e5ce480d796e82360b39b1dfdbbc57017b4d7c2ad2a05
+    authorization_state: user-authorized disposable source verification only; no root promotion or target mutation
+    security_critical: true
+    merge_blocking: true
+    expected_runner_time: null
+    deterministic_dedup_key: nexora:pr152:99274ce:fixture-004
+    status: PASS
+    immutable_evidence: '.ai/evidence/theme-security-fixture-004.json and archive: empty-env runner/2008-blob checkout verified; targeted10/77 PASS; full855/7363 PASS; A/B rebound and policy-valid toolchain PASS. No root promotion or independent review.'
